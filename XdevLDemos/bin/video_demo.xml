@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--  initialization of xdl::XdevLWindowDevice -->
+<XdevLProperties core_file="../../XdevL/lib/XdevLCored">
+
+  <Plugins>
+    <Plugin filename="../../XdevLPlugins/lib/XdevLOpenGLd"> </Plugin>
+    <Plugin filename="../../XdevLPlugins/lib/XdevLVideoFFmpegd"> </Plugin>
+  </Plugins>
+
+  <Modules>
+    <Module id="0" plugin_name="XdevLWindow" module_name="XdevLWindow"> </Module>
+    <Module id="1" plugin_name="XdevLKeyboard" module_name="XdevLKeyboard"> </Module>
+    <Module id="2" plugin_name="XdevLOpenGL" module_name="OpenGL"> </Module>
+    <Module id="3" plugin_name="XdevLVideo" module_name="FFmpeg"> </Module>
+  </Modules>
+
+  <XdevLWindowDevice id="0">
+    <Title> (C) 2005-2008 Cengiz Terzibas FFmpeg Demo </Title>
+    <Fullscreen> 0 </Fullscreen>
+    <X> 0 </X>
+    <Y> 0 </Y>
+    <Width> 848 </Width>
+    <Height> 480 </Height>
+  </XdevLWindowDevice>
+
+  <XdevLOpenGL id="2" framebuffer_depth="32" z-buffer-depth="16"> </XdevLOpenGL>
+
+</XdevLProperties>
+

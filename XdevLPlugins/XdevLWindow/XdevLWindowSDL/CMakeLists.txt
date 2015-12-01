@@ -1,0 +1,135 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLWindowSDL)
+
+find_package(SDL2)
+
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLWindowSDLLibrary XdevLWindowSDL)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLSDL_MAJOR_VERSION 1)
+set(XDEVLSDL_MINOR_VERSION 0)
+set(XDEVLSDL_PATCH_VERSION 0)
+set(XDEVLSDL_VERSION "${XDEVLSDL_MAJOR_VERSION}.${XDEVLSDL_MINOR_VERSION}.${XDEVLSDL_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLSDL_MAJOR_VERSION=${XDEVLSDL_MAJOR_VERSION}
+	-DXDEVLSDL_MINOR_VERSION=${XDEVLSDL_MINOR_VERSION} 
+	-DXDEVLSDL_PATCH_VERSION=${XDEVLSDL_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLSDL_MODULE_MAJOR_VERSION 0)
+set(XDEVLSDL_MODULE_MINOR_VERSION 2)
+set(XDEVLSDL_MODULE_PATCH_VERSION 0)
+set(XDEVLSDL_MODULE_VERSION "${XDEVLSDL_MODULE_MAJOR_VERSION}.${XDEVLSDL_MODULE_MINOR_VERSION}.${XDEVLSDL_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLSDL_MODULE_MAJOR_VERSION=${XDEVLSDL_MODULE_MAJOR_VERSION}
+	-DXDEVLSDL_MODULE_MINOR_VERSION=${XDEVLSDL_MODULE_MINOR_VERSION} 
+	-DXDEVLSDL_MODULE_PATCH_VERSION=${XDEVLSDL_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR .)
+set(SRC_DIR .)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+
+set(HEADER_FILES
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindow.h
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
+	${HEADERS_DIR}/XdevLWindowSDL.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.cpp
+	${SRC_DIR}/XdevLWindowSDL.cpp
+)
+
+#
+# Add include directories
+
+include_directories(
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+	${SDL2_INCLUDE_DIR}
+)
+
+
+#
+# Add external libraries folder
+
+link_directories(
+	${XdevL_BINARY_DIR}/lib
+	${SDL2_LIBRARYDIR}
+)
+
+#
+# Create the library
+
+add_library(${XdevLWindowSDLLibrary} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Set the compiler property
+
+set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY CXX_STANDARD 11)
+
+#
+# Add external ibraries
+
+set(LIBS ${SDL2_LIBRARY} )
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(LIBS ${LIBS} XdevLd ${SDL2_LIBRARY} )
+else()
+	set(LIBS ${LIBS} XdevL )
+endif()
+
+target_link_libraries(${XdevLWindowSDLLibrary} ${LIBS})
+
+#
+# Change the outputname of the library
+
+set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY SUFFIX "-${XDEVLSDL_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY SUFFIX "-${XDEVLSDL_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()

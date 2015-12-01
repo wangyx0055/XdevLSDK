@@ -1,0 +1,24 @@
+
+/**
+	@page xdevl_plugins_and_modules Interfaces, Plug-Ins and Modules
+
+	@section xdevl_interfaces What are Interfaces?
+	An Interface (C++ pure virtual class) separates functions of external communication from the internal operation.
+	This means the user should see and use only those functions which are really necessary. The real implementation 
+	is hided and is stored as a Module in a XdevL Plug-In.
+	@image html XdevLInterface.png
+
+	@section xdevl_modules What are XdevL Modules?
+	In short a Module in XdevL is a C++ class which is the implementation of the Module Interface. The Module developer can implement the functionality			but the user will never see this implementation and has only access to the functions which are defined in the Interface. Mostly you are only						interested in, for example playing a sound without knowing too much about the real programming of audio devices.  You just need to play a sound.
+	@image html XdevLModule.png
+
+	
+	@section xdevl_plugins What are XdevL Plug-Ins?
+	Plug-Ins usually have the file extension *.so or *.dll (depends on the operating system and/or the compiler) which can 
+	contain code, data and resources. These can be loaded dynamically (during runtime) and can be used in the host application. 
+	For our purpose it's enough to know that XdevL plug-ins contains the Modules (classes) which have different functionality.
+	You can see it in the image below. Those Modules have their own Interfaces which can be used by the user. The plug-in 
+	itself has an interface for the XdevLCore system.
+	@image html XdevLPluginModule.png
+
+*/

@@ -1,0 +1,90 @@
+﻿/**
+@mainpage XdevL
+
+@section xdevl_intro Introduction
+Hello and welcome to the world of XdevL.
+	 
+XdevL is an abbreviation and means eXtended DEVice Library. The main capability 
+of XdevL is managing plug-ins and modules in an easy way. At the moment 
+(the release version 0.3 of XdevL) 9 plug-ins are provided. You can use them to 
+play sounds, check keyboard, mouse and joystick events, render 3D graphics with 
+OGRE or raw OpenGL and sending data over the network using UDP sockets.
+
+@section xdevl_features_2 Additional Features
+The static library of XdevL provides some additional features you may want to use.
+
+-# High-Resolution timer xdl::XdevLTimer. 
+-# Basic threading support thread::Thread and thread::Mutex.
+-# Xml file parsing (it's the tinyxml project http://www.grinninglizard.com/tinyxml/)
+-# Extended string/filename parsing.
+-# Basic directory support. It's in the tdir namespace. Be aware of using it. At 
+the moment it is in alpha state.
+
+@section xdevl_compiler Supported compiler
+At the moment the following compilers are supported:
+
+- Visual Studio 2005 + SP1
+- Visual Studio 2005 Express + SP1 + PlatformSDK
+- Visual Studio 2008 + SP1
+- GNU G++ > 4.0 but GNU G++ > 4.2 (recommended)
+
+@section xdevl_requirements Requirements
+At the moment XdevL doesn't support standard makefiles. You can use project 
+files for the following development environments:
+	
+-# CodeLite (Platform independent). You can download it from here: http://codelite.org/LiteEditor/Download
+-# Visual Studio 2005 + SP1
+
+@section xdevl_usage Usage
+The first question of course is, "What is XdevL?" and after understanding that
+the next question is maybe "Ok, I want to use XdevL but where should I start?" :) 
+and here is the answer:
+
+-# To understand XdevL read the manual which is in the /doc folder
+-# To use XdevL do the following:
+	-# You have to install the SDK. (Or compile from the source.)
+	-# You must set the environment variables for XdevL.
+	-# You should check out the demos in the XdevLDemos folder to understand how
+			to use XdevL.
+
+@section sourceforge_source SVN source
+The main branch of XdevL is heavily under development. I recommend not using the 
+trunk of this project or you will have troubles later compiling your code. Use 
+the release version instead.
+
+@author Cengiz Terzibas
+
+*/
+
+/**
+	@page xdevl_version_definition Version number
+
+	XdevL's version number has 3 digit numbers: @b 'major'.@b 'minor'.@b 'patch'
+	
+	- The @b 'major' level can have a completely new API architecture and isn't 
+		compatible with other 'major' level versions.
+	- The @b 'minor' level has additional API functions but the old ones aren't 
+		changed. 
+	- The @b 'patch' level is only a bug fixed version. No API changes are done in 
+		the release.
+	
+	The 0.'x'.'y' series is a special version and will have some changes in the 
+	architecture and API. But I hope it will not affect your code too much.
+	
+	Here some additional information that can be with the version number:
+	
+	- Alpha: A real early stage of the library.
+	- Beta: It's for testing purposes only. 
+	- RC: Release Candidate 
+	- Release: Final version.
+	- Patch: Only changes in the patch level.
+	
+	Here an example: @b XdevL @b Beta @b 0.1.2
+	
+	This is a beta testing version with bug fixes included.
+	
+*/
+
+/**
+	
+	

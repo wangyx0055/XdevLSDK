@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLCoreProperties>
+
+	<!-- Plug necessary plugins -->
+	<XdevLPlugins>
+		<XdevLPlugin name="XdevLSerial" version="1.0.0"/>
+	</XdevLPlugins>
+
+	<!-- Create necessary modules -->
+	<XdevLModules>
+		<XdevLModule id="MySerial" name="XdevLSerial"/>
+	</XdevLModules>
+
+	<!-- Set the properties for the Serial Port Module -->
+	<XdevLSerial
+		id="MySerial" 
+		device="/dev/ttyUSB0"
+		mode="XDEVL_DEVICE_READ_WRITE"
+		baudrate="1500000"
+		bytesize="SERIAL_BSIZE_8"
+		stopbits="SERIAL_SB_1"
+		parity="SERIAL_NO_PARITY"
+		flowcontrol="SERIAL_FLOW_CONTROL_HARDWARE"
+	/>
+
+</XdevLCoreProperties>

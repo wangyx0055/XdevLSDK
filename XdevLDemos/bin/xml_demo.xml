@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<XdevLCoreProperties>
+  <MyElement myattribute="23"></MyElement>
+  <MyNextElement>Hello this is text field
+    <No></No> 
+  </MyNextElement>
+</XdevLCoreProperties>

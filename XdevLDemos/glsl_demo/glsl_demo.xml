@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLCoreProperties>
+
+	<!-- Plug necessary plugins -->
+	<XdevLPlugins>
+		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLMouse"		version="1.0.0"/>
+		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLOpenGL"		version="1.0.0"/>
+	</XdevLPlugins>
+
+	<!-- Create necessary modules -->
+	<XdevLModules>
+		<XdevLModule id="MyWindow"		name="XdevLWindow"/>
+		<XdevLModule id="MyMouse"		name="XdevLMouse"/>
+		<XdevLModule id="MyKeyboard"	name="XdevLKeyboard"/>
+		<XdevLModule id="MyOpenGL"		name="XdevLOpenGL"/>
+	</XdevLModules>
+
+	<!-- Setting some properties of the XdevLWindow module. -->
+	<XdevLWindow id="MyWindow">
+		<Title> (C) 2005 - 2015 Cengiz Terzibas GLSL Demo </Title>
+		<Fullscreen> 0 </Fullscreen>
+		<X> 0 </X>
+		<Y> 0 </Y>
+		<Width>800 </Width>
+		<Height> 600 </Height>
+		<HidePointer>0</HidePointer>
+	</XdevLWindow>
+
+	<!-- Setting some properties of the XdevLOpenGL module. -->
+	<XdevLOpenGL 
+		id="MyOpenGL"
+		profile="core"
+		major="3"
+		minor="2" 
+		framebuffer_depth="32" 
+		z_buffer_depth="24" 
+		stencil_buffer_depth="0"  
+		vsync="0" 
+		fsaa="0"
+	/> 
+
+
+</XdevLCoreProperties>
+

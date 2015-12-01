@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLCoreProperties>
+
+	<!-- Plug necessary plugins -->
+	<XdevLPlugins>
+		<XdevLPlugin name="XdevLWindowSDL" version="1.0.0"/>
+	</XdevLPlugins>
+
+	<!-- Create necessary modules -->
+	<XdevLModules>
+		<XdevLModule id="MyWindow1"	name="XdevLWindow"/>
+	</XdevLModules>
+
+	<!-- Setting some properties of the XdevLWindow module. -->  
+	<XdevLWindow id="MyWindow1">
+		<Title> (C) 2005 - 2015 Cengiz Terzibas Event Window 1 </Title>
+		<X> 0 </X>
+		<Y> 0 </Y>
+		<Width>320 </Width>
+		<Height> 200 </Height>
+		<Border> 1 </Border>
+		<BackgroundColor> 100 100 100 255 </BackgroundColor>
+	</XdevLWindow>
+
+</XdevLCoreProperties>

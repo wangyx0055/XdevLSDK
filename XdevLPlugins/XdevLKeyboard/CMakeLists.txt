@@ -1,0 +1,139 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLKeyboard)
+
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLKeyboardLibrary XdevLKeyboard)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLKEYBOARD_MAJOR_VERSION 1)
+set(XDEVLKEYBOARD_MINOR_VERSION 0)
+set(XDEVLKEYBOARD_PATCH_VERSION 0)
+set(XDEVLKEYBOARD_VERSION "${XDEVLKEYBOARD_MAJOR_VERSION}.${XDEVLKEYBOARD_MINOR_VERSION}.${XDEVLKEYBOARD_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLKEYBOARD_MAJOR_VERSION=${XDEVLKEYBOARD_MAJOR_VERSION}
+	-DXDEVLKEYBOARD_MINOR_VERSION=${XDEVLKEYBOARD_MINOR_VERSION} 
+	-DXDEVLKEYBOARD_PATCH_VERSION=${XDEVLKEYBOARD_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLKEYBOARD_MODULE_MAJOR_VERSION 0)
+set(XDEVLKEYBOARD_MODULE_MINOR_VERSION 2)
+set(XDEVLKEYBOARD_MODULE_PATCH_VERSION 0)
+set(XDEVLKEYBOARD_MODULE_VERSION "${XDEVLKEYBOARD_MODULE_MAJOR_VERSION}.${XDEVLKEYBOARD_MODULE_MINOR_VERSION}.${XDEVLKEYBOARD_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLKEYBOARD_MODULE_MAJOR_VERSION=${XDEVLKEYBOARD_MODULE_MAJOR_VERSION}
+	-DXDEVLKEYBOARD_MODULE_MINOR_VERSION=${XDEVLKEYBOARD_MODULE_MINOR_VERSION} 
+	-DXDEVLKEYBOARD_MODULE_PATCH_VERSION=${XDEVLKEYBOARD_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR .)
+set(SRC_DIR .)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+
+set(HEADER_FILES
+	${HEADERS_DIR}/XdevLKeyboard.h
+	${HEADERS_DIR}/XdevLKeyCode.h		
+	${HEADERS_DIR}/XdevLScanCode.h	
+	${HEADERS_DIR}/XdevLKeyboardImpl.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${SRC_DIR}/XdevLKeyboardImpl.cpp
+)
+
+#
+# Add external libraries folder
+
+link_directories(
+	${XdevL_BINARY_DIR}/lib
+)
+
+#
+# Create the library
+
+add_library(${XdevLKeyboardLibrary} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Set the compiler property
+
+set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY CXX_STANDARD 11)
+
+#
+# Add include directories
+
+include_directories(
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	target_link_libraries(
+		${XdevLKeyboardLibrary}
+		XdevLd
+	)
+else()
+	target_link_libraries(
+		${XdevLKeyboardLibrary}
+		XdevL
+	)
+endif()
+
+
+#
+# Add external ibraries
+
+if(UNIX)
+elseif(APPLE)
+elseif(WIN32)
+endif()
+
+
+#
+# Change the outputname of the library
+
+set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY SUFFIX "-${XDEVLKEYBOARD_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY SUFFIX "-${XDEVLKEYBOARD_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()

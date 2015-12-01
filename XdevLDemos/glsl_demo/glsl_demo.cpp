@@ -1,0 +1,557 @@
+/*
+	Application: glsl_demo.cpp
+	Author     : Cengiz Terzibas
+	Brief      : Demonstrates how to use more advanced 3D rendering.
+
+	That includes using the xdl::XdevLApplication class and XdevlOpenGL330 class and module.
+
+*/
+
+#include <XdevL.h>
+#include <XdevLApplication.h>
+#include <XdevLOpenGL/XdevLOpenGL.h>
+#include <cmath>
+#include <tm/tm.h>
+
+class XDEVL_VERTEX_COLOR;
+
+
+static const GLfloat g_vertex_buffer_data[] = {
+	-1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+
+	1.0f, 1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
+
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+
+	-1.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f
+};
+
+static const GLfloat g_normal_buffer_data[] = {
+	-1.0f, 0.0f,0.0f,
+	-1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f, 0.0f,
+
+	0.0f, 0.0f,-1.0f,
+	0.0f, 0.0f,-1.0f,
+	0.0f, 0.0f,-1.0f,
+
+	0.0f, -1.0f, 0.0f,
+	0.0f, -1.0f,0.0f,
+	0.0f, -1.0f,0.0f,
+
+	0.0f, 0.0f,-1.0f,
+	0.0f, 0.0f,-1.0f,
+	0.0f, 0.0f,-1.0f,
+
+	-1.0f, 0.0f,0.0f,
+	-1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f,0.0f,
+
+	0.0f,-1.0f, 0.0f,
+	0.0f,-1.0f, 0.0f,
+	0.0f,-1.0f,0.0f,
+
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+
+	1.0f, 0.0f, 0.0f,
+	1.0f,0.0f,0.0f,
+	1.0f, 0.0f,0.0f,
+
+	1.0f,0.0f,0.0f,
+	1.0f, 0.0f, 0.0f,
+	1.0f,0.0f, 0.0f,
+
+	0.0f, 1.0f, 0.0f,
+	0.0f, 1.0f,0.0f,
+	0.0f, 1.0f,0.0f,
+
+	0.0f, 1.0f, 0.0f,
+	0.0f, 1.0f,0.0f,
+	0.0f, 1.0f, 0.0f,
+
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f
+};
+
+static const GLfloat g_color_buffer_data[] = {
+	0.583f,  0.771f,  0.014f, 1.0f,
+	0.609f,  0.115f,  0.436f, 1.0f,
+	0.327f,  0.483f,  0.844f, 1.0f,
+	0.822f,  0.569f,  0.201f, 1.0f,
+	0.435f,  0.602f,  0.223f, 1.0f,
+	0.310f,  0.747f,  0.185f, 1.0f,
+	0.597f,  0.770f,  0.761f, 1.0f,
+	0.559f,  0.436f,  0.730f, 1.0f,
+	0.359f,  0.583f,  0.152f, 1.0f,
+	0.483f,  0.596f,  0.789f, 1.0f,
+	0.559f,  0.861f,  0.639f, 1.0f,
+	0.195f,  0.548f,  0.859f, 1.0f,
+	0.014f,  0.184f,  0.576f, 1.0f,
+	0.771f,  0.328f,  0.970f, 1.0f,
+	0.406f,  0.615f,  0.116f, 1.0f,
+	0.676f,  0.977f,  0.133f, 1.0f,
+	0.971f,  0.572f,  0.833f, 1.0f,
+	0.140f,  0.616f,  0.489f, 1.0f,
+	0.997f,  0.513f,  0.064f, 1.0f,
+	0.945f,  0.719f,  0.592f, 1.0f,
+	0.543f,  0.021f,  0.978f, 1.0f,
+	0.279f,  0.317f,  0.505f, 1.0f,
+	0.167f,  0.620f,  0.077f, 1.0f,
+	0.347f,  0.857f,  0.137f, 1.0f,
+	0.055f,  0.953f,  0.042f, 1.0f,
+	0.714f,  0.505f,  0.345f, 1.0f,
+	0.783f,  0.290f,  0.734f, 1.0f,
+	0.722f,  0.645f,  0.174f, 1.0f,
+	0.302f,  0.455f,  0.848f, 1.0f,
+	0.225f,  0.587f,  0.040f, 1.0f,
+	0.517f,  0.713f,  0.338f, 1.0f,
+	0.053f,  0.959f,  0.120f, 1.0f,
+	0.393f,  0.621f,  0.362f, 1.0f,
+	0.673f,  0.211f,  0.457f, 1.0f,
+	0.820f,  0.883f,  0.371f, 1.0f,
+	0.982f,  0.099f,  0.879f, 1.0f
+};
+
+class MyOpenGLApp : public xdl::XdevLApplication {
+	public:
+
+		MyOpenGLApp(int argc, char** argv, const xdl::XdevLFileName& xml_filename) throw() : 
+			xdl::XdevLApplication(argc, argv, xml_filename),
+			m_opengl(nullptr),
+			m_frameBuffer(nullptr),
+			m_frameBufferArray(nullptr),
+			m_appIsRunning(xdl::xdl_true)	{
+			getCore()->registerListener(this);
+		}
+
+		~MyOpenGLApp() {
+
+			m_opengl->destroy(m_frameBuffer);
+			m_opengl->destroy(m_vs);
+			m_opengl->destroy(m_fs);
+			m_opengl->destroy(m_sp);
+
+		}
+
+		virtual void main(const Arguments& argv) throw() {
+
+			if(initRenderDevice() != xdl::ERR_OK) {
+				return;
+			}
+
+			if(initFramebuffer() != xdl::ERR_OK) {
+				return;
+			}
+
+			if(initInputHandling() != xdl::ERR_OK) {
+				return;
+			}
+
+			if(initRenderAssets() != xdl::ERR_OK) {
+				return;
+			}
+
+			getWindow()->show();
+
+			xdl::xdl_double old_time = getCore()->getTime();
+
+			// Start main loop.
+			while(m_appIsRunning) {
+
+
+				// Update core events.
+				getCore()->update();
+
+				// Get current time step.
+				xdl::xdl_double dT = getCore()->getTime() - old_time;
+				old_time = getCore()->getTime();
+
+				handleInputEvents(dT);
+
+				// Draw and calculate stuff.
+				handleGraphics(dT);
+
+			}
+
+		}
+
+
+		virtual xdl::xdl_int notify(xdl::XdevLEvent& event) {
+			switch(event.type) {
+				case xdl::XDEVL_CORE_EVENT: {
+					if(event.core.type == xdl::XDEVL_CORE_SHUTDOWN) {
+						std::cout << "XDEVL_CORE_SHUTDOWN received.\n";
+						m_appIsRunning = xdl::xdl_false;
+					}
+				}break;
+				case xdl::XDEVL_WINDOW_EVENT: {
+					switch(event.window.event) {
+						case xdl::XDEVL_WINDOW_RESIZED: {
+							createScreenVertexArray(getWindow());
+						}
+						break;
+					}
+				}
+				break;
+			}
+			return xdl::ERR_OK;
+		}
+
+		void handleGraphics(xdl::xdl_double dT) {
+
+			//
+			// Let's render stuff into the framebuffer object with low resolution.
+			//
+			m_frameBuffer->activate();
+
+			xdl::xdl_uint list[] = {xdl::XDEVL_COLOR_TARGET0};
+			m_frameBuffer->activateColorTargets(1, list);
+
+			m_frameBuffer->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
+			m_frameBuffer->activateDepthTarget(xdl::xdl_true);
+			m_frameBuffer->clearDepthTarget(1.0f);
+
+			tmath::mat4 proj, view, model, rotx, roty, rotz, trans, projView;
+			tmath::quat qrotx, qroty, qrotz;
+			//tmath::frustum(-0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 6.0f, proj);
+			tmath::perspective(45.0f, 3.0f/4.0f, 1.0f, 110.0f, proj);
+			//tmath::ortho(-5.25f, 5.25f, -5.25f, 5.25f, -2.0f, 6.0f, proj);
+			tmath::identity(view);
+			tmath::identity(model);
+			tmath::identity(rotx);
+			tmath::identity(roty);
+			tmath::identity(rotz);
+
+			static xdl::xdl_float rx = 0.0;
+			static xdl::xdl_float ry = 0.0;
+
+			rx += 100.0f*dT;
+			ry += 100.0f*dT;
+
+
+			tmath::translate(0.0f, 0.0f, -3.0f,trans);
+			tmath::rotate_z(ry, rotz);
+			//tmath::rotate_x(rx, rotx);
+			tmath::rotate_y(ry, roty);
+			//	tmath::convert(qrotx, rotx);
+
+			model =  trans * rotz * roty * rotx;
+
+
+			projView = proj;
+
+
+
+			m_sp->activate();
+			m_sp->setUniformMatrix4(m_projViewMatrix, 1, projView);
+			m_sp->setUniformMatrix4(m_modelMatrix, 1, model);
+			m_sp->deactivate();
+
+			m_opengl->setActiveVertexArray(m_va);
+			m_opengl->setActiveShaderProgram(m_sp);
+
+			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 36);
+
+
+
+			//
+			// Now stop rendering into the frambuffer object.
+			//
+			m_frameBuffer->deactivate();
+
+
+
+			//
+			// Render into the second half of the normal framebuffer.
+			//
+
+			glViewport(0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
+			glClearColor(0.0f, 0.305f, 0.596f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			m_sp->activate();
+			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
+
+
+			m_sp->deactivate();
+
+
+			//
+			// Use the renderd texture from the framebuffer object to render into a squad.
+			// Render that squad into the first half of the viewport.
+			//
+
+			glDisable(GL_DEPTH_TEST);
+			glViewport(getWindow()->getWidth()/2.0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
+			tmath::mat4 fbProjection;
+			tmath::ortho(0.0f,
+			             (float)getWindow()->getWidth(),
+			             0.0f,
+			             (float)getWindow()->getHeight(),
+			             -1.0f,
+			             1.0f, fbProjection);
+
+			m_frameBufferSP->activate();
+			m_frameBufferSP->setUniformMatrix4(m_frameBufferProjectionMatrix, 1, fbProjection);
+			m_frameBufferSP->setUniformi(m_frameBufferTexture, 0);
+			m_frameBuffer->getTexture(0)->activate(0);
+			m_frameBufferSP->deactivate();
+
+			m_opengl->setActiveShaderProgram(m_frameBufferSP);
+			m_opengl->setActiveVertexArray(m_frameBufferArray);
+
+			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
+
+
+			m_opengl->swapBuffers();
+		}
+
+		//
+		// Initialize the rendering device.
+		//
+		xdl::xdl_int initRenderDevice() {
+			// Get the OpenGL context.
+			m_opengl = xdl::getModule<xdl::IPXdevLOpenGL330>(getCore(),  xdl::XdevLID("MyOpenGL"));
+			if(!m_opengl) {
+				return xdl::ERR_ERROR;
+			}
+
+			// We must attach the OpenGL context to a render m_window.
+			if(m_opengl->createContext(getWindow()) != xdl::ERR_OK) {
+				return xdl::ERR_ERROR;
+			}
+
+
+			std::cout << "--------------------------------------------------\n";
+			std::cout << "OpenGL Vendor : " << m_opengl->getVendor() << std::endl;
+			std::cout << "Version       : " << m_opengl->getVersion() << std::endl;
+			std::cout << "Shader Version: " << m_opengl->getShaderVersion() << std::endl;
+
+
+			return xdl::ERR_OK;
+		}
+
+		//
+		// Initialize and connect input devices.
+		//
+		xdl::xdl_int initInputHandling() {
+			getKeyboard()->getButton(xdl::KEY_ESCAPE, &m_esc);
+			getKeyboard()->getButton(xdl::KEY_F, &m_fullscreen);
+			getMouse()->getButton(xdl::BUTTON_LEFT, &m_left_mouse_button);
+
+			if((m_esc == nullptr) || (m_left_mouse_button == nullptr)) {
+				return xdl::ERR_ERROR;
+			}
+			return xdl::ERR_OK;
+		}
+
+		void handleInputEvents(xdl::xdl_double dT) {
+
+			if(m_esc->getClicked()) {
+				m_appIsRunning = xdl::xdl_false;
+			}
+			
+			if(m_fullscreen->getClicked()) {
+				static xdl::xdl_bool fullscreen = xdl::xdl_false;
+				fullscreen = !fullscreen;
+						
+				getWindow()->setFullscreen(fullscreen);
+				
+			}
+
+		}
+
+		//
+		// Initialize the framebuffer.
+		//
+		xdl::xdl_int initFramebuffer() {
+
+			m_opengl->createFrameBuffer(&m_frameBuffer);
+			m_frameBuffer->init(80, 50);
+			m_frameBuffer->addColorTarget(0	, xdl::XDEVL_FB_COLOR_RGBA);
+			m_frameBuffer->getTexture(0)->lock();
+			m_frameBuffer->getTexture(0)->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
+			m_frameBuffer->getTexture(0)->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_NEAREST);
+			m_frameBuffer->getTexture(0)->unlock();
+
+
+			m_frameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24);
+
+			createScreenVertexArray(getWindow());
+		
+			m_opengl->createShaderProgram(&m_frameBufferSP);
+
+			m_opengl->createVertexShader(&m_frameBufferVS);
+			m_frameBufferVS->compileFromFile("frameBuffer_vs.glsl");
+
+			m_opengl->createFragmentShader(&m_frameBufferFS);
+			m_frameBufferFS->compileFromFile("frameBuffer_fs.glsl");
+
+			m_frameBufferSP->attach(m_frameBufferVS);
+			m_frameBufferSP->attach(m_frameBufferFS);
+			m_frameBufferSP->link();
+
+			m_frameBufferProjectionMatrix = m_frameBufferSP->getUniformLocation("projMatrix");
+			m_frameBufferTexture = m_frameBufferSP->getUniformLocation("texture0");
+
+
+			return xdl::ERR_OK;
+		}
+
+		//
+		// Initialize the rendering assets.
+		//
+		xdl::xdl_int initRenderAssets() {
+
+			m_vd = new xdl::XdevLVertexDeclaration();
+			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);		// Position
+			m_vd->add(4, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 1);		// Color
+			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 2);		// Normal
+
+			std::vector<xdl::xdl_uint8*> list;
+			list.push_back((xdl::xdl_uint8*)g_vertex_buffer_data);
+			list.push_back((xdl::xdl_uint8*)g_color_buffer_data);
+			list.push_back((xdl::xdl_uint8*)g_normal_buffer_data);
+
+
+			m_opengl->createVertexArray(&m_va);
+			m_va->init(list.size(), list.data(), 36, m_vd);
+
+
+			// Create the shader program.
+			m_opengl->createShaderProgram(&m_sp);
+
+			m_opengl->createVertexShader(&m_vs);
+			m_vs->compileFromFile("vs1.vs");
+
+			m_opengl->createFragmentShader(&m_fs);
+			m_fs->compileFromFile("fs1.fs");
+
+			m_sp->attach(m_vs);
+			m_sp->attach(m_fs);
+			m_sp->link();
+
+
+			// Get the vertex attributes for the array.
+
+			m_modelMatrix		= m_sp->getUniformLocation("modelMatrix");
+			m_projViewMatrix	= m_sp->getUniformLocation("projViewMatrix");
+
+			return xdl::ERR_OK;
+		}
+
+
+		void createScreenVertexArray(xdl::IPXdevLWindow window) {
+			
+			// Layz destroying of the previous vertex array.
+			if(m_frameBufferArray != nullptr) {
+				m_opengl->destroy(m_frameBufferArray);
+			}
+			
+			xdl::xdl_float screen_vertex [] = {
+				0.0f, 0.0f,
+				(xdl::xdl_float)window->getWidth(), 0.0f,
+				(xdl::xdl_float)window->getWidth(), (xdl::xdl_float)window->getHeight(),
+
+				(xdl::xdl_float)window->getWidth(), (xdl::xdl_float)window->getHeight(),
+				0.0f, (xdl::xdl_float)window->getHeight(),
+				0.0f, 0.0f
+			};
+
+			xdl::xdl_float screen_uv [] = {
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				1.0f, 1.0f,
+
+				1.0f, 1.0f,
+				0.0f, 1.0f,
+				0.0f, 0.0f
+			};
+
+			xdl::XdevLVertexDeclaration* vd2 = new xdl::XdevLVertexDeclaration();
+			vd2->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);
+			vd2->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 9);
+
+			std::vector<xdl::xdl_uint8*> list2;
+			list2.push_back((xdl::xdl_uint8*)screen_vertex);
+			list2.push_back((xdl::xdl_uint8*)screen_uv);
+
+			m_opengl->createVertexArray(&m_frameBufferArray);
+			m_frameBufferArray->init(list2.size(), list2.data(), 6, vd2);
+		}
+
+	private:
+
+
+		xdl::IPXdevLOpenGL330 		m_opengl;
+		xdl::XdevLFrameBuffer*		m_frameBuffer;
+		xdl::XdevLVertexArray*		m_frameBufferArray;
+		xdl::XdevLVertexShader*		m_frameBufferVS;
+		xdl::XdevLFragmentShader*	m_frameBufferFS;
+		xdl::XdevLShaderProgram*	m_frameBufferSP;
+
+
+		xdl::XdevLVertexArray*			m_va;
+		xdl::XdevLVertexDeclaration*	m_vd;
+		xdl::XdevLVertexShader*			m_vs;
+		xdl::XdevLFragmentShader*		m_fs;
+		xdl::XdevLShaderProgram*		m_sp;
+
+		xdl::xdl_int m_modelMatrix;
+		xdl::xdl_int m_projViewMatrix;
+		xdl::xdl_int m_frameBufferProjectionMatrix;
+		xdl::xdl_int m_frameBufferTexture;
+
+		xdl::IPXdevLButton m_esc;
+		xdl::IPXdevLButton m_left_mouse_button;
+		xdl::IPXdevLButton m_fullscreen;
+
+		xdl::xdl_bool m_appIsRunning;
+
+};
+
+
+XdevLStartMain(MyOpenGLApp, "glsl_demo.xml")

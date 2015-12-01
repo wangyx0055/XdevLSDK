@@ -1,0 +1,14 @@
+*~
+*.project
+*.workspace
+Makefile
+CMakeFiles/
+CMakeCache.txt
+.codelite
+.kdev4*
+/build/
+*.kdevelop*
+*.project
+*.workspace
+*.cbp
+*.mk

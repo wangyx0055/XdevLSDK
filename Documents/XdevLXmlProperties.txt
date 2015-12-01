@@ -1,0 +1,75 @@
+/**
+@page xdevl_xml_properties The XdevLCore xml initialization file
+Before you start reading this section I recommend getting familiar working with XML files. You should at least understand what \b elements or \b attributes are. Check the wiki page @b http://en.wikipedia.org/wiki/XML to get more information about this topic. Don't get to much afraid on doing this because xml files are pretty handy and is a standard file format. You have to learn it someday anyway :P .
+
+@section xdevl_xml_properties_necessary_elements Necessary elements for XdevLCore
+
+You can start XdevLCore manually and plug plugins and create modules or use a XML file to do all that. Here is a minimum XML file snippet that you need to have a valid format for XdevLCore:
+
+@code
+<?xml version="1.0" encoding="utf-8"?>
+
+<XdevLCoreProperties>
+</XdevLCoreProperties>
+
+@endcode
+
+The first line gives information about the XML file itself and is not XdevL related. The system will look for the "<XdevLCoreProperties>" element. If we don't have this element in your XML file the system will not start. 
+
+@section xdevl_xml_properties_new_plugins How to plug new plugins into the XdevLCore system
+
+Next thing would be to plug plugins. Either we do that manually as mentioned above or we add the "<XdevLPlugins>" element in the "<XdevLCoreProperties>" section. The core system will search there which plugins  he should plug. Here is a snippet of the main xml file:
+
+@code
+<?xml version="1.0" encoding="utf-8"?>
+
+<XdevLCoreProperties>
+
+  <XdevLPlugins>
+		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLKeyboard" 	version="1.0.0"/>  
+  </XdevLPlugins>
+	
+</XdevLCoreProperties>
+
+@endcode
+
+Now to plug a specific plug-in add the "<XdevLPlugin>" element into the "<XdevLPlugins>" section. In the example above we can see how we plug the XdevLWindowSDL and XdevLKeyboard plugins into the core system. The attiribute @b "name" is the name of the plugin witout any path, version or extension information. I has a special format and is described later. The attiribute @b "version" specifies the version of that plugin. Let's say we have a plugin @b XdevLKeyboard-1.0.0 the we would have the following attributes 
+
+- @b name="XdevLKeyboard"
+- @b version="1.0.0"
+
+Now we have learned how to plug plugins to the XdevLCore system. To get instances of the modules that is inside of those plugins we have to instruct XdevLCore that it should create us a module using and id so we can get the reference to the module later. We can do that again manually using the xdl::createModule() function or via the main XML file. The next section will show you how to do that via the XML file.
+
+@note Be careful with the @b version attribute. XdevLCore expects excatly the same format: major.minor.patch
+
+@section xdevl_xml_properties_new_modules How to create modules
+
+Let's continue using the example XML file above. To instruct XdevLCore to create instances of modules we add first the "<XdevLModules>" element into the "<XdevLCoreProperties>" section. This instructs the core system that we want it to create instances of modules. Here an example:
+
+@code
+
+<XdevLCoreProperties>
+	
+  <XdevLPlugins>
+		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLKeyboard" 	version="1.0.0"/>  
+  </XdevLPlugins>
+
+  <XdevLModules>
+    <XdevLModule id="MyWindow"   		name="XdevLWindow"/>
+    <XdevLModule id="MyKeyboard" 		name="XdevLKeyboard"/>
+    <XdevLModule id="MyAudio"    		name="XdevLAudio"/>
+  </XdevLModules>
+
+</XdevLCoreProperties>
+
+@endcode
+
+This time we add the @b "<XdevLModule>" element within the @b "<XdevLModules>" section to instruct which module we want to create. 
+
+- @b "id"   : This is the id that will be used to identify this module in the core system. You will use this to get access to the real instance of this module.
+- @b "name" : Tells the XdevLCore system which module it should create. It will try to find the module automatically.
+
+*/
+

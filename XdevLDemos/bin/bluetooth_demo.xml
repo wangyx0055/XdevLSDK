@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLProperties>
+
+  <!-- Plug external plugins to the core system. -->
+  <Plugins>
+    <Plugin filename="XdevLBluetooth-0.1.0"></Plugin>
+  </Plugins>
+  
+  <Modules>
+		<Module id="MyBluetooth" plugin_name="XdevLBluetooth" module_name="XdevLBluetooth"></Module>
+  </Modules>
+  
+</XdevLProperties>

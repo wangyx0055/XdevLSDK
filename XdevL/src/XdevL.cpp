@@ -1,0 +1,372 @@
+/*
+	XdevL eXtended DEVice Library.
+
+	Copyright © 2005-2014 Cengiz Terzibas
+
+	This library is free software; you can redistribute it and/or modify it under the
+	terms of the GNU Lesser General Public License as published by the Free Software
+	Foundation; either version 2.1 of the License, or (at your option) any later version.
+	This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+	See the GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public License along with
+	this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
+	Suite 330, Boston, MA 02111-1307 USA
+
+	I would appreciate if you report all bugs to: cengiz@terzibas.de
+*/
+
+#include <tinyxml.h>
+#include "XdevL.h"
+#include "XdevLCore.h"
+#include "XdevLDynLib.h"
+#include "XdevLUtils.h"
+#include "XdevLCommandLine.h"
+#include "XdevLError.h"
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+//
+// The procedure of XdevL looking for the main XdevLCore plugin.
+//
+// 1. If use specified a
+
+namespace xdl {
+
+	XdevLVersion XdevLVersion::zero{0,0,0};
+	
+	// Typedef for the command line arguments.
+	typedef std::vector<std::string> Arguments;
+
+	// Typedefs for creating and deleting the XdevLCore object.
+	typedef xdl_int(*CREATE_XDEVL_CORE)(XdevLCore** core, XdevLCommandLineParser* param);
+	typedef void (*DELETE_XDEVL_CORE)(XdevLCore* core);
+
+	typedef xdl::XdevLModule*(*CREATE_XDEVL_MODULE)(const XdevLPluginDescriptor& pluginDescriptor, const XdevLModuleDescriptor& moduleDescriptor);
+	typedef void (*DELETE_XDEVL_MODULE)(xdl::XdevLModule* obj);
+
+
+	// Function pointer to the create function of the XdevLCore module.
+	CREATE_XDEVL_CORE create_xdevl_core = nullptr;
+
+	// Function pointer to the delete function of the XdevLCore module.
+	DELETE_XDEVL_CORE delete_xdevL_core = nullptr;
+
+	// Holds the main XdevLCore XML filename.
+	static std::string xml_file("");
+
+	// Holds the environmanth path value for the XdevLCore plugin.
+	static std::string xdevlcore_filename_environment_path;
+
+	// Holds the version of XdevLCore.
+
+	static std::string version_number;
+
+	// Holds the XdevLCore plugins filename.
+	static std::string xdevlcore_filename;
+
+	// Holds the path to the XdevLCore plugin.
+	static std::string xdevl_plugin_path;
+
+	static xdl_bool verbose = false;
+
+	std::ofstream file;
+
+	// Is used to load shared objects dynamically.
+	XdevLSharedLibrary 			dynamicLibraryLoader;
+
+	// Holds the command line for the XdevLCore plugin.
+	XdevLCommandLineParser* cmdl 	= nullptr;
+
+	//
+	// Check the local path for the XdevLCore plugin.
+	//
+	xdl_int checkLocal(std::string& pluginFilename) {
+
+		
+		// Make platform dependent fileformat.
+		xstd::make_path(pluginFilename);
+		xstd::make_path(xdevl_plugin_path);
+		
+		if(verbose) {
+			std::cout << ">> XdevLCore plugins search information: " << std::endl;
+			std::cout << ">> Version   : " << version_number << std::endl;
+			std::cout << ">> Directory : " << xdevl_plugin_path << std::endl;
+			std::cout << ">> Trying to load ... ";
+		}
+		// Let's look if the XdevLCore plugin is in the local folder or the specified
+		// by the user using command line or xml file.
+
+		std::ifstream fs;
+
+		fs.open(pluginFilename.c_str());
+		if(fs.is_open()) {
+			fs.close();
+			if(dynamicLibraryLoader.open(pluginFilename.c_str()) != 0) {
+				std::cerr << "Could not open library : " << pluginFilename << std::endl;
+				exit(-1);
+			} else {
+				if(verbose) {
+					std::cout << "Found and loaded.\n";
+				}
+			}
+		}
+		else {
+			// It was not at the specified path. Let's check if the
+			// 'XDEVL_PLUGINS' path is set as a environment variable.
+			if (verbose) {
+				std::cout << "Not found.\n";
+
+				std::cout << ">> Checking if XDEVL_PLUGINS environment variable is set ... ";
+			}
+
+			if (getenv("XDEVL_PLUGINS") == nullptr){ 
+				std::cerr << "It is not set. Can not find: " << pluginFilename << std::endl;
+				exit(-1);
+			}
+
+			std::string evnironment_variable{getenv("XDEVL_PLUGINS")};
+			if(evnironment_variable.size() == 0) {
+				std::cerr << "It is not set. Can not find: " <<  pluginFilename << std::endl;
+				exit(-1);
+			} else {
+				if(verbose) {
+					std::cout << "It is set." << std::endl;
+				}
+			}
+
+			//
+			// OK, the XDEVL_PLUGINS environment variable is set.
+			// Let's check if the XdevLCore plugins is there.
+			//
+			if(verbose) {
+				std::cout << ">> Trying to load from there ... ";
+			}
+			xdevl_plugin_path = evnironment_variable + "/lib/";
+			pluginFilename = xdevl_plugin_path + xstd::get_pathless(pluginFilename);
+						
+			fs.open(pluginFilename.c_str());
+			if(fs.is_open()) {
+				fs.close();
+				// File found in the local path. Than lets load it.
+				if(dynamicLibraryLoader.open(pluginFilename.c_str()) != 0) {
+					std::cerr << "Could not open plugin: '" << pluginFilename << "'... Abord program." << std::endl;
+					exit(-1);
+				} else {
+					if(verbose) {
+						std::cout << "Found and loaded." << std::endl;
+					}
+				}
+			} else {
+				std::cerr << "Not found  ... Abord program." << std::endl;
+				exit(-1);
+			}
+		}
+		return ERR_OK;
+	}
+
+
+	//
+	// Creates the XdevLCore filename.
+	//
+	void createXdevLCoreFilename(const std::string& path, const std::string& version, std::string& result) {
+		result = path + "/" + "XdevLCore-";
+		result += version;
+#ifdef XDEVL_DEBUG
+		result += "d";
+#endif
+		result += XdevLSharedLibrary::extension;
+	}
+
+
+
+//
+// Create the XdevLCore system.
+//
+	xdl_int createCore(XdevLCore** core,
+	                   xdl_int argc,
+	                   xdl_char* argv[],
+	                   const XdevLFileName& xmlFile,
+	                   XdevLUserData* userDataList[], xdl_uint numberOfUserData) {
+
+		xml_file 			= xmlFile;
+		
+		std::stringstream vn;
+		vn << XDEVL_MAJOR_VERSION << "." << XDEVL_MINOR_VERSION << "." << XDEVL_PATCH_VERSION;
+		version_number = vn.str();
+
+		//
+		// All command line specified values will override values specified in the
+		// xml file or default values. The following values can be overwritten.
+		//
+		//	- XML filename
+		//	- XdevLPlugins plugins path
+		// 	- XdevLCore plugins version number
+		//
+
+		xdl::XdevLCommandLineParser cmdParser(argc, argv);
+
+		//
+		// Set default parameters.
+		//
+		xdl::XdevLStringParameter versionNumberParameter("v", "The path to the plugins folder.", version_number);
+		xdl::XdevLStringParameter pluginsPathParameter("pp", "The path to the plugins folder.", ".");
+		xdl::XdevLStringParameter fileNameParameter("f", "The filename of the XML file.", xml_file);
+
+		// Parse the command line arguments.
+		cmdParser.add(&versionNumberParameter);
+		cmdParser.add(&pluginsPathParameter);
+		cmdParser.add(&fileNameParameter);
+		cmdParser.parse();
+
+		// Assign the values.
+		version_number		= versionNumberParameter.getValue();
+		xdevl_plugin_path = pluginsPathParameter.getValue();
+		xml_file 					= fileNameParameter.getValue();
+
+		//
+		// Check if there is a main XML file where the user may have specified.
+		// XdevLCore related information.
+		// TODO The not specified comparision must be changed.
+		if(xml_file != "Not Specified") {
+
+			// Convert to platform dependent file format.
+			xstd::make_path(xml_file);
+
+			TiXmlDocument xmlDocument;
+			if(!xmlDocument.LoadFile(xml_file.c_str())) {
+				std::cerr << "## Couldn't find specified XML file." << std::endl;
+				exit(-1);
+			}
+
+			TiXmlHandle docHandle(&xmlDocument);
+			TiXmlElement* root = docHandle.FirstChild("XdevLCoreProperties").ToElement();
+			if(!root) {
+				std::cerr << "## XML format not correct." << std::endl;
+				exit(-1);
+			}
+
+			//
+			// Do we have a version forces to use by the user?
+			//
+			if(!versionNumberParameter.getSet()) {
+				if(root->Attribute("version")) {
+					// Use the one from the xml file.
+					version_number = root->Attribute("version");
+					std::cout << ">> Using version specified in XML file." << std::endl;
+				}
+			}
+			if(!pluginsPathParameter.getSet()) {
+				if(root->Attribute("plugins_path")) {
+					// Use the one from the xml file.
+					xdevl_plugin_path = root->Attribute("plugins_path");
+					std::cout << ">> Using plugins folder specified in XML file." << std::endl;
+				}
+			}
+		}
+
+		//
+		// Create the filename.
+		//
+		createXdevLCoreFilename(xdevl_plugin_path, version_number, xdevlcore_filename);
+
+		// Load the XdevLCore plugin.
+		xdl_int ret;
+		if((ret = checkLocal(xdevlcore_filename)) != ERR_OK) {
+			std::cerr << "## Could not find XdevLCore plugin at all." << std::endl;
+			exit(-1);
+		}
+
+
+		//
+		// Get the plugins create and delte function pointer.
+		//
+		create_xdevl_core = (CREATE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_createXdevLCore"));
+		if(!create_xdevl_core) {
+			return ERR_GET_FUNCTION_ADDRESS_FAILED;
+		}
+		delete_xdevL_core = (DELETE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_deleteXdevLCore"));
+		if(!delete_xdevL_core) {
+			return ERR_GET_FUNCTION_ADDRESS_FAILED;
+		}
+
+		//
+		// Create the XdevLCore object.
+		//
+		XdevLCore* xdevlCoreObject =  nullptr;
+		cmdl = new xdl::XdevLCommandLineParser(argc, argv);
+		if(create_xdevl_core(&xdevlCoreObject, cmdl) != ERR_OK) {
+			std::cerr << "## Couldn't create XdevLCore object." << std::endl;
+			exit(-1);
+		}
+
+		//
+		// Initialize the XdevLCore system.
+		//
+		XdevLCoreInitParameters parameters;
+		parameters.xmlFileName 			= xml_file;
+		parameters.pluginsPath 			= xdevl_plugin_path;
+		parameters.userDataList 		= userDataList;
+		parameters.numberOfUserData = numberOfUserData;
+		
+		if(xdevlCoreObject->init(parameters) != ERR_OK) {
+			std::cerr << "## Couldn't initialize XdevLCore object." << std::endl;
+			exit(-1);
+		}
+
+		*core = xdevlCoreObject;
+
+		return ERR_OK;
+	}
+
+
+	XdevLModule* createModule(const XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
+
+		XdevLString pluginName = pluginDescriptor.getName() + STRING("-") + XdevLString(pluginDescriptor.getVersion().toString());
+		#ifdef XDEVL_DEBUG
+				pluginName += STRING("d");
+		#endif
+		pluginName += XdevLSharedLibrary::extension;
+		std::string tmp = pluginName.toString();
+		xdl_int ret;
+		if((ret = checkLocal(tmp)) != ERR_OK) {
+			std::cerr << "## Could not find XdevLCore plugin at all." << std::endl;
+			exit(-1);
+		}
+		
+		//
+		// Get the plugins create and delte function pointer.
+		//
+		CREATE_XDEVL_MODULE createModule = (CREATE_XDEVL_MODULE)(dynamicLibraryLoader.getFunctionAddress("_createModule"));
+		if(!createModule) {
+			return nullptr;
+		}
+		DELETE_XDEVL_MODULE deleteModule = (DELETE_XDEVL_MODULE)(dynamicLibraryLoader.getFunctionAddress("_delete"));
+		if(!deleteModule) {
+			return nullptr;
+		}
+		
+		return createModule(pluginDescriptor, moduleDescriptor );
+
+	}
+
+	xdl_int destroyCore(XdevLCore* core) {
+		XDEVL_ASSERT(core, "## Invalid argument!");
+
+		// Create the message.
+		xdl::XdevLEvent moduleShutdown;
+		moduleShutdown.type = XDEVL_MODULE_EVENT;
+		moduleShutdown.module.sender = 0;
+
+		// Send the message to the core.
+		core->sendEventTo(core->getID().getHashCode(), moduleShutdown);
+
+		delete_xdevL_core(core);
+
+		return ERR_OK;
+	}
+
+}

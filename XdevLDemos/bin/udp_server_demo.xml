@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLCoreProperties>
+
+	<!-- Plug necessary plugins -->
+	<XdevLPlugins>
+		<XdevLPlugin name="XdevLNetwork" version="1.0.0"/>
+	</XdevLPlugins>
+
+	<!-- Create necessary modules -->
+	<XdevLModules>
+		<XdevLModule id="MyUDPSocket" name="XdevLUDPSocket2"/>
+	</XdevLModules>
+
+</XdevLCoreProperties>

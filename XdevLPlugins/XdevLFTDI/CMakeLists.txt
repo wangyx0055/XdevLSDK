@@ -1,0 +1,126 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLFTDI)
+
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLFTDILibrary XdevLFTDI)
+
+#
+# Set the version
+
+set(VERSION "1.0.0")
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR .)
+set(SRC_DIR .)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+
+set(HEADER_FILES
+	${HEADERS_DIR}/XdevLFTDI.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${SRC_DIR}/XdevLFTDI.cpp
+)
+
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    MESSAGE( "64 bit compiler detected" )
+    SET( EX_PLATFORM 64 )
+    SET( EX_PLATFORM_NAME "x64" )
+else() 
+    MESSAGE( "32 bit compiler detected" )
+    SET( EX_PLATFORM 32 )
+    SET( EX_PLATFORM_NAME "x86" )
+endif()
+
+	
+#
+# Add external libraries folder
+set(LIBRARY_DIRS ${XdevL_BINARY_DIR}/lib)
+
+#
+# Add specific folder for the FTDI library
+if(EX_PLATFORM EQUAL 64)
+	set(LIBRARY_DIRS ${LIBRARY_DIRS}
+		${XDEVL_EXTERNALS}/ftdid2xx/build/x64_64
+	)
+elseif(EX_PLATFORM EQUAL 64)
+	set(LIBRARY_DIRS ${LIBRARY_DIRS}
+		${XDEVL_EXTERNALS}/ftdid2xx/build/i386
+	)
+endif()
+
+
+message(${LIBRARY_DIRS})
+
+	
+link_directories( ${LIBRARY_DIRS} )	
+	
+#
+# Create the library
+#
+add_library(${XdevLFTDILibrary} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Add include directories
+#
+include_directories( 
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+	${XDEVL_EXTERNALS}/ftdid2xx
+)
+
+#
+# Add external ibraries
+#
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  target_link_libraries(${XdevLFTDILibrary}
+     XdevLd
+		 ftd2xx
+  )
+else()
+  target_link_libraries(${XdevLFTDILibrary}
+     XdevL
+		 ftd2xx
+  )
+endif()
+
+#
+# Change the outputname of the library
+#
+set_property(TARGET ${XdevLFTDILibrary} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLFTDILibrary} PROPERTY SUFFIX "-${VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLFTDILibrary} PROPERTY SUFFIX "-${VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()
+

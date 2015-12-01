@@ -1,0 +1,132 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLOgre)
+
+find_package(OGRE)
+find_package(Boost COMPONENTS system)
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLOgreLibrary XdevLOgre)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLOGRE_MAJOR_VERSION 1)
+set(XDEVLOGRE_MINOR_VERSION 0)
+set(XDEVLOGRE_PATCH_VERSION 0)
+set(XDEVLOGRE_VERSION "${XDEVLOGRE_MAJOR_VERSION}.${XDEVLOGRE_MINOR_VERSION}.${XDEVLOGRE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLOGRE_MAJOR_VERSION=${XDEVLOGRE_MAJOR_VERSION}
+	-DXDEVLOGRE_MINOR_VERSION=${XDEVLOGRE_MINOR_VERSION} 
+	-DXDEVLOGRE_PATCH_VERSION=${XDEVLOGRE_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLOGRE_MODULE_MAJOR_VERSION 0)
+set(XDEVLOGRE_MODULE_MINOR_VERSION 2)
+set(XDEVLOGRE_MODULE_PATCH_VERSION 0)
+set(XDEVLOGRE_MODULE_VERSION "${XDEVLOGRE_MODULE_MAJOR_VERSION}.${XDEVLOGRE_MODULE_MINOR_VERSION}.${XDEVLOGRE_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLOGRE_MODULE_MAJOR_VERSION=${XDEVLOGRE_MODULE_MAJOR_VERSION}
+	-DXDEVLOGRE_MODULE_MINOR_VERSION=${XDEVLOGRE_MODULE_MINOR_VERSION} 
+	-DXDEVLOGRE_MODULE_PATCH_VERSION=${XDEVLOGRE_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR .)
+set(SRC_DIR .)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+
+set(HEADER_FILES
+	${HEADERS_DIR}/XdevLOgre.h
+	${HEADERS_DIR}/XdevLOgreImpl.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${SRC_DIR}/XdevLOgreImpl.cpp
+)
+
+	
+#
+# Add external libraries folder
+#
+link_directories(
+	${XDEVL_HOME}/lib
+	${Boost_LIBRARY_DIRS}
+)
+
+
+#
+# Create the library
+#
+add_library(${XdevLOgreLibrary} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Add include directories
+
+set(OGRE_INCLUDE_DIRECTORIES 
+	.
+	${XDEVL_HOME}/include 
+	${XDEVL_PLUGINS}
+	${OGRE_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
+)
+
+include_directories(${OGRE_INCLUDE_DIRECTORIES})
+
+#
+# Add external ibraries
+
+set(LIBS ${OGRE_LIBRARY} ${Boost_LIBRARIES} )
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(LIBS ${LIBS} XdevLd)
+else()
+	set(LIBS ${LIBS} XdevL)
+endif()
+
+target_link_libraries(${XdevLOgreLibrary} ${LIBS}  )
+
+#
+# Change the outputname of the library
+
+set_property(TARGET ${XdevLOgreLibrary} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLOgreLibrary} PROPERTY SUFFIX "-${XDEVLOGRE_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLOgreLibrary} PROPERTY SUFFIX "-${XDEVLOGRE_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()
+
