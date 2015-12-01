@@ -5,7 +5,7 @@
 
 	<!-- Plug necessary plugins -->
 	<XdevLPlugins>
-		<XdevLPlugin name="XdevLSerial" version="1.0.0"/>
+		<XdevLPlugin name="XdevLSerial" version="0.1.0"/>
 	</XdevLPlugins>
 
 	<!-- Create necessary modules -->

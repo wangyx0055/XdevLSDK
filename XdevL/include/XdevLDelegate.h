@@ -96,12 +96,18 @@ namespace xdl {
 
 			///  Executes the delegate.
 			ReturnType operator()(Parameters... pm) const {
+				assert(this->m_callbackFunction && "No callback function assigned to Delegate.");
 				return this->m_callbackFunction(m_callee, pm...);
 			}
 
 			/// Compares two delegates.
 			bool operator==(const XdevLDelegate& other) const {
 				return (m_callee == other.m_callee) && (m_callbackFunction == other.m_callbackFunction);
+			}
+			
+			// Returns if the callback function is valid.
+			xdl_bool isValid() const {
+				return (m_callbackFunction != nullptr);
 			}
 
 		private:

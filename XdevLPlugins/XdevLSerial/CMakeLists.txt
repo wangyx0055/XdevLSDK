@@ -60,9 +60,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
 
 #
 # Set header files for the library.
-#
-set(HEADER_FILES
+
+set(HEADER_INTERFACE_FILE 
 	${HEADERS_DIR}/XdevLSerial.h
+)
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
 	${HEADERS_DIR}/XdevLSerialImpl.h
 )
 
@@ -117,12 +121,6 @@ add_library(${XdevLSerialLibrary} SHARED
 )
 
 #
-# Set the compiler property
-
-set_property(TARGET ${XdevLSerialLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLSerialLibrary} PROPERTY CXX_STANDARD 11)
-
-#
 # Add include directories
 
 include_directories( 
@@ -154,4 +152,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLSerialLibrary} PROPERTY SUFFIX "-${XDEVLSERIAL_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLSerialLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})
 

@@ -82,9 +82,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
 
 #
 # Set header files for the library.
-#
+
+set(HEADER_INTERFACE_FILE 
+	${HEADERS_DIR}/XdevLSocket.h	
+)
+
 set(HEADER_FILES
-	${HEADERS_DIR}/XdevLSocket.h
+	${HEADER_INTERFACE_FILE}
 	${HEADERS_DIR}/XdevLSocketImpl.h
 )
 
@@ -107,12 +111,6 @@ add_library(${XdevLNetworkLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
-
-#
-# Set the compiler property
-
-set_property(TARGET ${XdevLNetworkLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLNetworkLibrary} PROPERTY CXX_STANDARD 11)
 
 #
 # Add include directories
@@ -162,3 +160,5 @@ else()
 	set_property(TARGET ${XdevLNetworkLibrary} PROPERTY SUFFIX "-${XDEVLNETWORK_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
 
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLNetworkLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

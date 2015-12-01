@@ -20,9 +20,23 @@
 #include "XdevLTimer.h"
 
 // This is for the MINGW case
-#if __GNUG__
-#include <sys/time.h>
+#if defined(_WIN32)
+#include <Windows.h>
+
+#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
+#include <unistd.h>	/* POSIX flags */
+#include <time.h>	/* clock_gettime(), time() */
+#include <sys/time.h>	/* gethrtime(), gettimeofday() */
+
+#if defined(__MACH__) && defined(__APPLE__)
+#include <mach/mach.h>
+#include <mach/mach_time.h>
 #endif
+
+#else
+#error "Unable to define getRealTime( ) for an unknown OS."
+#endif
+
 
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
   #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
@@ -36,9 +50,9 @@
 
 #ifdef _WIN32
 
-#include <Windows.h>
-#include <time.h>
-#include <XdevLTypes.h>
+//#include <Windows.h>
+//#include <time.h>
+//#include <XdevLTypes.h>
 
 xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
 	
@@ -65,12 +79,12 @@ xdl::xdl_double getTimeGlobal() {
 //
 #elif defined __GNUG__ && !defined _WIN32
 
-#include <netinet/in.h>
-#include <sys/timeb.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <pthread.h>
+//#include <netinet/in.h>
+//#include <sys/timeb.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <unistd.h>
+//#include <pthread.h>
 
 xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
 	

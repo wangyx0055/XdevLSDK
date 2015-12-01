@@ -5,7 +5,7 @@
 
 	<!-- Plug necessary plugins -->
 	<XdevLPlugins>
-		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLWindowX11"	version="1.0.0"/>
 		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>
 		<XdevLPlugin name="XdevLOgre"		version="1.0.0"/>
 	</XdevLPlugins>
@@ -32,8 +32,8 @@
 	<XdevLOgre id="MyOgre" vsync="0" fsaa="0" >
 		<Plugins>
 			<!-- Use the correct paths on your OS -->
-			<!-- <Plugin>/usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL</Plugin> -->
-			<Plugin>/Users/coda/Public/Projects/XdevLSDK/XdevLExternals/lib/RenderSystem_GL.framework/RenderSystem_GL</Plugin>
+			<Plugin>/usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL</Plugin>
+			<!-- <Plugin>/Users/coda/Public/Projects/XdevLSDK/XdevLExternals/lib/RenderSystem_GL.framework/RenderSystem_GL</Plugin> -->
 		</Plugins>
 
 		<Resources>

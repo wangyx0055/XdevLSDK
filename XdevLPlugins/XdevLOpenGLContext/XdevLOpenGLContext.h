@@ -33,21 +33,22 @@ namespace xdl {
 	};
 
 	enum XdevLOpenGLContextFlags {
-		XDEVL_OPENGL_CONTEXT_FLAGS_NONE											= 0,
-	    XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT								= 0x00000001,
+	    XDEVL_OPENGL_CONTEXT_FLAGS_NONE						= 0,
+	    XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT				= 0x00000001,
 	    XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT	= 0x00000002
 	};
 
 	class XdevLOpenGLContextAttributes {
 		public:
-			XdevLOpenGLContextAttributes() : 	red_size(8),
+			XdevLOpenGLContextAttributes() :
+				red_size(8),
 				green_size(8),
 				blue_size(8),
 				alpha_size(8),
 				color_buffer_size(32),
 				double_buffer(1),
 				depth_size(24),
-				stencil_size(0),
+				stencil_size(8),
 				accum_red_size(0),
 				accum_green_size(0),
 				accum_blue_size(0),
@@ -61,7 +62,7 @@ namespace xdl {
 				context_flags(XDEVL_OPENGL_CONTEXT_FLAGS_NONE) {
 
 			}
-			
+
 			xdl_uint	red_size;
 			xdl_uint	green_size;
 			xdl_uint	blue_size;
@@ -84,32 +85,51 @@ namespace xdl {
 	};
 
 	/**
-		@class XdevLOpenGL
-		@brief OpenGL context support.
+		@class XdevLOpenGLContext
+		@brief Support for handling OpenGL context for the GLX platform.
 		@author Cengiz Terzibas
 	*/
-
 	class XdevLOpenGLContext : public XdevLModule {
 
 		public:
 			virtual ~XdevLOpenGLContext() {};
 
-//			virtual void* getProcAddress(const xdl_char* func) = 0;
-
-			virtual xdl_int getAttributes(XdevLOpenGLContextAttributes& attributes) = 0;
-
-			virtual xdl_int setAttributes(const XdevLOpenGLContextAttributes& attributes) = 0;
-
+			/// Creates the context.
+			/**
+				@return Returns
+					@b ERR_OK on success.
+					@b ERR_ERROR else.
+			*/
 			virtual xdl_int create(XdevLWindow* window) = 0;
 
+			/// Gets the current attributes of the OpenGL context.
+			virtual xdl_int getAttributes(XdevLOpenGLContextAttributes& attributes) = 0;
+
+			/// Sets the attributes for the OpenGL context.
+			/**
+				Set the attributes you like to set before you call the create() method.
+
+				@return Returns
+					@b ERR_OK on success.
+					@b ERR_ERROR else.
+			*/
+			virtual xdl_int setAttributes(const XdevLOpenGLContextAttributes& attributes) = 0;
+
+			/// Make this context current to the specified window.
 			virtual xdl_int makeCurrent(XdevLWindow* window) = 0;
 
+			/// Swap the buffer.
 			virtual xdl_int swapBuffers() = 0;
 
+			/// Returns the function address of the specified string representation of the OpenGL function.
+			virtual void* getProcAddress(const xdl_char* func) = 0;
+
+			/// Enable/Disable Vertical Sync.
+			virtual xdl_int setVSync(xdl_bool enableVSync) = 0;
 	};
 
 
-	typedef XdevLOpenGLContext		IXdevLOpenGLContext;
+	typedef XdevLOpenGLContext	IXdevLOpenGLContext;
 	typedef XdevLOpenGLContext*	IPXdevLOpenGLContext;
 }
 

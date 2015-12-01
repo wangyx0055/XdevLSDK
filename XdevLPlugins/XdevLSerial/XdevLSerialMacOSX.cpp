@@ -431,9 +431,6 @@ namespace xdl {
 		XDEVL_MODULE_INFO("Options c_iflag: " 	<< options.c_iflag 	<< std::endl);
 		XDEVL_MODULE_INFO("Options c_ispeed: " 	<< options.c_ispeed << std::endl);
 		XDEVL_MODULE_INFO("Options c_lflag: " 	<< options.c_lflag 	<< std::endl);
-#if !defined(__APPLE__)
-		XDEVL_MODULE_INFO("Options c_line: " 		<< options.c_line 	<< std::endl);
-#endif
 		XDEVL_MODULE_INFO("Options c_oflag: " 	<< options.c_oflag 	<< std::endl);
 		XDEVL_MODULE_INFO("Options c_ospeed: " 	<< options.c_ospeed << std::endl);
 	}

@@ -465,4 +465,14 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>

@@ -63,7 +63,7 @@ namespace xdl {
 		if(str == STRING("BUTTON_15"))
 			return BUTTON_15;
 
-		return BUTTON_ID_MAX;
+		return BUTTON_UNKOWN;
 	}
 
 	// TODO Change this into a usual function. Do not use inline.
@@ -102,7 +102,7 @@ namespace xdl {
 			case 16:
 				return BUTTON_15;
 			default:
-				return BUTTON_ID_MAX;
+				return BUTTON_UNKOWN;
 		}
 	}
 
@@ -277,11 +277,9 @@ namespace xdl {
 			// Invisible for the user.
 			//
 			void setValue(xdl_float value) {
+				m_deltaValue = value - m_value;
 				m_valueOld = m_value;
 				m_value = value;
-			}
-			void setDeltaValue(xdl_float value) {
-				m_deltaValue = value;
 			}
 
 			void addValue(xdl_float value) {

@@ -71,92 +71,94 @@ namespace xdl {
 	};
 
 
-	const xdl_uint MOUSE_MAX_AXES = 2;
-	const xdl_uint MOUSE_MAX_BUTTONS = 10;
+	const xdl_uint MOUSE_MAX_AXES = 3;
+	const xdl_uint MOUSE_MAX_BUTTONS = 16;
 
-
+	static const XdevLID ButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
+	static const XdevLID ButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
+	static const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
 
 
 	template<typename T>
 	class XdevLMouseBase : public XdevLModuleImpl<T>, public thread::Thread {
-	public:
-		XdevLMouseBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)	:
-			XdevLModuleImpl<T>(parameter, descriptor),
-			m_window(NULL),
-			m_windowWidth(640),
-			m_windowHeight(480),
-			m_mouse_curr_x(0),
-			m_mouse_curr_y(0),
-			m_mouse_old_x(0),
-			m_mouse_old_y(0),
-			m_mouse_button_down(xdl_false),
-			m_mouse_moved(xdl_false),
-			m_mouse_moved_old(xdl_false),
-			m_relativeMode(xdl_false),
-			m_simulate_wheel_buttons(xdl_false),
-			m_attached(xdl_false),
-			m_skip(0),
-			m_threaded(xdl_false),
-			m_sleep(0.001) {
-		}
+		public:
+			XdevLMouseBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)	:
+				XdevLModuleImpl<T>(parameter, descriptor),
+				m_window(NULL),
+				m_windowWidth(640),
+				m_windowHeight(480),
+				m_mouse_curr_x(0),
+				m_mouse_curr_y(0),
+				m_mouse_old_x(0),
+				m_mouse_old_y(0),
+				m_mouse_button_down(xdl_false),
+				m_mouse_moved(xdl_false),
+				m_mouse_moved_old(xdl_false),
+				m_relativeMode(xdl_false),
+				m_simulate_wheel_buttons(xdl_false),
+				m_attached(xdl_false),
+				m_skip(0),
+				m_threaded(xdl_false),
+				m_sleep(0.001) {
+			}
 
-		virtual ~XdevLMouseBase() {
-		}
+			virtual ~XdevLMouseBase() {
+			}
 
-	protected:
-		using XdevLModuleImpl<T>::attach;
-		
-		// Returns the button id as string.
-		XdevLString getButtonIdAsString(const XdevLButtonId& id);
+		protected:
+			using XdevLModuleImpl<T>::attach;
 
-		// Reads the mouse device information from an xml file.
-		xdl_int readMouseInfo(TiXmlDocument& document, const xdl_char* modulename);
+			// Returns the button id as string.
+			XdevLString getButtonIdAsString(const XdevLButtonId& id);
 
-		xdl_int update();
+			// Reads the mouse device information from an xml file.
+			xdl_int readMouseInfo(TiXmlDocument& document, const xdl_char* modulename);
 
-		xdl_int RunThread(thread::ThreadArgument* p_arg);
+			xdl_int update();
 
-		xdl_int attach(XdevLWindow* window, const xdl_char* modulename);
+			xdl_int RunThread(thread::ThreadArgument* p_arg);
 
-		xdl_int notify(XdevLEvent& event);
-		xdl_int init();
-		xdl_int shutdown();
+			xdl_int attach(XdevLWindow* window, const xdl_char* modulename);
 
-		xdl_int reset();
+			xdl_int notify(XdevLEvent& event) override;
+			xdl_int init();
+			xdl_int shutdown();
 
-		xdl_bool getAttached();
+			xdl_int reset();
 
-		void setAttached(xdl_bool state);
+			xdl_bool getAttached();
 
-		xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
-		xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
-		xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
-		xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
+			void setAttached(xdl_bool state);
 
-	protected:
-		XdevLWindow*	m_window;
-		xdl_int			m_windowWidth;
-		xdl_int			m_windowHeight;
-		xdl_int			m_mouse_curr_x;
-		xdl_int			m_mouse_curr_y;
-		xdl_int			m_mouse_old_x;
-		xdl_int			m_mouse_old_y;
-		xdl_bool		m_mouse_button_down;
-		xdl_bool		m_mouse_moved;
-		xdl_bool		m_mouse_moved_old;
-		xdl_bool		m_relativeMode;
-		xdl_bool		m_simulate_wheel_buttons;
-		xdl_bool		m_attached;
-		xdl_int			m_skip;
-		xdl_bool		m_threaded;
-		xdl_double		m_sleep;
-		thread::Mutex	m_mutex;
-		std::vector<XdevLButtonImpl*>	m_Buttons;
-		std::vector<XdevLAxisImpl*>		m_Axes;
-		std::multimap<XdevLButtonId, XdevLButtonIdDelegateType> m_buttonIdDelegates;
-		std::multimap<XdevLAxisId, XdevLAxisIdDelegateType> m_axisIdDelegates;
-		std::vector<XdevLButtonDelegateType> m_buttonDelegates;
-		std::vector<XdevLAxisDelegateType> m_axisDelegates;
+			xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
+			xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
+			xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
+			xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
+
+		protected:
+			XdevLWindow*	m_window;
+			xdl_int			m_windowWidth;
+			xdl_int			m_windowHeight;
+			xdl_int			m_mouse_curr_x;
+			xdl_int			m_mouse_curr_y;
+			xdl_int			m_mouse_old_x;
+			xdl_int			m_mouse_old_y;
+			xdl_bool		m_mouse_button_down;
+			xdl_bool		m_mouse_moved;
+			xdl_bool		m_mouse_moved_old;
+			xdl_bool		m_relativeMode;
+			xdl_bool		m_simulate_wheel_buttons;
+			xdl_bool		m_attached;
+			xdl_int			m_skip;
+			xdl_bool		m_threaded;
+			xdl_double		m_sleep;
+			thread::Mutex	m_mutex;
+			std::vector<XdevLButtonImpl*>	m_Buttons;
+			std::vector<XdevLAxisImpl*>		m_Axes;
+			std::multimap<XdevLButtonId, XdevLButtonIdDelegateType> m_buttonIdDelegates;
+			std::multimap<XdevLAxisId, XdevLAxisIdDelegateType> m_axisIdDelegates;
+			std::vector<XdevLButtonDelegateType> m_buttonDelegates;
+			std::vector<XdevLAxisDelegateType> m_axisDelegates;
 
 	};
 
@@ -164,9 +166,6 @@ namespace xdl {
 	xdl_int  XdevLMouseBase<T>::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
 		XdevLButtonId idType = getButtonId(id);
 		m_buttonIdDelegates.insert(std::pair<const XdevLButtonId, const XdevLButtonIdDelegateType>(idType, delegate));
-		for(auto d : m_buttonIdDelegates) {
-			std::cout << "Register Button: " << d.first << std::endl;
-		}
 		return ERR_OK;
 	}
 
@@ -174,9 +173,6 @@ namespace xdl {
 	xdl_int  XdevLMouseBase<T>::registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate) {
 		XdevLAxisId idType = getAxisId(id);
 		m_axisIdDelegates.insert(std::pair<const XdevLAxisId, const XdevLAxisIdDelegateType>(idType, delegate));
-		for(auto d : m_axisIdDelegates) {
-			std::cout << "Register Axis: " << d.first << std::endl;
-		}
 		return ERR_OK;
 	}
 
@@ -211,7 +207,7 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevLMouseBase<T>::init() {
-			  
+
 		if(MOUSE_MAX_AXES > 0) {
 			m_Axes.reserve(MOUSE_MAX_AXES);
 			m_Axes.resize(MOUSE_MAX_AXES);
@@ -220,14 +216,17 @@ namespace xdl {
 			}
 		}
 
-		if(BUTTON_ID_MAX > 0) {
+		if(MOUSE_MAX_BUTTONS > 0) {
 			m_simulate_wheel_buttons = xdl_true;
-			m_Buttons.reserve(BUTTON_ID_MAX);
-			m_Buttons.resize(BUTTON_ID_MAX);
-			for(xdl_int a = 0; a < BUTTON_ID_MAX; ++a) {
+			m_Buttons.reserve(MOUSE_MAX_BUTTONS);
+			m_Buttons.resize(MOUSE_MAX_BUTTONS);
+			for(xdl_int a = 0; a < MOUSE_MAX_BUTTONS; ++a) {
 				m_Buttons[a] = new XdevLButtonImpl(&m_mutex);
 			}
 		}
+
+		reset();
+
 		return ERR_OK;
 	}
 
@@ -255,10 +254,10 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevLMouseBase<T>::reset() {
-		for(size_t a = 0; a < m_Buttons.size(); ++a)
-			m_Buttons[a]->setState(xdl_false);
+		for(auto& button : m_Buttons)
+			button->setState(xdl_false);
 		for(size_t a = 0; a < m_Axes.size(); ++a)
-			m_Axes[a]->setValue(xdl_false);
+			m_Axes[a]->setValue(0.0f);
 		return ERR_OK;
 	}
 
@@ -289,96 +288,98 @@ namespace xdl {
 	template<typename T>
 	xdl_int XdevLMouseBase<T>::notify(XdevLEvent& event) {
 
-		switch(event.type) {
-			case XDEVL_MOUSE_BUTTON_PRESSED: {
-				if(m_Buttons.size() == 0)
-					return xdl_false;
-
-				xdl_int idx = event.button.button;
-				if(!m_mouse_button_down)
-					m_Buttons[idx]->capturePressTime(event.common.timestamp);
-
-				m_mouse_button_down = xdl_true;
-				m_Buttons[idx]->setState(xdl_true);
-
-				for(auto& delegate : m_buttonDelegates) {
-					delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
+		if(event.type == XDEVL_WINDOW_EVENT) {
+			if(event.window.event == XDEVL_WINDOW_RESIZED) {
+				if(m_window->getWindowID() == event.window.windowid) {
+					m_windowWidth = event.window.width;
+					m_windowHeight = event.window.height;
 				}
-				
-				
-				
-				XdevLButtonId id = covertIdxToXdevLButton(idx);
-				auto pp = m_buttonIdDelegates.equal_range(id);
-				for (auto it = pp.first; it != pp.second; ++it) {
-					auto delegate = it->second;
-					delegate(BUTTON_PRESSED);
+			}
+		} else if( event.type == ButtonPressed.getHashCode()) {
+			if(m_Buttons.size() == 0)
+				return xdl_false;
+
+			xdl_int idx = event.button.button;
+			if(!m_mouse_button_down)
+				m_Buttons[idx]->capturePressTime(event.common.timestamp);
+
+			m_mouse_button_down = xdl_true;
+			m_Buttons[idx]->setState(xdl_true);
+
+			for(auto& delegate : m_buttonDelegates) {
+				delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
+			}
+
+
+
+			XdevLButtonId id = covertIdxToXdevLButton(idx);
+			auto pp = m_buttonIdDelegates.equal_range(id);
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_PRESSED);
+			}
+
+		} else if( event.type == ButtonReleased.getHashCode()) {
+			if(m_Buttons.size() == 0)
+				return xdl_false;
+
+			xdl_int idx = event.button.button;
+
+			if(m_mouse_button_down)
+				m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
+
+			m_mouse_button_down = xdl_false;
+			m_Buttons[idx]->setState(xdl_false);
+
+			for(auto& delegate : m_buttonDelegates) {
+				delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
+			}
+
+			XdevLButtonId id = covertIdxToXdevLButton(idx);
+			auto pp = m_buttonIdDelegates.equal_range(id);
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_RELEASED);
+			}
+
+		} else if( event.type == MouseMotion.getHashCode()) {
+
+			xdl_uint32 x = event.motion.x;
+			xdl_uint32 y = event.motion.y;
+
+			m_mouse_old_x = m_mouse_curr_x;
+			m_mouse_curr_x = x;
+			m_mouse_old_y = m_mouse_curr_y;
+			m_mouse_curr_y = y;
+			m_mouse_moved = true;
+
+			if(m_window && m_relativeMode) {
+				if((x <= 0 || x >= m_windowWidth - 1) ||
+				        (y <= 0 || y >= m_windowHeight - 1))   {
+					m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
+					m_mouse_old_x 	= m_windowWidth/2;
+					m_mouse_old_y 	= m_windowHeight/2;
+					m_mouse_curr_x 	= m_windowWidth/2;
+					m_mouse_curr_y 	= m_windowHeight/2;
+
+					return ERR_OK;
 				}
 
 			}
-			break;
-			case XDEVL_MOUSE_BUTTON_RELEASED: {
-				if(m_Buttons.size() == 0)
-					return xdl_false;
 
-				xdl_int idx = event.button.button;
+			//
+			// Why do I do x + 1? Because: 0 <= x < width. The same goes for y.
+			//
 
-				if(m_mouse_button_down)
-					m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
-
-				m_mouse_button_down = xdl_false;
-				m_Buttons[idx]->setState(xdl_false);
-
-				for(auto& delegate : m_buttonDelegates) {
-					delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
-				}
-
-				XdevLButtonId id = covertIdxToXdevLButton(idx);
-				auto pp = m_buttonIdDelegates.equal_range(id);
-				for (auto it = pp.first; it != pp.second; ++it) {
-					auto delegate = it->second;
-					delegate(BUTTON_RELEASED);
-				}
-
+			if(x >= m_windowWidth - 1) {
+				x = m_windowWidth;
 			}
-			break;
-			case XDEVL_MOUSE_MOTION: {
 
-				xdl_uint32 x = event.motion.x;
-				xdl_uint32 y = event.motion.y;
+			if(y >= m_windowHeight - 1) {
+				y = m_windowHeight;
+			}
 
-				m_mouse_old_x = m_mouse_curr_x;
-				m_mouse_curr_x = x;
-				m_mouse_old_y = m_mouse_curr_y;
-				m_mouse_curr_y = y;
-				m_mouse_moved = true;
-
-				if(m_relativeMode) {
-					if((x <= 0 || x >= m_windowWidth - 1) ||
-					        (y <= 0 || y >= m_windowHeight - 1))   {
-						m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
-						m_mouse_old_x 	= m_windowWidth/2;
-						m_mouse_old_y 	= m_windowHeight/2;
-						m_mouse_curr_x 	= m_windowWidth/2;
-						m_mouse_curr_y 	= m_windowHeight/2;
-
-						break;
-					} else {
-						m_Axes[AXIS_0]->setDeltaValue((float)(m_mouse_curr_x - m_mouse_old_x));
-						m_Axes[AXIS_1]->setDeltaValue((float)(m_mouse_curr_y - m_mouse_old_y));
-					}
-
-				}
-
-				//
-				// Why do I do x + 1? Because: 0 <= x < width. The same goes for y.
-				//
-
-				if(x >= m_windowWidth - 1) {
-					x = m_windowWidth;
-				}
-				if(y >= m_windowHeight - 1) {
-					y = m_windowHeight;
-				}
+			if(m_Axes.size() > 0) {
 				m_Axes[AXIS_0]->setValue(((xdl_float)(x) / (xdl_float)m_windowWidth));
 				m_Axes[AXIS_1]->setValue(((xdl_float)(y) / (xdl_float)m_windowHeight));
 
@@ -387,24 +388,16 @@ namespace xdl {
 					delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
 				}
 			}
-			break;
-			case XDEVL_MODULE_EVENT: {
-				if(event.module.event == XDEVL_MODULE_INIT) {
-					init();
-				} else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
-					shutdown();
-				} 
-			}
-			break;
-			default: {
-				if(m_Axes.size() > 0) {
-					m_Axes[AXIS_0]->setDeltaValue(0.0f);
-					m_Axes[AXIS_1]->setDeltaValue(0.0f);
-				}
-			}
+			
+//			std::cout << ((xdl_float)(x) / (xdl_float)m_windowWidth) << "x" << ((xdl_float)(y) / (xdl_float)m_windowHeight) << std::endl;
 
+		} else if (event.type == XDEVL_MODULE_EVENT) {
+			if(event.module.event == XDEVL_MODULE_INIT) {
+				init();
+			} else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
+				shutdown();
+			}
 		}
-
 		return ERR_OK;
 	}
 
@@ -541,8 +534,10 @@ namespace xdl {
 	template<typename T>
 	XdevLString XdevLMouseBase<T>::getButtonIdAsString(const XdevLButtonId& id) {
 		switch(id) {
-			case BUTTON_0: return XdevLString("BUTTON_0");
-			default: return XdevLString();
+			case BUTTON_0:
+				return XdevLString("BUTTON_0");
+			default:
+				return XdevLString();
 		}
 	}
 
@@ -553,45 +548,45 @@ namespace xdl {
 		@author Cengiz Terzibas
 	*/
 	class XdevLMouseImpl : public XdevLMouseBase<XdevLMouse> {
-	public:
-		XdevLMouseImpl(XdevLModuleCreateParameter* parameter);
+		public:
+			XdevLMouseImpl(XdevLModuleCreateParameter* parameter);
 
-		static XdevLModuleDescriptor m_moduleDescriptor;
+			static XdevLModuleDescriptor m_moduleDescriptor;
 
-		virtual xdl_int init();
-		virtual xdl_int shutdown();
+			virtual xdl_int init();
+			virtual xdl_int shutdown();
 
-		virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
-		virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
-		virtual xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
-		virtual xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
+			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
+			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
+			virtual xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
+			virtual xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
 
-		virtual xdl_int attach(XdevLWindow* window);
+			virtual xdl_int attach(XdevLWindow* window);
 
-		virtual xdl_uint getNumButtons() const;
-		virtual xdl_int getButton(const xdl_uint idx, XdevLButton** button);
-		virtual xdl_uint getNumAxis() const;
-		virtual xdl_int getAxis(const xdl_uint idx, XdevLAxis** axis) const;
-		virtual xdl_uint getNumPOV() const;
-		virtual xdl_int getPOV(const xdl_uint idx, XdevLPOV** pov) const;
+			virtual xdl_uint getNumButtons() const;
+			virtual xdl_int getButton(const xdl_uint idx, XdevLButton** button);
+			virtual xdl_uint getNumAxis() const;
+			virtual xdl_int getAxis(const xdl_uint idx, XdevLAxis** axis) const;
+			virtual xdl_uint getNumPOV() const;
+			virtual xdl_int getPOV(const xdl_uint idx, XdevLPOV** pov) const;
 
-		virtual xdl_bool getPressed(const xdl_uint key);
-		virtual xdl_bool getClicked(const xdl_uint key);
-		virtual void setClickResponseTimeForAll(xdl_double crt);
-		virtual void setClickResponseTime(const xdl_uint key, xdl_double crt);
-		virtual xdl_double getClickResponseTime(const xdl_uint key) ;
+			virtual xdl_bool getPressed(const xdl_uint key);
+			virtual xdl_bool getClicked(const xdl_uint key);
+			virtual void setClickResponseTimeForAll(xdl_double crt);
+			virtual void setClickResponseTime(const xdl_uint key, xdl_double crt);
+			virtual xdl_double getClickResponseTime(const xdl_uint key) ;
 
-		virtual xdl_float getValue(const xdl_uint button);
+			virtual xdl_float getValue(const xdl_uint button);
 
-		virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max);
-		virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min);
-		virtual void seAxisRangeMax(const xdl_uint axis, xdl_float max);
-		virtual void getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max);
-		virtual xdl_float getAxisRangeMin(const xdl_uint axis) const;
-		virtual xdl_float getAxisRangeMax(const xdl_uint axis) const;
+			virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max);
+			virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min);
+			virtual void seAxisRangeMax(const xdl_uint axis, xdl_float max);
+			virtual void getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max);
+			virtual xdl_float getAxisRangeMin(const xdl_uint axis) const;
+			virtual xdl_float getAxisRangeMax(const xdl_uint axis) const;
 
-		
-		virtual void setRelativeMode(xdl_bool state);
+
+			virtual void setRelativeMode(xdl_bool state);
 	};
 
 }

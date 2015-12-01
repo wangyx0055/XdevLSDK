@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(XdevLWindowSDL)
 
-find_package(SDL2)
-
 #
 # Set the names for the stuff we are going to create
 
@@ -63,8 +61,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
 #
 # Set header files for the library.
 
-set(HEADER_FILES
+set(HEADER_INTERFACE_FILE 
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindow.h
+)
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
 	${HEADERS_DIR}/XdevLWindowSDL.h
 )
@@ -105,12 +107,6 @@ add_library(${XdevLWindowSDLLibrary} SHARED
 )
 
 #
-# Set the compiler property
-
-set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY CXX_STANDARD 11)
-
-#
 # Add external ibraries
 
 set(LIBS ${SDL2_LIBRARY} )
@@ -133,3 +129,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLWindowSDLLibrary} PROPERTY SUFFIX "-${XDEVLSDL_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/XdevLWindow")
+install(TARGETS ${XdevLWindowSDLLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

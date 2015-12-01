@@ -17,34 +17,51 @@
 	I would appreciate if you report all bugs to: cengiz@terzibas.de
 */
 
-#ifndef XDEVL_DEVICE_WINDOW_WIN32_H
-#define XDEVL_DEVICE_WINDOW_WIN32_H
+#ifndef XDEVL_WINDOW_WINDOWS_H
+#define XDEVL_WINDOW_WINDOWS_H
 
 #include <XdevLPlatform.h>
 #include <XdevLPlugin.h>
-#include "XdevLWindowDeviceImpl.h"
+#include <XdevLWindow/XdevLWindowImpl.h>
 #include <XdevLTypes.h>
 #include <XdevLCoreMediator.h>
 #include <tinyxml.h>
-#include <OIS.h>
 
 namespace xdl {
 
+	// Holds the Major version number.
+	const xdl_uint XdevLWindowMajorVersion = XDEVLWINDOWS_MODULE_MAJOR_VERSION;
 
-class XdevLWindowDeviceWin32 : public XdevLWindowDeviceImpl {
+	// Holds the Minor version number.
+	const xdl_uint XdevLWindowMinorVersion = XDEVLWINDOWS_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLWindowPatchVersion = XDEVLWINDOWS_MODULE_PATCH_VERSION;
+
+
+	// Holds the Major version number.
+	const xdl_uint XdevLWindowEventServerMajorVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_MAJOR_VERSION;
+
+	// Holds the Minor version number.
+	const xdl_uint XdevLWindowEventServerMinorVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLWindowEventServerPatchVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_PATCH_VERSION;
+
+
+	static const XdevLString windowPluginName{
+		"XdevLWindowWindow"
+	};
+
+	static const XdevLString windowDescription{
+		"Support for creating a window using native OS methods."
+	};
+
+	class XdevLWindowDeviceWin32 : public XdevLWindowImpl, public thread::Thread {
 public:
-	XdevLWindowDeviceWin32(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowDeviceImpl(parameter),
-			m_inputManager(NULL),
-			m_instance(NULL),
-			m_DC(NULL),
-			m_windowStyle(0),
-			m_windowStyleEx(0){
-			this->getMediator()->getMessageQuark("XDEVL_MESSAGE_RESTART", &m_XDEVL_MESSAGE_RESTART);
-			XdevLWindowDeviceHide = new XdevLQuark("XdevLWindowDeviceHide");
-			XdevLWindowDeviceShow = new XdevLQuark("XdevLWindowDeviceShow");
-	}
-	~XdevLWindowDeviceWin32() {
+	XdevLWindowDeviceWin32(XdevLModuleCreateParameter* parameter);
+
+	virtual ~XdevLWindowDeviceWin32() {
 	}
 
 	virtual xdl_int init();
@@ -52,16 +69,46 @@ public:
 	virtual void* getInternal(const xdl_char* id);
 	virtual xdl_int update();
 	virtual xdl_int reset();
-	virtual void setX(xdl_uint x);
-	virtual void setY(xdl_uint y);
-	virtual void setWidth(xdl_uint width);
-	virtual void setHeight(xdl_uint height);
-	virtual void setTitle(const xdl_char* title);
+
+	const XdevLWindowPosition& getPosition();
+	const XdevLWindowSize& getSize();
+
+	virtual void setSize(const XdevLWindowSize& size);
+	virtual void setPosition(const XdevLWindowPosition& position);
+	virtual void setTitle(const XdevLWindowTitle& title);
 	virtual void setFullscreen(xdl_bool state);
+	virtual void showPointer();
+	virtual void hidePointer();
+	virtual void setPointerPosition(xdl_uint x, xdl_uint y);
+	virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height);
+	virtual void setX(XdevLWindowPosition::type x);
+	virtual void setY(XdevLWindowPosition::type y);
+	virtual void setWidth(XdevLWindowSize::type width);
+	virtual void setHeight(XdevLWindowSize::type height);
+	virtual void setType(XdevLWindowTypes type);
+	virtual const XdevLWindowTitle& getTitle();
+	virtual xdl_bool getFullscreen();
+	virtual xdl_int getColorDepth();
+	virtual xdl_bool getHidePointer();
+	virtual XdevLWindowSize::type getWidth();
+	virtual XdevLWindowSize::type getHeight();
+	virtual XdevLWindowPosition::type getX();
+	virtual XdevLWindowPosition::type getY();
+
 	virtual void setHidePointer(xdl_bool state);
-	virtual xdl_int show(xdl_bool state);
+	virtual void show();
+	virtual void hide();
+	virtual xdl_bool isHidden();
+	virtual void raise();
+	virtual void grabPointer();
+	virtual void ungrabPointer();
+	virtual void grabKeyboard();
+	virtual void ungrabKeyboard();
+	virtual void setInputFocus();
+	virtual xdl_bool hasFocus();
+	virtual xdl_int getInputFocus(XdevLWindow** window);
+
 protected:
-	OIS::InputManager* m_inputManager;
 	std::string m_winClassId;
 protected:
 	/// win32 instance handle.
@@ -77,23 +124,36 @@ protected:
 	DEVMODE m_oldDevMode;
 	DEVMODE m_matchingVideoMode;
 	std::vector<DISPLAY_DEVICE> displayInfoList;
+	xdl_bool m_isHidden;
 private:
 	///creates a win32 window
 	int create();
-	/// win32 message handling
-	LRESULT  callbackProc(HWND hWnd, UINT	uMsg, WPARAM wParam, LPARAM lParam);
-	/// windows message function callback
-	static LRESULT CALLBACK callbackProxy( HWND hWnd, UINT	uMsg, WPARAM wParam, LPARAM lParam);
-	
-	
-	virtual xdl_int recvEvent(XdevLEvent* ev);
-	XdevLQuark* m_XDEVL_MESSAGE_RESTART;
-	XdevLQuark* XdevLWindowDeviceHide;
-	XdevLQuark* XdevLWindowDeviceShow;
+
+//	virtual xdl_int recvEvent(XdevLEvent* ev);
 	
 };
 
+	class XdevLWindowWindowsEventServer : public XdevLWindowEventServerImpl {
+	public:
+		XdevLWindowWindowsEventServer(XdevLModuleCreateParameter* parameter);
+		virtual xdl_int init() override;
+		virtual xdl_int shutdown() override;
+		virtual void* getInternal(const XdevLInternalName& id) override;
+		virtual xdl_int update() override;
 
+		virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
+		virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
+		void flush() override;
+
+		/// windows message function callback
+		static LRESULT CALLBACK callbackProxy(HWND hWnd, UINT	uMsg, WPARAM wParam, LPARAM lParam);
+
+	private:
+//		int pollEvents();
+		/// win32 message handling
+		LRESULT  callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	};
 }
 
 extern "C" XDEVL_EXPORT int _createWindowDevice(xdl::XdevLModuleCreateParameter* parameter);

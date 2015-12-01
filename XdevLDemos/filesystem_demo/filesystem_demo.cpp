@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 	}
 
 	// Plug the XdevLFileSystem plugin to the core.
-	xdl::plug(core, xdl::XdevLPluginName("XdevLFileSystem"), xdl::XdevLVersion(1, 0, 0));
+	xdl::plug(core, xdl::XdevLPluginName("XdevLFileSystem"), xdl::XdevLVersion(0, 1, 0));
 
 	// Create a valid instance of the module XdevLFile to read/write files.
 	xdl::IPXdevLFile file = xdl::createModule<xdl::IPXdevLFile>(core, xdl::XdevLModuleName("XdevLFile"), xdl::XdevLID("MyFile"));

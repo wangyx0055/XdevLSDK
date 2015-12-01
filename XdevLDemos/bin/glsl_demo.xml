@@ -8,7 +8,8 @@
 		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
 		<XdevLPlugin name="XdevLMouse"		version="1.0.0"/>
 		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>
-		<XdevLPlugin name="XdevLOpenGL"		version="1.0.0"/>
+		<XdevLPlugin name="XdevLOpenGLContextSDL" version="0.1.0"/>
+		<XdevLPlugin name="XdevLRAIGL"		version="0.1.0"/>
 	</XdevLPlugins>
 
 	<!-- Create necessary modules -->
@@ -16,7 +17,7 @@
 		<XdevLModule id="MyWindow"		name="XdevLWindow"/>
 		<XdevLModule id="MyMouse"		name="XdevLMouse"/>
 		<XdevLModule id="MyKeyboard"	name="XdevLKeyboard"/>
-		<XdevLModule id="MyOpenGL"		name="XdevLOpenGL"/>
+		<XdevLModule id="MyRAIGL"		name="XdevLRAIGL"/>
 	</XdevLModules>
 
 	<!-- Setting some properties of the XdevLWindow module. -->

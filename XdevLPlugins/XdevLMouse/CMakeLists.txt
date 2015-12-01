@@ -61,8 +61,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
 #
 # Set header files for the library.
 
+set(HEADER_INTERFACE_FILE 
+	${HEADERS_DIR}/XdevLMouse.h	
+)
+
 set(HEADER_FILES
-	${HEADERS_DIR}/XdevLMouse.h
+	${HEADER_INTERFACE_FILE}
 	${HEADERS_DIR}/XdevLMouseImpl.h
 )
 
@@ -86,13 +90,6 @@ add_library(${XdevLMouseLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
-
-#
-# Set the compiler property
-
-set_property(TARGET ${XdevLMouseLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLMouseLibrary} PROPERTY CXX_STANDARD 11)
-
 
 #
 # Add include directories
@@ -129,3 +126,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLMouseLibrary} PROPERTY SUFFIX "-${XDEVLMOUSE_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLMouseLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

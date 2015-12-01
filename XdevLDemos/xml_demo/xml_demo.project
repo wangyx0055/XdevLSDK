@@ -35,14 +35,6 @@
     <File Name="../bin/xml_demo.xml"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -464,4 +456,14 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>

@@ -118,7 +118,7 @@ namespace xdl {
 			}
 
 			virtual void* getInternal(const XdevLInternalName& id) {
-				return NULL;
+				return nullptr;
 			}
       
       virtual const XdevLModuleDescriptor& getDescriptor() const {

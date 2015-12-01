@@ -76,22 +76,22 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
 
 namespace xdl {
 
-	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter) : XdevLKeyboardOISImpl<XdevLKeyboard>(parameter, m_keyboardModuleDesc) {
+	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter) : XdevlKeyboardBase<XdevLKeyboard>(parameter, m_keyboardModuleDesc) {
 	}
 
 	XdevLKeyboardImpl::~XdevLKeyboardImpl() {
 	}
 
 	xdl_int XdevLKeyboardImpl::init() {
-		return XdevLKeyboardOISImpl<XdevLKeyboard>::init();
+		return XdevlKeyboardBase<XdevLKeyboard>::init();
 	}
 
 	xdl_int XdevLKeyboardImpl::shutdown() {
-		return XdevLKeyboardOISImpl<XdevLKeyboard>::shutdown();
+		return XdevlKeyboardBase<XdevLKeyboard>::shutdown();
 	}
 
 	xdl_int XdevLKeyboardImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
-		return XdevLKeyboardOISImpl<XdevLKeyboard>::registerDelegate(id, delegate);
+		return XdevlKeyboardBase<XdevLKeyboard>::registerDelegate(id, delegate);
 	}
 	
 	xdl_int XdevLKeyboardImpl::registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate) {
@@ -99,7 +99,7 @@ namespace xdl {
 	}
 	
 	xdl_int XdevLKeyboardImpl::registerDelegate(const XdevLButtonDelegateType& delegate) {
-		return XdevLKeyboardOISImpl<XdevLKeyboard>::registerDelegate(delegate);
+		return XdevlKeyboardBase<XdevLKeyboard>::registerDelegate(delegate);
 	}
 	
 	xdl_int XdevLKeyboardImpl::registerDelegate(const XdevLAxisDelegateType& delegate) {
@@ -107,35 +107,36 @@ namespace xdl {
 	}
 
 	int XdevLKeyboardImpl::attach(XdevLWindow* window) {
-		return XdevLKeyboardOISImpl<XdevLKeyboard>::attach(window, this->getDescriptor().getName().toString().c_str());
+		return XdevlKeyboardBase<XdevLKeyboard>::attach(window, this->getDescriptor().getName().toString().c_str());
 	}
 
 	xdl_uint XdevLKeyboardImpl::getNumButtons() const {
 		return 255;
 	}
+
 	xdl_uint XdevLKeyboardImpl::getNumAxis() const {
 		return 0;
 	}
+
 	xdl_uint XdevLKeyboardImpl::getNumPOV() const {
 		return 0;
 	}
 
 	xdl_int XdevLKeyboardImpl::getAxis(const xdl_uint, XdevLAxis** axis) const {
-		*axis = NULL;
+		*axis = nullptr;
 		return ERR_ERROR;
 	}
 	xdl_int XdevLKeyboardImpl::getPOV(const xdl_uint, XdevLPOV** pov) const {
-		*pov = NULL;
+		*pov = nullptr;
 		return ERR_ERROR;
 	}
-
 
 	xdl_int XdevLKeyboardImpl::getButton(const xdl_uint idx, XdevLButton** button)  {
 		XDEVL_ASSERT(m_attached, "Keyboard device not attached!");
 
 		// If the key mapping does not exists, just create one.
 		XdevLButtonImpl* tmp = m_Buttons[idx];
-		if(tmp == NULL) {
+		if(tmp == nullptr) {
 			m_Buttons[idx] =  new XdevLButtonImpl(&m_mutex);
 			tmp = m_Buttons[idx];
 		}
@@ -155,8 +156,9 @@ namespace xdl {
 
 	void XdevLKeyboardImpl::setClickResponseTimeForAll(xdl_double crt) {
 		XDEVL_ASSERT(m_attached, "Keyboard device not attached!");
-		for(xdl_uint a = 0; a < m_Buttons.size(); ++a)
+		for(auto a = 0; a < m_Buttons.size(); ++a) {
 			m_Buttons[a]->setClickResponseTime(crt);
+		}
 	}
 
 	void XdevLKeyboardImpl::setClickResponseTime(const xdl_uint key, xdl_double crt) {

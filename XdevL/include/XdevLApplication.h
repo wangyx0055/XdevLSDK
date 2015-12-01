@@ -231,10 +231,10 @@ namespace xdl {
 
 		private:
 
-			xdl::XdevLCore* 			m_core;
+			xdl::XdevLCore* 		m_core;
 			xdl::XdevLWindow* 		m_window;
 			xdl::XdevLKeyboard* 	m_keyboard;
-			xdl::XdevLMouse*			m_mouse;
+			xdl::XdevLMouse*		m_mouse;
 			xdl::XdevLJoystick*		m_joystick;
 
 			// Holds the redirected stream file pointer.

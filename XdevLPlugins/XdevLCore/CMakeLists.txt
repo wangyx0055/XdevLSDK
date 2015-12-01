@@ -14,9 +14,9 @@ set(XdevLCoreLibrary XdevLCore)
 # Set the Plugin version
 #
 
-set(XDEVLCORE_MAJOR_VERSION 0)
-set(XDEVLCORE_MINOR_VERSION 5)
-set(XDEVLCORE_PATCH_VERSION 0)
+set(XDEVLCORE_MAJOR_VERSION ${XDEVLSDK_MAJOR_VERSION})
+set(XDEVLCORE_MINOR_VERSION ${XDEVLSDK_MINOR_VERSION})
+set(XDEVLCORE_PATCH_VERSION ${XDEVLSDK_PATCH_VERSION})
 set(XDEVLCORE_VERSION "${XDEVLCORE_MAJOR_VERSION}.${XDEVLCORE_MINOR_VERSION}.${XDEVLCORE_PATCH_VERSION}")
 
 add_definitions(
@@ -29,9 +29,9 @@ add_definitions(
 # Set the Module version
 #
 
-set(XDEVLCORE_MODULE_MAJOR_VERSION 0)
-set(XDEVLCORE_MODULE_MINOR_VERSION 5)
-set(XDEVLCORE_MODULE_PATCH_VERSION 0)
+set(XDEVLCORE_MODULE_MAJOR_VERSION ${XDEVLSDK_MAJOR_VERSION})
+set(XDEVLCORE_MODULE_MINOR_VERSION ${XDEVLSDK_MINOR_VERSION})
+set(XDEVLCORE_MODULE_PATCH_VERSION ${XDEVLSDK_PATCH_VERSION})
 set(XDEVLCORE_MODULE_VERSION "${XDEVLCORE_MODULE_MAJOR_VERSION}.${XDEVLCORE_MODULE_MINOR_VERSION}.${XDEVLCORE_MODULE_PATCH_VERSION}")
 
 add_definitions(
@@ -87,13 +87,6 @@ add_library(${XdevLCoreLibrary} SHARED
     ${SOURCE_FILES}
 )
 
-
-#
-# Set the compiler property
-
-set_property(TARGET ${XdevLCoreLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLCoreLibrary} PROPERTY CXX_STANDARD 11)
-
 #
 # Add include directories
 
@@ -110,12 +103,10 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
 			 XdevLd
-			 pthread
 	)
 	elseif(APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
 				 XdevLd
-				 pthread
 		)
 	elseif(WIN32)
 		target_link_libraries(${XdevLCoreLibrary}
@@ -126,12 +117,10 @@ else()
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
 			 XdevL
-			 pthread
 		)
 	elseif(APPLE)
 			target_link_libraries(${XdevLCoreLibrary}
 			 XdevL
-			 pthread
 		)
 	elseif(WIN32)
 		target_link_libraries(${XdevLCoreLibrary}
@@ -151,3 +140,5 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLCoreLibrary} PROPERTY SUFFIX "-${XDEVLCORE_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(TARGETS ${XdevLCoreLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

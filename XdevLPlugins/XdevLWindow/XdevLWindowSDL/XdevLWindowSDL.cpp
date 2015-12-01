@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <XdevLCore.h>
+#include <XdevLInputSystem.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
 #include <XdevLMouse/XdevLMouse.h>
 #include <XdevLJoystick/XdevLJoystick.h>
@@ -30,7 +31,7 @@
 #include <map>
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLWindowSDL::m_windowSDLModuleDesc {
+xdl::XdevLModuleDescriptor windowSDLModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[0],
@@ -41,6 +42,29 @@ xdl::XdevLModuleDescriptor xdl::XdevLWindowSDL::m_windowSDLModuleDesc {
 	xdl::XdevLWindowPatchVersion
 };
 
+xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[2],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	xdl::XdevLWindowEventServerMajorVersion,
+	xdl::XdevLWindowEventServerMinorVersion,
+	xdl::XdevLWindowEventServerPatchVersion
+};
+
+xdl::XdevLModuleDescriptor cursorModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[3],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	xdl::XdevLWindowEventServerMajorVersion,
+	xdl::XdevLWindowEventServerMinorVersion,
+	xdl::XdevLWindowEventServerPatchVersion
+};
+
+
 xdl::XdevLPluginDescriptor m_windowSDLPluginDescriptor {
 	xdl::windowPluginName,
 	xdl::window_moduleNames,
@@ -49,28 +73,51 @@ xdl::XdevLPluginDescriptor m_windowSDLPluginDescriptor {
 	xdl::XdevLWindowPluginPatchVersion
 };
 
-
 static xdl::xdl_int reference_counter = 0;
 static std::map<xdl::xdl_uint32, xdl::XdevLWindow*> windowMap;
+
+
+
+
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	// Only init SDL if this is the first module.
 	if(reference_counter == 0) {
 		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+		reference_counter++;
 	}
 
-	if(xdl::XdevLWindowSDL::m_windowSDLModuleDesc.getName() == parameter->getModuleName()) {
+	if(windowSDLModuleDesc.getName() == parameter->getModuleName()) {
+
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
+		}
+
 		xdl::XdevLWindowSDL* window = new xdl::XdevLWindowSDL(parameter);
 		parameter->setModuleInstance(window);
-
 	} else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+		}
+
 		xdl::XdevLWindowServerSDL* windowServer = new xdl::XdevLWindowServerSDL(parameter);
 		parameter->setModuleInstance(windowServer);
+	}  else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
+
+		xdl::XdevLCursorSDL* cursor = new xdl::XdevLCursorSDL(parameter);
+		parameter->setModuleInstance(cursor);
+	} else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+		xdl::windowEventServer = new xdl::XdevLWindowSDLEventServer(parameter);
+		parameter->setModuleInstance(xdl::windowEventServer);
+		xdl::XdevLWindowEventServerParameter = parameter;
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
-
-	reference_counter++;
 
 	return xdl::ERR_OK;
 }
@@ -83,6 +130,13 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 
 	// Only Quit SDL if this is the last module.
 	if(reference_counter == 0) {
+
+		// If the last window was destroy make sure to destroy the event server too.
+		if(xdl::windowEventServer != nullptr) {
+			xdl::XdevLWindowEventServerParameter->getMediator()->deleteModule(xdl::windowEventServer->getID());
+			xdl::windowEventServer = nullptr;
+		}
+
 		SDL_Quit();
 	}
 }
@@ -93,12 +147,146 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 
 namespace xdl {
 
+	static const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
+	static const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
+	static const XdevLID MouseButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
+	static const XdevLID MouseButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
+	static const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
+	static const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
+	
+	std::map<int, XdevLButtonId> KeySymToXdevLKeyCode = {
+		{ SDLK_a, KEY_A},
+		{ SDLK_b, KEY_B},
+		{ SDLK_c, KEY_C},
+		{ SDLK_d, KEY_D},
+		{ SDLK_e, KEY_E},
+		{ SDLK_f, KEY_F},
+		{ SDLK_g, KEY_G},
+		{ SDLK_h, KEY_H},
+		{ SDLK_i, KEY_I},
+		{ SDLK_j, KEY_J},
+		{ SDLK_k, KEY_K},
+		{ SDLK_l, KEY_L},
+		{ SDLK_m, KEY_M},
+		{ SDLK_n, KEY_N},
+		{ SDLK_o, KEY_O},
+		{ SDLK_p, KEY_P},
+		{ SDLK_q, KEY_Q},
+		{ SDLK_r, KEY_R},
+		{ SDLK_s, KEY_S},
+		{ SDLK_t, KEY_T},
+		{ SDLK_u, KEY_U},
+		{ SDLK_v, KEY_V},
+		{ SDLK_w, KEY_W},
+		{ SDLK_x, KEY_X},
+		{ SDLK_y, KEY_Y},
+		{ SDLK_z, KEY_Z},
 
+		{ SDLK_0, KEY_0},
+		{ SDLK_1, KEY_1},
+		{ SDLK_2, KEY_2},
+		{ SDLK_3, KEY_3},
+		{ SDLK_4, KEY_4},
+		{ SDLK_5, KEY_5},
+		{ SDLK_6, KEY_6},
+		{ SDLK_7, KEY_7},
+		{ SDLK_8, KEY_8},
+		{ SDLK_9, KEY_9},
+
+
+		{ SDLK_F1, KEY_F1},
+		{ SDLK_F2, KEY_F2},
+		{ SDLK_F3, KEY_F3},
+		{ SDLK_F4, KEY_F4},
+		{ SDLK_F5, KEY_F5},
+		{ SDLK_F6, KEY_F6},
+		{ SDLK_F7, KEY_F7},
+		{ SDLK_F8, KEY_F8},
+		{ SDLK_F9, KEY_F9},
+		{ SDLK_F10, KEY_F10},
+		{ SDLK_F11, KEY_F11},
+		{ SDLK_F12, KEY_F12},
+		{ SDLK_F13, KEY_F13},
+		{ SDLK_F14, KEY_F14},
+		{ SDLK_F15, KEY_F15},
+		{ SDLK_F16, KEY_F16},
+		{ SDLK_F17, KEY_F17},
+		{ SDLK_F18, KEY_F18},
+		{ SDLK_F19, KEY_F19},
+		{ SDLK_F20, KEY_F20},
+		{ SDLK_F21, KEY_F21},
+		{ SDLK_F22, KEY_F22},
+		{ SDLK_F23, KEY_F23},
+		{ SDLK_F24, KEY_F24},
+		
+		{ SDLK_ESCAPE, KEY_ESCAPE},
+		{ SDLK_HOME, KEY_HOME },
+		{ SDLK_END, KEY_END },
+		{ SDLK_INSERT, KEY_INSERT },
+		{ SDLK_DELETE, KEY_DELETE },
+		{ SDLK_DOWN, KEY_PAGEDOWN},
+		{ SDLK_PAGEUP, KEY_PAGEUP },
+
+		{ SDLK_SPACE, KEY_SPACE},
+		{ SDLK_BACKSPACE, KEY_BACKSPACE},
+		{ SDLK_RETURN, KEY_ENTER },
+		{ SDLK_TAB , KEY_TAB },
+		{ SDLK_CAPSLOCK, KEY_CAPSLOCK},
+		{ SDLK_PLUS, KEY_PLUS },
+		{ SDLK_MINUS, KEY_MINUS },
+
+		{ SDLK_UP, KEY_UP },
+		{ SDLK_DOWN, KEY_DOWN },
+		{ SDLK_LEFT, KEY_LEFT },
+		{ SDLK_RIGHT, KEY_RIGHT },
+
+		{ SDLK_LALT, KEY_LALT },
+		{ SDLK_LCTRL, KEY_LCTRL },
+		{ SDLK_LSHIFT, KEY_LSHIFT },
+		{ SDLK_RALT, KEY_RALT },
+		{ SDLK_RCTRL, KEY_RCTRL },
+		{ SDLK_RSHIFT, KEY_RSHIFT },
+		{ SDLK_LGUI, KEY_LGUI },
+		{ SDLK_RGUI, KEY_RGUI },
+
+		{ SDLK_KP_0, KEY_KP_0 },
+		{ SDLK_KP_1, KEY_KP_1 },
+		{ SDLK_KP_2, KEY_KP_2 },
+		{ SDLK_KP_3, KEY_KP_3 },
+		{ SDLK_KP_4, KEY_KP_4 },
+		{ SDLK_KP_5, KEY_KP_5 },
+		{ SDLK_KP_6, KEY_KP_6 },
+		{ SDLK_KP_7, KEY_KP_7 },
+		{ SDLK_KP_8, KEY_KP_8 },
+		{ SDLK_KP_9, KEY_KP_9 },
+
+
+		{ SDLK_NUMLOCKCLEAR, KEY_NUMLOCKCLEAR },
+		{ SDLK_KP_DIVIDE, KEY_KP_DIVIDE },
+		{ SDLK_KP_MULTIPLY, KEY_KP_MULTIPLY },
+		{ SDLK_KP_MINUS, KEY_KP_MINUS },
+		{ SDLK_KP_PLUS, KEY_KP_PLUS },
+		{ SDLK_KP_ENTER, KEY_KP_ENTER },
+		
+		{ SDLK_PRINTSCREEN, KEY_PRINTSCREEN },
+		{ SDLK_SCROLLLOCK, KEY_SCROLLLOCK },
+		{ SDLK_PAUSE, KEY_PAUSE },
+
+	};
+
+	
 	XdevLWindowSDL::XdevLWindowSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, m_windowSDLModuleDesc), m_joy(NULL) {}
+		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, windowSDLModuleDesc),
+		m_window(nullptr),
+		m_joy(NULL)
+	{}
 
 	XdevLWindowSDL::~XdevLWindowSDL() {
 
+		// Window got destroyed, did someone shut it down?
+		if(m_window != nullptr) {
+			shutdown();
+		}
 	}
 
 
@@ -108,17 +296,16 @@ namespace xdl {
 
 		if(create() != ERR_OK) {
 			XDEVL_MODULE_ERROR("Could not create SDL window: " << SDL_GetError() << std::endl);
-
 			return ERR_ERROR;
 		}
-		XDEVL_MODULE_SUCCESS("SDL window created successfully: " << m_window << std::endl);
 
+		XDEVL_MODULE_SUCCESS("SDL window created successfully: " << m_window << std::endl);
 		return ERR_OK;
 	}
 
 	xdl_int XdevLWindowSDL::create() {
 
-		xdl_uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+		xdl_uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
 		if(!m_border) {
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
@@ -138,6 +325,10 @@ namespace xdl {
 		SDL_Renderer* renderer = SDL_CreateRenderer(m_window, -1, 0);
 		SDL_SetRenderDrawColor(renderer, m_backgroundColor[0], m_backgroundColor[1], m_backgroundColor[2], m_backgroundColor[3]);
 		SDL_RenderClear(renderer);
+		
+		SDL_SetRenderDrawColor(renderer,255,0, 0, 255);
+		SDL_RenderDrawLine(renderer, 0, 0, 500, 500);
+
 		SDL_RenderPresent(renderer);
 		SDL_DestroyRenderer(renderer);
 
@@ -152,7 +343,7 @@ namespace xdl {
 
 		m_numberOfJoystickDevices = SDL_NumJoysticks();
 		if(m_numberOfJoystickDevices < 1) {
-			XDEVL_MODULE_WARNING("No joystick detected.\n");
+			// TODO What do we have to do here?
 		} else {
 			m_joy = SDL_JoystickOpen(0);
 			if(m_joy == nullptr) {
@@ -164,8 +355,6 @@ namespace xdl {
 			}
 		}
 
-		windowMap[SDL_GetWindowID(m_window)] = this;
-
 		//
 		// Star the main event polling thread.
 		//
@@ -175,6 +364,9 @@ namespace xdl {
 			argument->core = getMediator();
 			Start(argument);
 		}
+
+		m_id = SDL_GetWindowID(m_window);
+		windowEventServer->registerWindowForEvents(this);
 
 		return ERR_OK;
 	}
@@ -191,16 +383,16 @@ namespace xdl {
 		}
 
 #ifdef __LINUX__
-		if(id.toString() == "UNIX_DISPLAY") {
+		if(id.toString() == "X11_DISPLAY") {
 			return m_wmInfo.info.x11.display;
 		}
-		if(id.toString() == "UNIX_WINDOW") {
-			return &m_wmInfo.info.x11.window;
+		if(id.toString() == "X11_WINDOW") {
+			return (void*)m_wmInfo.info.x11.window;
 		}
 #endif
 
 #ifdef WIN32
-		if(id.toString() == "UNIX_DISPLAY") {
+		if(id.toString() == "WINDOWS_DISPLAY") {
 			return m_wmInfo.info.win.window;
 		}
 #endif
@@ -225,9 +417,13 @@ namespace xdl {
 		if(m_joy != nullptr) {
 			SDL_JoystickClose(m_joy);
 		}
-		SDL_DestroyWindow(m_window);
 
+		// We have to call this before SDL_DestroyWindow to get all pending events.
 		XdevLWindowImpl::shutdown();
+
+		SDL_DestroyWindow(m_window);
+		m_window = nullptr;
+
 
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 
@@ -235,374 +431,49 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowSDL::update() {
-		return pollEvents();
-	}
-
-	xdl_int XdevLWindowSDL::pollEvents() {
-
-		SDL_Event event;
-		while(SDL_PollEvent(&event)) {
-
-			switch(event.type) {
-				case SDL_KEYUP: {
-
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.type 			= XDEVL_KEY_RELEASED;
-					ev.common.timestamp	= getMediator()->getTimer().getTime64();
-
-					ev.key.windowid		=  windowMap[event.key.windowID]->getWindowID();
-					ev.key.repeat 		= event.key.repeat;
-					ev.key.scancode 	= event.key.keysym.scancode;
-					ev.key.sym 			= event.key.keysym.sym;
-					ev.key.mod 			= event.key.keysym.mod;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_KEYDOWN: {
-
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.type 			= XDEVL_KEY_PRESSED;
-					ev.common.timestamp	= getMediator()->getTimer().getTime64();
-
-
-					ev.key.windowid		= windowMap[event.key.windowID]->getWindowID();
-					ev.key.repeat 		= event.key.repeat;
-					ev.key.scancode 	= event.key.keysym.scancode;
-					ev.key.sym 			= event.key.keysym.sym;
-					ev.key.mod 			= event.key.keysym.mod;
-
-					getMediator()->fireEvent(ev);
-
-
-				}
-				break;
-				case SDL_MOUSEBUTTONDOWN: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_MOUSE_BUTTON_PRESSED;
-
-					ev.button.windowid		=  windowMap[event.key.windowID]->getWindowID();
-					ev.button.button		= event.button.button;
-					ev.button.x				= event.button.x;
-					ev.button.y				= event.button.y;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_MOUSEBUTTONUP: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_MOUSE_BUTTON_RELEASED;
-
-					ev.button.windowid		=  windowMap[event.key.windowID]->getWindowID();
-					ev.button.button		= event.button.button;
-					ev.button.x				= event.button.x;
-					ev.button.y				= event.button.y;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_MOUSEMOTION: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_MOUSE_MOTION;
-
-					ev.motion.windowid		=  windowMap[event.key.windowID]->getWindowID();
-					ev.motion.x				= event.motion.x;
-					ev.motion.y				= event.motion.y;
-					ev.motion.xrel			= event.motion.xrel;
-					ev.motion.yrel			= event.motion.yrel;
-
-					getMediator()->fireEvent(ev);
-				}
-				break;
-				case SDL_JOYAXISMOTION: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_MOTION;
-					ev.jaxis.axis			= event.jaxis.axis;
-					ev.jaxis.value			= event.jaxis.value;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_JOYBUTTONDOWN: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_BUTTON_PRESSED;
-					ev.button.button		= event.jbutton.button;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_JOYBUTTONUP: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_BUTTON_RELEASED;
-					ev.button.button		= event.jbutton.button;
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				case SDL_JOYHATMOTION: {
-					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_POV;
-
-					switch(event.jhat.value) {
-						case SDL_HAT_UP:
-							ev.jpov.direction = POV_UP;
-							break;
-						case SDL_HAT_RIGHTUP:
-							ev.jpov.direction = POV_RIGHT_UP;
-							break;
-						case SDL_HAT_RIGHT:
-							ev.jpov.direction = POV_RIGHT;
-							break;
-						case SDL_HAT_RIGHTDOWN:
-							ev.jpov.direction = POV_RIGHT_DOWN;
-							break;
-						case SDL_HAT_DOWN:
-							ev.jpov.direction = POV_DOWN;
-							break;
-						case SDL_HAT_LEFTDOWN:
-							ev.jpov.direction = POV_LEFT_DOWN;
-							break;
-						case SDL_HAT_LEFT:
-							ev.jpov.direction = POV_LEFT;
-							break;
-						case SDL_HAT_LEFTUP:
-							ev.jpov.direction = POV_LEFT_UP;
-							break;
-						case SDL_HAT_CENTERED:
-							ev.jpov.direction = POV_CENTERED;
-							break;
-						default:
-							break;
-					}
-
-					getMediator()->fireEvent(ev);
-
-				}
-				break;
-				// Here we do some window event handling.
-				case SDL_WINDOWEVENT: {
-					switch(event.window.event) {
-						case SDL_WINDOWEVENT_SHOWN: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_SHOWN;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_HIDDEN: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_HIDDEN;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_EXPOSED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_EXPOSED;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_MOVED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MOVED;
-							ev.window.x			= event.window.data1;
-							ev.window.y			= event.window.data2;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_RESIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_RESIZED;
-							ev.window.width		= event.window.data1;
-							ev.window.height	= event.window.data2;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_MINIMIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MINIMIZED;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_MAXIMIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MAXIMIZED;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_RESTORED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_RESTORED;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_ENTER: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_ENTER;
-							ev.window.data1		= event.window.data1;
-							ev.window.data2		= event.window.data2;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_LEAVE: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_LEAVE;
-							ev.window.data1		= event.window.data1;
-							ev.window.data2		= event.window.data2;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_FOCUS_GAINED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_FOCUS_LOST: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_LOST;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-						}
-						break;
-						case SDL_WINDOWEVENT_CLOSE: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_CLOSE;
-							ev.window.windowid	=  windowMap[event.key.windowID]->getWindowID();
-
-							getMediator()->fireEvent(ev);
-
-							// Make a core event.
-							ev.type				= XDEVL_CORE_EVENT;
-							ev.core.event 		= XDEVL_CORE_SHUTDOWN;
-
-							getMediator()->fireEvent(ev);
-
-							printf("SDL_WINDOWEVENT_CLOSE\n");
-						}
-						break;
-						default:
-							break;
-					}
-
-				}
-				break;
-				default:
-					//	XDEVL_MODULE_ERROR("Unhandled event: " << event.type << std::endl);
-					break;
-			}
-		}
-
 		return ERR_OK;
 	}
 
 	void XdevLWindowSDL::setSize(const XdevLWindowSize& size) {
-		SDL_SetWindowSize(m_window, size.width, size.height);
+		m_size = size;
+
+		if(m_window) {
+			SDL_SetWindowSize(m_window, size.width, size.height);
+		}
 	}
 
 	void XdevLWindowSDL::setPosition(const XdevLWindowPosition& position) {
-		SDL_SetWindowPosition(m_window, position.x, position.y);
+		m_position = position;
+
+		if(m_window) {
+			SDL_SetWindowPosition(m_window, position.x, position.y);
+		}
 	}
 
 	void XdevLWindowSDL::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
 
-		SDL_SetWindowTitle(m_window, title.toString().c_str());
+		if(m_window) {
+			SDL_SetWindowTitle(m_window, title.toString().c_str());
+		}
 	}
 
 	void XdevLWindowSDL::setFullscreen(xdl_bool state) {
 
 		int flags {0};
 		if(state) {
-			flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+			flags = SDL_WINDOW_FULLSCREEN;
 		}
 
-		SDL_SetWindowFullscreen(m_window, flags);
+		if(m_window) {
+			SDL_SetWindowFullscreen(m_window, flags);
+		}
+
 		SDL_GetWindowSize(m_window, &m_size.width, &m_size.height);
+
 	}
 
-	void XdevLWindowSDL::SetType(XdevLWindowTypes type) {
+	void XdevLWindowSDL::setType(XdevLWindowTypes type) {
 
 	}
 
@@ -734,12 +605,6 @@ namespace xdl {
 		return xdl_false;
 	}
 
-	xdl_int XdevLWindowSDL::getInputFocus(XdevLWindow** window) {
-		*window = nullptr;
-		return ERR_ERROR;
-	}
-
-
 	xdl_int XdevLWindowSDL::RunThread(thread::ThreadArgument* argument) {
 		return ERR_OK;
 	}
@@ -767,10 +632,445 @@ namespace xdl {
 		sdlWindow->setTitle(title);
 		sdlWindow->setPosition(position);
 		sdlWindow->setSize(size);
+		sdlWindow->setWindowDecoration(xdl_false);
 		sdlWindow->create();
 		*window = sdlWindow;
 		m_windowList[sdlWindow->getWindowID()] = sdlWindow;
 		return ERR_OK;
+	}
+
+
+
+
+
+	XdevLWindowSDLEventServer::XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc)
+	{}
+
+
+	xdl_int XdevLWindowSDLEventServer::registerWindowForEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::registerWindowForEvents(window);
+	}
+
+	xdl_int XdevLWindowSDLEventServer::unregisterWindowFromEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::unregisterWindowFromEvents(window);
+	}
+
+	xdl_int XdevLWindowSDLEventServer::init() {
+		XDEVL_MODULE_SUCCESS("Initialized successfully" << std::endl);
+		return ERR_OK;
+	}
+
+	void* XdevLWindowSDLEventServer::getInternal(const XdevLInternalName& id) {
+
+		return nullptr;
+	}
+
+	xdl_int XdevLWindowSDLEventServer::shutdown() {
+		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
+		return ERR_OK;
+	}
+
+	xdl_int XdevLWindowSDLEventServer::update() {
+		return pollEvents();
+	}
+
+	xdl_int XdevLWindowSDLEventServer::pollEvents() {
+
+		SDL_Event event;
+		while(SDL_PollEvent(&event)) {
+
+			XdevLWindow* window = getWindow(event.key.windowID);
+			if(window == nullptr) {
+				continue;
+			}
+
+			switch(event.type) {
+				case SDL_KEYDOWN: {
+
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.type 			= ButtonPressed.getHashCode();
+					ev.common.timestamp	= getMediator()->getTimer().getTime64();
+
+
+					ev.key.windowid		=window->getWindowID();
+					ev.key.repeat 		= event.key.repeat;
+					ev.key.keycode		= KeySymToXdevLKeyCode[event.key.keysym.sym];
+					ev.key.mod 			= event.key.keysym.mod;
+
+					getMediator()->fireEvent(ev);
+
+
+				}
+				break;
+				case SDL_KEYUP: {
+
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.type 			= ButtonReleased.getHashCode();
+					ev.common.timestamp	= getMediator()->getTimer().getTime64();
+
+					ev.key.windowid		= window->getWindowID();
+					ev.key.repeat 		= event.key.repeat;
+					ev.key.keycode		= KeySymToXdevLKeyCode[event.key.keysym.sym];
+					ev.key.mod 			= event.key.keysym.mod;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_MOUSEBUTTONDOWN: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= MouseButtonPressed.getHashCode();
+
+					ev.button.windowid		= window->getWindowID();
+					ev.button.button		= event.button.button;
+					ev.button.x				= event.button.x;
+					ev.button.y				= event.button.y;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_MOUSEBUTTONUP: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= MouseButtonReleased.getHashCode();
+
+					ev.button.windowid		= window->getWindowID();
+					ev.button.button		= event.button.button;
+					ev.button.x				= event.button.x;
+					ev.button.y				= event.button.y;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_MOUSEMOTION: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= MouseMotion.getHashCode();
+
+					ev.motion.windowid		= window->getWindowID();
+					ev.motion.x				= event.motion.x;
+					ev.motion.y				= event.motion.y;
+					ev.motion.xrel			= event.motion.xrel;
+					ev.motion.yrel			= event.motion.yrel;
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+				case SDL_JOYAXISMOTION: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= XDEVL_JOYSTICK_MOTION;
+					ev.jaxis.axis			= event.jaxis.axis;
+					ev.jaxis.value			= event.jaxis.value;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_JOYBUTTONDOWN: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= XDEVL_JOYSTICK_BUTTON_PRESSED;
+					ev.button.button		= event.jbutton.button;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_JOYBUTTONUP: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= XDEVL_JOYSTICK_BUTTON_RELEASED;
+					ev.button.button		= event.jbutton.button;
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				case SDL_JOYHATMOTION: {
+					// Register button up event in the Core.
+					XdevLEvent ev;
+					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
+					ev.type 				= XDEVL_JOYSTICK_POV;
+
+					switch(event.jhat.value) {
+						case SDL_HAT_UP:
+							ev.jpov.direction = POV_UP;
+							break;
+						case SDL_HAT_RIGHTUP:
+							ev.jpov.direction = POV_RIGHT_UP;
+							break;
+						case SDL_HAT_RIGHT:
+							ev.jpov.direction = POV_RIGHT;
+							break;
+						case SDL_HAT_RIGHTDOWN:
+							ev.jpov.direction = POV_RIGHT_DOWN;
+							break;
+						case SDL_HAT_DOWN:
+							ev.jpov.direction = POV_DOWN;
+							break;
+						case SDL_HAT_LEFTDOWN:
+							ev.jpov.direction = POV_LEFT_DOWN;
+							break;
+						case SDL_HAT_LEFT:
+							ev.jpov.direction = POV_LEFT;
+							break;
+						case SDL_HAT_LEFTUP:
+							ev.jpov.direction = POV_LEFT_UP;
+							break;
+						case SDL_HAT_CENTERED:
+							ev.jpov.direction = POV_CENTERED;
+							break;
+						default:
+							break;
+					}
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+				// Here we do some window event handling.
+				case SDL_WINDOWEVENT: {
+					switch(event.window.event) {
+						case SDL_WINDOWEVENT_SHOWN: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_SHOWN;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_HIDDEN: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_HIDDEN;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_EXPOSED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_EXPOSED;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_MOVED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_MOVED;
+							ev.window.x			= event.window.data1;
+							ev.window.y			= event.window.data2;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_RESIZED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_RESIZED;
+							ev.window.width		= event.window.data1;
+							ev.window.height	= event.window.data2;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_MINIMIZED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_MINIMIZED;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_MAXIMIZED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_MAXIMIZED;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_RESTORED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_RESTORED;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_ENTER: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_ENTER;
+							ev.window.data1		= event.window.data1;
+							ev.window.data2		= event.window.data2;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_LEAVE: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_LEAVE;
+							ev.window.data1		= event.window.data1;
+							ev.window.data2		= event.window.data2;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_FOCUS_GAINED: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+							ev.window.windowid	= window->getWindowID();
+
+							focusGained(window);
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_FOCUS_LOST: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_LOST;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+						}
+						break;
+						case SDL_WINDOWEVENT_CLOSE: {
+							XdevLEvent ev;
+							ev.common.timestamp = getMediator()->getTimer().getTime64();
+							ev.type				= XDEVL_WINDOW_EVENT;
+							ev.window.event 	= XDEVL_WINDOW_CLOSE;
+							ev.window.windowid	= window->getWindowID();
+
+							getMediator()->fireEvent(ev);
+
+							// Make a core event.
+							ev.type				= XDEVL_CORE_EVENT;
+							ev.core.event 		= XDEVL_CORE_SHUTDOWN;
+
+							getMediator()->fireEvent(ev);
+
+							printf("SDL_WINDOWEVENT_CLOSE\n");
+						}
+						break;
+						default:
+							break;
+					}
+
+				}
+				break;
+				default:
+					//	XDEVL_MODULE_ERROR("Unhandled event: " << event.type << std::endl);
+					break;
+			}
+		}
+
+		return ERR_OK;
+	}
+
+	void XdevLWindowSDLEventServer::flush() {
+		pollEvents();
+	}
+
+//
+// -----------------------------------------------------------------------------
+//
+
+	XdevLCursorSDL::XdevLCursorSDL(XdevLModuleCreateParameter* parameter) :
+		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc)  {
+
+	}
+
+	xdl_int XdevLCursorSDL::init() {
+		return ERR_OK;
+	}
+
+	xdl_int XdevLCursorSDL::shutdown() {
+		return ERR_OK;
+	}
+
+	void* XdevLCursorSDL::getInternal(const XdevLInternalName& id) {
+		return nullptr;
+	}
+
+	void XdevLCursorSDL::show() {
+		SDL_ShowCursor(SDL_TRUE);
+	}
+
+	void XdevLCursorSDL::hide() {
+		SDL_ShowCursor(SDL_FALSE);
+	}
+
+	void XdevLCursorSDL::setPosition(xdl_uint x, xdl_uint y) {
+		//SDL_WarpMouseGlobal(x, y);
+	}
+
+	xdl_int XdevLCursorSDL::clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
+		// Not supported by SDL
+		return ERR_ERROR;
+	}
+
+	void XdevLCursorSDL::releaseClip() {
+
+	}
+
+	xdl_int XdevLCursorSDL::enableRelativeMotion() {
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+		return ERR_OK;
+	}
+	void XdevLCursorSDL::disableRelativeMotion() {
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 
 }

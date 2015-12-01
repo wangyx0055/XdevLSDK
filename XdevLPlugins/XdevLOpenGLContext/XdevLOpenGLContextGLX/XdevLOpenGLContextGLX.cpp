@@ -10,20 +10,22 @@
 #include "XdevLOpenGLContextGLX.h"
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextGLX::m_moduleDescriptor{	glx_context_vendor, 
-																																						glx_context_author, 
-																																						glx_context_moduleNames[0], 
-																																						glx_context_copyright, 
-																																						glx_description, 
-																																						XdevLOpenGLContexGLXMajorVersion, 
-																																						XdevLOpenGLContextGLXMinorVersion,
-																																						XdevLOpenGLContextGLXPatchVersion};
+xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextGLX::m_moduleDescriptor {	glx_context_vendor,
+        glx_context_author,
+        glx_context_moduleNames[0],
+        glx_context_copyright,
+        glx_description,
+        XdevLOpenGLContexGLXMajorVersion,
+        XdevLOpenGLContextGLXMinorVersion,
+        XdevLOpenGLContextGLXPatchVersion
+                                                                          };
 
-xdl::XdevLPluginDescriptor pluginDescriptor{	xdl::glx_context_pluginName,
-																								xdl::glx_context_moduleNames,
-																								xdl::XdevLOpenGLContextGLXPluginMajorVersion,
-																								xdl::XdevLOpenGLContextGLXPluginMinorVersion,
-																								xdl::XdevLOpenGLContextGLXPluginPatchVersion};
+xdl::XdevLPluginDescriptor pluginDescriptor {	xdl::glx_context_pluginName,
+        xdl::glx_context_moduleNames,
+        xdl::XdevLOpenGLContextGLXPluginMajorVersion,
+        xdl::XdevLOpenGLContextGLXPluginMinorVersion,
+        xdl::XdevLOpenGLContextGLXPluginPatchVersion
+                                            };
 
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
@@ -48,24 +50,61 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
 
 namespace xdl {
 
+	static xdl_bool contextErrorOccured = xdl_false;
+	static int contextErrorHanlder(Display* display, XErrorEvent* ev) {
+		contextErrorOccured = xdl_true;
+		return 0;
+	}
 
 	XdevLOpenGLContextGLX::XdevLOpenGLContextGLX(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleAutoImpl(parameter, m_moduleDescriptor),
-		m_visualInfo(NULL) {
+		XdevLOpenGLContextBase(parameter, m_moduleDescriptor),
+		m_display(nullptr),
+		m_window(None),
+		m_screenNumber(0),
+		m_glxContext(nullptr),
+		m_glxMajorVersion(0),
+		m_glxMinorVersion(0),
+		m_visualInfo(nullptr) {
 	}
 
 	XdevLOpenGLContextGLX::~XdevLOpenGLContextGLX() {
-		shutdown();
+		XDEVL_ASSERT(m_glxContext == nullptr, "XdevLOpenGLContextGLX::shutdown wasn't called. The OpenGL context might be not destroyed.");
+	}
+
+	xdl_int XdevLOpenGLContextGLX::init() {
+
+		glXCreateContextAttribs = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte *)"glXCreateContextAttribsARB");
+		glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddress((GLubyte *)"glXSwapIntervalEXT");
+		glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)glXGetProcAddress((GLubyte *)"glXSwapIntervalSGI");
+
+
+		return XdevLOpenGLContextBase::init();
 	}
 
 	xdl_int XdevLOpenGLContextGLX::shutdown() {
+
+		//
+		// Free resources
+		//
 		glXDestroyContext(m_display, m_glxContext);
+		XFree(m_visualInfo);
+
+		//
+		// Reset all used variables.
+		//
+		m_display = nullptr;
+		m_window = None;
+		m_screenNumber = 0;
+		m_glxMajorVersion = 0;
+		m_glxMinorVersion = 0;
+		m_glxContext = nullptr;
+		m_visualInfo = nullptr;
 		return ERR_OK;
 	}
 
-//	void* XdevLOpenGLContextGLX::getProcAddress(const xdl_char* func) {
-//		return glXGetProcAddress((const GLubyte *)func);
-//	}
+	void* XdevLOpenGLContextGLX::getProcAddress(const xdl_char* func) {
+		return reinterpret_cast<void*>(glXGetProcAddress((const GLubyte *)func));
+	}
 
 	xdl_int XdevLOpenGLContextGLX::getAttributes(XdevLOpenGLContextAttributes& attributes) {
 		attributes = m_attributes;
@@ -78,52 +117,17 @@ namespace xdl {
 	}
 
 	int XdevLOpenGLContextGLX::create(XdevLWindow* window) {
+		XDEVL_ASSERT(m_display == nullptr, "XdevLOpenGLContextGLX already created.");
 
-//		// Let's check if the user wants multisampling(fullscreen anti aliasing)
-//		if(m_fsaa > 0) {
-//			// Ok, he wants multisampling support. First we have to check if the graphics cards supports
-//			// multisampling. For this we have to create a dummy window which is hided and create an OpenGL
-//			// context. After we did that we can check if the GLEW_ARB_multisample is supported.
-//			// If yes we can get the Pixelformat. Than destroy the dummy window and create a new OpenGL context
-//			// on the provided windows with the Pixelformat.
-//			IPXdevLWindowDevice win = static_cast<IPXdevLWindowDevice>(getMediator()->createModule("XdevLWindowDevice", "DUMMY_WINDOW", NULL));
-//			// We have to hide the window. The XdevLWindowDevice interface doesn't support a function to hide it directly
-//			// but supports it internal over an event.
-//			// TODO: The window is shown first and than hided. This should be fixed because causes flickering.
-//			XdevLQuark msg("XdevLWindowDeviceHide");
-//			XdevLEvent data;
-//
-//			data.type = XDEVL_CORE_EVENT;
-//
-//			XdevLInternalEvent ev(this, win, &msg, data);
-//			win->recvEvent(&ev);
-//			// Get the internal Window handle.
-//			Display* displaytmp = static_cast<Display*>(win->getInternal("UNIX_DISPLAY"));
-//			Window windowtmp = *(static_cast<Window*>(win->getInternal("UNIX_WINDOW")));
-//			if(initOpenGL(displaytmp, windowtmp) == ERR_ERROR) {
-//				XDEVL_MODULE_ERROR("Failed to initialize OpenGL.\n");
-//				getMediator()->deleteModule(win->getId());
-//				return ERR_ERROR;
-//			} else {
-//				initMultisample();
-//				if(m_multisampleSupport == xdl_false)
-//					m_fsaa = 0;
-//			}
-//			glXDestroyContext(displaytmp, m_glContext);
-//			m_glContext = NULL;
-//			// Destroy the dummy window.
-//			getMediator()->deleteModule(win->getId());
-//		}
-
-		m_display = static_cast<Display*>(window->getInternal(XdevLInternalName("UNIX_DISPLAY")));
-		if(NULL == m_display) {
-			XDEVL_MODULE_ERROR("Could not get native UNIX_DISPLAY.\n");
+		m_display = static_cast<Display*>(window->getInternal(XdevLInternalName("X11_DISPLAY")));
+		if(nullptr == m_display) {
+			XDEVL_MODULE_ERROR("Could not get native X11 display information.\n");
 			return ERR_ERROR;
 		}
 
-		m_window = *(static_cast<Window*>(window->getInternal(XdevLInternalName("UNIX_WINDOW"))));
+		m_window = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
 		if(None == m_display) {
-			XDEVL_MODULE_ERROR("Could not get native UNIX_WINDOW.\n");
+			XDEVL_MODULE_ERROR("Could not get native X11 window information.\n");
 			return ERR_ERROR;
 		}
 
@@ -144,93 +148,139 @@ namespace xdl {
 			XDEVL_MODULE_WARNING("Direct Rendering not supported.\n");
 		}
 
-
-//		setVSync(m_VSync);
-
-		//getOpenGLInfos();
+		setVSync(getVSync());
 
 		return ERR_OK;
 	}
 
 	xdl_int XdevLOpenGLContextGLX::initOpenGL(Display* display, Window window) {
 
-		std::vector<int> double_buffer_attribute_list;
+		XDEVL_MODULE_INFO("Supported GLX extensions ---------------\n");
+		std::string tmp(glXQueryExtensionsString(display, DefaultScreen(display)));
+		std::vector<std::string> exlist;
+		xstd::tokenize(tmp, exlist, " ");
+		for(auto extension : exlist) {
+			extensionsList.push_back(XdevLString(extension));
+			std::cout << extension << std::endl;
+		}
+		XDEVL_MODULE_INFO("-----------------------------------------\n");
+
+
+		std::vector<int> attribute_list;
 		// ---------------------------------------------------------------------------
 		// Prepare the attribute values for the glXChooseVisual function
 		//
 
-		double_buffer_attribute_list.push_back(GLX_DRAWABLE_TYPE);
-		double_buffer_attribute_list.push_back(GLX_WINDOW_BIT);
-		double_buffer_attribute_list.push_back(GLX_RENDER_TYPE);
-		double_buffer_attribute_list.push_back(GLX_RGBA_BIT);
-		double_buffer_attribute_list.push_back(GLX_RGBA);
+		// We are going to use the normal RGBA color type, not the color indext type.
+		attribute_list.push_back(GLX_RENDER_TYPE);
+		attribute_list.push_back(GLX_RGBA_BIT);
+
+		// This window is going to use only Window type, that means we can't use PBuffers.
+		// Valid values are GLX WINDOW BIT, GLX PIXMAP BIT, GLX PBUFFER BIT. All can be used at the same time.
+		attribute_list.push_back(GLX_DRAWABLE_TYPE);
+		attribute_list.push_back(GLX_WINDOW_BIT);
 
 		if(m_attributes.double_buffer > 0) {
-			double_buffer_attribute_list.push_back(GLX_DOUBLEBUFFER);
-			double_buffer_attribute_list.push_back(True);
+			attribute_list.push_back(GLX_DOUBLEBUFFER);
 		}
 
-		double_buffer_attribute_list.push_back(GLX_RED_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.red_size);
+		attribute_list.push_back(GLX_RED_SIZE);
+		attribute_list.push_back(m_attributes.red_size);
 
-		double_buffer_attribute_list.push_back(GLX_GREEN_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.green_size);
+		attribute_list.push_back(GLX_GREEN_SIZE);
+		attribute_list.push_back(m_attributes.green_size);
 
-		double_buffer_attribute_list.push_back(GLX_BLUE_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.blue_size);
+		attribute_list.push_back(GLX_BLUE_SIZE);
+		attribute_list.push_back(m_attributes.blue_size);
 
-		double_buffer_attribute_list.push_back(GLX_ALPHA_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.alpha_size);
+		attribute_list.push_back(GLX_ALPHA_SIZE);
+		attribute_list.push_back(m_attributes.alpha_size);
 
-		double_buffer_attribute_list.push_back(GLX_ACCUM_RED_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.accum_red_size);
+		attribute_list.push_back(GLX_ACCUM_RED_SIZE);
+		attribute_list.push_back(m_attributes.accum_red_size);
 
-		double_buffer_attribute_list.push_back(GLX_ACCUM_GREEN_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.accum_green_size);
+		attribute_list.push_back(GLX_ACCUM_GREEN_SIZE);
+		attribute_list.push_back(m_attributes.accum_green_size);
 
-		double_buffer_attribute_list.push_back(GLX_ACCUM_BLUE_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.accum_blue_size);
+		attribute_list.push_back(GLX_ACCUM_BLUE_SIZE);
+		attribute_list.push_back(m_attributes.accum_blue_size);
 
-		double_buffer_attribute_list.push_back(GLX_ACCUM_ALPHA_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.accum_alpha_size);
+		attribute_list.push_back(GLX_ACCUM_ALPHA_SIZE);
+		attribute_list.push_back(m_attributes.accum_alpha_size);
 
-		double_buffer_attribute_list.push_back(GLX_DEPTH_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.depth_size);
+		attribute_list.push_back(GLX_BUFFER_SIZE);
+		attribute_list.push_back(m_attributes.color_buffer_size);
 
-		double_buffer_attribute_list.push_back(GLX_STENCIL_SIZE);
-		double_buffer_attribute_list.push_back(m_attributes.stencil_size);
+		attribute_list.push_back(GLX_DEPTH_SIZE);
+		attribute_list.push_back(m_attributes.depth_size);
+
+		attribute_list.push_back(GLX_STENCIL_SIZE);
+		attribute_list.push_back(m_attributes.stencil_size);
 
 
 		if(m_attributes.stereo > 0) {
-			double_buffer_attribute_list.push_back(GLX_STEREO);
-			double_buffer_attribute_list.push_back(True);
-		}
-		
-		if(m_attributes.multisample_buffers > 0) {
-			double_buffer_attribute_list.push_back(GLX_SAMPLE_BUFFERS_ARB);
-			double_buffer_attribute_list.push_back(GL_TRUE);
-			double_buffer_attribute_list.push_back(GLX_SAMPLES_ARB);
-			double_buffer_attribute_list.push_back(GL_TRUE);
-			double_buffer_attribute_list.push_back(m_attributes.multisample_buffers);
+			attribute_list.push_back(GLX_STEREO);
+			attribute_list.push_back(True);
 		}
 
-//		if(m_multisampleSupport) {
-//			if(GLXEW_ARB_multisample) {
-//				XDEVL_MODULE_INFO("GLXEW_ARB_multisample supported.\n");
-//				double_buffer_attribute_list.push_back(GLX_SAMPLE_BUFFERS_ARB);
-//				double_buffer_attribute_list.push_back(GL_TRUE);
-//				double_buffer_attribute_list.push_back(GLX_SAMPLES_ARB);
-//				double_buffer_attribute_list.push_back(m_fsaa);
-//			} else if(GLXEW_SGIS_multisample) {
-//				XDEVL_MODULE_INFO("GLX_SAMPLE_BUFFERS_SGIS supported.\n");
-//				double_buffer_attribute_list.push_back(GLX_SAMPLE_BUFFERS_SGIS);
-//				double_buffer_attribute_list.push_back(GL_TRUE);
-//				double_buffer_attribute_list.push_back(GLX_SAMPLES_SGIS);
-//				double_buffer_attribute_list.push_back(m_fsaa);
-//			}
+		if(m_attributes.multisample_buffers > 0) {
+			attribute_list.push_back(GLX_SAMPLE_BUFFERS_ARB);
+			attribute_list.push_back(GL_TRUE);
+			attribute_list.push_back(GLX_SAMPLES_ARB);
+			attribute_list.push_back(m_attributes.multisample_samples);
+		}
+
+		attribute_list.push_back(None);
+
+
+		//
+		// Get all supported visual configurations.
+		//
+		xdl_int elemc;
+		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), nullptr, &elemc);
+		if(!fbcfg) {
+			XDEVL_MODULE_ERROR("glXChooseFBConfig failed\n");
+			return ERR_ERROR;
+		}
+
+		//
+		// Not get the most close one the user specified.
+		//
+		int best_fbc = -1;
+		int worst_fbc = -1;
+		int best_num_samples = -1;
+		int worst_num_samples = 999;
+
+		for(auto i = 0; i < elemc; i++) {
+			XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbcfg[i]);
+			if(nullptr != vi) {
+				int sample_buffer, samples;
+				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLE_BUFFERS, &sample_buffer);
+				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLES, &samples);
+				if(best_fbc < 0 || sample_buffer && samples > best_num_samples) {
+					best_fbc = i;
+					best_num_samples = samples;
+				}
+				if(worst_fbc < 0 || !sample_buffer && samples < worst_num_samples) {
+					worst_fbc = i;
+					worst_num_samples = samples;
+				}
+			}
+			XFree(vi);
+		}
+
+		GLXFBConfig bestFbc = fbcfg[best_fbc];
+		XFree(fbcfg);
+
+		m_visualInfo = glXGetVisualFromFBConfig(display, bestFbc);
+
+//		// TODO: This is the easiest way to create a visual for X11. You should do that in a better way cengiz.
+//		m_visualInfo = glXChooseVisual(display, DefaultScreen(display), attribute_list.data());
+//		if(nullptr == m_visualInfo) {
+//			XDEVL_MODULE_ERROR("glXChooseVisual failed. Please try different framebuffer, depthbuffer, stencilbuffer values.\n");
+//			return ERR_ERROR;
 //		}
 
-		double_buffer_attribute_list.push_back(None);
 
 		//
 		// Set OpenGL 3.0 > attributes.
@@ -241,35 +291,53 @@ namespace xdl {
 		opengl_profile_attribute_list.push_back(GLX_CONTEXT_MINOR_VERSION_ARB);
 		opengl_profile_attribute_list.push_back(m_attributes.context_minor_version);
 
-		if(m_attributes.context_flags != XDEVL_OPENGL_CONTEXT_FLAGS_NONE) {
+		if( (m_attributes.context_flags & XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT) || (m_attributes.context_flags & XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT)) {
 			opengl_profile_attribute_list.push_back(GLX_CONTEXT_FLAGS_ARB);
-			opengl_profile_attribute_list.push_back(m_attributes.context_flags);
 
+			if(m_attributes.context_flags == XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT) {
+				opengl_profile_attribute_list.push_back(GLX_CONTEXT_DEBUG_BIT_ARB);
+			} else if(m_attributes.context_flags == XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT) {
+				opengl_profile_attribute_list.push_back(GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+			}
+		}
+
+		if( (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) || (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY)) {
+			opengl_profile_attribute_list.push_back(GLX_CONTEXT_PROFILE_MASK_ARB);
+			if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) {
+				opengl_profile_attribute_list.push_back(GLX_CONTEXT_CORE_PROFILE_BIT_ARB);
+			} else if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
+				opengl_profile_attribute_list.push_back(GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
+			}
 		}
 		opengl_profile_attribute_list.push_back(None);
 
+		contextErrorOccured = false;
+		int (*oldErrorHandler)(Display*, XErrorEvent*) = XSetErrorHandler(&contextErrorHanlder);
 
-		xdl_int elemc;
-		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), NULL, &elemc);
-		if(!fbcfg) {
-			throw std::string("Couldn't get FB configs\n");
+		if(nullptr != glXCreateContextAttribs) {
+			m_glxContext = glXCreateContextAttribs(display, bestFbc, nullptr, true, opengl_profile_attribute_list.data());
 		} else {
-			XDEVL_MODULE_INFO("Got " << elemc << " FBConfigs\n");
+			m_glxContext = glXCreateContext(display, m_visualInfo, nullptr, GL_TRUE);
+		}
+		XSync(display, False);
+		if(xdl_true == contextErrorOccured) {
+			m_glxContext = glXCreateContext(display, m_visualInfo, nullptr, GL_TRUE);
 		}
 
-		// TODO: This is the easiest way to create a visual for x11. You should do that in a better way cengiz.
-		m_visualInfo = glXChooseVisual(display, DefaultScreen(display), &double_buffer_attribute_list[0]);
-		if(NULL == m_visualInfo) {
-			XDEVL_MODULE_ERROR("glXChooseVisual failed. Please try different framebuffer, depthbuffer, stencilbuffer values.\n");
+		if(nullptr == m_glxContext) {
+			XDEVL_MODULE_ERROR("glXCreateContext failed.\n");
 			return ERR_ERROR;
 		}
 
-		PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte *)"glXCreateContextAttribsARB");
-		glXCreateContextAttribs(display, fbcfg[0], NULL, true, &opengl_profile_attribute_list[0]);
+		XSync(display, False);
+		XSetErrorHandler(oldErrorHandler);
 
-		m_glxContext = glXCreateContext(display, m_visualInfo, 0, GL_TRUE);
-		if(NULL == m_glxContext) {
-			XDEVL_MODULE_ERROR("glXCreateContext failed.\n");
+		setEnableFSAA(xdl_true);
+
+		//
+		// Make it current.
+		//
+		if(glXMakeCurrent(display, window, m_glxContext) == False) {
 			return ERR_ERROR;
 		}
 
@@ -278,12 +346,12 @@ namespace xdl {
 
 	int XdevLOpenGLContextGLX::makeCurrent(XdevLWindow* window) {
 
-		Display* xdisplay = static_cast<Display*>(window->getInternal(XdevLInternalName("UNIX_DISPLAY")));
-		if(NULL == xdisplay) {
+		Display* xdisplay = static_cast<Display*>(window->getInternal(XdevLInternalName("X11_DISPLAY")));
+		if(nullptr == xdisplay) {
 			return ERR_ERROR;
 		}
 
-		Window xwindow = *(static_cast<Window*>(window->getInternal(XdevLInternalName("UNIX_WINDOW"))));
+		Window xwindow = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
 		if(None == xdisplay) {
 			return ERR_ERROR;
 		}
@@ -296,10 +364,12 @@ namespace xdl {
 
 	void* XdevLOpenGLContextGLX::getInternal(const XdevLInternalName& id) {
 
-		if(id.toString() == "GLX_CONTEXT")
+		if(id.toString() == "GLX_CONTEXT") {
 			return m_glxContext;
-
-		return NULL;
+		} else if(id.toString() == "X11_VisualInfo") {
+			return m_visualInfo;
+		}
+		return nullptr;
 	}
 
 	int XdevLOpenGLContextGLX::swapBuffers() {
@@ -307,51 +377,22 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLContextGLX::setVSync(xdl_bool state) {
-		/*if(GLXEW_EXT_swap_control){
-			if(state)
-					glXSwapIntervalEXT(m_Display, m_glContext,1);
-				else
-					glXSwapIntervalEXT(m_Display, m_glContext,0);
-
-		    return ERR_OK;
-		}else*/
-
-//		if(GLXEW_SGI_swap_control) {
-//			if(state)
-//				glXSwapIntervalSGI(1);
-//			else
-//				glXSwapIntervalSGI(0);
-//
-//			return ERR_OK;
-//		} else {
-//			XDEVL_MODULE_WARNING("No VSync swap supported.\n");
-//		}
-
-		return ERR_ERROR;
+	xdl_int XdevLOpenGLContextGLX::setVSync(xdl_bool enableVSync) {
+		xdl_int state = enableVSync ? 1 : 0;
+		if(glXSwapIntervalEXT) {
+			GLXDrawable drawable = glXGetCurrentDrawable();
+			glXSwapIntervalEXT(m_display, drawable, state);
+		}
+		return ERR_OK;
 	}
 
+
 	xdl_bool XdevLOpenGLContextGLX::initMultisample() {
-//		if(GLXEW_ARB_multisample) {
-//			m_multisampleSupport = xdl_true;
-//			return xdl_true;
-//		} else if(GLXEW_SGIS_multisample) {
-//			m_multisampleSupport = xdl_true;
-//			return xdl_true;
-//		}
-//		m_multisampleSupport = xdl_false;
 		return xdl_false;
 	}
 
-	xdl_int XdevLOpenGLContextGLX::setEnableFSAA(xdl_bool state) {
-//		if(m_multisampleSupport == xdl_false)
-//			return ERR_ERROR;
-//
-//		if(state)
-//			glEnable(GL_MULTISAMPLE);
-//		else
-//			glDisable(GL_MULTISAMPLE);
-
+	xdl_int XdevLOpenGLContextGLX::setEnableFSAA(xdl_bool enableFSAA) {
+		enableFSAA ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
 		return ERR_OK;
 	}
 

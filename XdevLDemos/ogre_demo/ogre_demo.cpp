@@ -37,11 +37,11 @@ int createOgreObjects(){
 
 		// We need a camera.
 		camera = sceneManager->createCamera("Test");
-		camera->setPosition(Ogre::Vector3(0.0f,0.0f,4.0f));
+		camera->setPosition(Ogre::Vector3(0.0f,0.0f,7.0f));
 		camera->lookAt(Ogre::Vector3(0.0f,0.0f,0.0f));
 		camera->setNearClipDistance(0.5f);
 		camera->setFarClipDistance(5000.0f);
-		camera->setAspectRatio(4.0f/3.0f);
+		camera->setAspectRatio(window->getWidth()/window->getHeight());
 
 
 		// Now we assign the camera as our viewport.

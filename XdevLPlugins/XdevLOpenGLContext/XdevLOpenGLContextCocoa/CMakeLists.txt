@@ -15,8 +15,8 @@ set(VERSION "1.0.0")
 #
 # Set variable names for the library
 
-set(HEADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(HEADERS_DIR  ${XDEVL_PLUGINS})
+set(SRC_DIR  ${XDEVL_PLUGINS})
 
 #
 # Set the output directories
@@ -47,16 +47,21 @@ include_directories(
 #
 # Set header files for the library.
 
+set(HEADER_INTERFACE_FILE
+	${HEADERS_DIR}/XdevLOpenGLContext/XdevLOpenGLContext.h
+)
+
 set(HEADER_FILES
-	${XDEVL_PLUGINS}/XdevLOpenGLContext/XdevLOpenGLContext.h
-	${HEADERS_DIR}/XdevLOpenGLContextCocoa.h
+	${HEADER_INTERFACE_FILE}
+	${HEADERS_DIR}/XdevLOpenGLContext/XdevLOpenGLContextBase.h
+	${HEADERS_DIR}/XdevLOpenGLContext/XdevLOpenGLContextCocoa/XdevLOpenGLContextCocoa.h
 )
 
 #
 # Set the source files for the library.
 
 set(SOURCE_FILES
-	${SRC_DIR}/XdevLOpenGLContextCocoa.mm
+	${SRC_DIR}/XdevLOpenGLContext/XdevLOpenGLContextCocoa/XdevLOpenGLContextCocoa.mm
 )
 
 #
@@ -104,3 +109,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLOpenGLContextCocoaLibrary} PROPERTY SUFFIX "-${VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/XdevLOpenGLContext")
+install(TARGETS ${XdevLOpenGLContextCocoaLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

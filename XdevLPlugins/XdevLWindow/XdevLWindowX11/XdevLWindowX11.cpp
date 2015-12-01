@@ -26,6 +26,13 @@
 #include <cstddef>
 #include <climits>
 
+#include <vector>
+
+
+#define _NET_WM_STATE_REMOVE    0l
+#define _NET_WM_STATE_ADD       1l
+#define _NET_WM_STATE_TOGGLE    2l
+
 class m_keylayout;
 
 xdl::XdevLModuleDescriptor xdl::XdevLWindowLinux::m_windowX11ModuleDesc {
@@ -40,6 +47,29 @@ xdl::XdevLModuleDescriptor xdl::XdevLWindowLinux::m_windowX11ModuleDesc {
 };
 
 
+xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[2],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	xdl::XdevLWindowEventServerMajorVersion,
+	xdl::XdevLWindowEventServerMinorVersion,
+	xdl::XdevLWindowEventServerPatchVersion
+};
+
+xdl::XdevLModuleDescriptor cursorModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[3],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	xdl::XdevLWindowEventServerMajorVersion,
+	xdl::XdevLWindowEventServerMinorVersion,
+	xdl::XdevLWindowEventServerPatchVersion
+};
+
+
 xdl::XdevLPluginDescriptor m_windowX11PluginDescriptor {
 	xdl::window_x11_pluginName,
 	xdl::window_moduleNames,
@@ -48,13 +78,13 @@ xdl::XdevLPluginDescriptor m_windowX11PluginDescriptor {
 	xdl::XdevLWindowPluginPatchVersion
 };
 
+static xdl::XdevLCursorX11* x11cursor = nullptr;
+
 static Display* m_display = nullptr;
+static Window 	m_rootWindow;
+static Colormap defaultColorMap;
 
 static xdl::xdl_int reference_counter = 0;
-
-static std::map<Window, xdl::XdevLWindow*> windowMap;
-
-static Window m_clipWindow = None;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
 
@@ -69,41 +99,45 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			if(m_display == nullptr) {
 				return xdl::ERR_ERROR;
 			}
+			m_rootWindow = DefaultRootWindow(m_display);
 			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
 			std::clog << "Vendor              : " << XServerVendor(m_display) << "\n";
 			std::clog << "Release             : " << XVendorRelease(m_display)<< "\n";
 			std::clog << "Number of Screens   : " << XScreenCount(m_display) 	<< std::endl;
 
-
-			XSetWindowAttributes attrib;
-			attrib.event_mask = FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-			                    ExposureMask | ButtonPressMask | ButtonReleaseMask |
-			                    PointerMotionMask | KeyPressMask | KeyReleaseMask |
-			                    PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
-
-			m_clipWindow = XCreateWindow(m_display,
-			                             RootWindow(m_display, DefaultScreen(m_display)),
-			                             0,
-			                             0,
-			                             DisplayWidth(m_display, DefaultScreen(m_display)),
-			                             DisplayHeight(m_display, DefaultScreen(m_display)),
-			                             0,
-			                             CopyFromParent,
-			                             InputOnly,
-			                             CopyFromParent,
-			                             0,
-			                             &attrib);
-
 		}
 	}
 
 	if(xdl::XdevLWindowLinux::m_windowX11ModuleDesc.getName() == parameter->getModuleName()) {
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowX11")));
+		}
+
 		xdl::XdevLWindowLinux* window = new xdl::XdevLWindowLinux(parameter);
 		parameter->setModuleInstance(window);
 	} else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+		}
+
 		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
 		parameter->setModuleInstance(windowServer);
-	} else {
+	}  else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
+		x11cursor =  new xdl::XdevLCursorX11(parameter);
+		xdl::cursor = x11cursor;
+		parameter->setModuleInstance(xdl::cursor);
+	} else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+		if(xdl::windowEventServer == nullptr) {
+			xdl::windowEventServer = new xdl::XdevLWindowX11EventServer(parameter);
+			xdl::XdevLWindowEventServerParameter = parameter;
+		}
+		parameter->setModuleInstance(xdl::windowEventServer);
+
+	}  else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
 
@@ -119,8 +153,6 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 	reference_counter--;
 
 	if(reference_counter == 0) {
-		XDestroyWindow(m_display, m_clipWindow);
-
 		// And now close the window.
 		if(m_display) {
 			XCloseDisplay(m_display);
@@ -136,6 +168,13 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 
 namespace xdl {
 
+	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
+	const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
+	const XdevLID MouseButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
+	const XdevLID MouseButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
+	const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
+	const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
+
 
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
@@ -150,482 +189,6 @@ namespace xdl {
 	};
 
 
-
-	xdl_int XdevLWindowLinux::RunThread(thread::ThreadArgument* argument) {
-		XDEVL_MODULE_INFO("Starting Event Thread ...");
-
-		XdevLWindowThreadArgument* arg = static_cast<XdevLWindowThreadArgument*>(argument);
-
-		m_keyboard = new XdevLWindowX11Keyboard(m_display, arg->core);
-
-		startEventThread();
-
-
-		while(true) {
-			// The thread got the stop event.
-			if(isEventThreadRunning() == xdl_false) {
-				break;
-			}
-
-
-			// Do this loop forever ... until :D.
-			//	while(XPending(m_display) > 0) {
-			XEvent event;
-
-			// Get event and block if no events are available.
-			XNextEvent(m_display, &event);
-
-
-			// Get current XdevLWindow.
-			XdevLWindow* window = windowMap[event.xany.window];
-
-
-			// Check which event type we've got.
-			switch(event.type) {
-
-					//
-					// Will be send if window was created.
-					//
-				case CreateNotify:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp = arg->core->getTimer().getTime64();
-						ev.type				= XDEVL_WINDOW_EVENT;
-						ev.window.event 	= XDEVL_WINDOW_CREATE;
-						ev.window.windowid	= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Keyboard pressed.
-					//
-				case KeyPress: {
-					KeySym keysym = NoSymbol;
-					KeyCode keycode = event.xkey.keycode;
-					keysym = XkbKeycodeToKeysym(m_display, keycode, 0, event.xkey.state & ShiftMask ? 1 : 0);
-					XdevLScanCode idx = m_keyboard->keyCodeToXdevLScancode(keycode);
-
-					//XLookupKeysym(&event.xkey, 0); // This gives the Symbol expression of the KeyCode.
-
-					//std::cout << "X11 keycode: " << (int)keycode << ", X11 symcode: " << (int)keysym << ", XdevLScanCode: " << idx << std::endl;
-
-					m_keyboard->sendKeyboardEvent(1, keycode, window->getWindowID());
-				}
-				break;
-
-				//
-				// Keyboard released.
-				//
-				case KeyRelease: {
-					KeyCode keycode 	= event.xkey.keycode;
-					m_keyboard->sendKeyboardEvent(0, keycode, window->getWindowID());
-				}
-				break;
-
-				//
-				// Mouse pointer moved.
-				//
-				case MotionNotify:
-					if(window) {
-
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type 							= XDEVL_MOUSE_MOTION;
-
-						ev.motion.x						= event.xmotion.x;
-						ev.motion.y						= event.xmotion.y;
-						//ev.motion.xrel				= event.motion.xrel;
-						//ev.motion.yrel				= event.motion.yrel;
-						ev.window.windowid		= window->getWindowID();
-
-						if(event.xmotion.state & Button1Mask) {
-							std::cout << "Button 1 was pressed during motion.\n";
-						} else if(event.xmotion.state & Button2Mask) {
-							std::cout << "Button 2 was pressed during motion.\n";
-						}	else if(event.xmotion.state & Button3Mask) {
-							std::cout << "Button 3 was pressed during motion.\n";
-						}	else if(event.xmotion.state & Button4Mask) {
-							std::cout << "Button 5 was pressed during motion.\n";
-						}	else if(event.xmotion.state & Button5Mask) {
-							std::cout << "Button 5 was pressed during motion.\n";
-						}	else if(event.xmotion.state & ControlMask) {
-							std::cout << "Control was pressed during motion.\n";
-						}	else if(event.xmotion.state & Mod1Mask) {
-							std::cout << "Mod1Mask was pressed during motion.\n";
-						}	else if(event.xmotion.state & Mod2Mask) {
-							std::cout << "Mod2Mask was pressed during motion.\n";
-						}	else if(event.xmotion.state & Mod3Mask) {
-							std::cout << "Mod3Mask was pressed during motion.\n";
-						}	else if(event.xmotion.state & Mod4Mask) {
-							std::cout << "Mod4Mask was pressed during motion.\n";
-						}	else if(event.xmotion.state & Mod5Mask) {
-							std::cout << "Mod5Mask was pressed during motion.\n";
-						}
-
-						ev.window.data1				= event.xmotion.state;
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Mouse button pressed.
-					//
-				case ButtonPress:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type 							= XDEVL_MOUSE_BUTTON_PRESSED;
-
-						ev.button.button			= event.xbutton.button;
-						ev.button.x						= event.xbutton.x;
-						ev.button.y						= event.xbutton.y;
-						ev.window.windowid		= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-
-					}
-					break;
-
-					//
-					// Mouse button released.
-					//
-				case ButtonRelease :
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type 							= XDEVL_MOUSE_BUTTON_RELEASED;
-
-						ev.button.button			= event.xbutton.button;
-						ev.button.x						= event.xbutton.x;
-						ev.button.y						= event.xbutton.y;
-						ev.window.windowid		= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					//
-					//
-				case PropertyNotify: {
-					if(window) {
-						//						char *name = XGetAtomName(m_display, event.xproperty.atom);
-						//						std::cout << "PropertyNotify" << ": WindowID: " << window->getWindowID() << ": " << name << " -> " << ((event.xproperty.state == PropertyDelete) ? "deleted" : "changed") << std::endl;
-						//						XFree(name);
-						//						if(event.xproperty.atom == _NET_WM_STATE) {
-						//							xdl_uint32 flags = getNetWMState();
-						//							// TODO Do the WM state handling here.
-						//							std::cout << "_NET_WM_STATE" << std::endl;
-						//						}
-					}
-				}
-				break;
-
-				//
-				//
-				//
-				case SelectionRequest: {
-
-					int seln_format;
-					unsigned long nbytes;
-					unsigned long overflow;
-					unsigned char *seln_data;
-					XEvent sevent;
-					sevent.xany.type = SelectionNotify;
-					sevent.xselection.selection = event.xselectionrequest.selection;
-					sevent.xselection.target = None;
-					sevent.xselection.property = None;
-					sevent.xselection.requestor = event.xselectionrequest.requestor;
-					sevent.xselection.time = event.xselectionrequest.time;
-
-					// Check if  we have a cut buffer.
-					if(XGetWindowProperty(m_display, m_rootWindow,
-					                      XA_CUT_BUFFER0, 0, INT_MAX/4, False, event.xselectionrequest.target,
-					                      &sevent.xselection.target, &seln_format, &nbytes,
-					                      &overflow, &seln_data) == Success) {
-
-						Atom XA_TARGETS = XInternAtom(m_display, "TARGETS", 0);
-						if(sevent.xselection.target == event.xselectionrequest.target) {
-							XChangeProperty(m_display, event.xselectionrequest.requestor, event.xselectionrequest.property,
-							                sevent.xselection.target, seln_format, PropModeReplace,
-							                seln_data, nbytes);
-							sevent.xselection.property = event.xselectionrequest.property;
-						} else if(XA_TARGETS == event.xselectionrequest.target) {
-							Atom SupportedFormats[] = { sevent.xselection.target, XA_TARGETS };
-							XChangeProperty(m_display, event.xselectionrequest.requestor, event.xselectionrequest.property,
-							                XA_ATOM, 32, PropModeReplace,
-							                (unsigned char*)SupportedFormats,
-							                sizeof(SupportedFormats)/sizeof(*SupportedFormats));
-							sevent.xselection.property = event.xselectionrequest.property;
-						}
-						XFree(seln_data);
-					}
-					XSendEvent(m_display, event.xselectionrequest.requestor, False, 0, &sevent);
-					XSync(m_display, False);
-
-				}
-				break;
-
-				//
-				//
-				//
-				case SelectionNotify:
-					if(window) {
-
-						Atom target = event.xselection.target;
-						//	if (target == data->xdnd_req) {
-						//}
-					}
-					break;
-				default: {
-					switch(event.type - m_event_basep) {
-						case RRScreenChangeNotify: {
-							// Show XRandR that we really care
-							XRRUpdateConfiguration(&event);
-						}
-						break;
-					}
-				}
-				break;
-
-				//
-				// The mouse entered the window area.
-				//
-				case EnterNotify:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 				= arg->core->getTimer().getTime64();
-						ev.type							= XDEVL_WINDOW_EVENT;
-						ev.window.event 		= XDEVL_WINDOW_ENTER;
-						ev.window.data1			= event.xcrossing.x;
-						ev.window.data2			= event.xcrossing.y;
-						ev.window.windowid	= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// The mouse left the window area.
-					//
-				case LeaveNotify:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 				= arg->core->getTimer().getTime64();
-						ev.type							= XDEVL_WINDOW_EVENT;
-						ev.window.event 		= XDEVL_WINDOW_LEAVE;
-						ev.window.data1			= event.xcrossing.x;
-						ev.window.data2			= event.xcrossing.y;
-						ev.window.windowid	= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Input focus gained.
-					//
-				case FocusIn:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type								= XDEVL_WINDOW_EVENT;
-						ev.window.event 			= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
-						ev.window.windowid		= window->getWindowID();
-
-						getMediator()->fireEvent(ev);
-
-					}
-					break;
-
-					//
-					// Input focus lost focus.
-					//
-				case FocusOut:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type								= XDEVL_WINDOW_EVENT;
-						ev.window.event 			= XDEVL_WINDOW_INPUT_FOCUS_LOST;
-						ev.window.windowid		= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Window was hidden
-					//
-				case UnmapNotify:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 				= arg->core->getTimer().getTime64();
-						ev.type							= XDEVL_WINDOW_EVENT;
-						ev.window.event 		= XDEVL_WINDOW_HIDDEN;
-						ev.window.windowid	= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Window was shown.
-					//
-				case MapNotify:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 				= arg->core->getTimer().getTime64();
-						ev.type							= XDEVL_WINDOW_EVENT;
-						ev.window.event 		= XDEVL_WINDOW_SHOWN;
-						ev.window.windowid	= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-
-					}
-					break;
-
-				case ClientMessage: {
-					if((event.xclient.message_type == WM_PROTOCOLS) &&
-					        (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
-					        (event.xclient.format == 32)) {
-
-						XdevLEvent ev;
-						ev.common.timestamp 					= arg->core->getTimer().getTime64();
-						ev.type								= XDEVL_WINDOW_EVENT;
-						ev.window.event 			= XDEVL_WINDOW_CLOSE;
-						ev.window.windowid		= window->getWindowID();
-
-						arg->core->fireEvent(ev);
-
-						// Make a core event.
-						ev.type								= XDEVL_CORE_EVENT;
-						ev.core.event 				= XDEVL_CORE_SHUTDOWN;
-
-						arg->core->fireEvent(ev);
-
-					}
-					//
-					// Desktop Systems. send a ping to check if the window is still active.
-					// This must be handled otherwise the Desktop System will complain or it
-					// will make the window dark or what ever.
-					//
-					else if((event.xclient.message_type == WM_PROTOCOLS) &&
-					        (event.xclient.format == 32) &&
-					        (event.xclient.data.l[0] == _NET_WM_PING)) {
-						Window root = DefaultRootWindow(m_display);
-						event.xclient.window = root;
-						XSendEvent(m_display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
-					}
-				}
-				break;
-				//
-				//
-				//
-				case DestroyNotify: {
-					if(event.xdestroywindow.window == m_window) {
-						std::cout << "DestroyNotify" << ": WindowID: "
-						          << windowMap[event.xexpose.window]->getWindowID()
-						          << std::endl;
-					}
-				}
-				break;
-
-				//
-				// Part of the window changed. Notify
-				//
-				case Expose:
-					if(window) {
-						XdevLEvent ev;
-						ev.common.timestamp 				= arg->core->getTimer().getTime64();
-						ev.type							= XDEVL_WINDOW_EVENT;
-						ev.window.event 		= XDEVL_WINDOW_EXPOSED;
-						ev.window.windowid	= windowMap[event.xexpose.window]->getWindowID();
-
-						arg->core->fireEvent(ev);
-					}
-					break;
-
-					//
-					// Resized or moved
-					//
-				case ConfigureNotify:
-					if(window) {
-						if(event.xconfigure.x != m_prevConfigureEvent.x || event.xconfigure.y != m_prevConfigureEvent.y) {
-							// Window moved.
-							XdevLEvent ev;
-							ev.common.timestamp 				= arg->core->getTimer().getTime64();
-							ev.type							= XDEVL_WINDOW_EVENT;
-							ev.window.event 		= XDEVL_WINDOW_MOVED;
-							ev.window.x					= event.xconfigure.x;
-							ev.window.y					= event.xconfigure.y;
-							ev.window.width			= event.xconfigure.width;
-							ev.window.height		= event.xconfigure.height;
-							ev.window.windowid	= windowMap[event.xconfigure.window]->getWindowID();
-
-							arg->core->fireEvent(ev);
-
-						}
-						if(event.xconfigure.width != m_prevConfigureEvent.width || event.xconfigure.height != m_prevConfigureEvent.height) {
-							//
-							// Window resized.
-							//
-							XdevLEvent ev;
-							ev.common.timestamp 				= arg->core->getTimer().getTime64();
-							ev.type							= XDEVL_WINDOW_EVENT;
-							ev.window.event 		= XDEVL_WINDOW_RESIZED;
-							ev.window.x					= event.xconfigure.x;
-							ev.window.y					= event.xconfigure.y;
-							ev.window.width			= event.xconfigure.width;
-							ev.window.height		= event.xconfigure.height;
-							ev.window.windowid	=  windowMap[event.xconfigure.window]->getWindowID();
-
-							arg->core->fireEvent(ev);
-						}
-						m_prevConfigureEvent = event.xconfigure;
-
-					}
-					break;
-
-					//
-					//
-					//
-				case KeymapNotify: {
-					//std::cout << "MappingNotify" << ": WindowID: "  << getWindowID() << std::endl;
-					/* FIXME:
-					   X11_SetKeyboardState(SDL_Display, xevent.xkeymap.key_vector);
-					 */
-				}
-				break;
-
-				//
-				// Keyboard mapping changed.
-				//
-				case MappingNotify: {
-					//std::cout << "MappingNotify" << std::endl;
-					//	m_keyboard->updateKeyboardMap();
-				}
-				break;
-
-			}
-			//	}
-
-		}
-
-		// Free the keyboard device.
-		if(m_keyboard != nullptr) {
-			delete m_keyboard;
-			m_keyboard = nullptr;
-		}
-
-		XDEVL_MODULE_INFO("Stopping Event Thread.");
-
-		return ERR_OK;
-	}
-
-
 	XdevLWindowLinux::XdevLWindowLinux(XdevLModuleCreateParameter* parameter) :
 		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, m_windowX11ModuleDesc),
 		m_rootWindow(0),
@@ -636,6 +199,7 @@ namespace xdl {
 		m_best_fit_width(-1),
 		m_best_fit_height(-1),
 		m_best_fit_rate(-1),
+		m_fullscreenModeActive(xdl_false),
 		m_originalScreenConfig(nullptr) {}
 
 	XdevLWindowLinux::~XdevLWindowLinux() {
@@ -660,7 +224,8 @@ namespace xdl {
 
 	int XdevLWindowLinux::create() {
 
-		Visual* 							visual;
+
+		Visual* 						visual;
 		XVisualInfo*					vinfo;
 
 		// Get the default screen number.
@@ -711,11 +276,17 @@ namespace xdl {
 		xdl_int borderwith = 0;
 
 		XSetWindowAttributes WindowAttributes;
-		WindowAttributes.override_redirect	= True;
+
+		if((m_windowType == WINDOW_TOOLTIP) || (m_windowType == WINDOW_POPUP) || (m_windowType == WINDOW_SPLASH) || (m_windowType == WINDOW_NOTIFICATION)) {
+			// Tell the WM not to controll our window.
+			WindowAttributes.override_redirect	= True;
+		} else {
+			WindowAttributes.override_redirect	= False;
+		}
 		WindowAttributes.background_pixmap	= None;
 		WindowAttributes.background_pixel 	= color.pixel;
-		WindowAttributes.border_pixel				= 0;
-		WindowAttributes.colormap						= CopyFromParent;
+		WindowAttributes.border_pixel		= 0;
+		WindowAttributes.colormap			= CopyFromParent;
 
 		m_window = XCreateWindow(m_display,
 		                         m_rootWindow,
@@ -733,58 +304,25 @@ namespace xdl {
 		                     ExposureMask | ButtonPressMask | ButtonReleaseMask |
 		                     PointerMotionMask | KeyPressMask | KeyReleaseMask |
 		                     PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask |
-		                     KeymapStateMask;
+		                     KeymapStateMask | GenericEvent;
 
 
 		XSelectInput(m_display, m_window, event_mask);
 
-		XSizeHints*  	size_hints 	= XAllocSizeHints();
-		XWMHints*  		wm_hints 		= XAllocWMHints();
-		XClassHint*  	class_hints = XAllocClassHint();
-		XTextProperty windowName;
-		XTextProperty iconName;
-
-		char* window_name = (char*)getTitle().toString().c_str();
-		char* icon_name 	= (char*)getTitle().toString().c_str();
-
-		XStringListToTextProperty(&window_name, 1, &windowName);
-		XStringListToTextProperty(&icon_name, 1, &iconName);
-
-		size_hints->flags       = USPosition | USSize | PPosition | PSize | PMinSize;
-		size_hints->x						= m_position.x;
-		size_hints->y						= m_position.y;
-		size_hints->width				= m_size.width;
-		size_hints->height			= m_size.height;
-		size_hints->min_width   = m_size.width;
-		size_hints->min_height  = m_size.height;
-
-		wm_hints->flags         = StateHint | InputHint;
-		wm_hints->initial_state = NormalState;
-		wm_hints->input         = True;
-
-		class_hints->res_name   = (char*)getTitle().toString().c_str();
-		class_hints->res_class  = (char*)getTitle().toString().c_str();
-
-		XSetWMProperties(m_display, m_window, &windowName, &iconName, nullptr, 0, size_hints, wm_hints, class_hints);
-
-		XFree(size_hints);
-		XFree(wm_hints);
-		XFree(class_hints);
-
-
 		XClearWindow(m_display, m_window);
 
 
-		// Get all protocols and assign for usage.
-		setWMProtocols();
+		setTitle(m_title);
+
+		// Initialize Extented Window Manager Hints.
+		initializeEWMH();
+
+		setType(m_windowType);
 
 		// Check if the user specified fullscreen mode.
 		if(getFullscreen()) {
 			setFullscreenVideoMode();
 		}
-
-//		XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
-
 
 		const long _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1;
 		XChangeProperty(m_display, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
@@ -793,39 +331,26 @@ namespace xdl {
 		// Set the border property.
 		setWindowBordered();
 
-		//	showMousePointer(getHidePointer());
-
-//		XMapWindow(m_display, m_window);
+		showMousePointer(getHidePointer());
 
 		XFlush(m_display);
 
-		// Move window to the specified position. Normaly the window manager would put it
-		// somewhere. This is just a cheap trick to position it to the right place.
-
 		//	initKeyboardKeyCodes();
 
-		//
-		// Star the main event polling thread.
-		//
-		if(isEventThreadRunning() == xdl::xdl_false) {
+		m_id = m_window;
 
-			XdevLWindowThreadArgument* argument = new XdevLWindowThreadArgument();
-			argument->core = getMediator();
-			Start(argument);
-		}
-
-		windowMap[m_window] = this;
+		windowEventServer->registerWindowForEvents(this);
 
 		return ERR_OK;
 	}
 
-	void* XdevLWindowLinux::getInternal(const char* id) {
+	void* XdevLWindowLinux::getInternal(const XdevLInternalName& id) {
 		std::string data(id);
 		if(data == "X11_DISPLAY")
 			return m_display;
 		if(data == "X11_WINDOW")
 			return (void*)m_window;
-		if(data == "X11X_SCREEN_NUMBER")
+		if(data == "X11_SCREEN_NUMBER")
 			return &m_screenNumber;
 		return nullptr;
 	}
@@ -833,8 +358,6 @@ namespace xdl {
 	xdl_int XdevLWindowLinux::shutdown() {
 
 		XDEVL_MODULE_INFO("Starting shutdown process.\n");
-
-		stopEventThread();
 
 		// Send a more or less random value to unblock the
 		// XNextEvent functions in the thread.
@@ -850,11 +373,8 @@ namespace xdl {
 		ev.xclient.data.l[1] = CurrentTime;
 		XSendEvent(m_display, m_window, False, NoEventMask, &ev);
 
-		// Wait until thread finished it's job.
-		Join();
-
 		// Ok, check if the are in fullscreen mode.
-		if(getFullscreen()) {
+		if(m_fullscreenModeActive)  {
 			restoreFullscreenVideoMode();
 		}
 
@@ -879,19 +399,14 @@ namespace xdl {
 	}
 
 	int XdevLWindowLinux::update() {
-
 		return ERR_OK;
 	}
 
 
 
 	xdl_int XdevLWindowLinux::getGetClosestVideoMode() {
-		int i, match, bestmatch;
-		int sizecount, bestsize;
+		int i, match;
 		int ratecount;
-		short *ratelist;
-
-		XRRScreenSize *sizelist;
 
 		// Get current resolution and frequency.
 		m_originalScreenConfig 	= XRRGetScreenInfo(m_display, m_rootWindow);
@@ -899,29 +414,26 @@ namespace xdl {
 		m_originalSizeId		= XRRConfigCurrentConfiguration(m_originalScreenConfig, &m_originalRotation);
 
 		// Get all supported screen sizes
-		sizelist = XRRConfigSizes(m_originalScreenConfig, &sizecount);
+		xdl_int numberOfScreenSizes;
+		XRRScreenSize* sizelist = XRRConfigSizes(m_originalScreenConfig, &numberOfScreenSizes);
 
 		// Find the best matching mode
-		bestsize  = -1;
-		bestmatch = 999999;
-		for(i = 0; i < sizecount; i++) {
-			match = (getWidth() - sizelist[i].width) *
-			        (getWidth() - sizelist[i].width) +
-			        (getHeight() - sizelist[i].height) *
-			        (getHeight() - sizelist[i].height);
+		m_bestSizeId  = -1;
+		xdl_int bestmatch = 999999;
+		for(int i = 0; i < numberOfScreenSizes; i++) {
+			match = (getWidth() - sizelist[i].width) * (getWidth() - sizelist[i].width) + (getHeight() - sizelist[i].height) * (getHeight() - sizelist[i].height);
 			if(match < bestmatch) {
 				bestmatch = match;
-				bestsize  = i;
-				m_sizeId = i;
+				m_bestSizeId = i;
 			}
 		}
 
-		if(bestsize != -1) {
+		if(m_bestSizeId != -1) {
 			// Report width & height of best matching mode
-			m_best_fit_width = sizelist[bestsize].width;
-			m_best_fit_height = sizelist[bestsize].height;
+			m_best_fit_width = sizelist[m_bestSizeId].width;
+			m_best_fit_height = sizelist[m_bestSizeId].height;
 			if(m_originalScreenRate > 0) {
-				ratelist = XRRConfigRates(m_originalScreenConfig, bestsize, &ratecount);
+				short* ratelist = XRRConfigRates(m_originalScreenConfig, m_bestSizeId, &ratecount);
 
 				m_best_fit_rate = -1;
 				bestmatch = 999999;
@@ -935,21 +447,27 @@ namespace xdl {
 			}
 		}
 
-		if(bestsize != -1) {
-			XDEVL_MODULE_INFO("Found matching screen size: " << sizelist[bestsize].width << "x" << sizelist[bestsize].height << " " << m_best_fit_rate << " Hz" << std::endl);
-			return bestsize;
+		if(m_bestSizeId != -1) {
+			XDEVL_MODULE_INFO("Found matching screen size: " << sizelist[m_bestSizeId].width << "x" << sizelist[m_bestSizeId].height << " " << m_best_fit_rate << " Hz" << std::endl);
+			return m_bestSizeId;
 		}
 
 		return 0;
 	}
 
 	void XdevLWindowLinux::setFullscreenVideoMode() {
+		// Don't do this if we already in fullscreen mode.
+		if(xdl_false != m_fullscreenModeActive) {
+			return;
+		}
+
 		// Disable window manager decoration.
 		disableDecoration();
+
 		// Check for the closest video mode.
 		getGetClosestVideoMode();
-		// Set the video mode.
 
+		// Set the video mode.
 		xdl_int rate;
 		if(m_best_fit_rate == -1)
 			rate = m_originalScreenRate;
@@ -960,22 +478,28 @@ namespace xdl {
 		XRRSetScreenConfigAndRate(m_display,
 		                          m_originalScreenConfig,
 		                          m_rootWindow,
-		                          m_sizeId,
+		                          m_bestSizeId,
 		                          m_originalRotation,
 		                          (short int)rate,
 		                          CurrentTime);
 
-		// Disable screensaver.
-		XGetScreenSaver(m_display,
-		                &timeout_return,
-		                &interval_return,
-		                &prefer_blanking_return,
-		                &allow_exposures_return);
-		// Disable screen saver
+		//
+		// Store old screen saver settings and disable it.
+		//
+		XGetScreenSaver(m_display, &timeout_return, &interval_return, &prefer_blanking_return, &allow_exposures_return);
 		XSetScreenSaver(m_display, 0, 0, DontPreferBlanking, DefaultExposures);
+
+		XSync(m_display, False);
+
+		m_fullscreenModeActive = xdl_true;
 	}
 
 	void XdevLWindowLinux::restoreFullscreenVideoMode() {
+		// Only to this if we are in fullscreen mode.
+		if(xdl_false == m_fullscreenModeActive) {
+			return;
+		}
+
 		// Change screen mode into it's original form.
 		XRRSetScreenConfigAndRate(m_display,
 		                          m_originalScreenConfig,
@@ -984,26 +508,32 @@ namespace xdl {
 		                          m_originalRotation,
 		                          m_originalScreenRate,
 		                          CurrentTime);
-		// Enable disabled window manager decoration.
-		enableDecoration();
-		// Set the previous screen saver.
-		XSetScreenSaver(m_display, timeout_return,
-		                interval_return, prefer_blanking_return,
-		                allow_exposures_return);
+
+		// Set the previous screen saver settings.
+		XSetScreenSaver(m_display, timeout_return, interval_return, prefer_blanking_return, allow_exposures_return);
 
 		// If we have changed the screen configuration, let's switch back.
-		if(m_originalScreenConfig)
+		if(m_originalScreenConfig) {
 			XRRFreeScreenConfigInfo(m_originalScreenConfig);
+		}
+
+		// Enable disabled window manager decoration.
+		enableDecoration();
+
+		XSync(m_display, False);
+
+		m_fullscreenModeActive = xdl_false;
 	}
 
 
 	xdl_int XdevLWindowLinux::disableDecoration() {
-		xdl_bool decorations_removed = false;
+
+		xdl_bool decorations_removed = xdl_false;
 		Atom hintAtom;
+
 		// Ok, but now we have to inform the window manager about the fullscreen
 		// request. EWMH and ICCCM specification.
-		hintAtom = XInternAtom(m_display, "_MOTIF_WM_HINTS", True);
-		if(hintAtom != None) {
+		if(_MOTIF_WM_HINTS != None) {
 			struct {
 				unsigned long flags;
 				unsigned long functions;
@@ -1012,9 +542,7 @@ namespace xdl {
 				unsigned long status;
 			} MWMHints = { MWM_HINTS_DECORATIONS, 0, 0, 0, 0 };
 
-			XChangeProperty(m_display, m_window, hintAtom, hintAtom,
-			                32, PropModeReplace, (unsigned char *)&MWMHints,
-			                sizeof(MWMHints)/4);
+			XChangeProperty(m_display, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32, PropModeReplace, (unsigned char *)&MWMHints, sizeof(MWMHints)/4);
 			decorations_removed = xdl_true;
 		}
 
@@ -1022,10 +550,8 @@ namespace xdl {
 		if(hintAtom != None) {
 			long KWMHints = KDE_tinyDecoration;
 
-			XChangeProperty(m_display,m_window, hintAtom, hintAtom,
-			                32, PropModeReplace, (unsigned char *)&KWMHints,
-			                sizeof(KWMHints)/4);
-			decorations_removed = 1;
+			XChangeProperty(m_display,m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&KWMHints,  sizeof(KWMHints)/4);
+			decorations_removed = xdl_true;
 		}
 
 		// Now try to set GNOME hints
@@ -1033,50 +559,49 @@ namespace xdl {
 		if(hintAtom != None) {
 			long GNOMEHints = 0;
 
-			XChangeProperty(m_display, m_window, hintAtom, hintAtom,
-			                32, PropModeReplace, (unsigned char *)&GNOMEHints,
-			                sizeof(GNOMEHints)/4);
-			decorations_removed = 1;
+			XChangeProperty(m_display, m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&GNOMEHints, sizeof(GNOMEHints)/4);
+			decorations_removed = xdl_true;
 		}
 
 		// Now try to set KDE NET_WM hints
-		hintAtom = XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", True);
-		if(hintAtom != None) {
-			Atom NET_WMHints[2];
+		if(_NET_WM_WINDOW_TYPE != None) {
+			Atom NET_WMHints[2] = {_KDE_NET_WM_WINDOW_TYPE_OVERRIDE, _NET_WM_WINDOW_TYPE_NORMAL};
 
-			NET_WMHints[0] = XInternAtom(m_display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
-			// define a fallback...
-			NET_WMHints[1] = XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
-
-			XChangeProperty(m_display, m_window, hintAtom, XA_ATOM,
-			                32, PropModeReplace, (unsigned char *)&NET_WMHints,
-			                2);
+			XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&NET_WMHints, 2);
 			decorations_removed = 1;
 		}
 
-		hintAtom = XInternAtom(m_display, "_NET_WM_STATE", True);
-		if(hintAtom != None) {
-			Atom NET_WMHints[1];
+		if(_NET_WM_STATE != None) {
 
-			NET_WMHints[0] = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", True);
+			XEvent msg;
+			memset(&msg, 0, sizeof(XEvent));
+			msg.xclient.type			= ClientMessage;
+			msg.xclient.message_type 	= _NET_WM_STATE;
+			msg.xclient.window 			= m_window;
+			msg.xclient.format 			= 32;
+			msg.xclient.data.l[0] 		= _NET_WM_STATE_ADD;
+			msg.xclient.data.l[1] 		= _NET_WM_STATE_FULLSCREEN;
+			msg.xclient.data.l[2] 		= 0;
+			msg.xclient.data.l[3] 		= 1; // Normal application
 
-			XChangeProperty(m_display, m_window, hintAtom, XA_ATOM, 32, PropModeReplace, (unsigned char *)&NET_WMHints, 1);
-			decorations_removed = xdl_true;
+			if(XSendEvent(m_display, DefaultRootWindow(m_display),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+				XDEVL_MODULE_WARNING("Could not add _NET_WM_STATE_FULLSCREEN state.\n");
+			}
 		}
 
 		// Did we sucessfully remove the window decorations?
 		if(decorations_removed) {
 			// Finally set the transient hints
 			XSetTransientForHint(m_display, m_window, m_rootWindow);
-			XUnmapWindow(m_display, m_window);
-			XMapWindow(m_display, m_window);
+			XRaiseWindow(m_display, m_window);
 		} else {
+			// Seems like we couldn't remove the decoration using EWMH hints. Let's try to change they window into a override_redirect window
+			// which means the Window Manager is supposed to ignore this window totally.
 			XSetWindowAttributes  attributes;
-			// The Butcher way of removing window decorations
 			attributes.override_redirect = True;
-			XChangeWindowAttributes(m_display, m_window,
-			                        CWOverrideRedirect, &attributes);
+			XChangeWindowAttributes(m_display, m_window, CWOverrideRedirect, &attributes);
 		}
+		XFlush(m_display);
 
 		XRRSelectInput(m_display, m_window, RRScreenChangeNotifyMask);
 
@@ -1122,6 +647,26 @@ namespace xdl {
 			}
 		}
 
+
+		if(_NET_WM_STATE != None) {
+
+			XEvent msg;
+			memset(&msg, 0, sizeof(XEvent));
+			msg.xclient.type			= ClientMessage;
+			msg.xclient.message_type 	= _NET_WM_STATE;
+			msg.xclient.window 			= m_window;
+			msg.xclient.format 			= 32;
+			msg.xclient.data.l[0] 		= _NET_WM_STATE_REMOVE;
+			msg.xclient.data.l[1] 		= _NET_WM_STATE_FULLSCREEN;
+			msg.xclient.data.l[2] 		= 0;
+			msg.xclient.data.l[3] 		= 1; // Normal application
+
+			if(XSendEvent(m_display, DefaultRootWindow(m_display),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+				XDEVL_MODULE_WARNING("Could not remove _NET_WM_STATE_FULLSCREEN state.\n");
+			}
+
+		}
+
 		// Finally unset the transient hints if necessary
 		if(ActivatedDecorations) {
 			// NOTE: Does this work?
@@ -1141,50 +686,50 @@ namespace xdl {
 	}
 
 	const XdevLWindowPosition& XdevLWindowLinux::getPosition() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_position.x = wa.x;
-		m_position.y = wa.y;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_position.x = wa.x;
+//		m_position.y = wa.y;
 		return m_position;
 	}
 
 	const XdevLWindowSize& XdevLWindowLinux::getSize() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_size.width 	= wa.width;
-		m_size.height = wa.height;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_size.width 	= wa.width;
+//		m_size.height = wa.height;
 		return m_size;
 	}
 
 	XdevLWindowSize::type  XdevLWindowLinux::getWidth() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_size.width 	= wa.width;
-		m_size.height = wa.height;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_size.width 	= wa.width;
+//		m_size.height = wa.height;
 		return m_size.width;
 	}
 
 	XdevLWindowSize::type  XdevLWindowLinux::getHeight() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_size.width 	= wa.width;
-		m_size.height = wa.height;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_size.width 	= wa.width;
+//		m_size.height = wa.height;
 		return m_size.height;
 	}
 
 	XdevLWindowPosition::type XdevLWindowLinux::getX() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_position.x = wa.x;
-		m_position.y = wa.y;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_position.x = wa.x;
+//		m_position.y = wa.y;
 		return m_position.x;
 	}
 
 	XdevLWindowPosition::type XdevLWindowLinux::getY() {
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		m_position.x = wa.x;
-		m_position.y = wa.y;
+//		XWindowAttributes wa;
+//		XGetWindowAttributes(m_display, m_window, &wa);
+//		m_position.x = wa.x;
+//		m_position.y = wa.y;
 		return m_position.y;
 	}
 
@@ -1242,6 +787,39 @@ namespace xdl {
 
 	void XdevLWindowLinux::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
+
+		XSizeHints*  	size_hints 	= XAllocSizeHints();
+		XWMHints*  		wm_hints 	= XAllocWMHints();
+		XClassHint*  	class_hints = XAllocClassHint();
+		XTextProperty windowName;
+		XTextProperty iconName;
+
+		char* window_name = (char*)getTitle().toString().c_str();
+		char* icon_name 	= (char*)getTitle().toString().c_str();
+
+		XStringListToTextProperty(&window_name, 1, &windowName);
+		XStringListToTextProperty(&icon_name, 1, &iconName);
+
+		size_hints->flags       = USPosition | USSize | PPosition | PSize | PMinSize;
+		size_hints->x						= m_position.x;
+		size_hints->y						= m_position.y;
+		size_hints->width				= m_size.width;
+		size_hints->height			= m_size.height;
+		size_hints->min_width   = m_size.width;
+		size_hints->min_height  = m_size.height;
+
+		wm_hints->flags         = StateHint | InputHint;
+		wm_hints->initial_state = NormalState;
+		wm_hints->input         = True;
+
+		class_hints->res_name   = (char*)getTitle().toString().c_str();
+		class_hints->res_class  = (char*)getTitle().toString().c_str();
+
+		XSetWMProperties(m_display, m_window, &windowName, &iconName, nullptr, 0, size_hints, wm_hints, class_hints);
+
+		XFree(size_hints);
+		XFree(wm_hints);
+		XFree(class_hints);
 	}
 
 	void XdevLWindowLinux::showPointer() {
@@ -1322,64 +900,6 @@ namespace xdl {
 	}
 
 	void XdevLWindowLinux::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-		//XReparentWindow(m_display, m_clipWindow, m_window, 0, 0);
-		//XResizeWindow(m_display, m_clipWindow,  width, height);
-		//XMoveWindow(m_display, m_clipWindow, x, y);
-
-		XSizeHints*  	size_hints 	= XAllocSizeHints();
-		XWMHints*  		wm_hints 		= XAllocWMHints();
-		XClassHint*  	class_hints = XAllocClassHint();
-
-
-		size_hints->flags       = USPosition | USSize | PPosition | PSize | PMinSize;
-		size_hints->x						= x;
-		size_hints->y						= y;
-		size_hints->width				= width;
-		size_hints->height			= height;
-		size_hints->min_width   = width;
-		size_hints->min_height  = height;
-
-		wm_hints->flags         = StateHint | InputHint;
-		wm_hints->initial_state = NormalState;
-		wm_hints->input         = False;
-
-
-		XSetWMProperties(m_display, m_clipWindow, nullptr, nullptr, nullptr, 0, size_hints, nullptr,nullptr);
-		XMapWindow(m_display,m_clipWindow);
-		XFlush(m_display);
-
-		XFree(size_hints);
-		XFree(wm_hints);
-		XFree(class_hints);
-
-//	Window window =	XCreateSimpleWindow(m_display,
-//		                                m_rootWindow,
-//		                                x, y,
-//																		width, height,
-//		                                0,
-//		                                BlackPixel(m_display, m_screenNumber),
-//																		BlackPixel(m_display, m_screenNumber));
-//
-//
-//		xdl_int event_mask = FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-//		                     ExposureMask | ButtonPressMask | ButtonReleaseMask |
-//		                     PointerMotionMask | KeyPressMask | KeyReleaseMask |
-//		                     PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask |
-//		                     KeymapStateMask;
-//
-//
-//		XSelectInput(m_display, window, event_mask);
-		//	XMapWindow(m_display,window);
-		//	XFlush(m_display);
-		for(;;) {
-			static int counter = 0;
-
-			int result = XGrabPointer(m_display, m_window, False, 0, GrabModeAsync, GrabModeAsync, m_clipWindow, None, CurrentTime);
-			if(result == GrabSuccess) {
-				std::cout << "result == GrabSuccess: " << counter++ << std::endl;
-				break;
-			}
-		}
 
 	}
 
@@ -1440,9 +960,6 @@ namespace xdl {
 			}
 			XFree(propertyValue);
 		}
-
-		/* FIXME, check the size hints for resizable */
-		/* flags |= SDL_WINDOW_RESIZABLE; */
 
 		return flags;
 	}
@@ -1506,21 +1023,13 @@ namespace xdl {
 	}
 
 	void XdevLWindowLinux::setInputFocus() {
-		XFlush(m_display);
 
-//			XEvent event;
-//			XIfEvent(m_display, &event, &isConfigureNotify, (XPointer)&m_window);
-//
-
-
-//		XSync(m_display, False);
-//
 		XWindowAttributes attribute;
 		XGetWindowAttributes(m_display,m_window,&attribute);
 		if(attribute.map_state == IsViewable) {
 			XSetInputFocus(m_display, m_window,  RevertToParent, CurrentTime);
 		}
-
+		XFlush(m_display);
 
 
 		//XGrabKeyboard(m_display, m_window, False, GrabModeAsync, GrabModeAsync, CurrentTime);
@@ -1567,7 +1076,7 @@ namespace xdl {
 		int revert_to;
 		XGetInputFocus(m_display, &wnd, &revert_to);
 
-		*window = windowMap[wnd];
+		*window = windowEventServer->getWindow(wnd);;
 		return ERR_OK;
 
 		*window = nullptr;
@@ -1578,17 +1087,17 @@ namespace xdl {
 		XdevLWindowImpl::setParent(window);
 	}
 
-	xdl_int XdevLWindowLinux::setWMProtocols() {
+	xdl_int XdevLWindowLinux::initializeEWMH() {
 
-		_MOTIF_WM_HINTS 				= XInternAtom(m_display, "_MOTIF_WM_HINTS", False);
-		_NET_WM_WINDOW_TYPE					= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", False);;
-		_NET_WM_WINDOW_TYPE_DESKTOP			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DESKTOP", False);;
-		_NET_WM_WINDOW_TYPE_DOCK			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DOCK", False);;
-		_NET_WM_WINDOW_TYPE_TOOLBAR			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);;
-		_NET_WM_WINDOW_TYPE_MENU			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_MENU", False);;
-		_NET_WM_WINDOW_TYPE_UTILITY			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_UTILITY", False);;
-		_NET_WM_WINDOW_TYPE_SPLASH			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_SPLASH", False);;
-		_NET_WM_WINDOW_TYPE_DIALOG			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DIALOG", False);;
+		_MOTIF_WM_HINTS 					= XInternAtom(m_display, "_MOTIF_WM_HINTS", False);
+		_NET_WM_WINDOW_TYPE					= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", False);
+		_NET_WM_WINDOW_TYPE_DESKTOP			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
+		_NET_WM_WINDOW_TYPE_DOCK			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DOCK", False);
+		_NET_WM_WINDOW_TYPE_TOOLBAR			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+		_NET_WM_WINDOW_TYPE_MENU			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_MENU", False);
+		_NET_WM_WINDOW_TYPE_UTILITY			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_UTILITY", False);
+		_NET_WM_WINDOW_TYPE_SPLASH			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_SPLASH", False);
+		_NET_WM_WINDOW_TYPE_DIALOG			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 		_NET_WM_WINDOW_TYPE_DROPDOWN_MENU	= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DROPDOWN_MENU", False);
 		_NET_WM_WINDOW_TYPE_POPUP_MENU		= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_POPUP_MENU", False);
 		_NET_WM_WINDOW_TYPE_TOOLTIP			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_TOOLTIP", False);
@@ -1597,45 +1106,44 @@ namespace xdl {
 		_NET_WM_WINDOW_TYPE_DND				= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DND", False);
 		_NET_WM_WINDOW_TYPE_NORMAL			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_NORMAL", False);
 		_NET_WM_WINDOW_OPACITY 				= XInternAtom(m_display, "_NET_WM_WINDOW_OPACITY", False);
-		_NET_WM_BYPASS_COMPOSITOR	= XInternAtom(m_display, "_NET_WM_BYPASS_COMPOSITOR", False);
-		_NET_WM_ACTION_RESIZE			= XInternAtom(m_display, "_NET_WM_ACTION_RESIZE", False);
-		_NET_WM_STATE					= XInternAtom(m_display, "_NET_WM_STATE", False);
-		_NET_WM_STATE_MAXIMIZED_VERT	= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-		_NET_WM_STATE_MAXIMIZED_HORZ	= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-		_NET_WM_STATE_FULLSCREEN		= XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
-		_NET_WM_STATE_HIDDEN			= XInternAtom(m_display, "_NET_WM_STATE_HIDDEN", False);
-		_NET_WM_STATE_FOCUSED			= XInternAtom(m_display, "_NET_WM_STATE_FOCUSED", False);
-		_NET_WM_STATE_ADD				= XInternAtom(m_display, "_NET_WM_STATE_ADD", False);
-		_NET_WM_STATE_REMOVE			= XInternAtom(m_display, "_NET_WM_STATE_REMOVE", False);
-		_NET_WM_NAME					= XInternAtom(m_display, "_NET_WM_NAME", False);
-		_NET_WM_ICON_NAME				= XInternAtom(m_display, "_NET_WM_ICON_NAME", False);
-		_NET_WM_ICON					= XInternAtom(m_display, "_NET_WM_ICON", False);
-		_NET_WM_PING					= XInternAtom(m_display, "_NET_WM_PING", False);
+		_NET_WM_BYPASS_COMPOSITOR			= XInternAtom(m_display, "_NET_WM_BYPASS_COMPOSITOR", False);
+		_NET_WM_ACTION_RESIZE				= XInternAtom(m_display, "_NET_WM_ACTION_RESIZE", False);
+		_NET_WM_STATE						= XInternAtom(m_display, "_NET_WM_STATE", False);
+		_NET_WM_STATE_MAXIMIZED_VERT		= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+		_NET_WM_STATE_MAXIMIZED_HORZ		= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		_NET_WM_STATE_FULLSCREEN			= XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
+		_NET_WM_STATE_HIDDEN				= XInternAtom(m_display, "_NET_WM_STATE_HIDDEN", False);
+		_NET_WM_STATE_FOCUSED				= XInternAtom(m_display, "_NET_WM_STATE_FOCUSED", False);
 
-		WM_STATE						= XInternAtom(m_display, "WM_STATE", False);
-		WM_NAME							= XInternAtom(m_display, "WM_NAME", False);
-		WM_NORMAL_HINTS					= XInternAtom(m_display, "WM_NORMAL_HINTS", False);
-		WM_HINTS						= XInternAtom(m_display, "WM_HINTS", False);
-		WM_ICON_SIZE					= XInternAtom(m_display, "WM_ICON_SIZE", False);
-		WM_DELETE_WINDOW				= XInternAtom(m_display, "WM_DELETE_WINDOW", False);
-		WM_PROTOCOLS					= XInternAtom(m_display, "WM_PROTOCOLS", False);
-		WM_TRANSIENT_FOR				= XInternAtom(m_display, "WM_TRANSIENT_FOR", False);
-		WM_CLASS						= XInternAtom(m_display, "WM_CLASS", False);
+		_NET_WM_NAME						= XInternAtom(m_display, "_NET_WM_NAME", False);
+		_NET_WM_ICON_NAME					= XInternAtom(m_display, "_NET_WM_ICON_NAME", False);
+		_NET_WM_ICON						= XInternAtom(m_display, "_NET_WM_ICON", False);
+		_NET_WM_PING						= XInternAtom(m_display, "_NET_WM_PING", False);
 
-		XdndEnter						= XInternAtom(m_display, "XdndEnter", False);
-		XdndPosition					= XInternAtom(m_display, "XdndPosition", False);
-		XdndStatus						= XInternAtom(m_display, "XdndStatus", False);
-		XdndTypeList					= XInternAtom(m_display, "XdndTypeList", False);
-		XdndActionCopy					= XInternAtom(m_display, "XdndActionCopy", False);
-		XdndDrop						= XInternAtom(m_display, "XdndDrop", False);
-		XdndFinished					= XInternAtom(m_display, "XdndFinished", False);
-		XdndSelection					= XInternAtom(m_display, "XdndSelection", False);
+		WM_STATE							= XInternAtom(m_display, "WM_STATE", False);
+		WM_NAME								= XInternAtom(m_display, "WM_NAME", False);
+		WM_NORMAL_HINTS						= XInternAtom(m_display, "WM_NORMAL_HINTS", False);
+		WM_HINTS							= XInternAtom(m_display, "WM_HINTS", False);
+		WM_ICON_SIZE						= XInternAtom(m_display, "WM_ICON_SIZE", False);
+		WM_DELETE_WINDOW					= XInternAtom(m_display, "WM_DELETE_WINDOW", False);
+		WM_PROTOCOLS						= XInternAtom(m_display, "WM_PROTOCOLS", False);
+		WM_TRANSIENT_FOR					= XInternAtom(m_display, "WM_TRANSIENT_FOR", False);
+		WM_CLASS							= XInternAtom(m_display, "WM_CLASS", False);
 
+		XdndEnter							= XInternAtom(m_display, "XdndEnter", False);
+		XdndPosition						= XInternAtom(m_display, "XdndPosition", False);
+		XdndStatus							= XInternAtom(m_display, "XdndStatus", False);
+		XdndTypeList						= XInternAtom(m_display, "XdndTypeList", False);
+		XdndActionCopy						= XInternAtom(m_display, "XdndActionCopy", False);
+		XdndDrop							= XInternAtom(m_display, "XdndDrop", False);
+		XdndFinished						= XInternAtom(m_display, "XdndFinished", False);
+		XdndSelection						= XInternAtom(m_display, "XdndSelection", False);
 
 
+		_KDE_NET_WM_WINDOW_TYPE_OVERRIDE	= XInternAtom(m_display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", False);
 
 
-		// Replace the WM_PROTOCOLS property on this window.
+		// Now we are going to tell the WM in which protocols we are interested are or which one we support.
 
 		std::vector<Atom> protocols;
 
@@ -1677,7 +1185,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void XdevLWindowLinux::SetType(XdevLWindowTypes type) {
+	void XdevLWindowLinux::setType(XdevLWindowTypes type) {
 
 		switch(type) {
 
@@ -1713,7 +1221,7 @@ namespace xdl {
 			default:
 				break;
 		}
-
+		XFlush(m_display);
 	}
 
 
@@ -1741,4 +1249,659 @@ namespace xdl {
 		return ERR_OK;
 	}
 
+
+
+//
+// -----------------------------------------------------------------------------
+//
+
+	XdevLWindowX11EventServer::XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
+		m_keyboard(nullptr) {
+		m_keyboard = new XdevLWindowX11Keyboard(m_display, getMediator());
+
+		WM_DELETE_WINDOW					= XInternAtom(m_display, "WM_DELETE_WINDOW", False);
+		WM_PROTOCOLS						= XInternAtom(m_display, "WM_PROTOCOLS", False);
+		_NET_WM_PING						= XInternAtom(m_display, "_NET_WM_PING", False);
+	}
+
+
+	xdl_int XdevLWindowX11EventServer::registerWindowForEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::registerWindowForEvents(window);
+	}
+
+	xdl_int XdevLWindowX11EventServer::unregisterWindowFromEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::unregisterWindowFromEvents(window);
+	}
+
+	xdl_int XdevLWindowX11EventServer::init() {
+		XDEVL_MODULE_SUCCESS("Created successfully" << std::endl);
+		return ERR_OK;
+	}
+
+	void* XdevLWindowX11EventServer::getInternal(const XdevLInternalName& id) {
+
+		return nullptr;
+	}
+
+	xdl_int XdevLWindowX11EventServer::shutdown() {
+
+		// Free the keyboard device.
+		if(m_keyboard != nullptr) {
+			delete m_keyboard;
+			m_keyboard = nullptr;
+		}
+
+		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
+		return ERR_OK;
+	}
+
+	xdl_int XdevLWindowX11EventServer::update() {
+		return pollEvents();
+	}
+
+	xdl_int XdevLWindowX11EventServer::pollEvents() {
+
+		// Only run this while loop when we have events in the queue.
+		while(XPending(m_display) > 0) {
+			XEvent event;
+
+			// Get next event.
+			XNextEvent(m_display, &event);
+
+			//
+			// Handle generic events like xinput2, xfixes etc.
+			//
+			if(event.type == GenericEvent) {
+				XGenericEventCookie* cookie = &event.xcookie;
+				XGetEventData(m_display, cookie);
+
+				if(x11cursor) {
+					x11cursor->onHandleXinputEvent(cookie);
+				}
+
+				XFreeEventData(m_display, cookie);
+				continue;
+			}
+
+			// Handle window events.
+			XdevLWindow* window = getWindow(event.xany.window);
+			if(window == nullptr) {
+				// We didn't find the window in the list. That means we are not managing it so
+				// we skip this event.
+				continue;
+			}
+
+//			std::cout << "Size: " << window->getWidth() << ":" << window->getHeight() << std::endl;
+
+			XdevLEvent ev;
+			ev.common.timestamp = getMediator()->getTimer().getTime64();
+
+			// Check which event type we've got.
+			switch(event.type) {
+
+					//
+					// Will be send if window was created.
+					//
+				case CreateNotify: {
+
+					ev.type				= XDEVL_WINDOW_EVENT;
+					ev.window.event 	= XDEVL_WINDOW_CREATE;
+					ev.window.windowid	= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Keyboard pressed.
+				//
+				case KeyPress: {
+					m_keyboard->sendKeyboardEvent(ButtonPressed.getHashCode(), event.xkey.keycode, window->getWindowID());
+				}
+				break;
+
+				//
+				// Keyboard released.
+				//
+				case KeyRelease: {
+					m_keyboard->sendKeyboardEvent(ButtonReleased.getHashCode(), event.xkey.keycode, window->getWindowID());
+				}
+				break;
+
+				//
+				// Mouse pointer moved.
+				//
+				case MotionNotify: {
+
+					ev.type 				= MouseMotion.getHashCode();
+					ev.motion.x				= event.xmotion.x;
+					ev.motion.y				= event.xmotion.y;
+					ev.window.windowid		= window->getWindowID();
+
+//					if(event.xmotion.state & Button1Mask) {
+//						std::cout << "Button 1 was pressed during motion.\n";
+//					} else if(event.xmotion.state & Button2Mask) {
+//						std::cout << "Button 2 was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Button3Mask) {
+//						std::cout << "Button 3 was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Button4Mask) {
+//						std::cout << "Button 5 was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Button5Mask) {
+//						std::cout << "Button 5 was pressed during motion.\n";
+//					}	else if(event.xmotion.state & ControlMask) {
+//						std::cout << "Control was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Mod1Mask) {
+//						std::cout << "Mod1Mask was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Mod2Mask) {
+//						std::cout << "Mod2Mask was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Mod3Mask) {
+//						std::cout << "Mod3Mask was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Mod4Mask) {
+//						std::cout << "Mod4Mask was pressed during motion.\n";
+//					}	else if(event.xmotion.state & Mod5Mask) {
+//						std::cout << "Mod5Mask was pressed during motion.\n";
+//					}
+
+					ev.window.data1				= event.xmotion.state;
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Mouse button pressed.
+				//
+				case ButtonPress: {
+
+					ev.type 				= MouseButtonPressed.getHashCode();
+					ev.button.button		= event.xbutton.button;
+					ev.button.x				= event.xbutton.x;
+					ev.button.y				= event.xbutton.y;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+
+				//
+				// Mouse button released.
+				//
+				case ButtonRelease : {
+
+					ev.type 				= MouseButtonReleased.getHashCode();
+					ev.button.button		= event.xbutton.button;
+					ev.button.x				= event.xbutton.x;
+					ev.button.y				= event.xbutton.y;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// A property of the window got changed.
+				//
+				case PropertyNotify: {
+				}
+				break;
+
+				//
+				//
+				//
+				case SelectionRequest: {
+
+					int seln_format;
+					unsigned long nbytes;
+					unsigned long overflow;
+					unsigned char *seln_data;
+					XEvent sevent;
+					sevent.xany.type = SelectionNotify;
+					sevent.xselection.selection = event.xselectionrequest.selection;
+					sevent.xselection.target = None;
+					sevent.xselection.property = None;
+					sevent.xselection.requestor = event.xselectionrequest.requestor;
+					sevent.xselection.time = event.xselectionrequest.time;
+
+					// Check if  we have a cut buffer.
+					if(XGetWindowProperty(m_display, m_rootWindow,
+					                      XA_CUT_BUFFER0, 0, INT_MAX/4, False, event.xselectionrequest.target,
+					                      &sevent.xselection.target, &seln_format, &nbytes,
+					                      &overflow, &seln_data) == Success) {
+
+						Atom XA_TARGETS = XInternAtom(m_display, "TARGETS", 0);
+						if(sevent.xselection.target == event.xselectionrequest.target) {
+							XChangeProperty(m_display, event.xselectionrequest.requestor, event.xselectionrequest.property,
+							                sevent.xselection.target, seln_format, PropModeReplace,
+							                seln_data, nbytes);
+							sevent.xselection.property = event.xselectionrequest.property;
+						} else if(XA_TARGETS == event.xselectionrequest.target) {
+							Atom SupportedFormats[] = { sevent.xselection.target, XA_TARGETS };
+							XChangeProperty(m_display, event.xselectionrequest.requestor, event.xselectionrequest.property,
+							                XA_ATOM, 32, PropModeReplace,
+							                (unsigned char*)SupportedFormats,
+							                sizeof(SupportedFormats)/sizeof(*SupportedFormats));
+							sevent.xselection.property = event.xselectionrequest.property;
+						}
+						XFree(seln_data);
+					}
+					XSendEvent(m_display, event.xselectionrequest.requestor, False, 0, &sevent);
+					XSync(m_display, False);
+
+				}
+				break;
+
+				//
+				//
+				//
+				case SelectionNotify: {
+//					if(window) {
+//
+//						Atom target = event.xselection.target;
+//						//	if (target == data->xdnd_req) {
+//						//}
+//					}
+//					break;
+//				default: {
+//					switch(event.type - m_event_basep) {
+//						case RRScreenChangeNotify: {
+//							// Show XRandR that we really care
+//							XRRUpdateConfiguration(&event);
+//						}
+//						break;
+//					}
+				} break;
+
+				//
+				// The mouse entered the window area.
+				//
+				case EnterNotify: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_ENTER;
+					ev.window.data1			= event.xcrossing.x;
+					ev.window.data2			= event.xcrossing.y;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// The mouse left the window area.
+				//
+				case LeaveNotify: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_LEAVE;
+					ev.window.data1			= event.xcrossing.x;
+					ev.window.data2			= event.xcrossing.y;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Input focus gained.
+				//
+				case FocusIn: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+					ev.window.windowid		= window->getWindowID();
+
+					focusGained(window);
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Input focus lost focus.
+				//
+				case FocusOut: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_LOST;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Window was hidden
+				//
+				case UnmapNotify: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_HIDDEN;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Window was shown.
+				//
+				case MapNotify: {
+
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_SHOWN;
+					ev.window.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+
+				}
+				break;
+
+				case ClientMessage: {
+					if((event.xclient.message_type == WM_PROTOCOLS) &&
+					        (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
+					        (event.xclient.format == 32)) {
+
+						ev.type					= XDEVL_WINDOW_EVENT;
+						ev.window.event 		= XDEVL_WINDOW_CLOSE;
+						ev.window.windowid		= window->getWindowID();
+
+						getMediator()->fireEvent(ev);
+
+						// Make a core event.
+						ev.type					= XDEVL_CORE_EVENT;
+						ev.core.event 			= XDEVL_CORE_SHUTDOWN;
+
+						getMediator()->fireEvent(ev);
+
+					}
+					//
+					// Desktop Systems. send a ping to check if the window is still active.
+					// This must be handled otherwise the Desktop System will complain or it
+					// will make the window dark or what ever.
+					//
+					else if((event.xclient.message_type == WM_PROTOCOLS) &&
+					        (event.xclient.format == 32) &&
+					        (event.xclient.data.l[0] == _NET_WM_PING)) {
+						Window root = DefaultRootWindow(m_display);
+						event.xclient.window = root;
+						XSendEvent(m_display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
+					}
+				}
+				break;
+
+				//
+				//
+				//
+				case DestroyNotify: {
+//					if(event.xdestroywindow.window == m_window) {
+//						std::cout << "DestroyNotify" << ": WindowID: "
+//						          << windowMap[event.xexpose.window]->getWindowID()
+//						          << std::endl;
+//					}
+				}
+				break;
+
+				//
+				// Part of the window changed. Notify
+				//
+				case Expose: {
+					ev.type					= XDEVL_WINDOW_EVENT;
+					ev.window.event 		= XDEVL_WINDOW_EXPOSED;
+					ev.button.windowid		= window->getWindowID();
+
+					getMediator()->fireEvent(ev);
+				}
+				break;
+
+				//
+				// Resized or moved
+				//
+				case ConfigureNotify: {
+					if( (event.xconfigure.x != window->getX()) || (event.xconfigure.y != window->getY())) {
+
+						ev.type					= XDEVL_WINDOW_EVENT;
+						ev.window.event 		= XDEVL_WINDOW_MOVED;
+						ev.window.x				= event.xconfigure.x;
+						ev.window.y				= event.xconfigure.y;
+						ev.window.width			= event.xconfigure.width;
+						ev.window.height		= event.xconfigure.height;
+						ev.button.windowid		= window->getWindowID();
+
+						getMediator()->fireEvent(ev);
+					}
+					if( (event.xconfigure.width != window->getWidth()) || (event.xconfigure.height != window->getHeight())) {
+						ev.type					= XDEVL_WINDOW_EVENT;
+						ev.window.event 		= XDEVL_WINDOW_RESIZED;
+						ev.window.x				= event.xconfigure.x;
+						ev.window.y				= event.xconfigure.y;
+						ev.window.width			= event.xconfigure.width;
+						ev.window.height		= event.xconfigure.height;
+						ev.window.windowid		= window->getWindowID();
+
+						getMediator()->fireEvent(ev);
+
+					}
+				}
+				break;
+
+				//
+				//
+				//
+				case KeymapNotify: {
+					//std::cout << "MappingNotify" << ": WindowID: "  << getWindowID() << std::endl;
+				}
+				break;
+
+				//
+				// Keyboard mapping changed.
+				//
+				case MappingNotify: {
+					//std::cout << "MappingNotify" << std::endl;
+					//	m_keyboard->updateKeyboardMap();
+				}
+				break;
+
+			}
+			//	}
+
+		}
+
+		return ERR_OK;
+	}
+
+	void XdevLWindowX11EventServer::flush() {
+		pollEvents();
+	}
+
+//
+// -----------------------------------------------------------------------------
+//
+
+	XdevLCursorX11::XdevLCursorX11(XdevLModuleCreateParameter* parameter) :
+		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc),
+		m_barriersSupported(xdl_false),
+		m_xinput2Supported(xdl_false) {
+		memset(m_barriers, 0, sizeof(PointerBarrier)*4);
+	}
+
+	xdl_int XdevLCursorX11::init() {
+		m_defaultRootWindow = DefaultRootWindow(m_display);
+		m_screenNumber 		= DefaultScreen(m_display);
+		m_defaultColorMap 	= DefaultColormap(m_display, DefaultScreen(m_display));
+		m_screenWidth 		= DisplayWidth(m_display, DefaultScreen(m_display));
+		m_screenHeight 		= DisplayHeight(m_display,DefaultScreen(m_display));
+
+		// Lets first create black color for the specific color map we use.
+		XAllocNamedColor(m_display, m_defaultColorMap, "black", &m_black, &m_dummy);
+
+		// Now we create an empty bitmap where we will fill nothing with the color.
+		static char bm_no_data[] = {0, 0, 0, 0, 0, 0, 0, 0};
+		m_invisibleCursorPixmap = XCreateBitmapFromData(m_display, m_defaultRootWindow, bm_no_data, 8, 8);
+
+		// Now create the new cursor bitmap which is of course back, transparent.
+		m_invisibleCursor = XCreatePixmapCursor(m_display, m_invisibleCursorPixmap, m_invisibleCursorPixmap, &m_black, &m_black, 0, 0);
+		XFlush(m_display);
+
+
+
+		// Check for pointer barrier support.
+		if(XQueryExtension(m_display, "XFIXES", &m_fixes_opcode, &m_fixes_event, &m_fixes_error)) {
+			m_barriersSupported = xdl_true;
+		}
+
+		// Check for xinput2 support.
+		if(XQueryExtension(m_display, "XInputExtension", &m_xinput2_opcode, &m_xinput2_event, &m_xinput2_error)) {
+			m_xinput2Supported = xdl_true;
+		}
+
+		return ERR_OK;
+	}
+
+	xdl_int XdevLCursorX11::shutdown() {
+		XFreeColors(m_display, m_defaultColorMap, &m_black.pixel, 1, 0);
+		XFreeCursor(m_display, m_invisibleCursor);
+		XFreePixmap(m_display, m_invisibleCursorPixmap);
+
+		return ERR_OK;
+	}
+
+	void* XdevLCursorX11::getInternal(const XdevLInternalName& id) {
+		return nullptr;
+	}
+
+	void XdevLCursorX11::show() {
+		XUndefineCursor(m_display, m_defaultRootWindow);
+		XFlush(m_display);
+	}
+
+	void XdevLCursorX11::hide() {
+		XDefineCursor(m_display, m_defaultRootWindow, m_invisibleCursor);
+		XFlush(m_display);
+	}
+
+	void XdevLCursorX11::setPosition(xdl_uint x, xdl_uint y) {
+		XWarpPointer(m_display, None, m_defaultRootWindow, 0, 0, 0, 0, x, y);
+		XFlush(m_display);
+	}
+
+	xdl_int XdevLCursorX11::clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) {
+		if(xdl_false == m_barriersSupported) {
+			return ERR_ERROR;
+		}
+
+		// Release previous barriers.
+		releaseClip();
+
+		/** Create the left barrier */
+		m_barriers[0] = XFixesCreatePointerBarrier(m_display, DefaultRootWindow(m_display),
+		                x1, 0,
+		                x1, m_screenHeight,
+		                BarrierPositiveX,
+		                0, NULL);
+		/** Create the right barrier */
+		m_barriers[1] = XFixesCreatePointerBarrier(m_display, DefaultRootWindow(m_display),
+		                x2, 0,
+		                x2, m_screenHeight,
+		                BarrierNegativeX,
+		                0, NULL);
+		/** Create the top barrier */
+		m_barriers[2] = XFixesCreatePointerBarrier(m_display, DefaultRootWindow(m_display),
+		                0, y1,
+		                m_screenWidth, y1,
+		                BarrierPositiveY,
+		                0, NULL);
+		/** Create the bottom barrier */
+		m_barriers[3] = XFixesCreatePointerBarrier(m_display, DefaultRootWindow(m_display),
+		                0, y2,
+		                m_screenWidth, y2,
+		                BarrierNegativeY,
+		                0, NULL);
+		return ERR_OK;
+
+
+	}
+
+	void XdevLCursorX11::releaseClip() {
+		if((m_barriers[0] > 0) || (m_barriers[1] > 0) || (m_barriers[2] > 0) || (m_barriers[3] > 0)) {
+			for(xdl_int i = 0; i < 4; i++) {
+				XFixesDestroyPointerBarrier(m_display, m_barriers[i]);
+				m_barriers[i] = 0;
+			}
+		}
+	}
+
+	xdl_int XdevLCursorX11::enableRelativeMotion() {
+		if(xdl_false == m_xinput2Supported) {
+			return ERR_ERROR;
+		}
+
+		XIEventMask eventmask;
+		unsigned char mask[5] = { 0,0,0,0,0 };
+
+		eventmask.deviceid = XIAllMasterDevices;
+		eventmask.mask_len = sizeof(mask);
+		eventmask.mask = mask;
+
+		XISetMask(mask, XI_RawMotion);
+		XISetMask(mask, XI_RawButtonPress);
+		XISetMask(mask, XI_RawButtonRelease);
+
+		if(XISelectEvents(m_display, DefaultRootWindow(m_display), &eventmask,1) != Success) {
+			m_xinput2Supported = xdl_false;
+			return ERR_ERROR;
+		}
+
+		return ERR_OK;
+	}
+	void XdevLCursorX11::disableRelativeMotion() {
+
+	}
+
+	void XdevLCursorX11::onHandleXinputEvent(XGenericEventCookie* cookie) {
+
+		// Only handle xinput2 events.
+		if(cookie->extension != m_xinput2_opcode) {
+			return;
+		}
+
+		switch(cookie->evtype) {
+			case XI_RawMotion: {
+				const XIRawEvent *rawev = (const XIRawEvent*)cookie->data;
+				if(rawev == nullptr) {
+					return;
+				}
+
+				double relative_cords[2];
+				parseValuators(rawev->raw_values,rawev->valuators.mask, rawev->valuators.mask_len,relative_cords,2);
+				printf("rel. (%f %f)\n", relative_cords[0], relative_cords[1]);
+				return;
+			}
+			break;
+
+			case XI_RawButtonPress:
+			case XI_RawButtonRelease:
+				break;
+		}
+	}
+
+	void XdevLCursorX11::parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len) {
+		const int MAX_AXIS = 16;
+
+		int i = 0,z = 0;
+		int top = mask_len * 8;
+		if(top > MAX_AXIS)
+			top = MAX_AXIS;
+
+		memset(output_values, 0, output_values_len * sizeof(double));
+		for(; i < top && z < output_values_len; i++) {
+			if(XIMaskIsSet(mask, i)) {
+				const int value = (int) *input_values;
+				output_values[z] = value;
+				input_values++;
+			}
+			z++;
+		}
+	}
 }

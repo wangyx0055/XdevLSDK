@@ -48,6 +48,7 @@
 	#error XDEVL_UNKNOWN_PLATFORM
 #endif
 
+#ifndef __func__
 #if __STDC_VERSION__ < 199901L
 # if __GNUC__ >= 2
 #  define __func__ __FUNCTION__
@@ -56,6 +57,15 @@
 # else 
 # define __func__ "<unknown>"
 # endif
+#endif
+#endif
+
+#ifdef _MSC_VER
+	#if _MSC_VER < 1800 
+		#error This project needs atleast Visual Studio 2013
+	#endif
+#elif __cplusplus <= 199711L
+	#error This project can only be compiled with a compiler that supports C++11
 #endif
 
 #ifdef _MSC_VER
@@ -67,6 +77,8 @@
 #endif
 
 #ifdef _WIN32
+	#define NOMINMAX // Window uses macros using min,max which gets in conflict with std::max, std::min.
+
 	// We need this definition to tell the gcc compiler that we need at least the win32 api for WindowsXP
 	#ifndef _WIN32_WINNT
 		#define _WIN32_WINNT 0x0600

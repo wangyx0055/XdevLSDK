@@ -156,19 +156,19 @@ namespace xdl {
     private:
 
       // Holds the functon pointer to create a module.
-      XdevLCreateModuleFunction 					m_createModule;
+      XdevLCreateModuleFunction 			m_createModule;
 
       // Holds the function pointer to delete a module.
-      XdevLDeleteModuleFunction 					m_deleteModule;
+      XdevLDeleteModuleFunction 			m_deleteModule;
 
       // Holds the function pointer to get the plugins descriptor.
       XdevLGetPluginDescriptorFunction 		m_getPluginDescriptor;
 
       // Holds the version of the plugin.
-      XdevLVersion 												m_version;
+      XdevLVersion 							m_version;
 
       // Holds the shared library that contains the modules.
-      XdevLSharedLibrary* 								m_sharedLibraryLoader;
+      XdevLSharedLibrary* 					m_sharedLibraryLoader;
 
   };
 

@@ -10,9 +10,9 @@ out vec3 normal;
 
 void main() {
 	
-		color = icolor;
+	color = icolor;
 		
-		normal = normalize(modelMatrix*vec4(inormal, 0.0)).xyz;
+	normal = normalize(modelMatrix*vec4(inormal, 0.0)).xyz;
 		
     gl_Position = projViewMatrix * modelMatrix * vec4(iposition, 1.0);
 }

@@ -26,6 +26,7 @@
 #include <XdevLTypes.h>
 #include <XdevLPluginImpl.h>
 #include <XdevLCoreMediator.h>
+#include <XdevLSharedMemory.h>
 #include <XdevLWindow/XdevLWindow.h>
 #include <XdevLWindow/XdevLWindowImpl.h>
 
@@ -93,14 +94,23 @@ namespace xdl {
 	typedef struct wl_surface*			WaylandSurface;
 	typedef struct wl_shell*			WaylandShell;
 	typedef struct wl_shell_surface*	WaylandShellSurface;
+	typedef struct wl_shm*				WaylandSharedMemory;
+	typedef struct wl_shm_pool*			WaylandSharedMemoryPool;
+	typedef struct wl_buffer*			WaylandBuffer;
+	typedef struct wl_region*			WaylandRegion;
+	typedef struct wl_callback*			WaylandCallback;
+	typedef struct wl_callback_listener WaylandCallbackListener;
+
 	typedef wl_egl_window* 				WaylandEGLWindow;
 
 
 	class XdevLEGL {
 		public:
-			EGLDisplay m_eglDisplay;
-			EGLContext m_eglContext;
-			EGLConfig  m_eglConfig;
+			EGLDisplay 			m_eglDisplay;
+			EGLSurface 			m_eglSurface;
+			EGLContext 			m_eglContext;
+			EGLConfig  			m_eglConfig;
+			WaylandEGLWindow	m_eglWindow;
 	};
 
 	class XdevLWindowWayland : public XdevLWindowImpl  {
@@ -114,130 +124,97 @@ namespace xdl {
 			virtual void* getInternal(const XdevLInternalName& id) override;
 			virtual xdl_int update() override;
 
-			/// Returns the x position of the window on the desktop
 			virtual const XdevLWindowPosition& getPosition();
-
-			/// Returns the size of the window.
 			virtual const XdevLWindowSize& getSize();
-
-			/// Returns the x position of the window.
 			virtual XdevLWindowPosition::type getX();
-
-			/// Returns the y position of the window.
 			virtual XdevLWindowPosition::type getY();
-
-			/// Returns the width of the window.
 			virtual XdevLWindowSize::type getWidth();
-
-			/// Returns the height of the window.
 			virtual XdevLWindowSize::type getHeight();
-
-			/// Returns the title of the window
 			virtual const XdevLWindowTitle& getTitle();
-
-			/// Returns the screen mode state.
 			virtual xdl_bool getFullscreen();
-
-			/// Return if the mouse pointer is hidden.
 			virtual xdl_bool getHidePointer();
-
-			/// Returns the color buffer depth.
 			virtual xdl_int getColorDepth();
-
-			/// Sets the position of the window.
 			virtual void setPosition(const XdevLWindowPosition& position);
-
-			/// Sets the size of the window.
 			virtual void setSize(const XdevLWindowSize& size);
-
-			/// Sets the x position of the window.
 			virtual void setX(XdevLWindowPosition::type x);
-
-			/// Sets the y position of the window.
 			virtual void setY(XdevLWindowPosition::type y);
-
-			/// Sets the width of the window.
 			virtual void setWidth(XdevLWindowSize::type width);
-
-			/// Sets the height of the window.
 			virtual void setHeight(XdevLWindowSize::type height);
-
-			/// Sets the title of the window.
 			virtual void setTitle(const XdevLWindowTitle& title);
-
-			/// Sets the fullscreen mode.
 			virtual void setFullscreen(xdl_bool state);
-
-			/// Sets the window type.
-			virtual void SetType(XdevLWindowTypes type);
-
-			/// Show the pointer.
+			virtual void setType(XdevLWindowTypes type);
 			virtual void showPointer();
-
-			/// Hide the pointer.
 			virtual void hidePointer();
-
-			/// Sets the pointer position.
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y);
-
-			/// Clips the pointer position.
 			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height);
-
-			/// Show the window.
-			/**
-				Shows the window without setting the input focus.
-			*/
 			virtual void show();
-
-			/// Hide the window.
 			virtual void hide();
-
-			/// Returns if the window is hidden.
 			virtual xdl_bool isHidden();
-
-			/// Raise window above others.
-			/**
-				The window will be restacked and will become the top most ( in Z order)
-			*/
 			virtual void raise();
-
-			/// Grabs the pointer.
 			virtual void grabPointer();
-
-			/// Ungrabs the pointer.
 			virtual void ungrabPointer();
-
-			/// Grabs the keyboard.
 			virtual void grabKeyboard();
-
-			/// Ungrabs the keyboard.
 			virtual void ungrabKeyboard();
-
-			/// Sets the input focus.
 			virtual void setInputFocus();
-
-			/// Checks if the window has focus.
 			virtual xdl_bool hasFocus();
-
-			/// Returns the input focus window.
 			virtual xdl_int getInputFocus(XdevLWindow** window);
-
-			/// Sets the parent window.
 			virtual void setParent(XdevLWindow* window);
 
 			void setCompositor(WaylandCompositor compositor);
 			void setShell(WaylandShell shell);
-			xdl_int InitEGL();
+			void setSharedMemory(WaylandSharedMemory sharedMemory);
+			void setFrameCallback(WaylandCallback frameCallback) {
+				m_frameCallback = frameCallback;
+			}
+			WaylandSurface getSurface() const {
+				return m_surface;
+			}
+
+			WaylandShellSurface getShellSurface() const {
+				return m_shellSurface;
+			}
+
+			WaylandSharedMemory getSharedMemory() const {
+				return m_sharedMemory;
+			}
+
+			WaylandCallback getFrameCallback() const {
+				return m_frameCallback;
+			}
+
+			WaylandBuffer getBuffer() const {
+				return m_buffer;
+			}
+
+			virtual void onPaint();
+			virtual void onSizeChanged(xdl_int width, xdl_int height);
+		protected:
+			int setCloexecOrClose(int fd);
+			int createTmpFileCloExec(char *tmpname) ;
+			xdl_int createAnonymousFile(off_t size) ;
+			xdl_int createBuffer();
+			void createOpaqueRegion(xdl_int x, xdl_int y, xdl_int width, xdl_int height);
+
+			void paint_pixels();
+			xdl_int initializeEGL();
 		protected:
 			WaylandCompositor 		m_compositor;
-			WaylandRegistry				m_registry;
-			WaylandSurface				m_surface;
-			WaylandShell					m_shell;
+			WaylandRegistry			m_registry;
+			WaylandSurface			m_surface;
+			WaylandShell			m_shell;
 			WaylandShellSurface 	m_shellSurface;
-			WaylandEGLWindow			m_eglWindow;
+			WaylandSharedMemory		m_sharedMemory;
+			WaylandCallback			m_frameCallback;
+
+
+			WaylandSharedMemoryPool	m_pool;
+			WaylandBuffer			m_buffer;
+			WaylandRegion			m_region;
 
 			XdevLEGL							m_egl;
 			xdl_int								m_bufferSize;
+			xdl_int m_fd;
+			xdl_uint8*							m_shm_data;
 	};
 
 }

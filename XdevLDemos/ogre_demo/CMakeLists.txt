@@ -1,0 +1,55 @@
+project(ogre_demo)
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${XDEVL_DEMOS}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_DEMOS}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_DEMOS}/bin)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${XDEVL_DEMOS}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG  ${XDEVL_DEMOS}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE  ${XDEVL_DEMOS}/bin)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${XDEVL_DEMOS}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  ${XDEVL_DEMOS}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_DEMOS}/bin)
+
+set(CMAKE_DEBUG_POSTFIX d)
+
+include_directories(
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+	${OGRE_INCLUDES}
+)
+
+link_directories(
+	${XDEVL_HOME}/lib
+	${XDEVL_EXTERNALS}/lib
+)
+
+if(PLATFORM_MACOSX)
+	set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -F${XDEVL_EXTERNALS}/lib" )
+endif()
+
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(LIBS XdevLd)
+else()
+	set(LIBS XdevL)
+endif()
+
+if(PLATFORM_MACOSX)
+	set(LIBS ${LIBS} dl OgreMain boost_sytem)
+elseif(PLATFORM_LINUX)
+	set(LIBS ${LIBS} dl OgreMain boost_system)
+elseif(PLATFORM_WINDOWS)
+
+endif()
+
+
+add_executable(ogre_demo ogre_demo.cpp)
+
+target_link_libraries(ogre_demo ${LIBS})
+
+
+
+
+

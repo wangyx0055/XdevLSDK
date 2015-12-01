@@ -187,8 +187,7 @@ namespace xdl
 		xdl_uint64 sender;
 		
 		xdl_uint32 windowid;
-		xdl_uint32 scancode;
-		xdl_uint32 sym;
+		xdl_uint32 keycode;
 		xdl_uint16 mod;
 		xdl_uint8 repeat;
 		xdl_uint8 device_type;

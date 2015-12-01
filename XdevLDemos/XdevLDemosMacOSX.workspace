@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="XdevLDemos" Database="./XdevLDemos.tags">
   <Project Name="devices_demo" Path="devices_demo/devices_demo.project" Active="No"/>
-  <Project Name="opengl_demo" Path="opengl_demo/opengl_demo.project" Active="No"/>
   <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
-  <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="Yes"/>
+  <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
   <Project Name="tcp_client_demo" Path="tcp_client_demo/tcp_client_demo.project" Active="No"/>
   <Project Name="tcp_server_demo" Path="tcp_server_demo/tcp_server_demo.project" Active="No"/>
   <Project Name="udp_server_demo" Path="udp_server_demo/udp_server_demo.project" Active="No"/>
@@ -14,6 +13,8 @@
   <Project Name="events_demo" Path="events_demo/events_demo.project" Active="No"/>
   <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="No"/>
   <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="No"/>
+  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
+  <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>
@@ -32,6 +33,8 @@
       <Project Name="events_demo" ConfigName="Release_Linux32"/>
       <Project Name="filesystem_demo" ConfigName="Release_Linux32"/>
       <Project Name="glsl_demo" ConfigName="Release_Linux32"/>
+      <Project Name="rai_demo" ConfigName="Release_Linux32"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux32" Selected="no">
       <Project Name="xml_demo" ConfigName="Debug_Linux32"/>
@@ -50,6 +53,8 @@
       <Project Name="events_demo" ConfigName="Debug_Linux32"/>
       <Project Name="filesystem_demo" ConfigName="Debug_Linux32"/>
       <Project Name="glsl_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux64" Selected="no">
       <Project Name="xml_demo" ConfigName="Debug_Linux64"/>
@@ -68,6 +73,8 @@
       <Project Name="events_demo" ConfigName="Debug_Linux64"/>
       <Project Name="filesystem_demo" ConfigName="Debug_Linux64"/>
       <Project Name="glsl_demo" ConfigName="Debug_Linux64"/>
+      <Project Name="rai_demo" ConfigName="Debug_Linux64"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_Linux64" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux64"/>
@@ -86,6 +93,8 @@
       <Project Name="events_demo" ConfigName="Release_Linux64"/>
       <Project Name="filesystem_demo" ConfigName="Release_Linux64"/>
       <Project Name="glsl_demo" ConfigName="Release_Linux64"/>
+      <Project Name="rai_demo" ConfigName="Release_Linux64"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_MacOSX32" Selected="no">
       <Project Name="xml_demo" ConfigName="Debug_Linux32"/>
@@ -104,6 +113,8 @@
       <Project Name="events_demo" ConfigName="Debug_Linux32"/>
       <Project Name="filesystem_demo" ConfigName="Debug_Linux32"/>
       <Project Name="glsl_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_MacOSX32" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>
@@ -122,6 +133,8 @@
       <Project Name="events_demo" ConfigName="Debug_Linux32"/>
       <Project Name="filesystem_demo" ConfigName="Debug_Linux32"/>
       <Project Name="glsl_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Linux32"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_MacOSX64" Selected="yes">
       <Project Name="xml_demo" ConfigName="Debug_MacOSX64"/>
@@ -139,6 +152,8 @@
       <Project Name="audio_demo" ConfigName="Debug_MacOSX64"/>
       <Project Name="filesystem_demo" ConfigName="Debug_MacOSX64"/>
       <Project Name="glsl_demo" ConfigName="Debug_MacOSX64"/>
+      <Project Name="rai_demo" ConfigName="Debug_MacOSX64"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_MacOSX64" Selected="yes">
       <Project Name="xml_demo" ConfigName="Release_MacOSX64"/>
@@ -156,6 +171,8 @@
       <Project Name="audio_demo" ConfigName="Release_MacOSX64"/>
       <Project Name="filesystem_demo" ConfigName="Release_MacOSX64"/>
       <Project Name="glsl_demo" ConfigName="Release_MacOSX64"/>
+      <Project Name="rai_demo" ConfigName="Release_MacOSX64"/>
+      <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

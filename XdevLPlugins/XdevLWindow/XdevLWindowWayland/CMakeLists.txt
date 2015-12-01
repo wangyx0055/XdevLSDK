@@ -60,9 +60,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
 
 #
 # Set header files for the library.
-#
-set(HEADER_FILES
+
+set(HEADER_INTERFACE_FILE 
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindow.h
+)
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
 	${HEADERS_DIR}/XdevLWindowWayland.h
 )
@@ -110,12 +114,16 @@ if(UNIX)
 			XdevLd
 			wayland-client
 			wayland-egl
+			GLESv2
+			EGL
 		)
 	else()
 		target_link_libraries(${XdevLWindowWaylandLibrary}
 			XdevL
 			wayland-client
 			wayland-egl
+			GLESv2
+			EGL
 		)
 	endif()
 elseif(APPLE)
@@ -132,3 +140,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLWindowWaylandLibrary} PROPERTY SUFFIX "-${XDEVLWAYLAND_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/XdevLWindow")
+install(TARGETS ${XdevLWindowWaylandLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

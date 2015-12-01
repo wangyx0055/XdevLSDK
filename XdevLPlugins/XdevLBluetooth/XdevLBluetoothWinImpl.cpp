@@ -148,8 +148,8 @@ namespace xdl {
 	}
 
 	xdl::xdl_int XdevLBluetoothWinImpl::open(const xdl_char* name) {
-		DCB dcb;
-		COMMTIMEOUTS timeout;
+//		DCB dcb;
+//		COMMTIMEOUTS timeout;
 #define DEFAULT_BUFLEN 512
 
 		// Hard coded directly, got it from the receiver/server

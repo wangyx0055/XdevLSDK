@@ -1,0 +1,193 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLRAIGL)
+
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLRAIGL XdevLRAIGL)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLRAIGL_MAJOR_VERSION 1)
+set(XDEVLRAIGL_MINOR_VERSION 0)
+set(XDEVLRAIGL_PATCH_VERSION 0)
+set(XDEVLRAIGL_VERSION "${XDEVLRAIGL_MAJOR_VERSION}.${XDEVLRAIGL_MINOR_VERSION}.${XDEVLRAIGL_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLRAIGL_MAJOR_VERSION=${XDEVLRAIGL_MAJOR_VERSION}
+	-DXDEVLRAIGL_MINOR_VERSION=${XDEVLRAIGL_MINOR_VERSION} 
+	-DXDEVLRAIGL_PATCH_VERSION=${XDEVLRAIGL_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLRAIGL_MODULE_MAJOR_VERSION 0)
+set(XDEVLRAIGL_MODULE_MINOR_VERSION 1)
+set(XDEVLRAIGL_MODULE_PATCH_VERSION 0)
+set(XDEVLRAIGL_MODULE_VERSION "${XDEVLRAIGL_MODULE_MAJOR_VERSION}.${XDEVLRAIGL_MODULE_MINOR_VERSION}.${XDEVLRAIGL_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLRAIGL_MODULE_MAJOR_VERSION=${XDEVLRAIGL_MODULE_MAJOR_VERSION}
+	-DXDEVLRAIGL_MODULE_MINOR_VERSION=${XDEVLRAIGL_MODULE_MINOR_VERSION} 
+	-DXDEVLRAIGL_MODULE_PATCH_VERSION=${XDEVLRAIGL_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR ${XDEVL_PLUGINS}/XdevLRAI)
+set(SRC_DIR ${XDEVL_PLUGINS}/XdevLRAI)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(HEADER_INTERFACE_FILE 
+	${HEADERS_DIR}/XdevLRAI.h
+	${HEADERS_DIR}/XdevLTexture.h
+	${HEADERS_DIR}/XdevLTextureCube.h
+	${HEADERS_DIR}/XdevLTexture3D.h
+	${HEADERS_DIR}/XdevLFrameBuffer.h
+	${HEADERS_DIR}/XdevLVertexBuffer.h
+	${HEADERS_DIR}/XdevLIndexBuffer.h
+	${HEADERS_DIR}/XdevLVertexArray.h
+	${HEADERS_DIR}/XdevLVertexDeclaration.h
+	${HEADERS_DIR}/XdevLStreamBuffer.h	
+	${HEADERS_DIR}/XdevLShader.h
+	${HEADERS_DIR}/XdevLShaderProgram.h
+)
+
+#
+# Set header files for the library.
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
+	${HEADERS_DIR}/XdevLRAIGL/XdevLOpenGLUtils.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLTextureImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLTextureCubeImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLTexture3DImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLFrameBufferImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLOpenGLImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLVertexBufferImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLIndexBufferImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLVertexArrayImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLShaderImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLShaderProgramImpl.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${SRC_DIR}/XdevLRAIGL/XdevLOpenGLImpl.cpp
+	${SRC_DIR}/XdevLRAIGL/XdevLVertexArrayImpl.cpp
+	${SRC_DIR}/XdevLRAIGL/XdevLFrameBufferImpl.cpp
+	${SRC_DIR}/XdevLRAIGL/XdevLShaderProgramImpl.cpp
+	${SRC_DIR}/XdevLRAIGL/XdevLOpenGLUtils.cpp
+	${SRC_DIR}/GL/glew.c
+)
+
+
+add_definitions(-DGLEW_STATIC)
+
+#
+# Add external libraries folder
+
+link_directories(
+	${XdevL_BINARY_DIR}/lib
+)
+
+#
+# Create the library
+
+add_library(${XdevLRAIGL} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Add include directories
+
+include_directories(
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+	${OPENGL_INCLUDE_DIR}
+	${HEADERS_DIR}
+)
+
+#
+# Add external ibraries
+
+if(APPLE)
+	if(CMAKE_BUILD_TYPE MATCHES Debug)
+		target_link_libraries(${XdevLRAIGL}
+			XdevLd
+			${OPENGL_gl_LIBRARY}
+			"-framework AGL"
+		)
+		else()
+			target_link_libraries(${XdevLRAIGL}
+				XdevL
+				${OPENGL_gl_LIBRARY}
+				"-framework AGL"
+		)
+	endif()
+elseif(UNIX)
+	if(CMAKE_BUILD_TYPE MATCHES Debug)
+		target_link_libraries(${XdevLRAIGL}
+			XdevLd
+			GL
+		)
+	else()
+		target_link_libraries(${XdevLRAIGL}
+			XdevL
+			GL
+		)
+	endif()
+elseif(WIN32)
+	if(CMAKE_BUILD_TYPE MATCHES Debug)
+		target_link_libraries(${XdevLRAIGL}
+			XdevLd
+			opengl32
+			gdi32
+		)
+	else()
+		target_link_libraries(${XdevLRAIGL}
+			XdevL
+			opengl32
+			gdi32
+		)
+	endif()
+endif()
+
+#
+# Change the outputname of the library
+
+set_property(TARGET ${XdevLRAIGL} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLRAIGL} PROPERTY SUFFIX "-${XDEVLRAIGL_MODULE_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLRAIGL} PROPERTY SUFFIX "-${XDEVLRAIGL_MODULE_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLRAIGL} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})
+

@@ -10,16 +10,16 @@ xdl::XdevLModuleDescriptor xdl::XdevLFTDILinuxImpl::m_moduleDescriptor{vendor,
 																																						moduleNames[0],
 																																						copyright, 
 																																						description, 
-																																						XdevLSerialMajorVersion, 
-																																						XdevLSerialMinorVersion,
-																																						XdevLSerialPatchVersion};
+																																						XdevLFTDIMajorVersion, 
+																																						XdevLFTDIMinorVersion,
+																																						XdevLFTDIPatchVersion};
 																																			
 xdl::XdevLPluginDescriptor pluginDescriptor{	
 																					xdl::pluginName,
 																					xdl::moduleNames,
-																					xdl::XdevLSerialPluginMajorVersion,
-																					xdl::XdevLSerialPluginMinorVersion,
-																					xdl::XdevLSerialPluginPatchVersion
+																					xdl::XdevLFTDIPluginMajorVersion,
+																					xdl::XdevLFTDIPluginMinorVersion,
+																					xdl::XdevLFTDIPluginPatchVersion
 																				};
 																								
 

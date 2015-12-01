@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is the starting element for all XdevL 0.x.y applications -->
+<XdevLCoreProperties>
+
+	<!-- Plug necessary plugins -->
+	<XdevLPlugins>
+		<XdevLPlugin name="XdevLWindowSDL"			version="1.0.0"/>
+		<XdevLPlugin name="XdevLKeyboard"			version="1.0.0"/>
+		<XdevLPlugin name="XdevLMouse"				version="1.0.0"/>
+		<XdevLPlugin name="XdevLOpenGLContextSDL"	version="0.1.0"/>
+		<XdevLPlugin name="XdevLRAIGL"				version="0.1.0"/>
+        <XdevLPlugin name="XdevLFont"				version="1.0.0"/>
+	</XdevLPlugins>
+
+	<!-- Create necessary modules -->
+	<XdevLModules>
+		<XdevLModule id="MyWindow"		name="XdevLWindow"/>
+		<XdevLModule id="MyKeyboard"	name="XdevLKeyboard"/>
+		<XdevLModule id="MyMouse"		name="XdevLMouse"/>
+		<XdevLModule id="MyRAIGL"		name="XdevLRAIGL"/>
+		<XdevLModule id="MyFontSystem"	name="XdevLFontSystem"/>
+		<XdevLModule id="MyTextLayout"	name="XdevLTextLayout"/>
+	</XdevLModules>
+
+	<!-- Setting some properties of the XdevLWindow module. -->
+	<XdevLWindow id="MyWindow">
+		<Title> (C) 2005 - 2015 Cengiz Terzibas RAI (Rendering Abstraction Interface) Demo </Title>
+		<Fullscreen> 0 </Fullscreen>
+		<X> 0 </X>
+		<Y> 0 </Y>
+		<Width>800 </Width>
+		<Height> 600 </Height>
+		<HidePointer>0</HidePointer>
+	</XdevLWindow>
+
+	<XdevLOpenGLContext id="XdevLRAIOpenGLContext" vsync="0" />
+
+</XdevLCoreProperties>
+

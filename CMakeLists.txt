@@ -13,38 +13,24 @@ set(XDEVL_SDK ${XdevLSDK_SOURCE_DIR})
 set(XDEVL_HOME ${XDEVL_SDK}/XdevL)
 set(XDEVL_PLUGINS ${XDEVL_SDK}/XdevLPlugins)
 set(XDEVL_DEMOS ${XDEVL_SDK}/XdevLDemos)
+set(XDEVL_TOOLS ${XDEVL_SDK}/XdevLUtils)
 set(XDEVL_EXTERNALS ${XDEVL_SDK}/XdevLExternals)
 set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".xdp")
+
+# Where shall we install the libs, headers and plugins?
+set(XDEVL_INCLUDE_INSTALL_PATH "/usr/include/XdevL")
+set(XDEVL_LIB_INSTALL_PATH "/usr/lib")
+set(XDEVL_PLUGINS_INCLUDE_INSTALL_PATH "/usr/include/XdevLPlugins")
+set(XDEVL_PLUGINS_INSTALL_PATH "/usr/lib/XdevLPlugins")
+
 #
 # Set the XdevL version
 #
 
 set(XDEVLSDK_MAJOR_VERSION 0)
 set(XDEVLSDK_MINOR_VERSION 5)
-set(XDEVLSDK_MICRO_VERSION 0)
+set(XDEVLSDK_PATCH_VERSION 1)
 set(XDEVLSDK_VERSION "${XDEVLSDK_MAJOR_VERSION}.${XDEVLSDK_MINOR_VERSION}.${XDEVLSDK_MICRO_VERSION}")
-
-
-#
-# Select plugins to compile.
-#
-
-option(BUILD_NETWORK "Builds the Network plugin" ON)
-option(BUILD_KEYBOARD "Builds the Keyboard plugin" ON)
-option(BUILD_MOUSE "Builds the Mouse plugin" ON)
-option(BUILD_JOYSTICK "Builds the Joystick plugin" ON)
-option(BUILD_SERIAL "Builds the serial port plugin" ON)
-option(BUILD_BLUETOOTH "Builds the bluetooth plugin" ON)
-option(BUILD_FTDI "Builds the FTDI Serial Port plugin" OFF)
-option(BUILD_AUDIO "Builds the audio plugin" ON)
-option(BUILD_OPENGL "Builds the OpenGL plugin" ON)
-option(BUILD_SDL "Builds the SDL plugin" ON)
-option(BUILD_OGRE "Builds the ogre plugin" ON)
-option(BUILD_GL_CONTEXT "Builds the new OpenGL context plugin" ON)
-option(BUILD_WAYLAND "Builds the Wayland plugin" ON)
-option(BUILD_X11 "Builds the X11 plugin" ON)
-option(BUILD_MOUSE_SERVER "Builds the raw mouse server" ON)
-option(BUILD_FILESYSTEM "Builds the Directory module" ON)
 
 #
 # Check for 64 or 32 bit
@@ -96,6 +82,7 @@ endif()
 
 if(COMPILER_GCC OR COMPILER_CLANG)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+	set(CMAKE_CXX_STANDARD 11 )
 elseif(COMPILER_VISUAL_STUDIO)
 endif()
 
@@ -108,6 +95,38 @@ if(APPLE)
 elseif(WIN32)
 	set(DirectX_INCLUDEDIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Include")
 	set(DirectX_LIBRARYDIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64")
+endif()
+
+#
+# Select plugins to compile.
+#
+
+option(BUILD_NETWORK "Builds the Network plugin" ON)
+option(BUILD_KEYBOARD "Builds the Keyboard plugin" ON)
+option(BUILD_MOUSE "Builds the Mouse plugin" ON)
+option(BUILD_JOYSTICK "Builds the Joystick plugin" ON)
+option(BUILD_SERIAL "Builds the serial port plugin" ON)
+option(BUILD_BLUETOOTH "Builds the bluetooth plugin" ON)
+option(BUILD_FTDI "Builds the FTDI Serial Port plugin" OFF)
+option(BUILD_NATIVE_AUDIO "Builds the audio plugin" ON)
+option(BUILD_OPENGL "Builds the OpenGL plugin" ON)
+option(BUILD_FONT "Builds the Font plugin" ON)
+option(BUILD_SDL "Builds the SDL plugin" ON)
+option(BUILD_OGRE "Builds the ogre plugin" ON)
+option(BUILD_GL_CONTEXT "Builds the new OpenGL context plugin" ON)
+option(BUILD_WAYLAND "Builds the Wayland plugin" ON)
+option(BUILD_MOUSE_SERVER "Builds the raw mouse server" ON)
+option(BUILD_FILESYSTEM "Builds the Directory module" ON)
+option(BUILD_NATIVE_WINDOWS "Build native window support" ON)
+option(BUILD_DEMOS "Builds all demos" ON)
+
+
+if(NOT PLATFORM_LINUX)
+	set(BUILD_X11 OFF)
+	set(BUILD_WAYLAND OFF)
+	set(BUILD_X11 OFF)
+	set(BUILD_MOUSE_SERVER OFF)
+	set(BUILD_FTDI OFF)
 endif()
 
 #
@@ -156,27 +175,85 @@ endif()
 
 # Build the Bluetooth Port Communication plugin.
 if(BUILD_BLUETOOTH)
-	add_subdirectory(XdevLPlugins/XdevLBluetooth)
+	find_package(Bluetooth)
+	if(Bluetooth_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLBluetooth)
+	else()
+		message(STATUS "XdevLBluetooth will not be build.")
+	endif()
+endif()
+
+add_subdirectory(XdevLPlugins/XdevLBlankPlugin)
+
+# Build the Audio plugin.
+if(BUILD_NATIVE_AUDIO)
+	if(WIN32)
+		# TODO Add here window audio handling
+	elseif(APPLE)
+		add_subdirectory(XdevLPlugins/XdevLAudio/XdevLAudioCoreAudio)
+	elseif(UNIX)
+		add_subdirectory(XdevLPlugins/XdevLAudio/XdevLAudioAlsa)
+	endif()
+else()
+	find_package(OpenAL)
+	if(OPENAL_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLAudio/XdevLAudioOpenAL)
+	else()
+		message(STATUS "XdevLAudioOpenAL will not be build.")
+	endif()
 endif()
 
 # Build the OpenGL plugin.
 if(BUILD_OPENGL)
-	add_subdirectory(XdevLPlugins/XdevLOpenGL)
+	find_package(OpenGL)
+	if(OPENGL_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLRAI/XdevLRAIGL)
+	else()
+		message(STATUS "XdevLRAIGL will not be build.")
+	endif()
+endif()
+
+# Build the Font plugin.
+if(BUILD_FONT)
+	add_subdirectory(XdevLPlugins/XdevLFont)
 endif()
 
 # Build the SDL plugin.
 if(BUILD_SDL)
-	add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowSDL)
+	find_package(SDL2)
+	if(SDL2_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowSDL)
+	else()
+		message(WARNING "XdevLWindowSDL will not be build.")
+	endif()
 endif()
 
-# Build the Audio plugin.
-if(BUILD_AUDIO)
-	add_subdirectory(XdevLPlugins/XdevLAudio)
+#Build native window plugins.
+if(BUILD_NATIVE_WINDOWS)
+	if(WIN32)
+		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWin32)
+	elseif(APPLE)
+		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowCocoa)
+	elseif(UNIX)
+		find_package(Xrandr)
+		if(Xrandr_FOUND)
+			add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowX11)
+		else()
+			message(WARNING "XdevLWindowX11 will not be build.")
+		endif()
+	endif()
 endif()
 
 # Build the ogre plugin.
 if(BUILD_OGRE)
-	add_subdirectory(XdevLPlugins/XdevLOgre)
+	find_package(OGRE)
+	find_package(Boost COMPONENTS system)
+
+	if(OGRE_FOUND AND Boost_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLOgre)
+	else()
+		message(STATUS "XdevLOgre will not be build.")
+	endif()
 endif()
 
 # Build the FTDI Serial Port plugin.
@@ -186,13 +263,15 @@ endif()
 
 # Build the Wayland Window plugin.
 if(BUILD_WAYLAND)
-	add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWayland)
+	find_package(Wayland)
+	if(Wayland_FOUND)
+		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWayland)
+	else()
+		message(STATUS "XdevLWindowWayland will not be build.")
+	endif()
 endif()
 
-# Build the X11 Window plugin.
-if(BUILD_X11)
-	add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowX11)
-endif()
+
 
 # Build the Mouse Server plugins for raw mouse events.
 if(BUILD_MOUSE_SERVER)
@@ -205,15 +284,44 @@ endif()
 
 
 # Build the new OpenGL Contect plugin.
-#if(BUILD_GL_CONTEXT)
-	if(WIN32)
-		add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextWGL)
-	elseif(APPLE)
-		add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextCocoa)
-	elseif(UNIX)
-		add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextGLX)
+if(BUILD_GL_CONTEXT)
+	if(OPENGL_FOUND)
+		find_package(SDL2)
+		if(SDL2_FOUND)
+			add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextSDL)
+		else()
+			message(STATUS "XdevLOpenGLContextSDL will not be build.")
+		endif()
+		
+		if(WIN32)
+			add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextWGL)
+		elseif(APPLE)
+			add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextCocoa)
+		elseif(UNIX)
+			add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextGLX)
+		endif()
+	else()
+		message(STATUS "XdevLOpenGLContextSDL, XdevLOpenGLContextWGL, XdevLOpenGLContextCocoa or XdevLOpenGLContextGLX will not be build.")
 	endif()
+endif()
+
+#if(BUILD_DEMOS)
+#	add_subdirectory(XdevLDemos)
 #endif()
 
+add_subdirectory(XdevLUtils/XdevLBT)
+add_subdirectory(XdevLUtils/XdevLCodeLiteGenerator)
 
-add_subdirectory(XdevLDemos)
+
+# All packaging stuff
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Cengiz Terzibas") #required
+SET(CPACK_PACKAGE_VENDOR "Cengiz Terzibas")
+SET(CPACK_PACKAGE_VERSION ${XDEVLSDK_VERSION})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${XDEVLSDK_MAJOR_VERSION})
+SET(CPACK_PACKAGE_VERSION_MINOR ${XDEVLSDK_MINOR_VERSION})
+SET(CPACK_PACKAGE_VERSION_PATCH ${XDEVLSDK_PATCH_VERSION})
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The XdevLSDK framework.")
+
+include(CPack)

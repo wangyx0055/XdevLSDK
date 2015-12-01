@@ -5,6 +5,7 @@
 #include <XdevLOpenGLContext/XdevLOpenGLContext.h>
 
 #import <Cocoa/Cocoa.h>
+#include "mach-o/dyld.h"
 #include <OpenGL/CGLTypes.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/CGLRenderers.h>
@@ -66,11 +67,13 @@ namespace xdl {
 
 			virtual void* getInternal(const char* id);
 
+			virtual void* getProcAddress(const xdl_char* func);
 			virtual xdl_int getAttributes(XdevLOpenGLContextAttributes& attributes);
 			virtual xdl_int setAttributes(const XdevLOpenGLContextAttributes& attributes);
 			virtual xdl_int create(XdevLWindow* window);
 			virtual xdl_int makeCurrent(XdevLWindow* window);
 			virtual xdl_int swapBuffers();
+			virtual xdl_int setVSync(xdl_bool enableVSync) override;
 
 	private:
 		NXdevLOpenGLContext*					m_openGLContext;

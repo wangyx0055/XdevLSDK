@@ -122,22 +122,14 @@
     </VirtualDirectory>
     <File Name="glsl_demo.xml"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
   <Dependencies Name="Debug_MacOSX_64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
   <Dependencies Name="Release_MacOSX_64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
         <IncludePath Value="$(XDEVL_HOME)/include"/>
         <IncludePath Value="$(XDEVL_PLUGINS)"/>
-        <IncludePath Value="$(XDEVL_PLUGINS)/XdevLOpenGL"/>
+        <IncludePath Value="$(XDEVL_PLUGINS)/XdevLRAI"/>
         <Preprocessor Value="GLEW_STATIC"/>
       </Compiler>
       <Linker Options="">
@@ -145,7 +137,7 @@
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
         <LibraryPath Value="$(XDEVL_PLUGINS)/lib"/>
         <LibraryPath Value="$(XDEVL_EXTERNAL)/lib"/>
-        <LibraryPath Value="/usr/lib/nvidia-352"/>
+        <LibraryPath Value="/usr/lib/nvidia-358"/>
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
@@ -201,6 +193,7 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
+        <LibraryPath Value="/usr/lib/nvidia-355"/>
         <Library Value="XdevLd"/>
         <Library Value="dl"/>
         <Library Value="GL"/>
@@ -588,4 +581,14 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>

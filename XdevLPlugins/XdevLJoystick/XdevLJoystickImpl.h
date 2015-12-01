@@ -362,8 +362,6 @@ namespace xdl {
 						delegate(AXIS_3, m_Axes[AXIS_3]->getValue());
 					}
 				}
-				m_Axes[AXIS_0]->setDeltaValue(0.0f);
-				m_Axes[AXIS_1]->setDeltaValue(0.0f);
 			}
 			break;
 			case XDEVL_JOYSTICK_POV: {

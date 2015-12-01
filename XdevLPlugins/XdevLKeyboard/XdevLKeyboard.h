@@ -22,17 +22,10 @@
 
 #include <XdevLModule.h>
 #include <XdevLInputSystem.h>
-#include <XdevLKeyboard/XdevLScanCode.h>
-#include <XdevLKeyboard/XdevLKeyCode.h>
 
 namespace xdl {
 
 	class XdevLWindow;
-
-	enum XdevLKeyStates {
-	    XDEVL_KEY_UP,
-	    XDEVL_KEY_DOWN
-	};
 
 	/**
 		@class XdevLKeyboard

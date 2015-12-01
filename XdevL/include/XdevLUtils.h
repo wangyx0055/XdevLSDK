@@ -60,12 +60,6 @@ namespace xdl {
 	  XdevLVersion& version,
 	  const std::string& filename);
 
-	// Search a plugin in a specific directory.
-	xdl_int searchPluginInFolder(const std::string& pluginName, const XdevLVersion& version, const std::string& folder);
-
-	// Collect all available plugins in a specific directory.
-	xdl_int collectAllPlugins(const std::string& folder, std::vector<std::string>& list);
-
 	/**
 		@class XdevLFreeList
 		@brief Freelist implementation

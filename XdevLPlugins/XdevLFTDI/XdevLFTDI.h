@@ -28,15 +28,47 @@
 
 namespace xdl {
 
-	static const XdevLString	vendor			{"www.codeposer.net"};
-	static const XdevLString	author			{"Cengiz Terzibas"};
-	static const XdevLString	copyright		{"(c) 2005 - 2014 Cengiz Terzibas."};
-	static const XdevLString	pluginName 	{"XdevLFTDI"};
-	static const XdevLString	description	{"Creates a connection and read/write methods to a FTDI USB device."};
+	// Holds the plugin major version.
+	const xdl_uint XdevLFTDIPluginMajorVersion = XDEVLFTDI_MAJOR_VERSION;
 
-	static const std::vector<XdevLModuleName>	moduleNames	{ 
-																													XdevLModuleName("XdevLFTDI")
-																												};
+	// Holds the plugin minor version.
+	const xdl_uint XdevLFTDIPluginMinorVersion = XDEVLFTDI_MINOR_VERSION;
+
+	// Holds the plugin patch version.
+	const xdl_uint XdevLFTDIPluginPatchVersion = XDEVLFTDI_PATCH_VERSION;
+
+
+
+	// Holds the Major version number.
+	const xdl_uint XdevLFTDIMajorVersion = XDEVLFTDI_MODULE_MAJOR_VERSION;
+
+	// Holds the Minor version number.
+	const xdl_uint XdevLFTDIMinorVersion = XDEVLFTDI_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLFTDIPatchVersion = XDEVLFTDI_MODULE_PATCH_VERSION;
+
+
+
+	static const XdevLString vendor {
+		"www.codeposer.net"
+	};
+	static const XdevLString author {
+		"Cengiz Terzibas"
+	};
+	static const XdevLString copyright {
+		"(c) 2005 - 2014 Cengiz Terzibas."
+	};
+	static const XdevLString pluginName {
+		"XdevLFTDI"
+	};
+	static const XdevLString description {
+		"Creates a connection and read/write methods to a FTDI USB device."
+	};
+
+	static const std::vector<XdevLModuleName> moduleNames { 
+		XdevLModuleName("XdevLFTDI")
+	};
 
 	/**
 		@class XdevLFTDILinuxImpl

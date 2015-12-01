@@ -38,6 +38,9 @@ namespace xdl {
 		XdevLWindowServerPatchVersion
 	};
 
+	xdl::XdevLWindowEventServer* windowEventServer = nullptr;
+	xdl::XdevLCursor* cursor = nullptr;
+	xdl::XdevLModuleCreateParameter* XdevLWindowEventServerParameter;
 
 	static xdl_bool eventThreadIsRunning = xdl_false;
 
@@ -59,81 +62,6 @@ namespace xdl {
 	}
 
 
-
-
-	xdl_bool XdevLWindowBase::getWindowBorder() {
-		return m_border;
-	}
-
-	xdl_uint XdevLWindowBase::getWindowID() {
-		return m_id;
-	}
-
-	XdevLWindowSize::type XdevLWindowBase::getWidth() const {
-		return m_size.width;
-	}
-
-	XdevLWindowSize::type XdevLWindowBase::getHeight() const {
-		return m_size.height;
-	}
-
-	XdevLWindowPosition::type XdevLWindowBase::getX() const {
-		return m_position.x;
-	}
-
-	XdevLWindowPosition::type XdevLWindowBase::getY() const {
-		return m_position.y;
-	}
-
-	const XdevLWindowTitle& XdevLWindowBase::getTitle() {
-		return m_title;
-	}
-
-	xdl_bool XdevLWindowBase::getFullscreen() const {
-		return m_fullScreen;
-	}
-
-	xdl_int XdevLWindowBase::getColorDepth() const {
-		return m_colorDepth;
-	}
-
-	void XdevLWindowBase::setX(XdevLWindowPosition::type x) {
-		m_position.x = x;
-	}
-
-	void XdevLWindowBase::setY(XdevLWindowPosition::type y) {
-		m_position.y = y;
-	}
-
-	void XdevLWindowBase::setWidth(XdevLWindowSize::type width) {
-		m_size.width = width;
-	}
-
-	void XdevLWindowBase::setHeight(XdevLWindowSize::type height) {
-		m_size.height = height;
-	}
-
-	void XdevLWindowBase::setColorDepth(int depth) {
-		m_colorDepth = depth;
-	}
-
-	void XdevLWindowBase::setTitle(const XdevLWindowTitle& title) {
-		m_title = title;
-	}
-
-	xdl_bool XdevLWindowBase::getHidePointer() const {
-		return m_hideMouse;
-	}
-
-	void XdevLWindowBase::setHidePointer(xdl_bool state) {
-		m_hideMouse = state;
-	}
-
-
-//
-// -----------------------------------------------------------------------------
-//
-
 	XdevLWindowImpl::XdevLWindowImpl(xdl_uint id, XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLModuleAutoImpl<XdevLWindow>(parameter, desriptor),
 		m_rootWindow(NULL),
@@ -146,7 +74,8 @@ namespace xdl {
 		m_border(xdl_true),
 		m_numberOfJoystickDevices(0),
 		m_numberOfJoystickButtons(0),
-		m_numberOfJoystickAxis(0) {
+		m_numberOfJoystickAxis(0),
+		m_windowType(WINDOW_NORMAL) {
 
 		m_position.x = 0;
 		m_position.y = 0;
@@ -157,29 +86,47 @@ namespace xdl {
 		m_backgroundColor[0] = 0;
 		m_backgroundColor[1] = 0;
 		m_backgroundColor[2] = 0;
-		m_backgroundColor[3] = 0;
+		m_backgroundColor[3] = 255;
 
 	}
-	
+
 	xdl_int XdevLWindowImpl::notify(XdevLEvent& event) {
-		XdevLModuleAutoImpl::notify(event);
-		
+
 		switch(event.type) {
-		  case XDEVL_JOYSTICK_REQ_DEVICES_INFO: {
-			std::cout << "XdevLWindowImpl::notify: XDEVL_JOYSTICK_REQ_NUM_DEV received." << std::endl;
-			XdevLEvent event;
-			event.type = XDEVL_JOYSTICK_RPLY_DEVICES_INFO;
-			event.jdeviceinfo.sender = this->getID().getHashCode();
-			event.jdeviceinfo.timestamp = this->getMediator()->getTime();
-			event.jdeviceinfo.number_devices = m_numberOfJoystickDevices;
-			event.jdeviceinfo.number_buttons = m_numberOfJoystickButtons;
-			event.jdeviceinfo.number_axis = m_numberOfJoystickAxis;
-			this->getMediator()->fireEvent(event);
-		  }break;
+			case XDEVL_WINDOW_EVENT: {
+				switch(event.window.event) {
+					case XDEVL_WINDOW_MOVED: {
+						m_position.x = event.window.x;
+						m_position.y = event.window.y;
+						m_size.width = event.window.width;
+						m_size.height = event.window.height;
+					}break;
+					case XDEVL_WINDOW_RESIZED:  {
+						m_position.x = event.window.x;
+						m_position.y = event.window.y;
+						m_size.width = event.window.width;
+						m_size.height = event.window.height;
+					} break;
+				}
+			}
+			break;
+			case XDEVL_JOYSTICK_REQ_DEVICES_INFO: {
+				std::cout << "XdevLWindowImpl::notify: XDEVL_JOYSTICK_REQ_NUM_DEV received." << std::endl;
+				XdevLEvent event;
+				event.type = XDEVL_JOYSTICK_RPLY_DEVICES_INFO;
+				event.jdeviceinfo.sender = this->getID().getHashCode();
+				event.jdeviceinfo.timestamp = this->getMediator()->getTimer().getTime64();
+				event.jdeviceinfo.number_devices = m_numberOfJoystickDevices;
+				event.jdeviceinfo.number_buttons = m_numberOfJoystickButtons;
+				event.jdeviceinfo.number_axis = m_numberOfJoystickAxis;
+				this->getMediator()->fireEvent(event);
+			}
+			break;
 		}
-		return xdl::ERR_OK;
+
+		return 	XdevLModuleAutoImpl::notify(event);;
 	}
-	
+
 	void XdevLWindowImpl::increaseWindowCounter() {
 		windowCounter++;
 	}
@@ -260,6 +207,10 @@ namespace xdl {
 		m_rootWindow = window;
 	}
 
+	void XdevLWindowImpl::setWindowDecoration(xdl_bool enable) {
+		m_border = enable;
+	}
+
 	int XdevLWindowImpl::readWindowInfo(TiXmlDocument& document) {
 		TiXmlHandle docHandle(&document);
 		TiXmlElement* root = docHandle.FirstChild(XdevLCorePropertiesName.c_str()).FirstChildElement("XdevLWindow").ToElement();
@@ -328,10 +279,20 @@ namespace xdl {
 			if(readWindowInfo(xmlDocument) != ERR_OK)
 				return ERR_ERROR;
 		}
+
 		return ERR_OK;
 	}
 
 	xdl_int XdevLWindowImpl::shutdown() {
+
+		if(nullptr == windowEventServer) {
+			return ERR_OK;
+		}
+
+		// TODO We flush here to receive pending events before we unregister from the events server. Maybe harmful?
+		windowEventServer->flush();
+		windowEventServer->unregisterWindowFromEvents(this);
+
 		return ERR_OK;
 	}
 
@@ -357,7 +318,7 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerImpl::destroy(XdevLWindow* window) {
-		assert((window == nullptr) && "XdevLWindowServerImpl::destroy: window == nullptr");
+		assert((window) && "XdevLWindowServerImpl::destroy: window == nullptr");
 
 		// Find in the map and remove it and free all resources.
 		auto tmp = m_windowList.find(window->getWindowID());
@@ -365,11 +326,57 @@ namespace xdl {
 		if(tmp != m_windowList.end()) {
 			m_windowList.erase(tmp);
 
+			// We do not destroy using event system. Directly delete which is handles in the descructor.
 			delete tmp->second;
 
 			return ERR_OK;
 		}
 		return ERR_ERROR;
+	}
+
+
+
+	//
+	// -------------------------------------------------------------------------
+	//
+
+	XdevLWindowEventServerImpl::XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleAutoImpl<XdevLWindowEventServer>(parameter, descriptor) {
+
+	}
+
+	xdl_int XdevLWindowEventServerImpl::registerWindowForEvents(XdevLWindow* window) {
+		WindowEventMapType::iterator it = m_windows.find(window->getWindowID());
+		if(it == m_windows.end()) {
+			m_windows[window->getWindowID()] = window;
+			return ERR_OK;
+		}
+		return ERR_ERROR;
+	}
+
+	xdl_int XdevLWindowEventServerImpl::unregisterWindowFromEvents(XdevLWindow* window) {
+		WindowEventMapType::iterator it = m_windows.find(window->getWindowID());
+		if(it != m_windows.end()) {
+			m_windows.erase(it);
+			return ERR_OK;
+		}
+		return ERR_ERROR;
+	}
+
+	XdevLWindow* XdevLWindowEventServerImpl::getWindow(xdl_uint id) {
+		return m_windows[id];
+	}
+
+	XdevLWindow* XdevLWindowEventServerImpl::getFocus() const {
+		return m_focusWindow;
+	}
+
+	void XdevLWindowEventServerImpl::focusGained(XdevLWindow* window) {
+		m_focusWindow = window;
+	}
+
+	void XdevLWindowEventServerImpl::flush() {
+
 	}
 
 

@@ -17,7 +17,6 @@
 #include <XdevLLog.h>
 #include <XdevLThread.h>
 #include <XdevLWindow/XdevLWindow.h>
-#include <XdevLKeyboard/XdevLKeyCode.h>
 #include <map>
 
 xdl::IPXdevLCore core = nullptr;
@@ -43,14 +42,14 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 
 		case xdl::XDEVL_KEY_PRESSED: {
 			printf(("WindowID: %d -> XDEVL_KEY_PRESSED\n"), event.window.windowid);
-			if(event.key.sym == xdl::KEY_ESCAPE) {
+			if(event.key.keycode == xdl::KEY_ESCAPE) {
 				run = xdl::xdl_false;
 			}
 		}
 		break;
 		case xdl::XDEVL_KEY_RELEASED: {
 			printf(("WindowID: %d -> XDEVL_KEY_RELEASED\n"), event.window.windowid);
-			if(event.key.sym == xdl::KEY_ESCAPE) {
+			if(event.key.keycode == xdl::KEY_ESCAPE) {
 				run = xdl::xdl_false;
 			}
 		}
@@ -206,7 +205,7 @@ int main(int argc, char* argv[]) {
 
 	// Get a window device.
 
-	window->SetType(xdl::WINDOW_NORMAL);
+	window->setType(xdl::WINDOW_NORMAL);
 	window->show();
 	window->setInputFocus();
 

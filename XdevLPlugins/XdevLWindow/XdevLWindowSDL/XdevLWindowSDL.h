@@ -45,6 +45,7 @@ namespace xdl {
 	const xdl_uint XdevLWindowPluginPatchVersion = XDEVLSDL_PATCH_VERSION;
 
 
+
 	// Holds the Major version number.
 	const xdl_uint XdevLWindowMajorVersion = XDEVLSDL_MODULE_MAJOR_VERSION;
 
@@ -55,41 +56,57 @@ namespace xdl {
 	const xdl_uint XdevLWindowPatchVersion = XDEVLSDL_MODULE_PATCH_VERSION;
 
 
+
+	// Holds the Major version number.
+	const xdl_uint XdevLWindowEventServerMajorVersion = XDEVLSDL_MODULE_MAJOR_VERSION;
+
+	// Holds the Minor version number.
+	const xdl_uint XdevLWindowEventServerMinorVersion = XDEVLSDL_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLWindowEventServerPatchVersion = XDEVLSDL_MODULE_PATCH_VERSION;
+
+
+
 	static const XdevLString windowPluginName {
 		"XdevLWindowSDL"
 	};
+
 	static const XdevLString windowDescription {
 		"Support for creating a window using SDL."
+	};
+	
+	static const XdevLString cursorDescription {
+		"Support for handling the cursor using SDL."
 	};
 
 	class XdevLWindowSDL : public XdevLWindowImpl, public thread::Thread  {
 		public:
 			XdevLWindowSDL(XdevLModuleCreateParameter* parameter);
 			virtual ~XdevLWindowSDL();
-			static XdevLModuleDescriptor m_windowSDLModuleDesc;
 
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
 			virtual xdl_int update();
-			int pollEvents();
 
-			const XdevLWindowPosition& getPosition();
-			const XdevLWindowSize& getSize();
+			virtual const XdevLWindowPosition& getPosition();
+			virtual const XdevLWindowSize& getSize();
+
+			virtual void showPointer();
+			virtual void hidePointer();
+			virtual void setPointerPosition(xdl_uint x, xdl_uint y);
+			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) ;
 
 			virtual void setSize(const XdevLWindowSize& size);
 			virtual void setPosition(const XdevLWindowPosition& position);
 			virtual void setTitle(const XdevLWindowTitle& title);
 			virtual void setFullscreen(xdl_bool state);
-			virtual void showPointer();
-			virtual void hidePointer();
-			virtual void setPointerPosition(xdl_uint x, xdl_uint y);
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) ;
 			virtual void setX(XdevLWindowPosition::type x);
 			virtual void setY(XdevLWindowPosition::type y);
 			virtual void setWidth(XdevLWindowSize::type width);
 			virtual void setHeight(XdevLWindowSize::type height);
-			virtual void SetType(XdevLWindowTypes type);
+			virtual void setType(XdevLWindowTypes type);
 			virtual XdevLWindowSize::type getWidth();
 			virtual XdevLWindowSize::type getHeight();
 			virtual XdevLWindowPosition::type getX();
@@ -110,9 +127,6 @@ namespace xdl {
 			virtual void setInputFocus();
 			virtual xdl_bool hasFocus();
 
-			/// Returns the input focus window.
-			virtual xdl_int getInputFocus(XdevLWindow** window);
-
 			virtual void setParent(XdevLWindow* window);
 
 			virtual xdl_int create() override;
@@ -120,6 +134,8 @@ namespace xdl {
 		protected:
 
 			xdl_int RunThread(thread::ThreadArgument* argument);
+
+
 
 		protected:
 			SDL_Window*				m_window;
@@ -141,6 +157,43 @@ namespace xdl {
 			                             const XdevLWindowSize& size);
 	};
 
+
+	class XdevLWindowSDLEventServer : public XdevLWindowEventServerImpl {
+		public:
+			XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter);
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+			virtual xdl_int update() override;
+
+			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
+			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
+			void flush() override;
+		private:
+			int pollEvents();
+	};
+	
+	
+	class XdevLCursorSDL : public XdevLModuleImpl<XdevLCursor>  {
+		public:
+			virtual ~XdevLCursorSDL() {}
+			
+			XdevLCursorSDL(XdevLModuleCreateParameter* parameter);
+
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+
+
+			virtual void show();
+			virtual void hide();
+			virtual void setPosition(xdl_uint x, xdl_uint y);
+			virtual xdl_int clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height);
+			virtual void releaseClip() override;
+			virtual xdl_int enableRelativeMotion();
+			virtual void disableRelativeMotion();
+
+	};
 }
 
 

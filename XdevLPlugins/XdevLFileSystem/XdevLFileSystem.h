@@ -57,6 +57,9 @@ namespace xdl {
 	/**
 		@class XdevLDirectoryEntity
 		@brief Information about an entity in the directory.
+        
+        This class holds information about one entity in the directory. Either
+        it is a file or a folder. 
 	*/
 	class XdevLDirectoryEntity {
 		public:
@@ -80,11 +83,16 @@ namespace xdl {
 			const XdevLString& getName() const {
 				return m_filename;
 			}
-
+            
+            /// Returns the type.
+            /**
+                @return One of the Type:
+            */
 			Type getType() {
 				return m_type;
 			}
-
+            
+            /// Returns the type as string.
 			XdevLString getTypeAsString() {
 				switch(m_type) {
 					case Type::REGULAR:
@@ -97,10 +105,12 @@ namespace xdl {
 				}
 			}
 			
+            /// Does this entity represent a directory?
 			xdl_bool isDirectory() {
 				return (m_type == Type::DIRECTORY ? xdl_true : xdl_false);
 			}
 			
+            /// Is this entity a regular file?
 			xdl_bool isRegular() {
 				return (m_type == Type::REGULAR ? xdl_true : xdl_false);
 			}

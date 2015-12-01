@@ -7,15 +7,14 @@
 	<XdevLPlugins>
 		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
 		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>  
-		<XdevLPlugin name="XdevLAudioAL"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLAudioOpenAL"	version="1.0.0"/>
 	</XdevLPlugins>
 
 	<!-- Create necessary modules -->
 	<XdevLModules>
 		<XdevLModule id="MyWindow"		name="XdevLWindow"/>
 		<XdevLModule id="MyKeyboard"	name="XdevLKeyboard"/>
-		<XdevLModule id="MyAudio"		name="XdevLAudio"/>
-		<XdevLModule id="MyAudioRecord" name="XdevLAudioALRecord"/>
+		<XdevLModule id="MyAudio"		name="XdevLAudioPlayback"/>
 	</XdevLModules>
 
 	<!-- Setting some properties of the XdevLWindow module. -->  

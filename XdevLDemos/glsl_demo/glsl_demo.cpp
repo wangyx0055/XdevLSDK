@@ -9,7 +9,12 @@
 
 #include <XdevL.h>
 #include <XdevLApplication.h>
-#include <XdevLOpenGL/XdevLOpenGL.h>
+
+#include <XdevLOpenGLContext/XdevLOpenGLContext.h>
+
+#include <XdevLRAI/GL/glew.h>
+#include <XdevLRAI/XdevLRAI.h>
+
 #include <cmath>
 #include <tm/tm.h>
 
@@ -158,7 +163,7 @@ static const GLfloat g_color_buffer_data[] = {
 class MyOpenGLApp : public xdl::XdevLApplication {
 	public:
 
-		MyOpenGLApp(int argc, char** argv, const xdl::XdevLFileName& xml_filename) throw() : 
+		MyOpenGLApp(int argc, char** argv, const xdl::XdevLFileName& xml_filename) throw() :
 			xdl::XdevLApplication(argc, argv, xml_filename),
 			m_opengl(nullptr),
 			m_frameBuffer(nullptr),
@@ -226,9 +231,11 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 						std::cout << "XDEVL_CORE_SHUTDOWN received.\n";
 						m_appIsRunning = xdl::xdl_false;
 					}
-				}break;
+				}
+				break;
 				case xdl::XDEVL_WINDOW_EVENT: {
 					switch(event.window.event) {
+						case xdl::XDEVL_WINDOW_MOVED:
 						case xdl::XDEVL_WINDOW_RESIZED: {
 							createScreenVertexArray(getWindow());
 						}
@@ -241,6 +248,11 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		}
 
 		void handleGraphics(xdl::xdl_double dT) {
+
+			if(m_left_mouse_button->getPressed()) {
+				rx += static_cast<GLfloat>(y_axis->getDeltaValue()*230.0);
+				ry += static_cast<GLfloat>(x_axis->getDeltaValue()*230.0);
+			}
 
 			//
 			// Let's render stuff into the framebuffer object with low resolution.
@@ -265,15 +277,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			tmath::identity(roty);
 			tmath::identity(rotz);
 
-			static xdl::xdl_float rx = 0.0;
-			static xdl::xdl_float ry = 0.0;
-
-			rx += 100.0f*dT;
-			ry += 100.0f*dT;
-
-
 			tmath::translate(0.0f, 0.0f, -3.0f,trans);
-			tmath::rotate_z(ry, rotz);
+			tmath::rotate_x(rx, rotz);
 			//tmath::rotate_x(rx, rotx);
 			tmath::rotate_y(ry, roty);
 			//	tmath::convert(qrotx, rotx);
@@ -308,14 +313,12 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			// Render into the second half of the normal framebuffer.
 			//
 
-			glViewport(0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
-			glClearColor(0.0f, 0.305f, 0.596f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			m_opengl->setViewport(0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
+			m_opengl->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
+			m_opengl->clearDepthTarget(1.0);
 
 			m_sp->activate();
 			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
-
-
 			m_sp->deactivate();
 
 
@@ -353,23 +356,24 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		// Initialize the rendering device.
 		//
 		xdl::xdl_int initRenderDevice() {
-			// Get the OpenGL context.
-			m_opengl = xdl::getModule<xdl::IPXdevLOpenGL330>(getCore(),  xdl::XdevLID("MyOpenGL"));
+			// Get OpenGL Rendering System.
+			m_opengl = xdl::getModule<xdl::IPXdevLRAI>(getCore(),  xdl::XdevLID("MyRAIGL"));
 			if(!m_opengl) {
 				return xdl::ERR_ERROR;
 			}
 
 			// We must attach the OpenGL context to a render m_window.
-			if(m_opengl->createContext(getWindow()) != xdl::ERR_OK) {
+			if(m_opengl->create(getWindow()) != xdl::ERR_OK) {
 				return xdl::ERR_ERROR;
 			}
 
-
-			std::cout << "--------------------------------------------------\n";
-			std::cout << "OpenGL Vendor : " << m_opengl->getVendor() << std::endl;
-			std::cout << "Version       : " << m_opengl->getVersion() << std::endl;
-			std::cout << "Shader Version: " << m_opengl->getShaderVersion() << std::endl;
-
+			// If we want we can get the OpenGL context to change some behaviour. Do get this module before
+			// creating the XdevLRAI module. That module will create a context for itself. If you plan in using
+			// only XdevLRAI interface do not get this module here. This is rather a hack to show how things work.
+			m_gl_context = xdl::getModule<xdl::XdevLOpenGLContext*>(getCore(), xdl::XdevLID("XdevLRAIOpenGLContext"));
+			if(!m_gl_context) {
+				return xdl::ERR_ERROR;
+			}
 
 			return xdl::ERR_OK;
 		}
@@ -378,6 +382,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		// Initialize and connect input devices.
 		//
 		xdl::xdl_int initInputHandling() {
+
 			getKeyboard()->getButton(xdl::KEY_ESCAPE, &m_esc);
 			getKeyboard()->getButton(xdl::KEY_F, &m_fullscreen);
 			getMouse()->getButton(xdl::BUTTON_LEFT, &m_left_mouse_button);
@@ -385,6 +390,11 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			if((m_esc == nullptr) || (m_left_mouse_button == nullptr)) {
 				return xdl::ERR_ERROR;
 			}
+
+
+			getMouse()->getAxis(xdl::AXIS_0, &x_axis);
+			getMouse()->getAxis(xdl::AXIS_1, &y_axis);
+
 			return xdl::ERR_OK;
 		}
 
@@ -393,13 +403,13 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			if(m_esc->getClicked()) {
 				m_appIsRunning = xdl::xdl_false;
 			}
-			
+
 			if(m_fullscreen->getClicked()) {
 				static xdl::xdl_bool fullscreen = xdl::xdl_false;
 				fullscreen = !fullscreen;
-						
+
 				getWindow()->setFullscreen(fullscreen);
-				
+
 			}
 
 		}
@@ -410,7 +420,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		xdl::xdl_int initFramebuffer() {
 
 			m_opengl->createFrameBuffer(&m_frameBuffer);
-			m_frameBuffer->init(80, 50);
+			m_frameBuffer->init(16, 16);
 			m_frameBuffer->addColorTarget(0	, xdl::XDEVL_FB_COLOR_RGBA);
 			m_frameBuffer->getTexture(0)->lock();
 			m_frameBuffer->getTexture(0)->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
@@ -421,7 +431,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_frameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24);
 
 			createScreenVertexArray(getWindow());
-		
+
 			m_opengl->createShaderProgram(&m_frameBufferSP);
 
 			m_opengl->createVertexShader(&m_frameBufferVS);
@@ -485,12 +495,13 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 
 		void createScreenVertexArray(xdl::IPXdevLWindow window) {
-			
+
 			// Layz destroying of the previous vertex array.
 			if(m_frameBufferArray != nullptr) {
 				m_opengl->destroy(m_frameBufferArray);
 			}
-			
+
+
 			xdl::xdl_float screen_vertex [] = {
 				0.0f, 0.0f,
 				(xdl::xdl_float)window->getWidth(), 0.0f,
@@ -525,8 +536,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 	private:
 
-
-		xdl::IPXdevLOpenGL330 		m_opengl;
+		xdl::XdevLOpenGLContext* 	m_gl_context;
+		xdl::IPXdevLRAI 			m_opengl;
 		xdl::XdevLFrameBuffer*		m_frameBuffer;
 		xdl::XdevLVertexArray*		m_frameBufferArray;
 		xdl::XdevLVertexShader*		m_frameBufferVS;
@@ -545,11 +556,15 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		xdl::xdl_int m_frameBufferProjectionMatrix;
 		xdl::xdl_int m_frameBufferTexture;
 
+		xdl::IPXdevLAxis x_axis;
+		xdl::IPXdevLAxis y_axis;
 		xdl::IPXdevLButton m_esc;
 		xdl::IPXdevLButton m_left_mouse_button;
 		xdl::IPXdevLButton m_fullscreen;
 
 		xdl::xdl_bool m_appIsRunning;
+		xdl::xdl_float rx;
+		xdl::xdl_float ry;
 
 };
 

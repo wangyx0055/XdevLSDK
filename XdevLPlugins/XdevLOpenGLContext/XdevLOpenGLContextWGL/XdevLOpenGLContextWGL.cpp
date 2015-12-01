@@ -4,8 +4,10 @@
 #include <XdevLWindow/XdevLWindow.h>
 #include <XdevLXstring.h>
 #include <XdevLPlatform.h>
-#include <GL/glew.h>
-#include <GL/wglew.h>
+#include <GL/GL.h>
+#include <GL/wglext.h>
+//#include <GL/glew.h>
+//#include <GL/wglew.h>
 #include <tinyxml.h>
 
 xdl::XdevLModuleDescriptor xdl::XdevLOpenGLWGL::m_moduleDescriptor{ vendor,
@@ -17,11 +19,11 @@ xdl::XdevLModuleDescriptor xdl::XdevLOpenGLWGL::m_moduleDescriptor{ vendor,
 																	XdevLOpenGLContextWGLMinorVersion,
 																	XdevLOpenGLContextWGLPatchVersion };
 
-xdl::XdevLPluginDescriptor m_bluetoothPluginDescriptor{ xdl::pluginName,
-														xdl::moduleNames,
-														xdl::XdevLOpenGLContextWGLPluginMajorVersion,
-														xdl::XdevLOpenGLContextWGLPluginMinorVersion,
-														xdl::XdevLOpenGLContextWGLPluginPatchVersion };
+xdl::XdevLPluginDescriptor wglPluginDescriptor{ xdl::pluginName,
+												xdl::moduleNames,
+												xdl::XdevLOpenGLContextWGLPluginMajorVersion,
+												xdl::XdevLOpenGLContextWGLPluginMinorVersion,
+												xdl::XdevLOpenGLContextWGLPluginPatchVersion };
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	// Create the "OpenGL" module.
@@ -39,10 +41,20 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 	return xdl::ERR_MODULE_NOT_FOUND;
 }
 
+extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
+	if (obj)
+		delete obj;
+}
+
+extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
+	return &wglPluginDescriptor;
+}
+
+
 namespace xdl {
 
 	XdevLOpenGLWGL::XdevLOpenGLWGL(XdevLModuleCreateParameter* parameter) : 
-		XdevLModuleAutoImpl(parameter, m_moduleDescriptor),
+		XdevLOpenGLContextBase(parameter, m_moduleDescriptor),
 		m_wnd(NULL),
 		m_DC(NULL),
 		m_RC(NULL),
@@ -53,6 +65,10 @@ namespace xdl {
 XdevLOpenGLWGL::~XdevLOpenGLWGL() {
 }
 
+void* XdevLOpenGLWGL::getProcAddress(const xdl_char* func) {
+	return (void*)wglGetProcAddress(func);
+}
+
 xdl_int XdevLOpenGLWGL::getAttributes(XdevLOpenGLContextAttributes& attributes) {
 	attributes = m_attributes;
 	return ERR_OK;
@@ -60,6 +76,13 @@ xdl_int XdevLOpenGLWGL::getAttributes(XdevLOpenGLContextAttributes& attributes) 
 
 xdl_int XdevLOpenGLWGL::setAttributes(const XdevLOpenGLContextAttributes& attributes) {
 	m_attributes = attributes;
+	return ERR_OK;
+}
+
+xdl_int XdevLOpenGLWGL::init() {
+	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
 	return ERR_OK;
 }
 
@@ -113,13 +136,13 @@ xdl_int XdevLOpenGLWGL::create(XdevLWindow* window) {
 		XDEVL_MODULE_ERROR("Failed to initialize OpenGL.\n");
 		return ERR_ERROR;
 	}else{
-		if(m_ARBMultisampleSupported == xdl_true && (m_fsaa > 0)){
-			glEnable(GL_MULTISAMPLE_ARB);
-		}
+//		if(m_ARBMultisampleSupported == xdl_true && (m_fsaa > 0)){
+//			glEnable(GL_MULTISAMPLE_ARB);
+//		}
 	}
 
 	// Set vertical syncronisation.
-	setVSync(m_VSync);
+	setVSync(getVSync());
 
 	// Get all OpenGL driver information, like vendor, version and extensions.
 	//getOpenGLInfos();
@@ -269,7 +292,7 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 
 	
 
-	if(WGLEW_ARB_create_context){
+	if (wglCreateContextAttribsARB){
 		std::vector<GLint> attribList;
 		if(m_major != -1 && m_minor != -1){
 			attribList.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
@@ -280,7 +303,7 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 		
 		xdl_int context_flags = 0;
 		attribList.push_back(WGL_CONTEXT_FLAGS_ARB);
-		if(m_debug){
+		if(m_debugMode){
 			context_flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 		}
 		attribList.push_back(context_flags);
@@ -314,14 +337,6 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 		XDEVL_MODULE_ERROR("Could not make GL context to the current context.\n");
 		return ERR_ERROR;
 	}
-
-	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if (GLEW_OK != err) {
-		XDEVL_MODULE_ERROR("GLEW: %s\n" <<  glewGetErrorString(err) << std::endl);
-	}
-
-
 	return ERR_OK;
 }
 
@@ -364,7 +379,8 @@ bool XdevLOpenGLWGL::initMultisample() {
 		break;
 	}
 
-	xdl_int iAttributes[] = { 		WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
+	xdl_int iAttributes[] = { 		
+		WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
 		WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
 		WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
 		WGL_COLOR_BITS_ARB,m_ColorDepth,
@@ -379,7 +395,7 @@ bool XdevLOpenGLWGL::initMultisample() {
                         
 	valid = wglChoosePixelFormatARB(m_DC, iAttributes, fAttributes, 64, m_ARBMultisampleFormat, &numFormats);
 	
-// If We Returned True, And Our Format Count Is Greater Than 1
+	// If We Returned True, And Our Format Count Is Greater Than 1
 	if (valid && numFormats >= 1) {
 		m_ARBMultisampleSupported = true;
 		return true;
@@ -388,7 +404,7 @@ bool XdevLOpenGLWGL::initMultisample() {
 }
 
 xdl_int XdevLOpenGLWGL::setVSync(xdl_bool state){
-	if(WGLEW_EXT_swap_control){
+	if (wglSwapIntervalEXT){
 		if(state)
 			wglSwapIntervalEXT(1);
 		else
@@ -402,14 +418,14 @@ xdl_int XdevLOpenGLWGL::setVSync(xdl_bool state){
 }
 
 xdl_int XdevLOpenGLWGL::setEnableFSAA(xdl_bool state){
-	if(m_ARBMultisampleSupported){
-		if(state)
-			glEnable(GL_MULTISAMPLE_ARB);
-		else{
-			glDisable(GL_MULTISAMPLE_ARB);
-		}
-		return ERR_OK;
-	}
+//	if(m_ARBMultisampleSupported){
+//		if(state)
+//			glEnable(GL_MULTISAMPLE_ARB);
+//		else{
+//			glDisable(GL_MULTISAMPLE_ARB);
+//		}
+//		return ERR_OK;
+//	}
 	return ERR_ERROR;
 }
 

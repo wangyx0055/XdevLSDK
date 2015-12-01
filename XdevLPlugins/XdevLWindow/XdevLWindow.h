@@ -51,8 +51,10 @@ namespace xdl {
 	enum XdevLWindowTypes {
 	    WINDOW_NORMAL,
 	    WINDOW_TOOLTIP,
+	    WINDOW_POPUP,
 	    WINDOW_DROPDOWN_MENU,
 	    WINDOW_SPLASH,
+	    WINDOW_NOTIFICATION,
 	    WINDOW_UNKNOWN
 	};
 
@@ -62,6 +64,7 @@ namespace xdl {
 	typedef XdevLSize XdevLWindowSize;
 
 	typedef XdevLString XdevLWindowTitle;
+
 
 	/**
 		@class XdevLWindow
@@ -152,19 +155,7 @@ namespace xdl {
 			virtual void setFullscreen(xdl_bool state) = 0;
 
 			/// Sets the window type.
-			virtual void SetType(XdevLWindowTypes type) = 0;
-
-			/// Show the pointer.
-			virtual void showPointer() = 0;
-
-			/// Hide the pointer.
-			virtual void hidePointer() = 0;
-
-			/// Sets the pointer position.
-			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
-
-			/// Clips the pointer position.
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) = 0;
+			virtual void setType(XdevLWindowTypes type) = 0;
 
 			/// Show the window.
 			/**
@@ -184,6 +175,18 @@ namespace xdl {
 			*/
 			virtual void raise() = 0;
 
+			/// Show pointer.
+			virtual void showPointer() = 0;
+
+			/// Hide pointer.
+			virtual void hidePointer() = 0;
+
+			/// Set pointer position on the screen.
+			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
+
+			/// Clip pointer movement in a specific rectangle area.
+			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) = 0;
+
 			/// Grabs the pointer.
 			virtual void grabPointer() = 0;
 
@@ -202,11 +205,11 @@ namespace xdl {
 			/// Checks if the window has focus.
 			virtual xdl_bool hasFocus() = 0;
 
-			/// Returns the input focus window.
-			virtual xdl_int getInputFocus(XdevLWindow** window) = 0;
-
 			/// Sets the parent window.
 			virtual void setParent(XdevLWindow* window) = 0;
+
+			/// Sets the window decoration
+			virtual void setWindowDecoration(xdl_bool enable) = 0;
 	};
 
 	/**
@@ -233,11 +236,54 @@ namespace xdl {
 			virtual xdl_int destroy(XdevLWindow* window) = 0;
 	};
 
+	class XdevLWindowEventServer : public XdevLModule {
+		public:
+			virtual ~XdevLWindowEventServer() {}
+
+			virtual xdl_int registerWindowForEvents(XdevLWindow* window) = 0;
+			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) = 0;
+			virtual XdevLWindow* getWindow(xdl_uint id) = 0;
+			virtual XdevLWindow* getFocus() const = 0;
+			virtual void flush() = 0;
+	};
+
+	class XdevLCursor : public XdevLModule {
+		public:
+			virtual ~XdevLCursor() {}
+
+			/// Show the pointer.
+			virtual void show() = 0;
+
+			/// Hide the pointer.
+			virtual void hide() = 0;
+
+			/// Sets the pointer position.
+			virtual void setPosition(xdl_uint x, xdl_uint y) = 0;
+
+			/// Clips the position.
+			virtual xdl_int clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) = 0;
+
+			/// Release clipping position.
+			virtual void releaseClip() = 0;
+			
+			/// Enable relative motion mode.
+			virtual xdl_int enableRelativeMotion() = 0;
+			
+			/// Disable relative motion mode.
+			virtual void disableRelativeMotion() = 0;
+	};
+
 	typedef XdevLWindow*		IPXdevLWindow;
 	typedef XdevLWindow			IXdevLWindow;
 
 	typedef XdevLWindowServer*	IPXdevLWindowServer;
 	typedef XdevLWindowServer	IXdevLWindowServer;
+
+	typedef XdevLWindowEventServer* IPXdevLWindowEventServer;
+	typedef XdevLWindowEventServer 	IXdevLWindowEventServer;
+
+	typedef XdevLCursor*		IPXdevLCursor;
+	typedef XdevLCursor			IXdevLCursor;
 
 }
 

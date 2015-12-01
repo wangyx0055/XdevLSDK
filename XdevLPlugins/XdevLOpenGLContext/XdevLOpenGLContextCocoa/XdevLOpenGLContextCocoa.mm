@@ -6,28 +6,30 @@
 #include "XdevLOpenGLcontextCocoa.h"
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextCocoa::moduleDescriptor{cocoa_context_vendor, 
-																																						cocoa_context_author, 
-																																						cocoa_context_moduleNames[0], 
-																																						cocoa_context_copyright, 
-																																						cocoa_context_description, 
-																																						XdevLOpenGLContexCocoaMajorVersion, 
-																																						XdevLOpenGLContextCocoaMinorVersion,
-																																						XdevLOpenGLContextCocoaPatchVersion};
+xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextCocoa::moduleDescriptor {cocoa_context_vendor,
+        cocoa_context_author,
+        cocoa_context_moduleNames[0],
+        cocoa_context_copyright,
+        cocoa_context_description,
+        XdevLOpenGLContexCocoaMajorVersion,
+        XdevLOpenGLContextCocoaMinorVersion,
+        XdevLOpenGLContextCocoaPatchVersion
+                                                                          };
 
 
-xdl::XdevLPluginDescriptor pluginDescriptor{xdl::cocoa_context_pluginName,
-																						xdl::cocoa_context_moduleNames,
-																						xdl::XdevLOpenGLContextCocoaPluginMajorVersion,
-																						xdl::XdevLOpenGLContextCocoaPluginMinorVersion,
-																						xdl::XdevLOpenGLContextCocoaPluginPatchVersion};
+xdl::XdevLPluginDescriptor pluginDescriptor {xdl::cocoa_context_pluginName,
+        xdl::cocoa_context_moduleNames,
+        xdl::XdevLOpenGLContextCocoaPluginMajorVersion,
+        xdl::XdevLOpenGLContextCocoaPluginMinorVersion,
+        xdl::XdevLOpenGLContextCocoaPluginPatchVersion
+                                            };
 
 extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* parameter) {
 
-	if (xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == parameter->getModuleName()) {
+	if(xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == parameter->getModuleName()) {
 		xdl::XdevLOpenGLContextCocoa* obj  = new xdl::XdevLOpenGLContextCocoa(parameter);
 
-		if (!obj)
+		if(!obj)
 			return xdl::ERR_ERROR;
 
 		parameter->setModuleInstance(obj);
@@ -67,6 +69,23 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLContextCocoa::shutdown() {
 		return ERR_OK;
+	}
+
+	void* XdevLOpenGLContextCocoa::getProcAddress(const xdl_char* functionName) {
+		
+		NSSymbol symbol;
+		char *symbolName;
+		symbolName = reinterpret_cast<char*>(malloc(strlen(functionName) + 2));
+		strcpy(symbolName + 1, functionName);
+		symbolName[0] = '_';
+		symbol = nullptr;
+
+		if(NSIsSymbolNameDefined(symbolName)) {
+			symbol = NSLookupAndBindSymbol(symbolName);
+		}
+		free(symbolName);
+
+		return symbol ? NSAddressOfSymbol(symbol) : nullptr;
 	}
 
 	xdl_int XdevLOpenGLContextCocoa::getAttributes(XdevLOpenGLContextAttributes& attributes) {
@@ -140,18 +159,18 @@ namespace xdl {
 
 		NSOpenGLPixelFormatAttribute attr[32];
 		NSOpenGLPixelFormat *fmt;
-		
-		fmt = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
-    if (fmt == nil) {
-        XDEVL_MODULE_ERROR("Could not initialize Pixel Format.\n");
-        [pool release];
-        return ERR_ERROR;;
-    }
 
-		
+		fmt = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
+		if(fmt == nil) {
+			XDEVL_MODULE_ERROR("Could not initialize Pixel Format.\n");
+			[pool release];
+			return ERR_ERROR;;
+		}
+
+
 		m_openGLContext = [[NXdevLOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
 
-		
+
 		[pool release];
 		return ERR_OK;
 	}
@@ -162,7 +181,7 @@ namespace xdl {
 
 		pool = [[NSAutoreleasePool alloc] init];
 
-[m_openGLContext setWindow:window];
+		[m_openGLContext setWindow:window];
 		[m_openGLContext updateIfNeeded];
 		[m_openGLContext makeCurrentContext];
 
@@ -181,6 +200,10 @@ namespace xdl {
 
 		return ERR_OK;
 	}
+	
+	xdl_int XdevLOpenGLContextCocoa::setVSync(xdl_bool enableVSync) {
+		return ERR_ERROR;
+	}
 
 	void* XdevLOpenGLContextCocoa::getInternal(const char* id) {
 		return NULL;
@@ -188,43 +211,42 @@ namespace xdl {
 
 }
 
-@implementation NXdevLOpenGLContext : NSOpenGLContext
+@implementation NXdevLOpenGLContext :
+NSOpenGLContext
 
-- (id)initWithFormat:(NSOpenGLPixelFormat *)format
-        shareContext:(NSOpenGLContext *)share
-{
-    self = [super initWithFormat:format shareContext:share];
-    if (self) {
-        self->window = NULL;
-    }
-    return self;
+- (id)initWithFormat:
+(NSOpenGLPixelFormat *)format
+shareContext:
+(NSOpenGLContext *)share {
+self = [super initWithFormat:format shareContext:share];
+	if(self) {
+		self->window = NULL;
+	}
+	return self;
 }
 
-- (void)scheduleUpdate
-{
+- (void)scheduleUpdate {
+
+}
+
+/* This should only be called on the thread on which a user is using the context. */
+- (void)updateIfNeeded {
+	/* We call the real underlying update here, since -[SDLOpenGLContext update] just calls us. */
+	[super update];
 
 }
 
 /* This should only be called on the thread on which a user is using the context. */
-- (void)updateIfNeeded
-{
-        /* We call the real underlying update here, since -[SDLOpenGLContext update] just calls us. */
-        [super update];
-	
-}
-
-/* This should only be called on the thread on which a user is using the context. */
-- (void)update
-{
-    /* This ensures that regular 'update' calls clear the atomic dirty flag. */
-    [self scheduleUpdate];
-    [self updateIfNeeded];
+- (void)update {
+	/* This ensures that regular 'update' calls clear the atomic dirty flag. */
+	[self scheduleUpdate];
+	[self updateIfNeeded];
 }
 
 /* Updates the drawable for the contexts and manages related state. */
-- (void)setWindow:(xdl::XdevLWindow *)newWindow
-{
-    self->window = newWindow;
+- (void)setWindow:
+(xdl::XdevLWindow *)newWindow {
+	self->window = newWindow;
 }
 
 @end

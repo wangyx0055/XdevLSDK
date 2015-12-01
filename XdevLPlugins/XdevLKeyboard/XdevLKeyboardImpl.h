@@ -22,11 +22,11 @@
 
 #include <XdevLPlatform.h>
 #include <XdevLPluginImpl.h>
-#include <XdevLKeyboard/XdevLKeyCode.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
 #include <XdevLXstring.h>
 #include <XdevLThread.h>
 #include <XdevLMutex.h>
+#include <XdevLInputSystem.h>
 #include "XdevLInputSystemUtils.h"
 #include <tinyxml.h>
 #include <map>
@@ -81,10 +81,13 @@ namespace xdl {
 		XdevLModuleName("XdevLKeyboard")
 	};
 
+	static const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
+	static const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
+
 	template<typename T>
-	class XdevLKeyboardOISImpl :  public XdevLModuleImpl<T>, public thread::Thread {
+	class XdevlKeyboardBase :  public XdevLModuleImpl<T>, public thread::Thread {
 		public:
-			XdevLKeyboardOISImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor):
+			XdevlKeyboardBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor):
 				XdevLModuleImpl<T>(parameter, descriptor),
 				m_attached(false) ,
 				m_key_down(false),
@@ -92,22 +95,22 @@ namespace xdl {
 				m_sleep(0.001) {
 
 			}
-			virtual	~XdevLKeyboardOISImpl() {
+			virtual	~XdevlKeyboardBase() {
 
 			}
-			typedef std::map<const XdevLString, XdevLKeyCode> KeyMapType;
+			typedef std::map<const XdevLString, XdevLButtonId> KeyMapType;
 		protected:
 			// Is this device attached to a window?
-			xdl_bool							m_attached;
+			xdl_bool		m_attached;
 
 			// Key map.
-			KeyMapType 							keyButtonId;
-			xdl_bool 							m_key_down;
-			xdl_bool							m_threaded;
-			xdl_double						m_sleep;
-			thread::Mutex					m_mutex;
+			KeyMapType 		keyButtonId;
+			xdl_bool 		m_key_down;
+			xdl_bool		m_threaded;
+			xdl_double		m_sleep;
+			thread::Mutex	m_mutex;
 			std::vector<XdevLButtonDelegateType> m_buttonDelegates;
-			std::multimap<XdevLKeyCode, XdevLButtonIdDelegateType> m_buttonIdDelegates;
+			std::multimap<XdevLButtonId, XdevLButtonIdDelegateType> m_buttonIdDelegates;
 			std::map<xdl_uint, XdevLButtonImpl*> m_Buttons;
 		protected:
             using XdevLModuleImpl<T>::attach;
@@ -115,7 +118,7 @@ namespace xdl {
 			xdl_bool getAttached();
 			void setAttached(xdl_bool state);
 
-			XdevLKeyCode getButtonId(const XdevLString& str);
+			XdevLButtonId getButtonId(const XdevLString& str);
 			xdl_int initKeyMap();
 			xdl_int readKeyboardXmlInfo(TiXmlDocument* document, const xdl_char* moduleName);
 			xdl_int update();
@@ -131,22 +134,21 @@ namespace xdl {
 	};
 
 	template<typename T>
-	xdl_int  XdevLKeyboardOISImpl<T>::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
-		XdevLKeyCode idType = getButtonId(id);
-		std::cout << "Register Key: " << static_cast<XdevLKeyCode>(idType) << std::endl;
-		m_buttonIdDelegates.insert(std::pair<const XdevLKeyCode, const XdevLButtonIdDelegateType>(static_cast<XdevLKeyCode>(idType), delegate));
+	xdl_int  XdevlKeyboardBase<T>::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
+		XdevLButtonId idType = getButtonId(id);
+		m_buttonIdDelegates.insert(std::pair<const XdevLButtonId, const XdevLButtonIdDelegateType>(static_cast<XdevLButtonId>(idType), delegate));
 		return ERR_OK;
 	}
 
 	template<typename T>
-	xdl_int  XdevLKeyboardOISImpl<T>::registerDelegate(const XdevLButtonDelegateType& delegate) {
+	xdl_int  XdevlKeyboardBase<T>::registerDelegate(const XdevLButtonDelegateType& delegate) {
 		m_buttonDelegates.push_back(delegate);
 		return ERR_OK;
 	}
 
 
 	template<typename T>
-	xdl_bool XdevLKeyboardOISImpl<T>::getAttached() {
+	xdl_bool XdevlKeyboardBase<T>::getAttached() {
 
 		m_mutex.Lock();
 		xdl_bool tmp;
@@ -157,30 +159,24 @@ namespace xdl {
 	}
 
 	template<typename T>
-	void XdevLKeyboardOISImpl<T>::setAttached(xdl_bool state) {
-		{
-			m_mutex.Lock();
-			m_attached = state;
-			m_mutex.Unlock();
-		}
+	void XdevlKeyboardBase<T>::setAttached(xdl_bool state) {
+		m_mutex.Lock();
+		m_attached = state;
+		m_mutex.Unlock();
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::init() {
+	xdl_int XdevlKeyboardBase<T>::init() {
 		return initKeyMap();
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::shutdown() {
-
-
+	xdl_int XdevlKeyboardBase<T>::shutdown() {
 		XDEVL_MODULE_INFO("Starting shutdown process.\n");
 
 		// Delete all XdevLButton objects.
-		std::map<xdl_uint, XdevLButtonImpl*>::iterator ib(m_Buttons.begin());
-		while(ib != m_Buttons.end()) {
-			delete ib->second;
-			ib++;
+		for(auto& button : m_Buttons) {
+			delete button.second;
 		}
 
 		m_Buttons.clear();
@@ -197,14 +193,14 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::reset() {
+	xdl_int XdevlKeyboardBase<T>::reset() {
 		for(size_t a = 0; a < m_Buttons.size(); ++a)
 			m_Buttons[a]->setState(false);
 		return ERR_OK;
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::RunThread(thread::ThreadArgument*) {
+	xdl_int XdevlKeyboardBase<T>::RunThread(thread::ThreadArgument*) {
 		XDEVL_MODULE_INFO("Starting threading mode.\n");
 		while(getAttached()) {
 			update();
@@ -214,82 +210,79 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::update() {
-		m_mutex.Lock();
-
-
-		m_mutex.Unlock();
+	xdl_int XdevlKeyboardBase<T>::update() {
 		return ERR_OK;
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::notify(XdevLEvent& event) {
-
-
-		switch(event.type) {
-			case XDEVL_KEY_PRESSED: {
-
-				XdevLButtonImpl* button = m_Buttons[event.key.sym];
-				if(button == NULL) {
-
-					m_Buttons[event.key.sym] = new XdevLButtonImpl(&m_mutex);
-					button = m_Buttons[event.key.sym];
-				}
-					
-					std::cout << "KEYPRESS: "<< event.common.timestamp << std::endl;
-					
-				if(!m_key_down) {
-					button->capturePressTime(event.common.timestamp);
-				}
-
-				button->setState(true);
-				m_key_down = true;
-
-				auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLKeyCode>(event.key.sym));
-				for (auto it = pp.first; it != pp.second; ++it) {
-					auto delegate = it->second;
-					delegate(BUTTON_PRESSED);
-				}
-
+	xdl_int XdevlKeyboardBase<T>::notify(XdevLEvent& event) {
+		//
+		// Did the user press a keyboard button?
+		//
+		if(event.type == ButtonPressed.getHashCode()) {
+			XdevLButtonImpl* button = m_Buttons[event.key.keycode];
+			if(button == nullptr) {
+				m_Buttons[event.key.keycode] = new XdevLButtonImpl(&m_mutex);
+				button = m_Buttons[event.key.keycode];
 			}
-			break;
-			case XDEVL_KEY_RELEASED: {
 
-				XdevLButtonImpl* button = m_Buttons[event.key.sym];
-				if(button == NULL) {
-					m_Buttons[event.key.sym] =  new XdevLButtonImpl( &m_mutex);
-					button = m_Buttons[event.key.sym];
-				}
-
-				if(m_key_down) {
-					button->captureReleaseTime(event.common.timestamp);
-				}
-
-				button->setState(false);
-				m_key_down = false;
-
-				auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLKeyCode>(event.key.sym));
-				for (auto it = pp.first; it != pp.second; ++it) {
-					auto delegate = it->second;
-					delegate(BUTTON_RELEASED);
-				}
+			if(!m_key_down) {
+				button->capturePressTime(event.common.timestamp);
 			}
-			break;
-			case XDEVL_MODULE_EVENT: {
-				if(event.module.event == XDEVL_MODULE_INIT) {
-					init();
-				} else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
-					shutdown();
-				} 
+
+			button->setState(true);
+			m_key_down = true;
+
+			auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLButtonId>(event.key.keycode));
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_PRESSED);
 			}
-			break;
+
+		} 
+		//
+		// Did the user released a keyboard button?
+		//
+		else if( event.type == ButtonReleased.getHashCode()) {
+
+			XdevLButtonImpl* button = m_Buttons[event.key.keycode];
+			if(button == nullptr) {
+				m_Buttons[event.key.keycode] =  new XdevLButtonImpl( &m_mutex);
+				button = m_Buttons[event.key.keycode];
+			}
+
+			if(m_key_down) {
+				button->captureReleaseTime(event.common.timestamp);
+			}
+
+			button->setState(false);
+			m_key_down = false;
+
+			auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLButtonId>(event.key.keycode));
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_RELEASED);
+			}
+		} 
+		//
+		// Did the core sent a message?
+		//
+		else if( event.type == XDEVL_MODULE_EVENT) {
+			// Initialize this module.
+			if(event.module.event == XDEVL_MODULE_INIT) {
+				return init();
+			} 
+			// Shutdown this module.
+			else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
+				return shutdown();
+			} 
 		}
 
 		return ERR_OK;
 	}
 
 	template<typename T>
-	XdevLKeyCode XdevLKeyboardOISImpl<T>::getButtonId(const XdevLString& str) {
+	XdevLButtonId XdevlKeyboardBase<T>::getButtonId(const XdevLString& str) {
 		std::string tmp(str);
 		xstd::trim(tmp);
 		
@@ -298,12 +291,12 @@ namespace xdl {
 			return it->second;
 		}
 		
-		return KEY_UNKNOWN;
+		return BUTTON_UNKOWN;
 	}
 
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::attach(XdevLWindow* window, const xdl_char* moduleName) {
+	xdl_int XdevlKeyboardBase<T>::attach(XdevLWindow* window, const xdl_char* moduleName) {
 		if(!window) {
 			XDEVL_MODULE_ERROR("Could not attach device to window. No vaild XdevLWindowDevice specified.\n");
 			return ERR_ERROR;
@@ -312,7 +305,6 @@ namespace xdl {
 		if(getAttached()) {
 			setAttached(false);
 			Join();
-
 		}
 
 		if(this->getMediator()->getXmlFilename() != XdevLFileName()) {
@@ -332,7 +324,7 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::readKeyboardXmlInfo(TiXmlDocument* document, const xdl_char* moduleName) {
+	xdl_int XdevlKeyboardBase<T>::readKeyboardXmlInfo(TiXmlDocument* document, const xdl_char* moduleName) {
 		TiXmlHandle docHandle(document);
 		TiXmlElement* root = docHandle.FirstChild(XdevLCorePropertiesName.c_str()).FirstChildElement(moduleName).ToElement();
 		if(!root) {
@@ -384,22 +376,14 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLKeyboardOISImpl<T>::initKeyMap() {
+	xdl_int XdevlKeyboardBase<T>::initKeyMap() {
 
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_UNKNOWN"),KEY_UNKNOWN));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_RETURN"),KEY_RETURN));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_ENTER"),KEY_ENTER));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_ESCAPE"),KEY_ESCAPE));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_BACKSPACE"),KEY_BACKSPACE));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_TAB"),KEY_TAB));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_SPACE"),KEY_SPACE));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_QUOTEDBL"),KEY_QUOTEDBL));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_HASH"),KEY_HASH));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_DOLLAR"),KEY_DOLLAR));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_AMPERSAND"),KEY_AMPERSAND));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_QUOTE"),KEY_QUOTE));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_LEFTPAREN"),KEY_LEFTPAREN));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_RIGHTPAREN"),KEY_RIGHTPAREN));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_ASTERISK"),KEY_ASTERISK));
+	
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_PLUS"),KEY_PLUS));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_COMMA"),KEY_COMMA));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_MINUS"),KEY_MINUS));
@@ -416,21 +400,6 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_7"),KEY_7));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_8"),KEY_8));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_9"),KEY_9));
-
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_COLON"),KEY_COLON));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_SEMICOLON"),KEY_SEMICOLON));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_LESS"),KEY_LESS));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_EQUALS"),KEY_EQUALS));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_GREATER"),KEY_GREATER));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_QUESTION"),KEY_QUESTION));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_AT"),KEY_AT));
-
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_LEFTBRACKET"),KEY_LEFTBRACKET));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_BACKSLASH"),KEY_BACKSLASH));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_RIGHTBRACKET"),KEY_RIGHTBRACKET));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_CARET"),KEY_CARET));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_UNDERSCORE"),KEY_UNDERSCORE));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_BACKQUOTE"),KEY_BACKQUOTE));
 
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_A"),KEY_A));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_B"),KEY_B));
@@ -459,8 +428,6 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_Y"),KEY_Y));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_Z"),KEY_Z));
 
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_CAPSLOCK"),KEY_CAPSLOCK));
-		
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F1"),KEY_F1));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F2"),KEY_F2));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F3"),KEY_F3));
@@ -473,6 +440,19 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F10"),KEY_F10));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F11"),KEY_F11));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F12"),KEY_F12));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F13"),KEY_F13));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F14"),KEY_F14));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F15"),KEY_F15));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F16"),KEY_F16));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F17"),KEY_F17));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F18"),KEY_F18));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F19"),KEY_F19));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F20"),KEY_F20));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F21"),KEY_F21));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F22"),KEY_F22));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F23"),KEY_F23));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_F24"),KEY_F24));
+
 
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_PRINTSCREEN"),KEY_PRINTSCREEN));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_SCROLLLOCK"),KEY_SCROLLLOCK));
@@ -489,6 +469,7 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_DOWN"),KEY_DOWN));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_UP"),KEY_UP));
 
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_CAPSLOCK"),KEY_CAPSLOCK));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_NUMLOCKCLEAR"),KEY_NUMLOCKCLEAR));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_DIVIDE"),KEY_KP_DIVIDE));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_MULTIPLY"),KEY_KP_MULTIPLY));
@@ -506,11 +487,6 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_8"),KEY_KP_8));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_9"),KEY_KP_9));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_PERIOD"),KEY_KP_PERIOD));
-
-
-
-
-
 
 		m_Buttons[KEY_0] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_1] = new XdevLButtonImpl(&m_mutex);
@@ -562,9 +538,21 @@ namespace xdl {
 		m_Buttons[KEY_F10] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_F11] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_F12] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F13] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F14] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F15] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F16] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F17] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F18] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F19] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F20] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F21] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F22] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F23] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_F24] = new XdevLButtonImpl(&m_mutex);
 
 		m_Buttons[KEY_ESCAPE] = new XdevLButtonImpl(&m_mutex);
-		m_Buttons[KEY_RETURN] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_ENTER] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_TAB] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_SPACE] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_BACKSPACE] = new XdevLButtonImpl(&m_mutex);
@@ -577,8 +565,8 @@ namespace xdl {
 		m_Buttons[KEY_KP_MINUS] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_KP_PLUS] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_KP_ENTER] = new XdevLButtonImpl(&m_mutex);
-		m_Buttons[KEY_KP_DECIMAL] = new XdevLButtonImpl(&m_mutex);
-		m_Buttons[KEY_KP_COMMA] = new XdevLButtonImpl(&m_mutex);
+
+		m_Buttons[KEY_KP_PERIOD] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_KP_0] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_KP_1] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_KP_2] = new XdevLButtonImpl(&m_mutex);
@@ -602,28 +590,29 @@ namespace xdl {
 		@brief Implementation class for the XdevLKeyboard interface
 		@author Cengiz Terzibas
 	*/
-	class XdevLKeyboardImpl : public XdevLKeyboardOISImpl<XdevLKeyboard> {
+	class XdevLKeyboardImpl : public XdevlKeyboardBase<XdevLKeyboard> {
 		public:
 			XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter);
 			virtual ~XdevLKeyboardImpl();
 
 			static XdevLModuleDescriptor m_keyboardModuleDesc;
+
 			// --------------------------------------------------------------------------
 			// XdevLModule function
 			//
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 
-
-			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
-			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
-			virtual xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
-			virtual xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
+			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) override;
+			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate) override;
+			virtual xdl_int registerDelegate(const XdevLButtonDelegateType& delegate) override;
+			virtual xdl_int registerDelegate(const XdevLAxisDelegateType& delegate) override;
 
 			// --------------------------------------------------------------------------
 			// XdevLKeyboard functions
 			//
-			virtual xdl_int attach(XdevLWindow* window);
+			virtual xdl_int attach(XdevLWindow* window) override;
+
 			// --------------------------------------------------------------------------
 			// XdevLEventCatalystFactory functions
 			//
@@ -638,18 +627,18 @@ namespace xdl {
 			// XdevLButton functions
 			//
 			/// Returns the state of a button.
-			virtual xdl_bool getPressed(const xdl_uint key);
-			virtual xdl_bool getClicked(const xdl_uint key);
-			virtual void setClickResponseTimeForAll(xdl_double crt);
-			virtual void setClickResponseTime(const xdl_uint key, xdl_double crt);
-			virtual xdl_double getClickResponseTime(const xdl_uint key) ;
-			
-			virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max);
-			virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min);
-			virtual void seAxisRangeMax(const xdl_uint axis, xdl_float max);
-			virtual void getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max);
-			virtual xdl_float getAxisRangeMin(const xdl_uint axis) const;
-			virtual xdl_float getAxisRangeMax(const xdl_uint axis) const;
+			virtual xdl_bool getPressed(const xdl_uint key) override;
+			virtual xdl_bool getClicked(const xdl_uint key) override;
+			virtual void setClickResponseTimeForAll(xdl_double crt) override;
+			virtual void setClickResponseTime(const xdl_uint key, xdl_double crt) override;
+			virtual xdl_double getClickResponseTime(const xdl_uint key) override;
+
+			virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max) override;
+			virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min) override;
+			virtual void seAxisRangeMax(const xdl_uint axis, xdl_float max) override;
+			virtual void getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max) override;
+			virtual xdl_float getAxisRangeMin(const xdl_uint axis) const override;
+			virtual xdl_float getAxisRangeMax(const xdl_uint axis) const override;
 	};
 
 

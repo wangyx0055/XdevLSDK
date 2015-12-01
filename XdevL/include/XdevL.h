@@ -53,6 +53,16 @@ namespace xdl {
 		return core->unplug(pluginName);
 	}
 
+	/// Check if the specified module is valid.
+	inline xdl_bool isModuleValid(xdl::XdevLModule* module) {
+		return (module != nullptr) ? xdl_true : xdl_false;
+	}
+
+	/// Check if the specified module is valid.
+	inline xdl_bool isModuleNotValid(xdl::XdevLModule* module) {
+		return (module == nullptr) ? xdl_true : xdl_false;
+	}
+
 	/**
 		@fn template<typename T> T getModule(XdevLCore* core, const XdevLID& id)
 		@brief Returns a existing module from the XdevL core system.
@@ -94,6 +104,12 @@ namespace xdl {
 		return static_cast<T>(core->createModule(moduleName, id, pluginName, data));
 	}
 
+	/**
+	 * @brief Create a module without the XdevLCore system.
+	 * @param pluginDescriptor The descriptor of the plugin.
+	 * @param moduleDescriptor The descriptor of the module./
+	 * @return A valid instance of the module if successful, nullptr if it fails.
+	 */
 	template<typename T>
 	T createModule(const XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 		return static_cast<T>(createModule(pluginDescriptor, moduleDescriptor));

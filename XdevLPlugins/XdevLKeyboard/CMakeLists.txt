@@ -61,10 +61,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
 #
 # Set header files for the library.
 
-set(HEADER_FILES
+set(HEADER_INTERFACE_FILE 
 	${HEADERS_DIR}/XdevLKeyboard.h
-	${HEADERS_DIR}/XdevLKeyCode.h		
-	${HEADERS_DIR}/XdevLScanCode.h	
+)
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
 	${HEADERS_DIR}/XdevLKeyboardImpl.h
 )
 
@@ -89,12 +91,6 @@ add_library(${XdevLKeyboardLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
-
-#
-# Set the compiler property
-
-set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY CXX_STANDARD 11)
 
 #
 # Add include directories
@@ -137,3 +133,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLKeyboardLibrary} PROPERTY SUFFIX "-${XDEVLKEYBOARD_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLKeyboardLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

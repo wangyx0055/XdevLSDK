@@ -50,16 +50,16 @@ int main(int argc, char* argv[]) {
 
 	// Create a window because we can use keyboard/mouse only if we have one (hopefully will be fixed in later versions of XdevL).
 	xdl::IPXdevLWindow window = xdl::getModule<xdl::IPXdevLWindow>(core,  xdl::XdevLID("MyWindow"));
-	if(!window) {
+	if(nullptr == window) {
 		return xdl::ERR_ERROR;
 	}
-	
+
 	// Create the keyboard module to get access to the keyboard device.
 	xdl::IPXdevLKeyboard keyboard = xdl::getModule<xdl::IPXdevLKeyboard>(core,  xdl::XdevLID("MyKeyboard"));
-	if(!keyboard) {
+	if(nullptr == keyboard) {
 		return xdl::ERR_ERROR;
 	}
-	
+
 	// Attach this keyboard to the window.
 	if(keyboard->attach(window) != xdl::ERR_OK) {
 		return xdl::ERR_ERROR;
@@ -68,9 +68,10 @@ int main(int argc, char* argv[]) {
 	// Get the module which we have created already to get access to the audio device.
 	// We requested the creation of the module within the 'audio_demo.xml' file.
 	xdl::IPXdevLAudio audio = xdl::getModule<xdl::IPXdevLAudio>(core,  xdl::XdevLID("MyAudio"));
-	if(!audio) {
+	if(nullptr == audio) {
 		return xdl::ERR_ERROR;
 	}
+
 	
 	// To store sounds we need a buffer so let's create one.
 	xdl::IPXdevLAudioBuffer abuffer = nullptr;
@@ -112,6 +113,7 @@ int main(int argc, char* argv[]) {
 	
 	xdl::IPXdevLButton F1 = nullptr;;
 	keyboard->getButton(xdl::KEY_F1, &F1);
+
 	
 	xdl::IPXdevLButton F2 = nullptr;;
 	keyboard->getButton(xdl::KEY_F2, &F2);

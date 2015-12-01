@@ -11,7 +11,7 @@
 #include <XdevLJoystick/XdevLJoystick.h>
 
 
-#define USE_DELEGATES
+//#define USE_DELEGATES
 
 // Some keyboard mappings.
 xdl::IPXdevLButton escape	= nullptr;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
 		return xdl::ERR_ERROR;
 
 	//
-	// Attach all input moduels to the window.
+	// Attach all input modules to the window.
 	//
 	if(keyboard->attach(window) == xdl::ERR_ERROR) {
 		return xdl::ERR_ERROR;
@@ -214,8 +214,7 @@ int main(int argc, char* argv[]) {
 	if(keyboard->getButton(xdl::KEY_ESCAPE, &escape) != xdl::ERR_OK) {
 		return xdl::ERR_ERROR;
 	}
-
-
+	
 	window->show();
 
 	//

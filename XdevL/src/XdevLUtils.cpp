@@ -23,7 +23,6 @@
 #include <XdevLXstring.h>
 #include <XdevLXfstring.h>
 #include <XdevLError.h>
-#include <tinydir.h>
 
 #if defined (__GNUC__) && !defined (WIN32)
 #  include <netinet/in.h>
@@ -83,61 +82,6 @@ namespace xdl {
 
 
 		return ERR_OK;
-	}
-	//
-	// The a folder for a specific plugin
-	//
-	xdl_int searchPluginInFolder(const std::string& pluginName, const XdevLVersion& version, const std::string& folder) {
-
-		tdir::directory dir;
-
-		// Open the directory.
-		if(dir.open(folder.c_str()) == -1) {
-			std::cerr << "Could not open directory: " << folder << std::endl;
-			return -1;
-		}
-
-		//
-		// Go through all entity in the folder.
-		//
-		tdir::dir_entity ent;
-		while(dir.read(&ent) != -1) {
-			std::string path, name;
-			XdevLVersion tmp;
-			if(getPluginInformationFromFilename(path, name, tmp, ent.get_name()) == ERR_OK) {
-				if( (pluginName == name) && (tmp == version) ) {
-					return ERR_OK;
-				}
-			}
-		}
-
-		return ERR_ERROR;
-	}
-
-	xdl_int collectAllPlugins(const std::string& folder, std::vector<std::string>& list) {
-
-		tdir::directory dir;
-
-		// Open the directory.
-		if(dir.open(folder.c_str()) == -1) {
-			std::cerr << "Could not open directory: " << folder << std::endl;
-			return -1;
-		}
-
-		tdir::dir_entity ent;
-		while(dir.read(&ent) != -1) {
-
-			std::string directory, pluginName;
-			XdevLVersion version;
-
-			if(getPluginInformationFromFilename(directory, pluginName, version, ent.get_name()) != ERR_OK) {
-				continue;
-			}
-
-			list.push_back(pluginName);
-		}
-    
-    return 0;
 	}
 
 

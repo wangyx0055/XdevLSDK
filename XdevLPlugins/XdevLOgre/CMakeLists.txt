@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(XdevLOgre)
 
-find_package(OGRE)
-find_package(Boost COMPONENTS system)
 #
 # Set the names for the stuff we are going to create
 
@@ -63,8 +61,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
 #
 # Set header files for the library.
 
+set(HEADER_INTERFACE_FILE 
+	${HEADERS_DIR}/XdevLOgre.h	
+)
+
 set(HEADER_FILES
-	${HEADERS_DIR}/XdevLOgre.h
+	${HEADER_INTERFACE_FILE}
 	${HEADERS_DIR}/XdevLOgreImpl.h
 )
 
@@ -130,3 +132,5 @@ else()
 	set_property(TARGET ${XdevLOgreLibrary} PROPERTY SUFFIX "-${XDEVLOGRE_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
 
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLOgreLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

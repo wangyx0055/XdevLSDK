@@ -70,7 +70,7 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
 namespace xdl {
 
 	XDEVL_DECLARE_LOG(XdevLCore);
-	
+
 	void logConsumerCallback(const XdevLLogItem& item) {
 		std::cout << "Time [us]: " << item.timestamp << ", Module: " << item.additional << " : " << item.message << std::endl;
 	}
@@ -124,7 +124,7 @@ namespace xdl {
 	xdl_double XdevLCoreImpl::getDT() {
 		return m_timer.getDT();
 	}
-	
+
 	XdevLTimer& XdevLCoreImpl::getTimer() {
 		return m_timer;
 	}
@@ -336,8 +336,8 @@ namespace xdl {
 		// Get the plugins basic create, delete and descriptor functions.
 		//
 		XdevLGetPluginDescriptorFunction 	plugin_descriptor	= (XdevLGetPluginDescriptorFunction)(modulesSharedLibrary->getFunctionAddress("_getDescriptor"));
-		XdevLCreateModuleFunction 				create_module			= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
-		XdevLDeleteModuleFunction 				delete_module			= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
+		XdevLCreateModuleFunction 			create_module		= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
+		XdevLDeleteModuleFunction 			delete_module		= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
 
 		// Check if we have all necessary module functions from the dynamic library.
 		if((plugin_descriptor == nullptr) || (create_module == nullptr) || (delete_module == nullptr)) {
@@ -353,6 +353,7 @@ namespace xdl {
 		// map to get the correct plugin.
 		for(int module = 0; module < plugin_descriptor()->getNumModules(); ++module) {
 			m_modulesMap[plugin_descriptor()->getModuleName(module).toString()] = plugininfo;
+			XDEVL_MODULE_INFO("Found Module: " << plugin_descriptor()->getModuleName(module).toString() << ".\n");
 		}
 
 		XdevLVersion pluginVersion = plugin_descriptor()->getVersion();
@@ -481,7 +482,7 @@ namespace xdl {
 		// Register this module as an listener. This is important to get messages from the core system.
 		registerListener(parameter->getModuleInstance());
 
-		XDEVL_MODULE_INFO("Starting initialization:\n");
+		XDEVL_MODULE_INFO("Initialize Module: " << parameter->getModuleId().getName() << "\n");
 
 		// Ok now to initiate the module we have to send the "XDEVL_MODULE_INIT" message.
 		XdevLEvent moduleInit;

@@ -1,0 +1,131 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLWindowCocoa)
+
+#
+# Set the names for the stuff we are going to create
+
+set(XdevLWindowLibrary XdevLWindowCocoa)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLCOCOA_MAJOR_VERSION 1)
+set(XDEVLCOCOA_MINOR_VERSION 0)
+set(XDEVLCOCOA_PATCH_VERSION 0)
+set(XDEVLCOCOA_VERSION "${XDEVLCOCOA_MAJOR_VERSION}.${XDEVLCOCOA_MINOR_VERSION}.${XDEVLCOCOA_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLCOCOA_MAJOR_VERSION=${XDEVLCOCOA_MAJOR_VERSION}
+	-DXDEVLCOCOA_MINOR_VERSION=${XDEVLCOCOA_MINOR_VERSION} 
+	-DXDEVLCOCOA_PATCH_VERSION=${XDEVLCOCOA_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLCOCOA_MODULE_MAJOR_VERSION 0)
+set(XDEVLCOCOA_MODULE_MINOR_VERSION 2)
+set(XDEVLCOCOA_MODULE_PATCH_VERSION 0)
+set(XDEVLCOCOA_MODULE_VERSION "${XDEVLCOCOA_MODULE_MAJOR_VERSION}.${XDEVLCOCOA_MODULE_MINOR_VERSION}.${XDEVLCOCOA_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLCOCOA_MODULE_MAJOR_VERSION=${XDEVLCOCOA_MODULE_MAJOR_VERSION}
+	-DXDEVLCOCOA_MODULE_MINOR_VERSION=${XDEVLCOCOA_MODULE_MINOR_VERSION} 
+	-DXDEVLCOCOA_MODULE_PATCH_VERSION=${XDEVLCOCOA_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+
+set(HEADERS_DIR .)
+set(SRC_DIR .)
+
+#
+# Set the output directories
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+
+set(HEADER_INTERFACE_FILE 
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindow.h
+)
+
+set(HEADER_FILES
+	${HEADER_INTERFACE_FILE}
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
+	${HEADERS_DIR}/XdevLWindowCocoa.h
+)
+
+#
+# Set the source files for the library.
+
+set(SOURCE_FILES
+	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.cpp
+	${SRC_DIR}/XdevLWindowCocoa.mm
+)
+
+
+#
+# Add external libraries folder
+
+link_directories(${XdevL_BINARY_DIR}/lib)
+
+#
+# Create the library
+
+add_library(${XdevLWindowLibrary} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Add include directories
+
+include_directories(
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+)
+
+#
+# Add external ibraries
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	target_link_libraries(${XdevLWindowLibrary}
+		XdevLd
+		"-framework Cocoa"
+	)
+else()
+	target_link_libraries(${XdevLWindowLibrary}
+		XdevL
+		"-framework Cocoa"
+)
+endif()
+#
+# Change the outputname of the library
+
+set_property(TARGET ${XdevLWindowLibrary} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLWindowLibrary} PROPERTY SUFFIX "-${XDEVLCOCOA_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLWindowLibrary} PROPERTY SUFFIX "-${XDEVLCOCOA_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/XdevLWindow")
+install(TARGETS ${XdevLWindowLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

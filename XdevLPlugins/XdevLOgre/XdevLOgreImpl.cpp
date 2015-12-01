@@ -74,18 +74,16 @@ namespace xdl {
 
 	XdevLOgreImpl::XdevLOgreImpl(XdevLModuleCreateParameter* parameter) :
 		XdevLModuleImpl<XdevLOgre>(parameter, m_moduleDescriptor),
-		m_attached(false),
-		m_xdlWindow(NULL),
+		m_xdlWindow(nullptr),
 		m_ColorDepth(-1),
 		m_Antialiasing(-1),
-		m_VSync(false),
+		m_VSync(xdl_false),
 		m_colorDepth(32),
-		m_gamma(true),
-		m_useNVPerfHUD(false),
+		m_gamma(xdl_false),
+		m_useNVPerfHUD(xdl_false),
 		m_displayFrequency(-1),
-		m_root(NULL),
-		m_window(NULL) {
-		// Add as default RenderSystem for ogre.
+		m_root(nullptr),
+		m_window(nullptr) {
 		m_ogrePluginNames.push_back("RenderSystem_GL");
 	}
 
@@ -96,18 +94,12 @@ namespace xdl {
 
 
 	Ogre::Root* XdevLOgreImpl::getRoot() {
-		if(!m_attached) {
-			XDEVL_MODULE_ERROR("Ogre context isn't attached to a window.\n");
-			assert(m_attached);
-		}
+		XDEVL_ASSERT( (m_xdlWindow != nullptr) || (m_root != nullptr), "XdevLOgre is not attached to a window.");
 		return m_root;
 	}
 
 	Ogre::RenderWindow* XdevLOgreImpl::getWindow() {
-		if(!m_attached) {
-			XDEVL_MODULE_ERROR("Ogre context isn't attached to a window.\n");
-			assert(m_attached);
-		}
+		XDEVL_ASSERT( (m_xdlWindow != nullptr), "XdevLOgre is not attached to a window.");
 		return m_window;
 	}
 
@@ -120,8 +112,8 @@ namespace xdl {
 		ss << (xdl_int)hwnd;
 		StartInfo.insert(Ogre::NameValuePairList::value_type("externalWindowHandle",ss.str()));
 #elif defined(XDEVL_PLATFORM_LINUX)
-		Display* display = static_cast<Display*>(window->getInternal(XdevLInternalName("UNIX_DISPLAY")));
-		Window  win = *(static_cast<Window*>(window->getInternal(XdevLInternalName("UNIX_WINDOW"))));
+		Display* display = static_cast<Display*>(window->getInternal(XdevLInternalName("X11_DISPLAY")));
+		Window  win = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
 		xdl_uint screen_number = 0;
 		StartInfo["parentWindowHandle"] =	Ogre::StringConverter::toString((long)display) + " :"  +
 											Ogre::StringConverter::toString((xdl_int)screen_number) + " :" +
@@ -132,18 +124,34 @@ namespace xdl {
 #else
 #error "Not supported paltform."
 #endif
-
-		if(-1 != m_ColorDepth)
+		
+		// If color depth specified assign it.
+		if(-1 != m_ColorDepth) {
 			StartInfo.insert(Ogre::NameValuePairList::value_type("colourDepth", Ogre::StringConverter::toString(m_ColorDepth)));
-
+		}
+		
+		// Assign vertical sync.
 		StartInfo.insert(Ogre::NameValuePairList::value_type("vsync", Ogre::StringConverter::toString(m_VSync)));
-		if(-1 != m_Antialiasing)
+		
+		// Assign anti-aliasing
+		if(-1 != m_Antialiasing) {
 			StartInfo.insert(Ogre::NameValuePairList::value_type("FSAA", Ogre::StringConverter::toString(m_Antialiasing)));
+		}
 
+		// Assign gamma correctiong.
 		StartInfo.insert(Ogre::NameValuePairList::value_type("gamma", Ogre::StringConverter::toString(m_gamma)));
+
+		// Switch on/off nvperf.
 		StartInfo.insert(Ogre::NameValuePairList::value_type("useNVPerfHUD", Ogre::StringConverter::toString(m_useNVPerfHUD)));
-		if(m_displayFrequency != -1)
+
+		// Assign display frequence.
+		if(m_displayFrequency != -1) {
 			StartInfo.insert(Ogre::NameValuePairList::value_type("displayFrequency", Ogre::StringConverter::toString(m_displayFrequency)));
+		}
+
+		XDEVL_MODULE_INFO("Window Title : " << m_xdlWindow->getTitle() << std::endl);
+		XDEVL_MODULE_INFO("Window Width : " << m_xdlWindow->getWidth() << std::endl);
+		XDEVL_MODULE_INFO("Window Height: " << m_xdlWindow->getHeight() << std::endl);
 
 		try {
 			m_window = m_root->createRenderWindow(m_xdlWindow->getTitle().toString(),
@@ -154,6 +162,7 @@ namespace xdl {
 			XDEVL_MODULE_ERROR(e.getFullDescription());
 			return ERR_ERROR;
 		}
+
 		XDEVL_MODULE_INFO("Initializing Ogre resource groups.\n");
 		// After reading resource infos we must initialize all groups
 		try {
@@ -162,7 +171,6 @@ namespace xdl {
 			XDEVL_MODULE_ERROR("Ogre resource manager error\n");
 			return ERR_ERROR;
 		}
-		m_attached = true;
 
 		return ERR_OK;
 	}
@@ -184,7 +192,6 @@ namespace xdl {
 			XDEVL_MODULE_ERROR("No 'id' attribute specified.");
 			return ERR_ERROR;
 		}
-
 
 		if(root->Attribute("fsaa"))
 			m_Antialiasing = xstd::from_string<xdl_int>(root->Attribute("fsaa"));
@@ -215,7 +222,21 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOgreImpl::init() {
-		if(getMediator()->getXmlFilename() == NULL)
+		// Log informations are nice but too much are anoying so
+		// let's create our own logger and say that we don't need
+		// to much log information.
+		if(Ogre::LogManager::getSingletonPtr() == 0) {
+			Ogre::LogManager* mLogManager = new Ogre::LogManager();
+			std::string logfilename = std::string(this->getID().getName().toString()) + ".log";
+			mLogManager->createLog(logfilename,false,false,false);
+#ifndef _NDEBUG
+			Ogre::LogManager::getSingleton().setLogDetail(Ogre::LL_BOREME);
+#else
+			Ogre::LogManager::getSingleton().setLogDetail(Ogre::LL_LOW);
+#endif
+		}
+
+		if(getMediator()->getXmlFilename() == nullptr)
 			return ERR_ERROR;
 
 		TiXmlDocument xmlDocument;
@@ -226,20 +247,6 @@ namespace xdl {
 
 		if(readOgreInfo(&xmlDocument) != ERR_OK) {
 			XDEVL_MODULE_WARNING("Parsing problems occurred of the Core XML file.\n");
-		}
-
-		// Log informations are nice but too much are anoying so
-		// let's create our own logger and say that we don't need
-		// to much log information.
-		if(Ogre::LogManager::getSingletonPtr() == 0) {
-			Ogre::LogManager* mLogManager = new Ogre::LogManager();
-			std::string logfilename = std::string(this->getID().getName().toString()) + ".log";
-			mLogManager->createLog(logfilename,false,false,false);
-#ifdef XDEVL_DEBUG
-			Ogre::LogManager::getSingleton().setLogDetail(Ogre::LL_NORMAL);
-#else
-			Ogre::LogManager::getSingleton().setLogDetail(Ogre::LL_LOW);
-#endif
 		}
 
 		// This is the main Ogre Object.
@@ -285,7 +292,7 @@ namespace xdl {
 			}
 		}
 
-		Ogre::RenderSystem* rsystem = NULL;
+		Ogre::RenderSystem* rsystem = nullptr;
 		rsystem = m_root->getRenderSystemByName("OpenGL Rendering Subsystem");
 		if(!rsystem)
 			rsystem = m_root->getRenderSystemByName("Direct3D9 Rendering Subsystem");
@@ -317,7 +324,7 @@ namespace xdl {
 			XDEVL_MODULE_WARNING("<XdevLOgre> section not found. Using default values for the device.\n");
 			return ERR_OK;
 		}
-		while(root != NULL) {
+		while(root != nullptr) {
 			if(root->Attribute("id")) {
 				XdevLID id(root->Attribute("id"));
 				if(getID() == id) {
@@ -358,14 +365,12 @@ namespace xdl {
 
 	xdl_int XdevLOgreImpl::shutdown() {
 		if(m_root) delete m_root;
-		m_attached = false;
 
 		return ERR_OK;
 	}
 
 	xdl_int XdevLOgreImpl::update() {
-		if(!m_attached)
-			return ERR_ERROR;
+		XDEVL_ASSERT( (m_xdlWindow != nullptr), "XdevLOgre is not attached to a window.");
 
 		if(!m_root)
 			return ERR_OK;
@@ -392,7 +397,7 @@ namespace xdl {
 			return m_root;
 		if(data == "OGRE_WINDOW")
 			return m_window;
-		return NULL;
+		return nullptr;
 	}
 
 // -----------------------------------------------------------------------------

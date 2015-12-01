@@ -107,7 +107,6 @@ namespace xdl {
 			virtual Ogre::RenderWindow* getWindow();
 			virtual xdl_int attach(XdevLWindow* window);
 		protected:
-			xdl_bool m_attached;
 			// Holds the core system;
 			XdevLWindow* m_xdlWindow;
 			// Holds the color depth
@@ -119,7 +118,7 @@ namespace xdl {
 			// Holds the color depth value.
 			xdl_int	m_colorDepth;
 			// Holds if gamma correction should be enabled.
-			xdl_bool	m_gamma;
+			xdl_bool m_gamma;
 			// Holds the NVPerfHUD flag.
 			xdl_bool m_useNVPerfHUD;
 			// Holds the display frequence.

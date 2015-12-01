@@ -34,6 +34,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#include <X11/extensions/XInput2.h>
+#include <X11/extensions/Xfixes.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/XKBlib.h>
 
@@ -59,6 +61,28 @@ namespace xdl {
 	// Holds the Patch version number.
 	const xdl_uint XdevLWindowPatchVersion = XDEVLX11_MODULE_PATCH_VERSION;
 
+
+
+	// Holds the Major version number.
+	const xdl_uint XdevLWindowEventServerMajorVersion = XDEVLX11_EVENT_SERVER_MODULE_MAJOR_VERSION;
+
+	// Holds the Minor version number.
+	const xdl_uint XdevLWindowEventServerMinorVersion = XDEVLX11_EVENT_SERVER_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLWindowEventServerPatchVersion = XDEVLX11_EVENT_SERVER_MODULE_PATCH_VERSION;
+
+
+	// Holds the Major version number.
+	const xdl_uint XdevLCursorMajorVersion = XDEVLX11CURSOR_MODULE_MAJOR_VERSION;
+
+	// Holds the Minor version number.
+	const xdl_uint XdevLCursorMinorVersion = XDEVLX11CURSOR_MODULE_MINOR_VERSION;
+
+	// Holds the Patch version number.
+	const xdl_uint XdevLCursorPatchVersion = XDEVLX11CURSOR_MODULE_PATCH_VERSION;
+
+
 	static const XdevLString window_x11_pluginName {
 		"XdevLWindowX11"
 	};
@@ -66,7 +90,7 @@ namespace xdl {
 		"Support for X11 window creation."
 	};
 
-	class XdevLWindowLinux: public XdevLWindowImpl, public thread::Thread {
+	class XdevLWindowLinux: public XdevLWindowImpl{
 		public:
 
 			XdevLWindowLinux(XdevLModuleCreateParameter* parameter);
@@ -74,9 +98,9 @@ namespace xdl {
 
 			static XdevLModuleDescriptor m_windowX11ModuleDesc;
 
-			virtual xdl_int init();
-			virtual xdl_int shutdown();
-			virtual void* getInternal(const char* id);
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
 			virtual xdl_int update();
 
 
@@ -176,10 +200,8 @@ namespace xdl {
 
 			virtual void setParent(XdevLWindow* window);
 
-			virtual void SetType(XdevLWindowTypes type);
-		protected:
+			virtual void setType(XdevLWindowTypes type);
 
-			xdl_int RunThread(thread::ThreadArgument* argument);
 
 		protected:
 			/// Holds the default root window. Mostly it is the desktop.
@@ -209,6 +231,7 @@ namespace xdl {
 			xdl_int m_best_fit_width;
 			xdl_int m_best_fit_height;
 			xdl_int m_best_fit_rate;
+			xdl_bool m_fullscreenModeActive;
 
 			// Stores the default color map.
 			Colormap 								m_defaultColorMap;
@@ -231,13 +254,13 @@ namespace xdl {
 
 			xdl_uint32 getNetWMState();
 			void setWindowBordered();
-			xdl_int setWMProtocols();
+			xdl_int initializeEWMH();
 		protected:
 			bool m_modeChanged;
 			xdl_int m_old_screen_width;
 			xdl_int m_old_screen_height;
 			Rotation m_oldRotation;
-			SizeID m_sizeId;
+			SizeID m_bestSizeId;
 
 			Cursor m_hideCursor;
 			xdl_int timeout_return;
@@ -284,8 +307,6 @@ namespace xdl {
 			Atom _NET_WM_STATE_FULLSCREEN;
 			Atom _NET_WM_STATE_HIDDEN;
 			Atom _NET_WM_STATE_FOCUSED;
-			Atom _NET_WM_STATE_ADD;
-			Atom _NET_WM_STATE_REMOVE;
 			Atom _NET_WM_NAME;
 			Atom _NET_WM_ICON_NAME;
 			Atom _NET_WM_ICON;
@@ -308,6 +329,8 @@ namespace xdl {
 			Atom XdndDrop;
 			Atom XdndFinished;
 			Atom XdndSelection;
+			
+			Atom _KDE_NET_WM_WINDOW_TYPE_OVERRIDE;
 
 	};
 
@@ -327,7 +350,83 @@ namespace xdl {
 
 	};
 
-	typedef XdevLWindowLinux* IPXdevLWindowLinux;
+
+	class XdevLWindowX11EventServer : public XdevLWindowEventServerImpl {
+		public:
+			XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter);
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+			virtual xdl_int update() override;
+
+			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
+			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
+			void flush() override;
+
+		private:
+			int pollEvents();
+
+			XdevLWindowX11Keyboard* m_keyboard;
+			xdl_int m_event_basep;
+			xdl_int m_error_basep;
+			
+			Atom WM_PROTOCOLS;
+			Atom WM_DELETE_WINDOW;
+			Atom _NET_WM_PING;
+			
+			XConfigureEvent m_prevConfigureEvent;
+	};
+	
+	
+	class XdevLCursorX11 : public XdevLModuleImpl<XdevLCursor>  {
+		public:
+			virtual ~XdevLCursorX11() {}
+			
+			XdevLCursorX11(XdevLModuleCreateParameter* parameter);
+
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+
+			virtual void show() override;
+			virtual void hide() override;
+			virtual void setPosition(xdl_uint x, xdl_uint y) override;
+			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;	
+			virtual void releaseClip() override;
+			virtual xdl_int enableRelativeMotion();
+			virtual void disableRelativeMotion();
+			
+			
+			void onHandleXinputEvent(XGenericEventCookie* cookie) ;
+	private:
+			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
+	private:
+			Window		m_defaultRootWindow;
+			Cursor		m_invisibleCursor;
+			Pixmap		m_invisibleCursorPixmap;
+			XColor		m_black;
+			XColor		m_dummy;
+			Colormap	m_defaultColorMap;
+			xdl_int		m_screenNumber;
+			
+			//
+			// Pointer barrier stuff.
+			//
+			xdl_bool	m_barriersSupported;
+			xdl_int		m_fixes_opcode;
+			xdl_int		m_fixes_event;
+			xdl_int		m_fixes_error;
+			PointerBarrier m_barriers[4];
+			
+			xdl_bool	m_xinput2Supported;
+			xdl_int		m_xinput2_opcode;
+			xdl_int		m_xinput2_event;
+			xdl_int		m_xinput2_error;
+			
+			xdl_int m_screenWidth;
+			xdl_int m_screenHeight;
+	};
+
 }
 
 

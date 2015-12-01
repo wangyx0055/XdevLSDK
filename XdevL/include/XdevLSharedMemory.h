@@ -89,7 +89,7 @@ namespace xdl {
 				std::string orders_name(name);
 				orders_name += ".osemaphore";
 
-#if defined (XDEVL_PLATFORM_UNIX)
+#if XDEVL_PLATFORM_UNIX
 				if(shm_unlink(m_name.c_str()) == -1) {
 					// If this fails here we don't bother because it is ok.
 					//std::cerr << "XdevLSharedMemory::XdevLSharedMemory: shm_unlink failed." << std::endl;
@@ -103,10 +103,13 @@ namespace xdl {
 				}
 
 				// Adjusting mapped file size (make room for the whole segment to map)
-				ftruncate(m_smfd, sharedMemorySize);
+				if(ftruncate(m_smfd, sharedMemorySize) < 0) {
+					std::cerr << "XdevLSharedMemory::XdevLSharedMemory: ftruncate failed." << std::endl;
+					return ERR_ERROR;					
+				}
 
 				m_mapped_region = (xdl_uint8*)mmap(NULL, sharedMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, m_smfd, 0);
-				if(m_mapped_region == nullptr) {
+				if(m_mapped_region == MAP_FAILED) {
 					std::cerr << "XdevLSharedMemory::XdevLSharedMemory: mmap failed." << std::endl;
 					return ERR_ERROR;
 				}
@@ -293,7 +296,10 @@ namespace xdl {
 				return (xdl_uint8*)m_mapped_region;
 			}
 
-
+#if XDEVL_PLATFORM_UNIX
+			xdl_int getNativeHandle() const { return m_smfd;}
+#endif
+			
 		private:
 			// Holds the name of the shared memory.
 			std::string m_name;
@@ -310,7 +316,6 @@ namespace xdl {
 			xdl_uint64				m_current;
 
 			// The shared memory.
-			//	boost::interprocess::shared_memory_object  	m_smfd;
 #if defined (XDEVL_PLATFORM_UNIX)
 			xdl_int m_smfd;
 #endif

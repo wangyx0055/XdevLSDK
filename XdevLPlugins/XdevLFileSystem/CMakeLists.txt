@@ -93,8 +93,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE .${XDEVL_PLUGINS}/lib)
 #
 # Set header files for the library.
 
+set(HEADER_INTERFACE_FILE ${XDEVL_PLUGINS}/XdevLFileSystem/XdevLFileSystem.h)
+
 set(HEADER_FILES
-		${XDEVL_PLUGINS}/XdevLFileSystem/XdevLFileSystem.h
+	${HEADER_INTERFACE_FILE}	
 )
 
 if(APPLE)
@@ -149,12 +151,6 @@ add_library(${XdevLFileSystemLibrary} SHARED
 )
 
 #
-# Set the compiler property
-
-set_property(TARGET ${XdevLFileSystemLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLFileSystemLibrary} PROPERTY CXX_STANDARD 11)
-
-#
 # Add external ibraries
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -203,3 +199,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
 	set_property(TARGET ${XdevLFileSystemLibrary} PROPERTY SUFFIX "-${XDEVL_FILESYSTEM_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
+install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
+install(TARGETS ${XdevLFileSystemLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

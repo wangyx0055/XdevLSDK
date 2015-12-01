@@ -10,9 +10,9 @@ set(XdevLLibrary XdevL)
 #
 # Set the version
 
-set(XDEVL_MAJOR_VERSION 0)
-set(XDEVL_MINOR_VERSION 5)
-set(XDEVL_PATCH_VERSION 0)
+set(XDEVL_MAJOR_VERSION ${XDEVLSDK_MAJOR_VERSION})
+set(XDEVL_MINOR_VERSION ${XDEVLSDK_MINOR_VERSION})
+set(XDEVL_PATCH_VERSION ${XDEVLSDK_PATCH_VERSION})
 set(XDEVL_VERSION "${XDEVL_MAJOR_VERSION}.${XDEVL_MINOR_VERSION}.${XDEVL_PATCH_VERSION}")
 
 add_definitions(
@@ -62,8 +62,6 @@ endif()
 # Set header files for the XdevL library.
 
 set(XDEVL_HEADER_FILES
-	${HEADERS_DIR}/tinydir.h
-	${HEADERS_DIR}/tinydir_entity.h
 	${HEADERS_DIR}/tinystr.h
 	${HEADERS_DIR}/tinyxml.h
 	${HEADERS_DIR}/XdevLApplication.h
@@ -106,8 +104,6 @@ set(XDEVL_HEADER_FILES
 # Set the source files for the bakka library.
 
 set(XDEVL_SOURCE_FILES
-	${SRC_DIR}/tinydir.cpp
-	${SRC_DIR}/tinydir_entity.cpp
 	${SRC_DIR}/tinystr.cpp
 	${SRC_DIR}/tinyxml.cpp
 	${SRC_DIR}/tinyxmlerror.cpp
@@ -130,11 +126,6 @@ add_library(${XdevLLibrary} STATIC
     ${XDEVL_HEADER_FILES}
     ${XDEVL_SOURCE_FILES}
 )
-
-#
-# Set the compiler property
-set_property(TARGET ${XdevLLibrary} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${XdevLLibrary} PROPERTY CXX_STANDARD 11)
 
 #
 # Add include directories
@@ -167,3 +158,6 @@ else()
 		set_property(TARGET ${XdevLLibrary} PROPERTY SUFFIX ".lib")
 	endif()
 endif()
+
+install(TARGETS ${XdevLLibrary} DESTINATION ${XDEVL_LIB_INSTALL_PATH})
+install(FILES ${XDEVL_HEADER_FILES} DESTINATION ${XDEVL_INCLUDE_INSTALL_PATH})
