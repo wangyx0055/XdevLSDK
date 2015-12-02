@@ -74,7 +74,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint8	 event;
+		xdl_uint8 event;
 		xdl_uint32 data1;
 		xdl_uint32 data2;
 	};
@@ -88,7 +88,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint8	 event;
+		xdl_uint8 event;
 		xdl_uint32 data1;
 		xdl_uint32 data2;
 	};
@@ -102,7 +102,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 
-		xdl_uint32 windowid;
+		xdl_uint64 windowid;
 		xdl_uint32 event;
 		xdl_int32  x;
 		xdl_int32  y;
@@ -122,7 +122,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint32 windowid;
+		xdl_uint64 windowid;
 		xdl_uint32 x;
 		xdl_uint32 y;
 		xdl_uint32 xrel;
@@ -151,7 +151,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint32 windowid;
+		xdl_uint64 windowid;
 		xdl_uint8 button;
 		xdl_uint32 x;
 		xdl_uint32 y;
@@ -178,7 +178,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint8	 direction;
+		xdl_uint8 direction;
 	};	
 
 	struct XdevLKeyEvent {
@@ -186,7 +186,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint32 windowid;
+		xdl_uint64 windowid;
 		xdl_uint32 keycode;
 		xdl_uint16 mod;
 		xdl_uint8 repeat;
