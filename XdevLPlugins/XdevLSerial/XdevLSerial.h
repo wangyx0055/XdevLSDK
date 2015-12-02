@@ -75,7 +75,7 @@ namespace xdl {
 	    SERIAL_BAUD_1000000 = 1000000,
 	    SERIAL_BAUD_1152000 = 1152000,
 	    SERIAL_BAUD_1382400 = 1382400,
-	    SERIAL_BAUD_1500000 = 1500000,
+		SERIAL_BAUD_1500000 = 1500000,
 	    SERIAL_BAUD_2000000 = 2000000,
 	    SERIAL_BAUD_2500000 = 2500000,
 	    SERIAL_BAUD_3000000 = 3000000,
@@ -121,7 +121,7 @@ namespace xdl {
 					- @b ERR_ERROR if it failed.
 					- @b ERR_OK if it was successful.
 			*/
-			virtual xdl_int open()	= 0;
+			virtual xdl_int open() = 0;
 			/// Open a connection to a serial port using a device name.
 			/**
 				Parameters of the serial port will be imported from the XML file.
@@ -130,14 +130,14 @@ namespace xdl {
 					- @b ERR_ERROR if it failed.
 					- @b ERR_OK if it was successful.
 			*/
-			virtual xdl_int open(const XdevLFileName& name)	= 0;
+			virtual xdl_int open(const XdevLFileName& name) = 0;
 			/// Close the serial port connection.
 			/**
 				@return
 					- @b ERR_ERROR if it failed.
 					- @b ERR_OK if it was successful.
 			*/
-			virtual xdl_int close() 																= 0;
+			virtual xdl_int close() = 0;
 			/// Send data to a open serial port connection.
 			/**
 				@param[in] src The memory buffer to copy from.
@@ -146,7 +146,7 @@ namespace xdl {
 					- @b -1 if it failed.
 					- @b Returns the number of bytes sent if it was successful.
 			*/
-			virtual xdl_int write(xdl_uint8* src, xdl_int size) 			= 0;
+			virtual xdl_int write(xdl_uint8* src, xdl_int size) = 0;
 			/// Receive data from a open serial port connection.
 			/**
 				@param[out] dst The buffer where the message should be stored.
@@ -155,7 +155,7 @@ namespace xdl {
 					- @b -1 if it failed.
 					- @b Returns the length of the message in bytes if it was successful. If no message are avaiable it will return 0.
 			*/
-			virtual xdl_int read(xdl_uint8*  dst, xdl_int size) 	= 0;
+			virtual xdl_int read(xdl_uint8*  dst, xdl_int size) = 0;
 			/// Set the serial port communication properties.
 			/**
 				@param baudrate The baudrate of the serial port.
