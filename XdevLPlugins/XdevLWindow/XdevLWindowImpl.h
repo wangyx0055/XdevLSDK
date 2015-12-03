@@ -87,6 +87,7 @@ namespace xdl {
 			void setParent(XdevLWindow* window);
 			virtual xdl_int notify(XdevLEvent& event) override;
 			virtual void setWindowDecoration(xdl_bool enable);
+			virtual xdl_bool isPointerInside() override;
 		protected:
 			// Holds the root window.
 			XdevLWindow*	m_rootWindow;
@@ -127,6 +128,8 @@ namespace xdl {
 			xdl_uint m_numberOfJoystickAxis;
 			
 			XdevLWindowTypes m_windowType;
+
+			xdl_bool m_pointerIsInside;
 		protected:
 			xdl_int readWindowInfo(TiXmlDocument& document);
 			xdl_int stringToWindowType(const std::string& string);
@@ -159,6 +162,7 @@ namespace xdl {
 		XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 		virtual ~XdevLWindowEventServerImpl() {}
 
+		virtual xdl_bool isWindowRegistered(XdevLWindow* window) override;
 		virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
 		virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
 		virtual XdevLWindow* getWindow(xdl_uint64 id) override;

@@ -188,7 +188,6 @@ namespace xdl {
 		KEY_BACKSPACE,
 		KEY_ENTER,
 		KEY_TAB,
-		KEY_CAPS_LOCK,
 		KEY_LSUPER,
 		KEY_RSUPER,
 
