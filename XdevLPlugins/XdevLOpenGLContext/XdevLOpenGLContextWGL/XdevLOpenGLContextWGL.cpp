@@ -80,13 +80,30 @@ xdl_int XdevLOpenGLWGL::setAttributes(const XdevLOpenGLContextAttributes& attrib
 }
 
 xdl_int XdevLOpenGLWGL::init() {
-	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+	//
+	// Let's get the extensions
+	//
+	
+
+
+
+	//HMODULE module = LoadLibraryA("opengl32.dll");
+	//wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)GetProcAddress(module, "wglCreateContextAttribsARB");
+	//wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetProcAddress(module, "wglSwapIntervalEXT");
+	//wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)GetProcAddress(module, "wglChoosePixelFormatARB");
+
+	//	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	//	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	//	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+
+	//	wglMakeCurrent(hDC, NULL);
+	//	wglDeleteContext(hRC);
+
 	return ERR_OK;
 }
 
 xdl_int XdevLOpenGLWGL::create(XdevLWindow* window) {
+
 	if(window == NULL){
 		XDEVL_MODULE_ERROR("Parameter invalid.\n");
 		return ERR_ERROR;
@@ -98,54 +115,14 @@ xdl_int XdevLOpenGLWGL::create(XdevLWindow* window) {
 		XDEVL_MODULE_ERROR("Get WIN32_HWND failed.\n");
 		return ERR_ERROR;
 	}
-	
-	// Let's check if the user wants multisampling(fullscreen anti aliasing)
-//	if(m_fsaa > 0){
-			// Ok, he wants multisampling support. First we have to check if the graphics cards supports
-			// multisampling. For this we have to create a dummy window which is hided and create an OpenGL 
-			// context. After we did that we can check if the GLEW_ARB_multisample is supported.
-			// If yes we can get the Pixelformat. Than destroy the dummy window and create a new OpenGL context
-			// on the provided windows with the Pixelformat.
-//			IPXdevLWindow win = static_cast<IPXdevLWindow>(getMediator()->createModule("XdevLWindow", "XdevLWindow", "DUMMY_WINDOW", NULL));
-			// We have to hide the window. The XdevLWindowDevice interface doesn't support a function to hide it directly
-			// but supports it internal over an event.
-			// TODO: The window is shown first and than hided. This should be fixed because causes flickering.
-//			XdevLQuark msg("XdevLWindowDeviceHide");
-//			XdevLEvent ev(this, win, &msg, NULL);
-//			win->recvEvent(&ev);
-			// Get the internal Window handle.
-//			HWND tmpWnd = static_cast<HWND>(win->getInternal("WIN32_HWND"));
-//			if (initOpenGL(tmpWnd) == ERR_ERROR) {
-//				XDEVL_MODULE_ERROR("Failed to initialize OpenGL.\n");
-//				getMediator()->deleteModule(win->getId());
-//				return ERR_ERROR;
-//			}else{
-//				if (GLEW_ARB_multisample) {
-//					m_ARBMultisampleSupported = initMultisample();
-//					if(m_ARBMultisampleSupported == xdl_false){
-//						m_fsaa = 0;
-//						XDEVL_MODULE_WARNING("FSSA is not supported. Ignoring request.\n");
-//					}
-//				}	
-//			}
-//			// Destroy the dummy window.
-//			getMediator()->deleteModule(win->getId());
-//	}
 
 	if (initOpenGL(m_wnd) == ERR_ERROR) {
 		XDEVL_MODULE_ERROR("Failed to initialize OpenGL.\n");
 		return ERR_ERROR;
-	}else{
-//		if(m_ARBMultisampleSupported == xdl_true && (m_fsaa > 0)){
-//			glEnable(GL_MULTISAMPLE_ARB);
-//		}
 	}
 
 	// Set vertical syncronisation.
 	setVSync(getVSync());
-
-	// Get all OpenGL driver information, like vendor, version and extensions.
-	//getOpenGLInfos();
 
 	// TODO: This shouldn't be done maybe because it changes the initial state of the OpenGL context.
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -185,7 +162,7 @@ xdl_int XdevLOpenGLWGL::shutdown() {
 }
 
 xdl_int XdevLOpenGLWGL::swapBuffers() {
-
+//	wglSwapLayerBuffers(m_DC, 1);
 	SwapBuffers(m_DC);
 	return ERR_OK;
 }
@@ -206,89 +183,138 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 		return ERR_ERROR;
 	}
 
-	xdl_int color_element_size 	= m_ColorDepth/8;
-	xdl_int color_red_size				= 4;
-	xdl_int color_green_size			= 4;
-	xdl_int color_blue_size				= 4;
-	
-	switch(color_element_size){
-		case 3:{ // We have RGB 8 bit values.
-			color_red_size				= 8;
-			color_green_size			= 8;
-			color_blue_size				= 8;
-			color_alpha_size			= 0;
-		}break;
-		case 4:{ // We have RGBA 8 bit values.
-			color_red_size				= 8;
-			color_green_size			= 8;
-			color_blue_size				= 8;
-			color_alpha_size			= 8;			
-		}break;
-		case 2: // Use 4 bit for each color and alpha = 0
-		default:
-		break;
-	}
-
-	PIXELFORMATDESCRIPTOR m_PFD;
-	m_PFD.nSize						= sizeof(PIXELFORMATDESCRIPTOR);
-	m_PFD.nVersion        = 1;
-	m_PFD.dwFlags         = PFD_DRAW_TO_WINDOW |	// Format Must Support Window
-	                        PFD_SUPPORT_OPENGL |	// Format Must Support OpenGL
-	                        PFD_DOUBLEBUFFER;			// Double Buffering
-	m_PFD.iPixelType      = PFD_TYPE_RGBA;
-	m_PFD.cColorBits			= m_ColorDepth;
-	m_PFD.cDepthBits      = static_cast<xdl_uchar>(m_ZDepth);
-	m_PFD.cStencilBits    = static_cast<xdl_uchar>(m_StencilDepth);
-	m_PFD.cRedBits        = 0;
-	m_PFD.cRedShift       = 0;
-	m_PFD.cGreenBits      = 0;
-	m_PFD.cGreenShift     = 0;
-	m_PFD.cBlueBits       = 0;
-	m_PFD.cBlueShift      = 0;
-	m_PFD.cAlphaBits      = color_alpha_size;
-	m_PFD.cAlphaShift     = 0;
-	m_PFD.cAccumBits      = 0;
-	m_PFD.cAccumRedBits   = 0;
-	m_PFD.cAccumGreenBits = 0;
-	m_PFD.cAccumBlueBits  = 0;
-	m_PFD.cAccumAlphaBits = 0;
-	m_PFD.cAccumBits      = 0;
-	m_PFD.dwLayerMask     = PFD_MAIN_PLANE;
-	m_PFD.bReserved       = 0;
-	m_PFD.dwLayerMask     = 0;
-	m_PFD.dwVisibleMask   = 0;
-	m_PFD.dwDamageMask    = 0;
 
 
-	if (!m_ARBMultisampleSupported) {
-			m_ARBMultisampleFormat[0] = ChoosePixelFormat( m_DC, &m_PFD );
-			if (m_ARBMultisampleFormat[0]==0) { // Let's choose a default index.
-				m_ARBMultisampleFormat[0] = 1;
-				if (DescribePixelFormat(m_DC, m_ARBMultisampleFormat[0], sizeof(PIXELFORMATDESCRIPTOR), &m_PFD)==0) {
-					return ERR_ERROR;
-				}
-			}
-		// Are We Able To Set The Pixel Format?
-		if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[0], &m_PFD ) == FALSE) {
-			XDEVL_MODULE_ERROR("Could not set pixel format.\n");
+
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 32;
+	pfd.cDepthBits = 24;
+	pfd.cStencilBits = 8;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+
+	int iPixelFormat = ChoosePixelFormat(m_DC, &pfd);
+	if (iPixelFormat == 0)return false;
+
+	if (!SetPixelFormat(m_DC, iPixelFormat, &pfd))return false;
+
+	// Create the old style context (OpenGL 2.1 and before)
+	HGLRC hRC = wglCreateContext(m_DC);
+	wglMakeCurrent(m_DC, hRC);
+
+	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+
+	wglMakeCurrent(nullptr, nullptr);
+	wglDeleteContext(hRC);
+
+	if (wglCreateContextAttribsARB) {
+		const int iPixelFormatAttribList[] =
+		{
+			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+			WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+			WGL_COLOR_BITS_ARB, 32,
+			WGL_DEPTH_BITS_ARB, 24,
+			WGL_STENCIL_BITS_ARB, 8,
+			0 // End of attributes list
+		};
+		int iContextAttribs[] =
+		{
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			0 // End of attributes list
+		};
+
+		int iPixelFormat, iNumFormats;
+		wglChoosePixelFormatARB(m_DC, iPixelFormatAttribList, NULL, 1, &iPixelFormat, (UINT*)&iNumFormats);
+
+		// PFD seems to be only redundant parameter now
+		if (SetPixelFormat(m_DC, iPixelFormat, &pfd) != TRUE) {
 			return ERR_ERROR;
 		}
 
+		m_RC = wglCreateContextAttribsARB(m_DC, 0, iContextAttribs);
+		// If everything went OK
+		 wglMakeCurrent(m_DC, m_RC);
+
 	}
-	else{
-		xdl_bool found = xdl_false;
-		for(UINT num = 0; num < numFormats; ++num){
-			// Are We Able To Set The Pixel Format?
-			if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[num], &m_PFD ) != TRUE) {
-				continue;
-			}else
-				found = xdl_true;
-		}
-		if(found == xdl_false){
-			XDEVL_MODULE_ERROR("Could not set pixel format.\n");
-			return ERR_ERROR;		
-		}
-	}
+
+
+
+
+	//PIXELFORMATDESCRIPTOR m_PFD;
+	//m_PFD.nSize						= sizeof(PIXELFORMATDESCRIPTOR);
+	//m_PFD.nVersion        = 1;
+	//m_PFD.dwFlags = PFD_DRAW_TO_WINDOW |	// Format Must Support Window
+	//				PFD_SUPPORT_OPENGL;	// Format Must Support OpenGL
+	//if (m_attributes.double_buffer > 0) {
+	//	m_PFD.dwFlags |= PFD_DOUBLEBUFFER;
+	//}
+	//m_PFD.iPixelType      = PFD_TYPE_RGBA;
+
+
+	//m_PFD.cColorBits	= m_attributes.color_buffer_size;
+	//m_PFD.cDepthBits    = m_attributes.depth_size;
+	//m_PFD.cStencilBits  = m_attributes.stencil_size;
+
+	//
+	//m_PFD.cRedBits = m_attributes.red_size;
+	//m_PFD.cRedShift       = 0;
+	//m_PFD.cGreenBits = m_attributes.green_size;
+	//m_PFD.cGreenShift     = 0;
+	//m_PFD.cBlueBits = m_attributes.blue_size;
+	//m_PFD.cBlueShift      = 0;
+	//m_PFD.cAlphaBits = m_attributes.alpha_size;
+	//m_PFD.cAlphaShift     = 0;
+	//m_PFD.cAccumBits      = 0;
+	//m_PFD.cAccumRedBits   = 0;
+	//m_PFD.cAccumGreenBits = 0;
+	//m_PFD.cAccumBlueBits  = 0;
+	//m_PFD.cAccumAlphaBits = 0;
+	//m_PFD.cAccumBits      = 0;
+	//m_PFD.dwLayerMask     = PFD_MAIN_PLANE;
+	//m_PFD.bReserved       = 0;
+	//m_PFD.dwVisibleMask   = 0;
+	//m_PFD.dwDamageMask    = 0;
+
+
+	//if (!m_ARBMultisampleSupported) {
+	//		m_ARBMultisampleFormat[0] = ChoosePixelFormat( m_DC, &m_PFD );
+	//		if (m_ARBMultisampleFormat[0]==0) { // Let's choose a default index.
+	//			m_ARBMultisampleFormat[0] = 1;
+	//			if (DescribePixelFormat(m_DC, m_ARBMultisampleFormat[0], sizeof(PIXELFORMATDESCRIPTOR), &m_PFD)==0) {
+	//				return ERR_ERROR;
+	//			}
+	//		}
+	//	// Are We Able To Set The Pixel Format?
+	//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[0], &m_PFD ) == FALSE) {
+	//		XDEVL_MODULE_ERROR("Could not set pixel format.\n");
+	//		return ERR_ERROR;
+	//	}
+
+	//}
+	//else{
+		//xdl_bool found = xdl_false;
+		//for(UINT num = 0; num < numFormats; ++num){
+		//	// Are We Able To Set The Pixel Format?
+		//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[num], &m_PFD ) != TRUE) {
+		//		continue;
+		//	}else
+		//		found = xdl_true;
+		//}
+		//if(found == xdl_false){
+		//	XDEVL_MODULE_ERROR("Could not set pixel format.\n");
+		//	return ERR_ERROR;		
+		//}
+	//}
 
 	
 
@@ -344,7 +370,7 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 
 xdl_int XdevLOpenGLWGL::makeCurrent(XdevLWindow* window) {
 	// Try To Activate The Rendering Context
-	if (!wglMakeCurrent( m_DC, m_RC)) {
+	if (!wglMakeCurrent(m_DC, m_RC)) {
 		return ERR_ERROR;
 	}
 	return ERR_OK;

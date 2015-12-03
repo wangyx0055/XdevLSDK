@@ -5,7 +5,7 @@
 
 	<!-- Plug necessary plugins -->
 	<XdevLPlugins>
-		<XdevLPlugin name="XdevLWindowX11" version="1.0.0"/>
+		<XdevLPlugin name="XdevLWindowWindow" version="1.0.0"/>
 	</XdevLPlugins>
 
 	<!-- Create necessary modules -->

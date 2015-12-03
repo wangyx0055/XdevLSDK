@@ -304,6 +304,10 @@ namespace xdl {
 		return WINDOW_UNKNOWN;
 	}
 
+	xdl_bool XdevLWindowImpl::isPointerInside() {
+		return m_pointerIsInside;
+	}
+
 	//
 	// -------------------------------------------------------------------------
 	//
@@ -343,6 +347,14 @@ namespace xdl {
 	XdevLWindowEventServerImpl::XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleAutoImpl<XdevLWindowEventServer>(parameter, descriptor) {
 
+	}
+
+	xdl_bool XdevLWindowEventServerImpl::isWindowRegistered(XdevLWindow* window) {
+		WindowEventMapType::iterator it = m_windows.find(window->getWindowID());
+		if (it == m_windows.end()) {
+			return xdl_false;
+		}
+		return xdl_true;
 	}
 
 	xdl_int XdevLWindowEventServerImpl::registerWindowForEvents(XdevLWindow* window) {

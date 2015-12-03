@@ -210,6 +210,8 @@ namespace xdl {
 
 			/// Sets the window decoration
 			virtual void setWindowDecoration(xdl_bool enable) = 0;
+
+			virtual xdl_bool isPointerInside() = 0;
 	};
 
 	/**
@@ -240,6 +242,7 @@ namespace xdl {
 		public:
 			virtual ~XdevLWindowEventServer() {}
 
+			virtual xdl_bool isWindowRegistered(XdevLWindow* window) = 0;
 			virtual xdl_int registerWindowForEvents(XdevLWindow* window) = 0;
 			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) = 0;
 			virtual XdevLWindow* getWindow(xdl_uint64 id) = 0;

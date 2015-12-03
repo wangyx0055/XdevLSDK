@@ -61,53 +61,51 @@ namespace xdl {
 public:
 	XdevLWindowDeviceWin32(XdevLModuleCreateParameter* parameter);
 
-	virtual ~XdevLWindowDeviceWin32() {
-	}
+	virtual ~XdevLWindowDeviceWin32();
 
 	virtual xdl_int init() override;
 	virtual xdl_int shutdown() override;
-	virtual void* getInternal(const xdl_char* id);
-	virtual xdl_int update();
+	virtual void* getInternal(const XdevLInternalName& id) override;
+	virtual xdl_int update() override;
 	virtual xdl_int reset();
 
-	const XdevLWindowPosition& getPosition();
-	const XdevLWindowSize& getSize();
+	virtual void setSize(const XdevLWindowSize& size) override;
+	virtual void setPosition(const XdevLWindowPosition& position) override;
+	virtual void setTitle(const XdevLWindowTitle& title) override;
+	virtual void setFullscreen(xdl_bool state) override;
+	virtual void showPointer() override;
+	virtual void hidePointer() override;
+	virtual void setPointerPosition(xdl_uint x, xdl_uint y) override;
+	virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) override;
+	virtual void setX(XdevLWindowPosition::type x) override;
+	virtual void setY(XdevLWindowPosition::type y) override;
+	virtual void setWidth(XdevLWindowSize::type width) override;
+	virtual void setHeight(XdevLWindowSize::type height) override;
+	virtual void setType(XdevLWindowTypes type) override;
+	virtual const XdevLWindowTitle& getTitle() override;
+	virtual xdl_bool getFullscreen() override;
+	virtual xdl_int getColorDepth() override;
+	virtual xdl_bool getHidePointer() override;
+	virtual const XdevLWindowPosition& getPosition() override;
+	virtual const XdevLWindowSize& getSize() override;
+	virtual XdevLWindowSize::type getWidth() override;
+	virtual XdevLWindowSize::type getHeight() override;
+	virtual XdevLWindowPosition::type getX() override;
+	virtual XdevLWindowPosition::type getY() override;
 
-	virtual void setSize(const XdevLWindowSize& size);
-	virtual void setPosition(const XdevLWindowPosition& position);
-	virtual void setTitle(const XdevLWindowTitle& title);
-	virtual void setFullscreen(xdl_bool state);
-	virtual void showPointer();
-	virtual void hidePointer();
-	virtual void setPointerPosition(xdl_uint x, xdl_uint y);
-	virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height);
-	virtual void setX(XdevLWindowPosition::type x);
-	virtual void setY(XdevLWindowPosition::type y);
-	virtual void setWidth(XdevLWindowSize::type width);
-	virtual void setHeight(XdevLWindowSize::type height);
-	virtual void setType(XdevLWindowTypes type);
-	virtual const XdevLWindowTitle& getTitle();
-	virtual xdl_bool getFullscreen();
-	virtual xdl_int getColorDepth();
-	virtual xdl_bool getHidePointer();
-	virtual XdevLWindowSize::type getWidth();
-	virtual XdevLWindowSize::type getHeight();
-	virtual XdevLWindowPosition::type getX();
-	virtual XdevLWindowPosition::type getY();
+	virtual void setHidePointer(xdl_bool state) override;
+	virtual void show() override;
+	virtual void hide() override;
+	virtual xdl_bool isHidden() override;
+	virtual void raise() override;
+	virtual void grabPointer() override;
+	virtual void ungrabPointer() override;
+	virtual void grabKeyboard() override;
+	virtual void ungrabKeyboard() override;
+	virtual void setInputFocus() override;
+	virtual xdl_bool hasFocus() override;
 
-	virtual void setHidePointer(xdl_bool state);
-	virtual void show();
-	virtual void hide();
-	virtual xdl_bool isHidden();
-	virtual void raise();
-	virtual void grabPointer();
-	virtual void ungrabPointer();
-	virtual void grabKeyboard();
-	virtual void ungrabKeyboard();
-	virtual void setInputFocus();
-	virtual xdl_bool hasFocus();
-	virtual xdl_int getInputFocus(XdevLWindow** window);
-
+	HWND getNativeWindow() { return m_wnd; }
 protected:
 	std::string m_winClassId;
 protected:
@@ -167,7 +165,27 @@ private:
 //		int pollEvents();
 		/// win32 message handling
 		LRESULT  callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		HWND m_pointerIsInsideWindow;
 
+	};
+
+	class XdevLCursorWindows : public XdevLModuleImpl<XdevLCursor>  {
+	public:
+		XdevLCursorWindows(XdevLModuleCreateParameter* parameter);
+
+		virtual ~XdevLCursorWindows();
+
+		virtual xdl_int init() override;
+		virtual xdl_int shutdown() override;
+		virtual void* getInternal(const XdevLInternalName& id) override;
+
+		virtual void show() override;
+		virtual void hide() override;
+		virtual void setPosition(xdl_uint x, xdl_uint y) override;
+		virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;
+		virtual void releaseClip() override;
+		virtual xdl_int enableRelativeMotion() override;
+		virtual void disableRelativeMotion() override;
 	};
 }
 
