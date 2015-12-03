@@ -90,7 +90,7 @@ namespace xdl {
 			virtual xdl_int update2() override;
 
 
-			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion) override;
+			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
 			virtual xdl_int createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer);
 			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer);
 			virtual xdl_int createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) override;
@@ -104,12 +104,13 @@ namespace xdl {
 		private:
 			AudioUnit audioUnit;
 			xdl_bool m_audioUnitOpen;
-			void *buffer;
 			UInt32 bufferOffset;
 			UInt32 bufferSize;
 #if MACOSX_COREAUDIO
 			AudioDeviceID deviceID;
+			AudioDeviceID* m_deviceList;
 #endif
+			XdevLAudioStreamType m_streamType;
 			xdl_uint m_bufferSize;
 			xdl_uint m_samplingRate;
 			xdl_uint m_channels;
@@ -118,6 +119,8 @@ namespace xdl {
 			xdl_float m_gain;
 
 			callbackFunctionType m_callbackFunction;
+			void* m_userData;
+			xdl_uint8* m_buffer;
 
 	};
 
