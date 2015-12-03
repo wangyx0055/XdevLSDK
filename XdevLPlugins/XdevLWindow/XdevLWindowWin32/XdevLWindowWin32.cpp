@@ -970,12 +970,13 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 			// TODO How about fullscreen window? Do we have to do this? But what if a client is withing the parent and
 			// needs this events too.
 			// TODO This causes to crash at shutdown and I don't know why.
-			TRACKMOUSEEVENT tme;
-			tme.cbSize = sizeof(TRACKMOUSEEVENT);
-			tme.dwFlags = TME_HOVER | TME_LEAVE; //Type of events to track & trigger.
-			tme.dwHoverTime = 1; //How long the mouse has to be in the window to trigger a hover event.
-			tme.hwndTrack = hWnd;
-			TrackMouseEvent(&tme);
+
+			//TRACKMOUSEEVENT tme;
+			//tme.cbSize = sizeof(TRACKMOUSEEVENT);
+			//tme.dwFlags = TME_HOVER | TME_LEAVE; //Type of events to track & trigger.
+			//tme.dwHoverTime = 1; //How long the mouse has to be in the window to trigger a hover event.
+			//tme.hwndTrack = hWnd;
+			//TrackMouseEvent(&tme);
 
 		}break;
 		case WM_LBUTTONDOWN: {
