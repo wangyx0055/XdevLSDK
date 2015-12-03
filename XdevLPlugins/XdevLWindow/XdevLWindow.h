@@ -98,7 +98,7 @@ namespace xdl {
 			}
 
 			/// Returns the ID of the windows in the window server.
-			virtual xdl_uint getWindowID() = 0;
+			virtual xdl_uint64 getWindowID() = 0;
 
 			/// Returns the x position of the window on the desktop
 			virtual const XdevLWindowPosition& getPosition() = 0;
@@ -242,7 +242,7 @@ namespace xdl {
 
 			virtual xdl_int registerWindowForEvents(XdevLWindow* window) = 0;
 			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) = 0;
-			virtual XdevLWindow* getWindow(xdl_uint id) = 0;
+			virtual XdevLWindow* getWindow(xdl_uint64 id) = 0;
 			virtual XdevLWindow* getFocus() const = 0;
 			virtual void flush() = 0;
 	};

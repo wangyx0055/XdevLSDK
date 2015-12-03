@@ -162,6 +162,22 @@ int XdevLWindowDeviceWin32::create() {
 	}
 
 
+	if ((m_windowType == WINDOW_TOOLTIP) || (m_windowType == WINDOW_POPUP) || (m_windowType == WINDOW_SPLASH) || (m_windowType == WINDOW_NOTIFICATION)) {
+
+		// The window is an overlapped window.
+		m_windowStyleEx = WS_EX_WINDOWEDGE;
+
+		// Do not show in Taskbar
+		m_windowStyleEx |= WS_EX_TOOLWINDOW;
+		
+		m_windowStyle = WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+	}
+	else {
+		m_windowStyle = WS_POPUP | WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_CAPTION;
+		m_windowStyleEx = WS_EX_APPWINDOW;
+	}
+
+
 	bool desiredDevModeFound = false;
 	if (m_fullScreen) {
 		// Cache the current display mode so we can switch back when done.
@@ -191,11 +207,8 @@ int XdevLWindowDeviceWin32::create() {
 		m_windowStyleEx = WS_EX_APPWINDOW;
 		SetRect( &rc, 0, 0, getWidth(), getHeight() );
 	}
-	else {
-		m_windowStyle = WS_POPUP | WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_CAPTION;
-		m_windowStyleEx = WS_EX_APPWINDOW;
-		SetRect( &rc, 0, 0, getWidth(), getHeight()  );
-	}
+
+	SetRect(&rc, 0, 0, getWidth(), getHeight());
 	// Ok, we do that because the user wants a client area width the dimenstion(widht, height)
 	// and not the whole windows include the decoration of a windows.
 	AdjustWindowRectEx( &rc, m_windowStyle, false, m_windowStyleEx);
@@ -203,7 +216,7 @@ int XdevLWindowDeviceWin32::create() {
 	m_wnd = CreateWindowEx( m_windowStyleEx,
 							WndClass.lpszClassName,
 	                        getTitle(),
-	                        m_windowStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+							m_windowStyle,
 	                        desiredDevModeFound ? 0: getX(),
 	                        desiredDevModeFound ? 0: getY(),
 	                        (rc.right - rc.left),
@@ -228,13 +241,10 @@ int XdevLWindowDeviceWin32::create() {
 		SetCursorPos((getWidth() >> 1), (getHeight() >> 1));
 	}
 
-	m_id = GetWindowLong(m_wnd, GWL_ID);
+	m_id = (xdl_uint64)GetWindowLong(m_wnd, GWL_ID);
 	windowEventServer->registerWindowForEvents(this);
 
-	SetForegroundWindow(m_wnd);
 	UpdateWindow(m_wnd);
-	ShowWindow(m_wnd, SW_SHOWNORMAL);
-	SetFocus(m_wnd);
 
 	return ERR_OK;
 }
@@ -572,7 +582,7 @@ xdl_int XdevLWindowWindowsEventServer::update() {
 
 LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
-	XdevLWindow* window = windowEventServer->getWindow(GetWindowLong(hWnd, GWL_ID));
+	XdevLWindow* window = windowEventServer->getWindow((xdl_uint64)GetWindowLong(hWnd, GWL_ID));
 	if (window == nullptr) {
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}

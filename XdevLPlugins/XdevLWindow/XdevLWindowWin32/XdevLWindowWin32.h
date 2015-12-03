@@ -64,8 +64,8 @@ public:
 	virtual ~XdevLWindowDeviceWin32() {
 	}
 
-	virtual xdl_int init();
-	virtual xdl_int shutdown();
+	virtual xdl_int init() override;
+	virtual xdl_int shutdown() override;
 	virtual void* getInternal(const xdl_char* id);
 	virtual xdl_int update();
 	virtual xdl_int reset();

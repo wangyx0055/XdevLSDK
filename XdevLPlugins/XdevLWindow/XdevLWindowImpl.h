@@ -65,7 +65,7 @@ namespace xdl {
 
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
-			virtual xdl_uint getWindowID();
+			virtual xdl_uint64 getWindowID();
 			virtual XdevLWindowPosition::type getX() const;
 			virtual XdevLWindowPosition::type getY() const;
 			virtual XdevLWindowSize::type getWidth() const;
@@ -92,7 +92,7 @@ namespace xdl {
 			XdevLWindow*	m_rootWindow;
 
 			// The identification code.
-			xdl_uint m_id;
+			xdl_uint64 m_id;
 
 			// Holds the windows title.
 			XdevLWindowTitle m_title;
@@ -149,19 +149,19 @@ namespace xdl {
 
 		protected:
 
-			std::map<xdl_uint, XdevLWindow*> m_windowList;
+			std::map<xdl_uint64, XdevLWindow*> m_windowList;
 	};
 
 	class XdevLWindowEventServerImpl : public XdevLModuleAutoImpl<XdevLWindowEventServer> {
 	public:
-		typedef std::map<xdl_uint, XdevLWindow*> WindowEventMapType;
+		typedef std::map<xdl_uint64, XdevLWindow*> WindowEventMapType;
 
 		XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 		virtual ~XdevLWindowEventServerImpl() {}
 
 		virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
 		virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
-		virtual XdevLWindow* getWindow(xdl_uint id) override;
+		virtual XdevLWindow* getWindow(xdl_uint64 id) override;
 		virtual XdevLWindow* getFocus() const override;
 		virtual void flush() override;
 
@@ -169,7 +169,7 @@ namespace xdl {
 
 	private:
 		XdevLWindow* m_focusWindow;
-		std::map<xdl_uint, XdevLWindow*> m_windows;
+		WindowEventMapType m_windows;
 		
 
 	};

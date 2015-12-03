@@ -139,7 +139,7 @@ namespace xdl {
 		return m_border;
 	}
 
-	xdl_uint XdevLWindowImpl::getWindowID() {
+	xdl_uint64 XdevLWindowImpl::getWindowID() {
 		return m_id;
 	}
 
@@ -363,8 +363,12 @@ namespace xdl {
 		return ERR_ERROR;
 	}
 
-	XdevLWindow* XdevLWindowEventServerImpl::getWindow(xdl_uint id) {
-		return m_windows[id];
+	XdevLWindow* XdevLWindowEventServerImpl::getWindow(xdl_uint64 id) {
+		auto window = m_windows.find(id);
+		if (window == m_windows.end()) {
+			return nullptr;
+		}
+		return window->second;
 	}
 
 	XdevLWindow* XdevLWindowEventServerImpl::getFocus() const {
