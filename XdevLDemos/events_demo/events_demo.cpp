@@ -46,26 +46,26 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 
 
 	if (event.type == ButtonPressed.getHashCode()) {
-		printf(("WindowID: %d -> XDEVL_KEY_PRESSED\n"), event.window.windowid);
+		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED\n"), event.window.windowid);
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
 	}
 	else if (event.type == ButtonReleased.getHashCode()) {
-		printf(("WindowID: %d -> XDEVL_KEY_RELEASED\n"), event.window.windowid);
+		printf(("WindowID: %ld -> XDEVL_KEY_RELEASED\n"), event.window.windowid);
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
 	}
 	else if (event.type == MouseButtonPressed.getHashCode()) {
-		printf(("WindowID: %d -> XDEVL_MOUSE_BUTTON_PRESSED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
+		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_PRESSED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
 		currentCursorPosition.pressed = true;
 		currentCursorPosition.released = false;
 		currentCursorPosition.x = event.button.x;
 		currentCursorPosition.y = event.button.y;
 	}
 	else if (event.type == MouseButtonReleased.getHashCode()) {
-		printf(("WindowID: %d -> XDEVL_MOUSE_BUTTON_RELEASED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
+		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_RELEASED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
 		currentCursorPosition.pressed = false;
 		currentCursorPosition.released = true;
 		currentCursorPosition.x = event.button.x;
@@ -86,62 +86,62 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 		case xdl::XDEVL_WINDOW_EVENT: {
 			switch(event.window.event) {
 				case xdl::XDEVL_WINDOW_CREATE: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_CREATE\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_CREATE\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_CLOSE: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_CLOSE\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_CLOSE\n"), event.window.windowid);
 					if(event.window.windowid == window->getWindowID()) {
 						run = xdl::xdl_false;
 					}
 				}
 				break;
 				case xdl::XDEVL_WINDOW_EXPOSED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_EXPOSED\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_EXPOSED\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_INPUT_FOCUS_GAINED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_INPUT_FOCUS_GAINED\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_INPUT_FOCUS_GAINED\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_INPUT_FOCUS_LOST: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_INPUT_FOCUS_LOST\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_INPUT_FOCUS_LOST\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_HIDDEN: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_HIDDEN\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_HIDDEN\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_LEAVE: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_LEAVE\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_LEAVE\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_ENTER: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_ENTER\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_ENTER\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_MAXIMIZED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_MAXIMIZED\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_MAXIMIZED\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_MINIMIZED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_MINIMIZED\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_MINIMIZED\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_MOVED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_MOVED (%d, %d)\n"),  event.window.windowid, event.window.x, event.window.y);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_MOVED (%d, %d)\n"),  event.window.windowid, event.window.x, event.window.y);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_RESIZED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_RESIZED (%d, %d)\n"),  event.window.windowid, event.window.width, event.window.height);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_RESIZED (%d, %d)\n"),  event.window.windowid, event.window.width, event.window.height);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_RESTORED: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_RESTORED\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_RESTORED\n"), event.window.windowid);
 				}
 				break;
 				case xdl::XDEVL_WINDOW_SHOWN: {
-					printf(("WindowID: %d -> XDEVL_WINDOW_SHOWN\n"), event.window.windowid);
+					printf(("WindowID: %ld -> XDEVL_WINDOW_SHOWN\n"), event.window.windowid);
 				}
 				break;
 			}
@@ -174,12 +174,6 @@ class MyListenerClass : public xdl::XdevLListener {
 		xdl::XdevLID id;
 };
 
-
-void logConsumerCallback(const xdl::XdevLLogItem& item) {
-	std::cout << "Time [us]: " << item.timestamp << " Message: " << item.message << std::endl;
-}
-
-
 int main(int argc, char* argv[]) {
 
 	// Create the core system.
@@ -191,10 +185,17 @@ int main(int argc, char* argv[]) {
 	core->registerListenerCallbackFunction(eventCallbackFunction);
 
 	window = xdl::getModule<xdl::IPXdevLWindow>(core,  xdl::XdevLID("MyWindow1"));
+	if(xdl::isModuleNotValid(window)) {
+		return -1;
+	}
+
 	window->setType(xdl::WINDOW_NORMAL);
 	windowsMap[window->getWindowID()] = window;
 
 	xdl::IPXdevLWindow tooltip = xdl::createModule<xdl::IPXdevLWindow>(core, xdl::XdevLModuleName("XdevLWindow"), xdl::XdevLID("Tooltip"));
+	if(xdl::isModuleNotValid(tooltip)) {
+		return -1;
+	}
 	windowsMap[tooltip->getWindowID()] = tooltip;
 
 	tooltip->setType(xdl::WINDOW_NORMAL);
