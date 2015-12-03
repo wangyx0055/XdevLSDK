@@ -71,6 +71,15 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::windowEventServer = new xdl::XdevLWindowWindowsEventServer(parameter);
 		parameter->setModuleInstance(xdl::windowEventServer);
 		xdl::XdevLWindowEventServerParameter = parameter;
+	}else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+		// If there is not event server first create one.
+		if (xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowWindowsEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+		}
+
+		xdl::XdevLWindowServerWindows* windowServer = new xdl::XdevLWindowServerWindows(parameter);
+		parameter->setModuleInstance(windowServer);
 	}
 	else {
 		return xdl::ERR_MODULE_NOT_FOUND;
@@ -183,8 +192,8 @@ int XdevLWindowDeviceWin32::create() {
 		SetRect( &rc, 0, 0, getWidth(), getHeight() );
 	}
 	else {
-		m_windowStyle 	= WS_OVERLAPPEDWINDOW;
-		m_windowStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+		m_windowStyle = WS_POPUP | WS_OVERLAPPED | WS_SYSMENU | WS_BORDER | WS_CAPTION;
+		m_windowStyleEx = WS_EX_APPWINDOW;
 		SetRect( &rc, 0, 0, getWidth(), getHeight()  );
 	}
 	// Ok, we do that because the user wants a client area width the dimenstion(widht, height)
@@ -219,7 +228,7 @@ int XdevLWindowDeviceWin32::create() {
 		SetCursorPos((getWidth() >> 1), (getHeight() >> 1));
 	}
 
-	m_id = GetWindowLong(m_wnd, GWL_ID) + 1;
+	m_id = GetWindowLong(m_wnd, GWL_ID);
 	windowEventServer->registerWindowForEvents(this);
 
 	SetForegroundWindow(m_wnd);
@@ -485,6 +494,30 @@ void XdevLWindowDeviceWin32::setHidePointer(xdl_bool state) {
 // -------------------------------------------------------------------------
 //
 
+XdevLWindowServerWindows::XdevLWindowServerWindows(XdevLModuleCreateParameter* parameter) :
+XdevLWindowServerImpl(parameter) {
+
+}
+
+XdevLWindowServerWindows::~XdevLWindowServerWindows() {
+
+}
+
+xdl_int XdevLWindowServerWindows::createWindow(XdevLWindow** window,
+	const XdevLWindowTitle& title,
+	const XdevLWindowPosition& position,
+	const XdevLWindowSize& size) {
+
+	*window = new XdevLWindowDeviceWin32(nullptr);
+
+	return ERR_OK;
+}
+
+
+
+//
+// -----------------------------------------------------------------------------
+//
 
 XdevLWindowWindowsEventServer::XdevLWindowWindowsEventServer(XdevLModuleCreateParameter* parameter) :
 XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc)
@@ -500,7 +533,7 @@ xdl_int XdevLWindowWindowsEventServer::unregisterWindowFromEvents(XdevLWindow* w
 }
 
 xdl_int XdevLWindowWindowsEventServer::init() {
-	XDEVL_MODULE_SUCCESS("SDL window created successfully" << std::endl);
+	XDEVL_MODULE_SUCCESS("Window created successfully" << std::endl);
 	return ERR_OK;
 }
 
@@ -539,45 +572,76 @@ xdl_int XdevLWindowWindowsEventServer::update() {
 
 LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
-	XdevLWindow* window = XdevLWindowEventServerImpl::getWindow(GetWindowLong(hWnd, GWL_ID));
+	XdevLWindow* window = windowEventServer->getWindow(GetWindowLong(hWnd, GWL_ID));
 	if (window == nullptr) {
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+	
+	XdevLEvent ev;
+	ev.common.timestamp = getMediator()->getTimer().getTime64();
 
 	switch (uMsg) {
+		case WM_CLOSE: {
 
+			ev.type = XDEVL_WINDOW_EVENT;
+			ev.window.event = XDEVL_WINDOW_CLOSE;
+			ev.window.windowid = window->getWindowID();
+
+			getMediator()->fireEvent(ev);
+
+			// Make a core event.
+			ev.type = XDEVL_CORE_EVENT;
+			ev.core.event = XDEVL_CORE_SHUTDOWN;
+
+			getMediator()->fireEvent(ev);
+
+		}break;
+		case WM_SHOWWINDOW: {
+			switch (lParam)
+			{
+			case SW_PARENTCLOSING:
+				
+				break;
+			case SW_PARENTOPENING:
+				ev.type = XDEVL_WINDOW_EVENT;
+				ev.type = XDEVL_WINDOW_EVENT;
+				ev.window.event = XDEVL_WINDOW_SHOWN;
+				ev.window.windowid = window->getWindowID();
+
+				getMediator()->fireEvent(ev);
+				break;
+			default:
+				break;
+			}
+		}
+		break;
+		case WM_SYSKEYUP:
+		case WM_KEYUP: {
+
+		}break;
+		case WM_SYSKEYDOWN:
+		case WM_KEYDOWN: {
+
+		}break;
 		case WM_CREATE:
 			break;
 		case WM_ACTIVATE: {
 		}break;
-		case WM_CLOSE:
-			break;
-		case WM_SYSKEYDOWN:
-			break;
 		case WM_SIZE: {
-			window->setSize(XdevLWindowSize(LOWORD(lParam), HIWORD(lParam)));
+	//		window->setSize(XdevLWindowSize(LOWORD(lParam), HIWORD(lParam)));
 		}break;
 		case WM_MOVE: {
-			window->setPosition(XdevLWindowPosition(LOWORD(lParam), HIWORD(lParam)));
+	//		window->setPosition(XdevLWindowPosition(LOWORD(lParam), HIWORD(lParam)));
 		}break;
 		case WM_ENTERSIZEMOVE:{
-			//OIS::InputManager::flushInputObjects(m_inputManager);
+	
 		}
 		case WM_EXITSIZEMOVE:{
-			//OIS::InputManager::flushInputObjects(m_inputManager);
-			// FIXME: Hey please Cengiz, find another solution for that. At the moment all modules whould be reseted but it shoudl be only keyboard, mouse and joystick.
-			//		XdevLQuark q("XDEVL_MESSAGE_RESET");
-			//		XdevLEvent ev(this, NULL, &q, NULL);
-			//		getMediator()->sendEvent(&ev);
 		}
 		case WM_SIZING:
 			break;
 		case WM_MOUSEMOVE: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_MOTION;
-
 			ev.motion.windowid = window->getWindowID();
 			ev.motion.x = LOWORD(lParam);
 			ev.motion.y = HIWORD(lParam);
@@ -587,9 +651,6 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 			getMediator()->fireEvent(ev);
 		}break;
 		case WM_LBUTTONDOWN: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_BUTTON_PRESSED;
 
 			ev.button.windowid = window->getWindowID();
@@ -600,9 +661,6 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 			getMediator()->fireEvent(ev);
 		}break;
 		case WM_LBUTTONUP: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_BUTTON_RELEASED;
 
 			ev.button.windowid = window->getWindowID();
@@ -614,9 +672,6 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 		}break;
 
 		case WM_RBUTTONDOWN: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_BUTTON_PRESSED;
 
 			ev.button.windowid = window->getWindowID();
@@ -627,9 +682,6 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 			getMediator()->fireEvent(ev);
 		}break;
 		case WM_RBUTTONUP: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_BUTTON_RELEASED;
 
 			ev.button.windowid = window->getWindowID();
@@ -641,9 +693,6 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 		}break;
 
 		case WM_MBUTTONUP: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
 			ev.type = XDEVL_MOUSE_BUTTON_PRESSED;
 
 			ev.button.windowid = window->getWindowID();
@@ -654,9 +703,7 @@ LRESULT  XdevLWindowWindowsEventServer::callbackProc(HWND hWnd, UINT uMsg, WPARA
 			getMediator()->fireEvent(ev);
 		}break;
 		case WM_MBUTTONDOWN: {
-			// Register button up event in the Core.
-			XdevLEvent ev;
-			ev.common.timestamp = getMediator()->getTimer().getTime64();
+
 			ev.type = XDEVL_MOUSE_BUTTON_RELEASED;
 
 			ev.button.windowid = window->getWindowID();

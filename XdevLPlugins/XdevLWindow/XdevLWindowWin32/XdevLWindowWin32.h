@@ -133,6 +133,21 @@ private:
 	
 };
 
+
+	class XdevLWindowServerWindows : public XdevLWindowServerImpl {
+	public:
+		XdevLWindowServerWindows(XdevLModuleCreateParameter* parameter);
+		virtual ~XdevLWindowServerWindows();
+
+		/// Creates a new window.
+		virtual xdl_int createWindow(XdevLWindow** window,
+			const XdevLWindowTitle& title,
+			const XdevLWindowPosition& position,
+			const XdevLWindowSize& size
+			);
+	};
+
+
 	class XdevLWindowWindowsEventServer : public XdevLWindowEventServerImpl {
 	public:
 		XdevLWindowWindowsEventServer(XdevLModuleCreateParameter* parameter);
