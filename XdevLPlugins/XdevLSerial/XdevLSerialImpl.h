@@ -51,15 +51,15 @@ namespace xdl {
 	}
 
 	protected:
-		XdevLFileName					m_deviceName;
+		XdevLFileName			m_deviceName;
 		XdevLStream::AccesType	m_deviceMode;
-		xdl::xdl_int 						m_baudrate;
-		XdevLSerialByteSize			m_byteSize;	
-		XdevLSerialParity 			m_parity;
-		XdevLSerialStopBits 		m_stopBits;
+		xdl::xdl_int 			m_baudrate;
+		XdevLSerialByteSize		m_byteSize;	
+		XdevLSerialParity 		m_parity;
+		XdevLSerialStopBits 	m_stopBits;
 		XdevLSerialFlowControl 	m_flowControl;
-		xdl_int									m_timeout;
-		xdl_bool								m_dirty;
+		xdl_int					m_timeout;
+		xdl_bool				m_dirty;
 		
 		std::map<std::string, XdevLStream::AccesType>	m_deviceModeMap;	
 		std::map<std::string, XdevLSerialByteSize> 		m_byteSizeMap;	
