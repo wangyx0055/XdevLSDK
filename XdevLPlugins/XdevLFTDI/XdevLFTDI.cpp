@@ -46,6 +46,64 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
 
 namespace xdl {
 
+	DWORD wrapXdevLStopBitsToFTDI(XdevLSerialStopBits stopBits) {
+		switch(stopBits) {
+			case SERIAL_SB_1:
+				return FT_STOP_BITS_1;
+			case SERIAL_SB_2:
+			default:
+				break;
+		}
+		return FT_STOP_BITS_2;
+	}
+
+	DWORD wrapXdevLByteSizeToFTDI(XdevLSerialByteSize byteSize) {
+		switch(byteSize) {
+			case SERIAL_BSIZE_5:
+				XDEVL_ASSERT(nullptr, "SERIAL_BSIZE_5 is not supported by this device.");
+				break;
+			case SERIAL_BSIZE_6:
+				XDEVL_ASSERT(nullptr, "SERIAL_BSIZE_6 is not supported by this device.");
+				break;
+			case SERIAL_BSIZE_7:
+				return FT_BITS_7;
+				break;
+			case SERIAL_BSIZE_8:
+			default:
+				break;
+		}
+		return SERIAL_BSIZE_8;
+	}
+
+	DWORD wrapXdevLParityToFTDI(XdevLSerialParity parity) {
+		switch(parity) {
+			case SERIAL_EVEN_PARITY: return FT_PARITY_EVEN;
+				break;
+			case SERIAL_ODD_PARITY: return FT_PARITY_ODD;
+				break;
+			case SERIAL_SPACE_PARITY: return FT_PARITY_SPACE;
+				break;
+			case SERIAL_MARK_PARITY: return FT_PARITY_MARK;
+			case SERIAL_NO_PARITY:
+			default:
+				break;
+		}
+		return FT_PARITY_NONE;
+	}
+
+	DWORD wrapXdevLFlowControlToFTDI(XdevLSerialFlowControl flowcontrol) {
+		switch(flowcontrol) {
+			case SERIAL_FLOW_CONTROL_HARDWARE: return FT_FLOW_RTS_CTS;
+				break;
+			case SERIAL_FLOW_CONTROL_SOFTWARE: return FT_FLOW_XON_XOFF;
+				break;
+			case SERIAL_FLOW_CONTROL_NONE:
+			default:
+				break;
+		}
+		return FT_FLOW_NONE;
+	}
+
 	XdevLFTDI::XdevLFTDI(XdevLModuleCreateParameter* parameter) :
 		XdevLModuleImpl<XdevLSerial>(parameter, moduleDescriptor),
 		m_usb_in_size(64),
@@ -229,58 +287,17 @@ namespace xdl {
 		//
 		// Wrap the stop bits.
 		//
-		DWORD sbits;
-		switch(stopbits) {
-			case SERIAL_SB_1:
-				sbits = FT_STOP_BITS_1;
-				break;
-			case SERIAL_SB_2:
-			default:
-				sbits = FT_STOP_BITS_2;
-				break;
-		}
+		DWORD sbits = wrapXdevLStopBitsToFTDI(stopbits);
 
 		//
 		// Wrap the byte size.
 		//
-		DWORD bsize;
-		switch(bytesize) {
-			case SERIAL_BSIZE_5:
-				XDEVL_ASSERT(nullptr, "SERIAL_BSIZE_5 is not supported by this device.");
-				break;
-			case SERIAL_BSIZE_6:
-				XDEVL_ASSERT(nullptr, "SERIAL_BSIZE_6 is not supported by this device.");
-				break;
-			case SERIAL_BSIZE_7:
-				bsize = FT_BITS_7;
-				break;
-			case SERIAL_BSIZE_8:
-			default:
-				bsize = FT_BITS_8;
-				break;
-		}
+		DWORD bsize = wrapXdevLByteSizeToFTDI(bytesize);
 
 		//
 		// Wrap the parity.
 		//
-		DWORD sparity;
-		switch(parity) {
-			case SERIAL_EVEN_PARITY:
-				sparity = FT_PARITY_EVEN;
-				break;
-			case SERIAL_ODD_PARITY:
-				sparity = FT_PARITY_ODD;
-				break;
-			case SERIAL_SPACE_PARITY:
-				sparity = FT_PARITY_SPACE;
-				break;
-			case SERIAL_MARK_PARITY:
-				sparity = FT_PARITY_MARK;
-			case SERIAL_NO_PARITY:
-			default:
-				sparity = FT_PARITY_NONE;
-				break;
-		}
+		DWORD sparity = wrapXdevLParityToFTDI(parity);
 
 		//
 		// Set byte size, stop bits and parity.
@@ -290,29 +307,22 @@ namespace xdl {
 			XDEVL_MODULE_ERROR("FT_SetDataCharacteristics failed: " << (xdl_int)ftStatus << "\n");
 			return ERR_ERROR;
 		}
+		XDEVL_MODULE_INFO("Baudrate           : " << baudrate << std::endl);
+		XDEVL_MODULE_INFO("Stop bits          : " << xdevLStopBitsToString(stopbits) << std::endl);
+		XDEVL_MODULE_INFO("Byte size          : " << xdevLByteSizeToString(bytesize) << std::endl);
+		XDEVL_MODULE_INFO("Parity             : " << xdevLParityToString(parity) << std::endl);
 
 		//
 		// Set the flow control.
 		//
-		DWORD fc;
-		switch(flowcontrol) {
-			case SERIAL_FLOW_CONTROL_HARDWARE:
-				fc = FT_FLOW_RTS_CTS;
-				break;
-			case SERIAL_FLOW_CONTROL_SOFTWARE:
-				fc = FT_FLOW_XON_XOFF;
-				break;
-			case SERIAL_FLOW_CONTROL_NONE:
-			default:
-				fc = FT_FLOW_NONE;
-				break;
-		}
+		DWORD fc = wrapXdevLFlowControlToFTDI(flowcontrol);
 
 		ftStatus = FT_SetFlowControl(ftHandle, fc, 0, 0);
 		if(ftStatus != FT_OK) {
 			XDEVL_MODULE_ERROR("FT_SetFlowControl failed: " << (xdl_int)ftStatus << "\n");
 			return ERR_ERROR;
 		}
+		XDEVL_MODULE_INFO("Flowcontrol        : " << xdevLFlowControlToString(flowcontrol) << std::endl);
 
 		//
 		// Set USB buffer parameters. (IN/OUT buffer size)
@@ -320,9 +330,9 @@ namespace xdl {
 		if((ftStatus = FT_SetUSBParameters(ftHandle, m_usb_in_size, m_usb_out_size)) != FT_OK) {
 			XDEVL_MODULE_ERROR("FT_SetUSBParameters failed: " << (xdl_int)ftStatus << "\n");
 			return ERR_ERROR;
-		} else {
-			XDEVL_MODULE_INFO("Device USB request transfer size. IN size: " << m_usb_in_size << " bytes . OUT size: " << m_usb_out_size << " bytes." << std::endl);
 		}
+		XDEVL_MODULE_INFO("USB transfer size  : IN: " << m_usb_in_size << ": OUT: " << m_usb_out_size << " bytes." << std::endl);
+
 
 		//
 		// Set the latency timer for better latency :D
@@ -330,9 +340,9 @@ namespace xdl {
 		if((ftStatus = FT_SetLatencyTimer(ftHandle, m_latency_timer)) != FT_OK) {
 			XDEVL_MODULE_ERROR("FT_SetLatencyTimer failed: " << (xdl_int)ftStatus << "\n");
 			return ERR_ERROR;
-		} else {
-			XDEVL_MODULE_INFO("Device Latency timer set to: " << m_latency_timer << " ms" << std::endl);
 		}
+		XDEVL_MODULE_INFO("Latency timer      : " << m_latency_timer << " ms" << std::endl);
+
 
 		//
 		// Set the time out times for reading and writing.
@@ -342,7 +352,7 @@ namespace xdl {
 			if(ftStatus != FT_OK) {
 				XDEVL_MODULE_ERROR("Could not set the timeout.\n");
 			} else {
-				XDEVL_MODULE_INFO("Device Timeout set to: " <<  m_timeout/1000000 << std::endl);
+				XDEVL_MODULE_INFO("Read/Write timeout : " <<  m_timeout/1000000 << " s" << std::endl);
 			}
 		}
 
