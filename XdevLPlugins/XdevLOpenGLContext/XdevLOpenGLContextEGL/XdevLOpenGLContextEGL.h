@@ -52,10 +52,12 @@ namespace xdl {
 			virtual xdl_int setVSync(xdl_bool enableVSync) override;
 
 		private:
-			EGLDisplay 			m_eglDisplay;
-			EGLSurface 			m_eglSurface;
-			EGLContext 			m_eglContext;
-			EGLConfig  			m_eglConfig;
+			EGLDisplay m_eglDisplay;
+			EGLSurface m_eglSurface;
+			EGLContext m_eglContext;
+			EGLConfig m_eglConfig;
+			EGLint m_major;
+			EGLint m_minor;
 	};
 
 
