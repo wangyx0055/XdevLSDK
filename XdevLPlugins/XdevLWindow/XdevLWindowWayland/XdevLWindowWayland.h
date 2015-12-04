@@ -247,14 +247,17 @@ namespace xdl {
 			void setSeat(wl_seat* seat);
 			void setPointer(wl_pointer* pointer);
 			void setCurrentWindow(wl_surface* surface);
+			void setCurrentPointerPosition(xdl_int x, xdl_int y);
+
+			void getCurrentPointerPosition(xdl_int& x, xdl_int& y);
 			wl_surface* getCurrentWindow() {return m_currentSurface;}
 
-			void handlePointerEntered(wl_surface* surface);
-			
 		private:
 			wl_seat* m_seat;
 			wl_pointer* m_pointer; 
 			wl_surface* m_currentSurface;
+			xdl_int m_pointerPositionX;
+			xdl_int m_pointerPositionY;
 	};
 
 

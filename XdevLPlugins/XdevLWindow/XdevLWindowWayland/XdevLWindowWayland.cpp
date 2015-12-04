@@ -859,8 +859,6 @@ err:
 		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
 		wes->setCurrentWindow(surface);
 
-//		wes->handlePointerEntered(surface);
-
 		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(surface);
 
 		XdevLEvent ev;
@@ -884,24 +882,32 @@ err:
 		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
 		ev.type				= XDEVL_WINDOW_EVENT;
 		ev.window.event 	= XDEVL_WINDOW_LEAVE;
-		ev.window.data1		= 0;//event.xcrossing.x;
-		ev.window.data2		= 0;//event.xcrossing.y;
+
+		xdl_int x, y;
+		wes->getCurrentPointerPosition(x, y);
+
+		ev.window.data1	= x;
+		ev.window.data2	= y;
+
 		ev.window.windowid	= window->getWindowID();
 
 		wes->getMediator()->fireEvent(ev);
 	}
 	static void pointerHandleMotion(void *data, struct wl_pointer *pointer, uint32_t time, wl_fixed_t sx_w, wl_fixed_t sy_w) {
 		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
-		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
 
 		XdevLEvent ev;
-		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.common.timestamp 	= wes->getMediator()->getTimer().getTime64();
 		ev.type 				= MouseMotion.getHashCode();
 		ev.motion.x				= wl_fixed_to_int(sx_w);
-		ev.motion.y				= wl_fixed_to_int(sy_w);;
+		ev.motion.y				= wl_fixed_to_int(sy_w);
+
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
 		ev.window.windowid		= window->getWindowID();
+
 		wes->getMediator()->fireEvent(ev);
-		
+		wes->setCurrentPointerPosition(ev.motion.x, ev.motion.y);
+
 	}
 	static void pointerHandleButton(void *data, struct wl_pointer *pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state_w) {
 
@@ -932,15 +938,19 @@ err:
 
 
 		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
-		ev.type 				= state ? MouseButtonPressed.getHashCode() : MouseButtonReleased.getHashCode();
-		ev.button.x				= 0; // TODO
-		ev.button.y				= 0; // TODO
+		ev.type = state ? MouseButtonPressed.getHashCode() : MouseButtonReleased.getHashCode();
+
+		xdl_int x, y;
+		wes->getCurrentPointerPosition(x, y);
+
+		ev.button.x				= x;
+		ev.button.y				= y;
 		ev.window.windowid		= window->getWindowID();
 
 		wes->getMediator()->fireEvent(ev);
 	}
 	static void pointerHandleAxis(void *data, struct wl_pointer *pointer, uint32_t time, uint32_t axis, wl_fixed_t value) {
-		std::cout << "pointerHandleAxis" << std::endl;
+		// TODO
 	}
 
 	static const struct wl_pointer_listener pointerListener = {
@@ -970,7 +980,9 @@ err:
 		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
 		m_seat(nullptr),
 		m_pointer(nullptr),
-		m_currentSurface(nullptr) {
+		m_currentSurface(nullptr),
+		m_pointerPositionX(0),
+		m_pointerPositionY(0) {
 	}
 
 	XdevLWindowEventServerWayland::~XdevLWindowEventServerWayland() {
@@ -993,6 +1005,9 @@ err:
 	}
 
 	xdl_int XdevLWindowEventServerWayland::shutdown() {
+		if(m_pointer) {
+			wl_pointer_destroy(m_pointer);
+		}
 		return ERR_OK;
 	}
 
@@ -1013,25 +1028,20 @@ err:
 		wl_pointer_set_user_data(pointer, this);
 		wl_pointer_add_listener(pointer, &pointerListener, this);
 	}
-	
+
 	void XdevLWindowEventServerWayland::setCurrentWindow(wl_surface* surface) {
 		m_currentSurface = surface;
 	}
 
-	void XdevLWindowEventServerWayland::handlePointerEntered(wl_surface* surface) {
-		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(surface);
-
-		XdevLEvent ev;
-		ev.common.timestamp = getMediator()->getTimer().getTime64();
-		ev.type					= XDEVL_WINDOW_EVENT;
-		ev.window.event 		= XDEVL_WINDOW_ENTER;
-		ev.window.data1			= 0.0f;//event.xcrossing.x;
-		ev.window.data2			= 0.0f;//event.xcrossing.y;
-		ev.window.windowid		= window->getWindowID();
-
-		getMediator()->fireEvent(ev);
+	void XdevLWindowEventServerWayland::setCurrentPointerPosition(xdl_int x, xdl_int y) {
+		m_pointerPositionX = x;
+		m_pointerPositionY = y;
 	}
 
+	void XdevLWindowEventServerWayland::getCurrentPointerPosition(xdl_int& x, xdl_int& y) {
+		x = m_pointerPositionX;
+		y = m_pointerPositionY;
+	}
 
 
 //
