@@ -184,6 +184,14 @@ namespace xdl {
 						std::istringstream ss(root->Attribute("timeout"));
 						ss >> m_timeout;
 					}
+					if(root->Attribute("xon")) {
+						std::istringstream ss(root->Attribute("xon"));
+						ss >> m_xon;
+					}
+					if(root->Attribute("xoff")) {
+						std::istringstream ss(root->Attribute("xoff"));
+						ss >> m_xoff;
+					}
 				}
 			} else
 				XDEVL_MODULE_ERROR("No 'id' attribute specified. Using default values for the device\n");
@@ -277,7 +285,7 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 		XDEVL_MODULE_INFO("Connection opened successfully." << std::endl);
-		
+
 		//
 		// Reset device
 		//
@@ -341,7 +349,7 @@ namespace xdl {
 		//
 		DWORD fc = wrapXdevLFlowControlToFTDI(flowcontrol);
 
-		ftStatus = FT_SetFlowControl(currentDevice.handle, fc, 0, 0);
+		ftStatus = FT_SetFlowControl(currentDevice.handle, fc, m_xon, m_xoff);
 		if(ftStatus != FT_OK) {
 			XDEVL_MODULE_ERROR("FT_SetFlowControl failed: " << (xdl_int)ftStatus << "\n");
 			return ERR_ERROR;
