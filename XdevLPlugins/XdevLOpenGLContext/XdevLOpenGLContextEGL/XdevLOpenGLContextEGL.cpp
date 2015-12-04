@@ -7,6 +7,8 @@
 #include <Windows.h>
 #elif XDEVL_PLATFORM_LINUX
 #include <X11/Xlib.h>
+#include <wayland-client.h>
+#include <wayland-egl.h>
 #endif
 
 xdl::XdevLPluginDescriptor pluginDescriptor {
@@ -59,6 +61,17 @@ namespace xdl {
 
 	}
 
+	void* XdevLOpenGLContextEGL::getInternal(const XdevLInternalName& id) {
+		if(id == XdevLString("EGL_DISPLAY")) {
+			return (void*)m_eglDisplay;
+		} else if(id == XdevLString("EGL_SURFACE")) {
+			return (void*)m_eglSurface;
+		} else if(id == XdevLString("EGL_CONTEXT")) {
+			return (void*)m_eglContext;
+		}
+		return nullptr;
+	}
+
 	xdl_int XdevLOpenGLContextEGL::create(XdevLWindow* window) {
 
 		static const EGLint context_attribs[] = {
@@ -106,17 +119,28 @@ namespace xdl {
 
 		Display* display = static_cast<Display*>(window->getInternal(XdevLInternalName("X11_DISPLAY")));
 		if(nullptr == display) {
-			XDEVL_MODULE_ERROR("Could not get native X11 display information.\n");
-			return ERR_ERROR;
-		}
+			wl_display* display = static_cast<wl_display*>(window->getInternal(XdevLInternalName("WAYLAND_DISPLAY")));
+			if(nullptr == display) {
+				XDEVL_MODULE_ERROR("Could not get native display information.\n");
+				return ERR_ERROR;
+			}
+			wl_egl_window* wnd = (wl_egl_window*)(window->getInternal(XdevLInternalName("WAYLAND_WINDOW")));
+			if(nullptr == wnd) {
+				XDEVL_MODULE_ERROR("Could not get native window information.\n");
+				return ERR_ERROR;
+			}
+			nativeDisplay = (EGLNativeDisplayType)display;
+			nativeWindow = (EGLNativeWindowType)wnd;
+		} else {
 
-		Window wnd = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
-		if(None == wnd) {
-			XDEVL_MODULE_ERROR("Could not get native X11 window information.\n");
-			return ERR_ERROR;
+			Window wnd = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
+			if(None == wnd) {
+				XDEVL_MODULE_ERROR("Could not get native X11 window information.\n");
+				return ERR_ERROR;
+			}
+			nativeDisplay = (EGLNativeDisplayType)display;
+			nativeWindow = (EGLNativeWindowType)wnd;
 		}
-		nativeDisplay = (EGLNativeDisplayType)display;
-		nativeWindow = (EGLNativeWindowType)wnd;
 #endif
 
 

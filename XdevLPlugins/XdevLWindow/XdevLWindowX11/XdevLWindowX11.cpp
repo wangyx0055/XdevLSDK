@@ -1264,6 +1264,10 @@ namespace xdl {
 		WM_PROTOCOLS						= XInternAtom(m_display, "WM_PROTOCOLS", False);
 		_NET_WM_PING						= XInternAtom(m_display, "_NET_WM_PING", False);
 	}
+	
+	XdevLWindowX11EventServer::~XdevLWindowX11EventServer() {
+
+	}
 
 
 	xdl_int XdevLWindowX11EventServer::registerWindowForEvents(XdevLWindow* window) {

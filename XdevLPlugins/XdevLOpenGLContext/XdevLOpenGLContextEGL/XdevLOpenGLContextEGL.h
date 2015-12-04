@@ -50,7 +50,7 @@ namespace xdl {
 			virtual xdl_int swapBuffers() override;
 			virtual void* getProcAddress(const xdl_char* func) override;
 			virtual xdl_int setVSync(xdl_bool enableVSync) override;
-
+			virtual void* getInternal(const XdevLInternalName& id) override;
 		private:
 			EGLDisplay m_eglDisplay;
 			EGLSurface m_eglSurface;

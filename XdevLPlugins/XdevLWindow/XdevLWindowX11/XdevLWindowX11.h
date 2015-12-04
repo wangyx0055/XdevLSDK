@@ -354,6 +354,7 @@ namespace xdl {
 	class XdevLWindowX11EventServer : public XdevLWindowEventServerImpl {
 		public:
 			XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter);
+			virtual ~XdevLWindowX11EventServer();
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
@@ -393,8 +394,8 @@ namespace xdl {
 			virtual void setPosition(xdl_uint x, xdl_uint y) override;
 			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;	
 			virtual void releaseClip() override;
-			virtual xdl_int enableRelativeMotion();
-			virtual void disableRelativeMotion();
+			virtual xdl_int enableRelativeMotion() override;
+			virtual void disableRelativeMotion() override;
 			
 			
 			void onHandleXinputEvent(XGenericEventCookie* cookie) ;
