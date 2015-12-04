@@ -16,29 +16,30 @@ namespace xdl {
 												m_stopBits(SERIAL_SB_1),
 												m_flowControl(SERIAL_FLOW_CONTROL_NONE),
 												m_timeout(0),
-												m_dirty(xdl_false) {
-													
-													
+												m_dirty(xdl_false),
+												m_xon(0x11),
+												m_xoff(0x13){
+
 				m_deviceModeMap["XDEVL_DEVICE_READ_ONLY"] 	= XdevLStream::AccesType::XDEVL_DEVICE_READ_ONLY;
 				m_deviceModeMap["XDEVL_DEVICE_WRITE_ONLY"] 	= XdevLStream::AccesType::XDEVL_DEVICE_WRITE_ONLY;
 				m_deviceModeMap["XDEVL_DEVICE_READ_WRITE"] 	= XdevLStream::AccesType::XDEVL_DEVICE_READ_WRITE;
-													
-				m_byteSizeMap["SERIAL_BSIZE_5"] = SERIAL_BSIZE_5;
-				m_byteSizeMap["SERIAL_BSIZE_6"] = SERIAL_BSIZE_6;	
-				m_byteSizeMap["SERIAL_BSIZE_7"] = SERIAL_BSIZE_7;	
-				m_byteSizeMap["SERIAL_BSIZE_8"] = SERIAL_BSIZE_8;	
-				
-				m_parityMap["SERIAL_NO_PARITY"] 		= SERIAL_NO_PARITY;	
-				m_parityMap["SERIAL_EVEN_PARITY"] 	= SERIAL_EVEN_PARITY;	
-				m_parityMap["SERIAL_ODD_PARITY"] 		= SERIAL_ODD_PARITY;	
-				m_parityMap["SERIAL_SPACE_PARITY"] 	= SERIAL_SPACE_PARITY;	
-			
-				m_stopBitsMap["SERIAL_SB_1"] = SERIAL_SB_1;	
-				m_stopBitsMap["SERIAL_SB_2"] = SERIAL_SB_2;	
 
-				m_flowControlMap["SERIAL_FLOW_CONTROL_NONE"] 			= SERIAL_FLOW_CONTROL_NONE;	
-				m_flowControlMap["SERIAL_FLOW_CONTROL_HARDWARE"] 	= SERIAL_FLOW_CONTROL_HARDWARE;	
-				m_flowControlMap["SERIAL_FLOW_CONTROL_SOFTWARE"] 	= SERIAL_FLOW_CONTROL_SOFTWARE;	
+				m_byteSizeMap["SERIAL_BSIZE_5"] = SERIAL_BSIZE_5;
+				m_byteSizeMap["SERIAL_BSIZE_6"] = SERIAL_BSIZE_6;
+				m_byteSizeMap["SERIAL_BSIZE_7"] = SERIAL_BSIZE_7;
+				m_byteSizeMap["SERIAL_BSIZE_8"] = SERIAL_BSIZE_8;
+
+				m_parityMap["SERIAL_NO_PARITY"] 	= SERIAL_NO_PARITY;
+				m_parityMap["SERIAL_EVEN_PARITY"] 	= SERIAL_EVEN_PARITY;
+				m_parityMap["SERIAL_ODD_PARITY"] 	= SERIAL_ODD_PARITY;
+				m_parityMap["SERIAL_SPACE_PARITY"] 	= SERIAL_SPACE_PARITY;
+
+				m_stopBitsMap["SERIAL_SB_1"] = SERIAL_SB_1;
+				m_stopBitsMap["SERIAL_SB_2"] = SERIAL_SB_2;
+
+				m_flowControlMap["SERIAL_FLOW_CONTROL_NONE"] 		= SERIAL_FLOW_CONTROL_NONE;
+				m_flowControlMap["SERIAL_FLOW_CONTROL_HARDWARE"] 	= SERIAL_FLOW_CONTROL_HARDWARE;
+				m_flowControlMap["SERIAL_FLOW_CONTROL_SOFTWARE"] 	= SERIAL_FLOW_CONTROL_SOFTWARE;
 
 		}
 	void setStates(xdl_int baudrate, XdevLSerialByteSize bytesize, XdevLSerialParity parity, XdevLSerialStopBits stopbits, XdevLSerialFlowControl flowcontrol, xdl_int timeout = -1) {
@@ -46,20 +47,22 @@ namespace xdl {
 		this->m_byteSize 		= bytesize;
 		this->m_parity			= parity;
 		this->m_stopBits		= stopbits;
-		this->m_flowControl	= flowcontrol;
+		this->m_flowControl		= flowcontrol;
 		this->m_timeout			= timeout;
 	}
 
 	protected:
-		XdevLFileName					m_deviceName;
+		XdevLFileName			m_deviceName;
 		XdevLStream::AccesType	m_deviceMode;
-		xdl::xdl_int 						m_baudrate;
-		XdevLSerialByteSize			m_byteSize;	
-		XdevLSerialParity 			m_parity;
-		XdevLSerialStopBits 		m_stopBits;
+		xdl::xdl_int 			m_baudrate;
+		XdevLSerialByteSize		m_byteSize;	
+		XdevLSerialParity 		m_parity;
+		XdevLSerialStopBits 	m_stopBits;
 		XdevLSerialFlowControl 	m_flowControl;
-		xdl_int									m_timeout;
-		xdl_bool								m_dirty;
+		xdl_int					m_timeout;
+		xdl_bool				m_dirty;
+		xdl_int					m_xon;
+		xdl_int					m_xoff;
 		
 		std::map<std::string, XdevLStream::AccesType>	m_deviceModeMap;	
 		std::map<std::string, XdevLSerialByteSize> 		m_byteSizeMap;	

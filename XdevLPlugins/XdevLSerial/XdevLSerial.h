@@ -33,6 +33,15 @@ namespace xdl {
 	    SERIAL_SB_2
 	};
 
+	inline XdevLString xdevLStopBitsToString(xdl_int stopBits) {
+		if(stopBits == SERIAL_SB_1) {
+			return XdevLString("SERIAL_SB_1");
+		} else if(stopBits == SERIAL_SB_2) {
+			return XdevLString("SERIAL_SB_2");
+		}
+		return XdevLString("SERIAL_SB_UNKOWN");
+	}
+
 	/**
 		@enum XdevLSerialByteSize
 		@brief The byte size of the data on the serial port.
@@ -43,6 +52,19 @@ namespace xdl {
 	    SERIAL_BSIZE_7,
 	    SERIAL_BSIZE_8
 	};
+
+	inline XdevLString xdevLByteSizeToString(xdl_int byteSize) {
+		if(byteSize == SERIAL_BSIZE_5) {
+			return XdevLString("SERIAL_BSIZE_5");
+		} else if(byteSize == SERIAL_BSIZE_6) {
+			return XdevLString("SERIAL_BSIZE_6");
+		} else if(byteSize == SERIAL_BSIZE_7) {
+			return XdevLString("SERIAL_BSIZE_7");
+		} else if(byteSize == SERIAL_BSIZE_8) {
+			return XdevLString("SERIAL_BSIZE_8");
+		}
+		return XdevLString("SERIAL_BSIZE_UNKOWN");
+	}
 
 	/**
 		@enum XdevLSerialBaudRate
@@ -75,7 +97,7 @@ namespace xdl {
 	    SERIAL_BAUD_1000000 = 1000000,
 	    SERIAL_BAUD_1152000 = 1152000,
 	    SERIAL_BAUD_1382400 = 1382400,
-		SERIAL_BAUD_1500000 = 1500000,
+	    SERIAL_BAUD_1500000 = 1500000,
 	    SERIAL_BAUD_2000000 = 2000000,
 	    SERIAL_BAUD_2500000 = 2500000,
 	    SERIAL_BAUD_3000000 = 3000000,
@@ -95,15 +117,44 @@ namespace xdl {
 	    SERIAL_SPACE_PARITY
 	};
 
+	inline XdevLString xdevLParityToString(xdl_int parity) {
+		if(parity == SERIAL_EVEN_PARITY) {
+			return XdevLString("SERIAL_EVEN_PARITY");
+		} else if(parity == SERIAL_MARK_PARITY) {
+			return XdevLString("SERIAL_MARK_PARITY");
+		} else if(parity == SERIAL_NO_PARITY) {
+			return XdevLString("SERIAL_NO_PARITY");
+		} else if(parity == SERIAL_ODD_PARITY) {
+			return XdevLString("SERIAL_ODD_PARITY");
+		} else if(parity == SERIAL_SPACE_PARITY) {
+			return XdevLString("SERIAL_SPACE_PARITY");
+		}
+		return XdevLString("SERIAL_PARITY_UNKOWN");
+	}
+
 	/**
 		@enum XdevLSerialFlowControl
 		@brief The control mode of the serial port.
+
+		Flow control means the ability to slow down the flow of bytes in a wire. That
+		means to be able to stop/restart the flow without loosing bytes. 
 	*/
 	enum XdevLSerialFlowControl {
 	    SERIAL_FLOW_CONTROL_NONE,
 	    SERIAL_FLOW_CONTROL_HARDWARE,
 	    SERIAL_FLOW_CONTROL_SOFTWARE
 	};
+
+	inline XdevLString xdevLFlowControlToString(xdl_int flowControl) {
+		if(flowControl == SERIAL_FLOW_CONTROL_NONE) {
+			return XdevLString("SERIAL_FLOW_CONTROL_NONE");
+		} else if(flowControl == SERIAL_FLOW_CONTROL_HARDWARE) {
+			return XdevLString("SERIAL_FLOW_CONTROL_HARDWARE");
+		} else if(flowControl == SERIAL_FLOW_CONTROL_SOFTWARE) {
+			return XdevLString("SERIAL_FLOW_CONTROL_SOFTWARE");
+		}
+		return XdevLString("SERIAL_FLOW_CONTROL_UNKOWN");
+	}
 
 	/**
 		@class XdevLSerial

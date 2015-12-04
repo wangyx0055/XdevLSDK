@@ -30,26 +30,38 @@ int main(int argc, char* argv[]) {
 		std::cerr <<  "Failed to set SIGINT handler." << std::endl;
 		return -1;
 	}
-	
+
 	// Register a termination handler.
 	if(signal(SIGTERM, exitHandle) == SIG_ERR) {
 		std::cerr <<  "Failed to set SIGTERM handler." << std::endl;
 		return -1;
 	}
-	
+
+	xdl::XdevLFileName fileName;
+	if(argc > 1) {
+		fileName = xdl::XdevLFileName(argv[1]);
+	}
+
 	// Create the core system using a XML file.
 	xdl::IPXdevLCore core = nullptr;
 	if(xdl::createCore(&core, argc, argv, xdl::XdevLFileName("serial_demo.xml")) != xdl::ERR_OK) {
 		return xdl::ERR_ERROR;
 	}
-	
+
 	// Get the serial port module.
 	serial = xdl::getModule<xdl::IPXdevLSerial>(core, xdl::XdevLID("MySerial"));
 	if(serial == NULL)
 		return xdl::ERR_ERROR;
-	
+
 	// Connect the serial port module to a port.
-	if(serial->open() != xdl::ERR_OK){
+	xdl::xdl_int ret = 0;
+	if(fileName != "NotSpecified") {
+		ret = serial->open(fileName);
+	} else {
+		ret = serial->open();
+	}
+
+	if(ret != xdl::ERR_OK){
 		// Could not open the serial port.
 		std::cerr << "Could not open a connection to serial device.\n";
 		return xdl::ERR_ERROR;

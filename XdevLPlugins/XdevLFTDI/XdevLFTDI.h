@@ -70,6 +70,25 @@ namespace xdl {
 		XdevLModuleName("XdevLSerial")
 	};
 
+	class XdevLFTDIDeviceInfo {
+		public:
+			XdevLFTDIDeviceInfo() :
+				handle(0),
+				usbInSize(2048),
+				usbOutSize(2048) {
+			}
+
+			FT_HANDLE handle;
+			DWORD flags[128];
+			DWORD type[128];
+			DWORD id[128];
+			DWORD locId[128];
+			CHAR serial[128];
+			CHAR desc[128];
+			DWORD usbInSize;
+			DWORD usbOutSize;
+	};
+
 	/**
 		@class XdevLFTDI
 		@brief Core class to support Serial Port Communication for FTDI devices.
@@ -100,14 +119,15 @@ namespace xdl {
 		protected:
 
 			xdl_int readInfoFromXMLFile();
-			xdl::xdl_int _open();
+			xdl::xdl_int openConnection();
 
 		private:
-			FT_HANDLE	ftHandle;
-			DWORD		m_usb_in_size;
-			DWORD		m_usb_out_size;
-			DWORD		m_latency_timer;
+			XdevLFTDIDeviceInfo currentDevice;
+			DWORD m_usbInSize;
+			DWORD m_usbOutSize;
+			DWORD m_latencyTimer;
 			XdevLString	m_deviceName;
+			std::vector<XdevLFTDIDeviceInfo> m_foundDevices;
 	};
 
 }
