@@ -56,6 +56,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		display = wl_display_connect(nullptr);
 		if(display == nullptr) {
+			std::cerr << "## XdevLWindowWayland::wl_display_connect failed" << std::endl;
 			return xdl::ERR_ERROR;
 		}
 	}
