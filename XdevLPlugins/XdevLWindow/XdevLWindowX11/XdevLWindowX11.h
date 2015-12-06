@@ -277,6 +277,7 @@ namespace xdl {
 			xdl_int disableDecoration();
 			xdl_int enableDecoration();
 			void showMousePointer(xdl_bool state);
+			void setResizeable(xdl_bool state);
 		protected:
 			XdevLWindowX11Keyboard* m_keyboard;
 			XConfigureEvent m_prevConfigureEvent;

@@ -224,7 +224,6 @@ namespace xdl {
 
 	int XdevLWindowLinux::create() {
 
-
 		Visual* 						visual;
 		XVisualInfo*					vinfo;
 
@@ -299,23 +298,44 @@ namespace xdl {
 		                         CWOverrideRedirect | CWColormap | CWBackPixmap | CWBackPixel,
 		                         &WindowAttributes);
 
+		// Initialize all EWMH to tell the Window Manager which protocols we are going to handle.
+		initializeEWMH();
 
-		xdl_int event_mask = FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-		                     ExposureMask | ButtonPressMask | ButtonReleaseMask |
-		                     PointerMotionMask | KeyPressMask | KeyReleaseMask |
-		                     PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask |
-		                     KeymapStateMask | GenericEvent;
+		// Set the event mask to tell the X server on which events we are interessted in for this window.
+		xdl_int event_mask = FocusChangeMask |        // Keyboard focus in/out events.
+		                     EnterWindowMask |        // Events that tells us if the mouse pointer entered the window.
+		                     LeaveWindowMask |        // Events that tells us if the mouse pointer left the window.
+		                     ExposureMask |
+		                     ButtonPressMask |        // Events when the user pressed one of the mouse buttons on the window.
+		                     ButtonReleaseMask |      // Events when the user released one of the mouse buttons on the window.
+		                     PointerMotionMask |      // Events when the user move the mouse pointer while it is over the window.
+		                     KeyPressMask |           // Events when the user pressed a key.
+		                     KeyReleaseMask |         // Events when the user released a key.
+		                     StructureNotifyMask |    // Events when the window got Mapped, Unmapped, Destroyed, Reparented or Configured like, position, size.
+		                     SubstructureNotifyMask |
+		                     KeymapStateMask |
+		                     GenericEvent;
 
 
 		XSelectInput(m_display, m_window, event_mask);
 
 		XClearWindow(m_display, m_window);
 
+		//
+		// Set the WM hints
+		//
+		XWMHints* wmHints 	= XAllocWMHints();
+		wmHints->flags = 	StateHint | // We want to set the initial state of this window (NormalState)
+		                    InputHint;  // We want to set the input focus model.
+		wmHints->input = True;          // Does this application rely on the window manager to get keyboard input?
+		wmHints->initial_state = NormalState; // Most applications start this way. WithdrawnState would hide the window and IconicState would start as icon.
+		XSetWMHints(m_display, m_window, wmHints);
+		XFree(wmHints);
 
 		setTitle(m_title);
 
 		// Initialize Extented Window Manager Hints.
-		initializeEWMH();
+
 
 		setType(m_windowType);
 
@@ -775,8 +795,28 @@ namespace xdl {
 
 	void XdevLWindowLinux::setSize(const XdevLWindowSize& size) {
 		m_size = size;
+
+		XSizeHints *sizehints = XAllocSizeHints();
+		long userhints;
+
+		XGetWMNormalHints(m_display, m_window, sizehints, &userhints);
+
+		sizehints->min_width = sizehints->max_width = m_size.width;
+		sizehints->min_height = sizehints->max_height = m_size.height;
+		sizehints->flags |= PMinSize | PMaxSize;
+
+		XSetWMNormalHints(m_display, m_window, sizehints);
+
+		XFree(sizehints);
+
+		// OK What Moving the window for a resize? Well some Window Manager
+		// resize only after either the user move/resize the window or within the code
+		// or first unmapping then mapping.
+
 		XResizeWindow(m_display, m_window, m_size.width, m_size.height);
-		XMapWindow(m_display, m_window);
+		XMoveWindow(m_display, m_window, m_position.x, m_position.y);
+		XRaiseWindow(m_display, m_window);
+		XFlush(m_display);
 	}
 
 	void XdevLWindowLinux::setPosition(const XdevLWindowPosition& position) {
@@ -785,40 +825,36 @@ namespace xdl {
 		XMapWindow(m_display, m_window);
 	}
 
+	void XdevLWindowLinux::setResizeable(xdl_bool state) {
+		XSizeHints* sizeHints 	= XAllocSizeHints();
+		sizeHints->flags		= USPosition | USSize | PPosition | PSize | PMinSize;
+		sizeHints->x			= m_position.x;
+		sizeHints->y			= m_position.y;
+		sizeHints->width		= m_size.width;
+		sizeHints->height		= m_size.height;
+		sizeHints->min_width	= m_size.width;
+		sizeHints->min_height	= m_size.height;
+		XSetWMNormalHints(m_display, m_window, sizeHints);
+		XFree(sizeHints);
+	}
+
 	void XdevLWindowLinux::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
 
-		XSizeHints*  	size_hints 	= XAllocSizeHints();
-		XWMHints*  		wm_hints 	= XAllocWMHints();
-		XClassHint*  	class_hints = XAllocClassHint();
+		XClassHint* class_hints = XAllocClassHint();
 		XTextProperty windowName;
 		XTextProperty iconName;
 
 		char* window_name = (char*)getTitle().toString().c_str();
-		char* icon_name 	= (char*)getTitle().toString().c_str();
+		char* icon_name = (char*)getTitle().toString().c_str();
 
 		XStringListToTextProperty(&window_name, 1, &windowName);
 		XStringListToTextProperty(&icon_name, 1, &iconName);
 
-		size_hints->flags       = USPosition | USSize | PPosition | PSize | PMinSize;
-		size_hints->x						= m_position.x;
-		size_hints->y						= m_position.y;
-		size_hints->width				= m_size.width;
-		size_hints->height			= m_size.height;
-		size_hints->min_width   = m_size.width;
-		size_hints->min_height  = m_size.height;
-
-		wm_hints->flags         = StateHint | InputHint;
-		wm_hints->initial_state = NormalState;
-		wm_hints->input         = True;
-
 		class_hints->res_name   = (char*)getTitle().toString().c_str();
 		class_hints->res_class  = (char*)getTitle().toString().c_str();
 
-		XSetWMProperties(m_display, m_window, &windowName, &iconName, nullptr, 0, size_hints, wm_hints, class_hints);
-
-		XFree(size_hints);
-		XFree(wm_hints);
+		XSetWMProperties(m_display, m_window, &windowName, &iconName, nullptr, 0, nullptr, nullptr, class_hints);
 		XFree(class_hints);
 	}
 
@@ -1264,7 +1300,7 @@ namespace xdl {
 		WM_PROTOCOLS						= XInternAtom(m_display, "WM_PROTOCOLS", False);
 		_NET_WM_PING						= XInternAtom(m_display, "_NET_WM_PING", False);
 	}
-	
+
 	XdevLWindowX11EventServer::~XdevLWindowX11EventServer() {
 
 	}
@@ -1441,13 +1477,6 @@ namespace xdl {
 					ev.window.windowid		= window->getWindowID();
 
 					getMediator()->fireEvent(ev);
-				}
-				break;
-
-				//
-				// A property of the window got changed.
-				//
-				case PropertyNotify: {
 				}
 				break;
 
@@ -1636,14 +1665,10 @@ namespace xdl {
 				break;
 
 				//
-				//
+				// Window got destroyed.
 				//
 				case DestroyNotify: {
-//					if(event.xdestroywindow.window == m_window) {
-//						std::cout << "DestroyNotify" << ": WindowID: "
-//						          << windowMap[event.xexpose.window]->getWindowID()
-//						          << std::endl;
-//					}
+					// TODO Do we have to do something here?
 				}
 				break;
 
@@ -1694,7 +1719,7 @@ namespace xdl {
 				//
 				//
 				case KeymapNotify: {
-					//std::cout << "MappingNotify" << ": WindowID: "  << getWindowID() << std::endl;
+					// TODO Something to do here?
 				}
 				break;
 
