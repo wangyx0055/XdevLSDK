@@ -95,7 +95,17 @@ namespace xdl {
 		{ XK_Super_L, KEY_LGUI },
 		{ XK_plus, KEY_PLUS },
 		{ XK_minus, KEY_MINUS },
+		{ XK_backslash, KEY_BACKSLASH },
+		{ XK_slash, KEY_SLASH },
+		{ XK_period, KEY_PERIOD },
+		{ XK_comma, KEY_COMMA },
+		{ XK_colon, KEY_COLON },
+		{ XK_semicolon, KEY_SEMICOLON },
 
+		{ XK_bracketleft, KEY_LEFTBRACKET },
+		{ XK_bracketright, KEY_RIGHTBRACKET },
+		{ XK_grave, KEY_GRAVE },
+		{ XK_underscore, KEY_UNDERSCORE},
 
 
 		{ XK_Up, KEY_UP },
@@ -123,7 +133,7 @@ namespace xdl {
 		{ XK_KP_9, KEY_KP_9 },
 
 
-		{ XK_Num_Lock, KEY_NUMLOCKCLEAR },
+		{ XK_Num_Lock, KEY_NUMLOCK },
 		{ XK_KP_Divide, KEY_KP_DIVIDE },
 		{ XK_KP_Multiply, KEY_KP_MULTIPLY },
 		{ XK_KP_Subtract, KEY_KP_MINUS },
@@ -134,6 +144,9 @@ namespace xdl {
 		{ XK_Print, KEY_PRINTSCREEN },
 		{ XK_Scroll_Lock, KEY_SCROLLLOCK },
 		{ XK_Pause, KEY_PAUSE },
+
+		{ XK_Caps_Lock, KEY_CAPSLOCK },
+		
 
 	};
 
@@ -146,7 +159,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11Keyboard::sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint windowID) {
-
+		printf("***************: X11: %d\n", keycode);
 		XdevLButtonId code = x11KeyCodeToXdevLButtonId(keycode);
 		if(keycode == KEY_UNKNOWN) {
 			// TODO Do we have to inform someone?
@@ -159,7 +172,7 @@ namespace xdl {
 
 		if(state == ButtonPressed.getHashCode()) {
 			switch(code) {
-				case KEY_NUMLOCKCLEAR:
+				case KEY_NUMLOCK:
 					mod ^= KEY_MOD_NUM;
 					break;
 				case KEY_CAPSLOCK:
@@ -194,7 +207,7 @@ namespace xdl {
 			}
 		} else if( state == ButtonReleased.getHashCode()) {
 			switch(code) {
-				case KEY_NUMLOCKCLEAR:
+				case KEY_NUMLOCK:
 				case KEY_CAPSLOCK:
 					break;
 				case KEY_LCTRL:

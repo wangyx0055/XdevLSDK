@@ -46,13 +46,15 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 
 
 	if (event.type == ButtonPressed.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED\n"), event.window.windowid);
+		printf("****** %d\n", event.key.keycode);
+		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED: %s\n"), event.window.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
+		
 	}
 	else if (event.type == ButtonReleased.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_KEY_RELEASED\n"), event.window.windowid);
+		printf(("WindowID: %ld -> XDEVL_KEY_RELEASED: %s\n"), event.window.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
@@ -71,15 +73,15 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 		currentCursorPosition.x = event.button.x;
 		currentCursorPosition.y = event.button.y;
 	}
-//	else if (event.type == MouseMouseMotion.getHashCode()) {
-//		printf(("WindowID: %d -> XDEVL_MOUSE_MOTION (%d, %d)\n"), event.window.windowid, event.motion.x, event.motion.y);
-//		if (currentCursorPosition.pressed) {
-//			xdl::IPXdevLWindow tmp = windowsMap[event.window.windowid];
-//			if (tmp != nullptr) {
-//				tmp->setPosition(xdl::XdevLWindowPosition(currentCursorPosition.x + event.motion.x, currentCursorPosition.y + event.motion.y));
-//			}
-//		}
-//	}
+	else if (event.type == MouseMouseMotion.getHashCode()) {
+		printf(("WindowID: %d -> XDEVL_MOUSE_MOTION (%d, %d)\n"), event.window.windowid, event.motion.x, event.motion.y);
+		if (currentCursorPosition.pressed) {
+			xdl::IPXdevLWindow tmp = windowsMap[event.window.windowid];
+			if (tmp != nullptr) {
+				tmp->setPosition(xdl::XdevLWindowPosition(currentCursorPosition.x + event.motion.x, currentCursorPosition.y + event.motion.y));
+			}
+		}
+	}
 
 
 	switch(event.type) {

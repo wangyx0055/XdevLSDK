@@ -246,16 +246,21 @@ namespace xdl {
 			
 			void setSeat(wl_seat* seat);
 			void setPointer(wl_pointer* pointer);
+			void setKeyboard(wl_keyboard* keyboard);
 			void setCurrentWindow(wl_surface* surface);
+			void setFocusWindow(XdevLWindow* window);
 			void setCurrentPointerPosition(xdl_int x, xdl_int y);
 
 			void getCurrentPointerPosition(xdl_int& x, xdl_int& y);
 			wl_surface* getCurrentWindow() {return m_currentSurface;}
+			XdevLWindow* getFocusWindow();
 
 		private:
 			wl_seat* m_seat;
 			wl_pointer* m_pointer; 
+			wl_keyboard* m_keyboard;
 			wl_surface* m_currentSurface;
+			XdevLWindow* m_focusWindow;
 			xdl_int m_pointerPositionX;
 			xdl_int m_pointerPositionY;
 	};
