@@ -416,14 +416,16 @@ namespace xdl {
 
 		if(m_joy != nullptr) {
 			SDL_JoystickClose(m_joy);
+			m_joy = nullptr;
 		}
 
 		// We have to call this before SDL_DestroyWindow to get all pending events.
 		XdevLWindowImpl::shutdown();
 
-		SDL_DestroyWindow(m_window);
-		m_window = nullptr;
-
+		if(nullptr != m_window) {
+			SDL_DestroyWindow(m_window);
+			m_window = nullptr;
+		}
 
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 
