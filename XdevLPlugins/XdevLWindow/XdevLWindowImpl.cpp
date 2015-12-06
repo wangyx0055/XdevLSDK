@@ -72,9 +72,6 @@ namespace xdl {
 		m_colorDepth(32),
 		m_hideMouse(xdl_false),
 		m_border(xdl_true),
-		m_numberOfJoystickDevices(0),
-		m_numberOfJoystickButtons(0),
-		m_numberOfJoystickAxis(0),
 		m_windowType(WINDOW_NORMAL) {
 
 		m_position.x = 0;
@@ -108,18 +105,6 @@ namespace xdl {
 						m_size.height = event.window.height;
 					} break;
 				}
-			}
-			break;
-			case XDEVL_JOYSTICK_REQ_DEVICES_INFO: {
-				std::cout << "XdevLWindowImpl::notify: XDEVL_JOYSTICK_REQ_NUM_DEV received." << std::endl;
-				XdevLEvent event;
-				event.type = XDEVL_JOYSTICK_RPLY_DEVICES_INFO;
-				event.jdeviceinfo.sender = this->getID().getHashCode();
-				event.jdeviceinfo.timestamp = this->getMediator()->getTimer().getTime64();
-				event.jdeviceinfo.number_devices = m_numberOfJoystickDevices;
-				event.jdeviceinfo.number_buttons = m_numberOfJoystickButtons;
-				event.jdeviceinfo.number_axis = m_numberOfJoystickAxis;
-				this->getMediator()->fireEvent(event);
 			}
 			break;
 		}

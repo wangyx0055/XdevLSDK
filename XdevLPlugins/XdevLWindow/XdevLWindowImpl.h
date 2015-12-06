@@ -122,10 +122,7 @@ namespace xdl {
 			// Holds the background color.
 			xdl_uint m_backgroundColor[4];
 
-			// TODO This might be changed in future releases
-			xdl_uint m_numberOfJoystickDevices;
-			xdl_uint m_numberOfJoystickButtons;
-			xdl_uint m_numberOfJoystickAxis;
+
 			
 			XdevLWindowTypes m_windowType;
 
