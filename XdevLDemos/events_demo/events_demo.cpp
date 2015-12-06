@@ -46,7 +46,6 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 
 
 	if (event.type == ButtonPressed.getHashCode()) {
-		printf("****** %d\n", event.key.keycode);
 		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED: %s\n"), event.window.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;

@@ -132,6 +132,16 @@ namespace xdl {
 		{ XK_KP_8, KEY_KP_8 },
 		{ XK_KP_9, KEY_KP_9 },
 
+		{ XK_KP_Insert, KEY_KP_0 },
+		{ XK_KP_End, KEY_KP_1 },
+		{ XK_KP_Down, KEY_KP_2 },
+		{ XK_KP_Next, KEY_KP_3 },
+		{ XK_KP_Left, KEY_KP_4 },
+		{ XK_KP_Begin, KEY_KP_5 },
+		{ XK_KP_Right, KEY_KP_6 },
+		{ XK_KP_Home, KEY_KP_7 },
+		{ XK_KP_Up, KEY_KP_8 },
+		{ XK_KP_Prior, KEY_KP_9 },
 
 		{ XK_Num_Lock, KEY_NUMLOCK },
 		{ XK_KP_Divide, KEY_KP_DIVIDE },
@@ -159,7 +169,6 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11Keyboard::sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint windowID) {
-		printf("***************: X11: %d\n", keycode);
 		XdevLButtonId code = x11KeyCodeToXdevLButtonId(keycode);
 		if(keycode == KEY_UNKNOWN) {
 			// TODO Do we have to inform someone?
