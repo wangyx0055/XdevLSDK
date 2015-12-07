@@ -35,7 +35,7 @@
 
 class m_keylayout;
 
-xdl::XdevLModuleDescriptor xdl::XdevLWindowLinux::m_windowX11ModuleDesc {
+xdl::XdevLModuleDescriptor windowX11ModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[0],
@@ -88,36 +88,47 @@ static xdl::xdl_int reference_counter = 0;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
 
+	//
+	// Initialize Xlib for threading and open a connections to the X server only once.
+	//
 	if(reference_counter == 0) {
 
-		// Start X-Server thread support.
+		// Start X server with thread support.
 		XInitThreads();
 
-		// Open a display.
+		// Connect to X server.
 		if(m_display == nullptr) {
 			m_display = XOpenDisplay(nullptr);
 			if(m_display == nullptr) {
 				return xdl::ERR_ERROR;
 			}
 			m_rootWindow = DefaultRootWindow(m_display);
+
+			// Print out some useless information :D
 			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
 			std::clog << "Vendor              : " << XServerVendor(m_display) << "\n";
 			std::clog << "Release             : " << XVendorRelease(m_display)<< "\n";
 			std::clog << "Number of Screens   : " << XScreenCount(m_display) 	<< std::endl;
-
 		}
 	}
 
-	if(xdl::XdevLWindowLinux::m_windowX11ModuleDesc.getName() == parameter->getModuleName()) {
+	//
+	// Create XdevLWindow instance.
+	//
+	if(windowX11ModuleDesc.getName() == parameter->getModuleName()) {
 		// If there is not event server first create one.
 		if(xdl::windowEventServer == nullptr) {
 			// If there is no even server active, create and activate it.
 			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowX11")));
 		}
 
-		xdl::XdevLWindowLinux* window = new xdl::XdevLWindowLinux(parameter);
+		xdl::XdevLWindowX11* window = new xdl::XdevLWindowX11(parameter);
 		parameter->setModuleInstance(window);
-	} else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+	} 
+	//
+	// Create XdevLWindowServer instance.
+	//
+	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
 		// If there is not event server first create one.
 		if(xdl::windowEventServer == nullptr) {
 			// If there is no even server active, create and activate it.
@@ -126,18 +137,26 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
 		parameter->setModuleInstance(windowServer);
-	}  else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
-		x11cursor =  new xdl::XdevLCursorX11(parameter);
-		xdl::cursor = x11cursor;
-		parameter->setModuleInstance(xdl::cursor);
-	} else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+	}
+	//
+	// Create XdevLEventServer instance.
+	//
+	else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
 		if(xdl::windowEventServer == nullptr) {
 			xdl::windowEventServer = new xdl::XdevLWindowX11EventServer(parameter);
 			xdl::XdevLWindowEventServerParameter = parameter;
 		}
 		parameter->setModuleInstance(xdl::windowEventServer);
 
-	}  else {
+	}
+	//
+	// Create XdevLCursor instance.
+	//
+	else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
+		x11cursor =  new xdl::XdevLCursorX11(parameter);
+		xdl::cursor = x11cursor;
+		parameter->setModuleInstance(xdl::cursor);
+	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
 
@@ -189,8 +208,8 @@ namespace xdl {
 	};
 
 
-	XdevLWindowLinux::XdevLWindowLinux(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, m_windowX11ModuleDesc),
+	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, windowX11ModuleDesc),
 		m_rootWindow(0),
 		m_window(0),
 		m_screenNumber(0),
@@ -202,11 +221,11 @@ namespace xdl {
 		m_fullscreenModeActive(xdl_false),
 		m_originalScreenConfig(nullptr) {}
 
-	XdevLWindowLinux::~XdevLWindowLinux() {
+	XdevLWindowX11::~XdevLWindowX11() {
 
 	}
 
-	xdl_int XdevLWindowLinux::init() {
+	xdl_int XdevLWindowX11::init() {
 
 		XdevLWindowImpl::init();
 
@@ -216,13 +235,13 @@ namespace xdl {
 
 		return ERR_OK;
 	}
-	xdl_int XdevLWindowLinux::create(const XdevLWindowTitle& title,
+	xdl_int XdevLWindowX11::create(const XdevLWindowTitle& title,
 	                                 const XdevLWindowPosition& position,
 	                                 const XdevLWindowSize& size) {
 		return ERR_ERROR;
 	}
 
-	int XdevLWindowLinux::create() {
+	int XdevLWindowX11::create() {
 
 		Visual* 						visual;
 		XVisualInfo*					vinfo;
@@ -364,7 +383,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void* XdevLWindowLinux::getInternal(const XdevLInternalName& id) {
+	void* XdevLWindowX11::getInternal(const XdevLInternalName& id) {
 		std::string data(id);
 		if(data == "X11_DISPLAY")
 			return m_display;
@@ -375,7 +394,7 @@ namespace xdl {
 		return nullptr;
 	}
 
-	xdl_int XdevLWindowLinux::shutdown() {
+	xdl_int XdevLWindowX11::shutdown() {
 
 		XDEVL_MODULE_INFO("Starting shutdown process.\n");
 
@@ -418,13 +437,13 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	int XdevLWindowLinux::update() {
+	int XdevLWindowX11::update() {
 		return ERR_OK;
 	}
 
 
 
-	xdl_int XdevLWindowLinux::getGetClosestVideoMode() {
+	xdl_int XdevLWindowX11::getGetClosestVideoMode() {
 		int i, match;
 		int ratecount;
 
@@ -475,7 +494,7 @@ namespace xdl {
 		return 0;
 	}
 
-	void XdevLWindowLinux::setFullscreenVideoMode() {
+	void XdevLWindowX11::setFullscreenVideoMode() {
 		// Don't do this if we already in fullscreen mode.
 		if(xdl_false != m_fullscreenModeActive) {
 			return;
@@ -514,7 +533,7 @@ namespace xdl {
 		m_fullscreenModeActive = xdl_true;
 	}
 
-	void XdevLWindowLinux::restoreFullscreenVideoMode() {
+	void XdevLWindowX11::restoreFullscreenVideoMode() {
 		// Only to this if we are in fullscreen mode.
 		if(xdl_false == m_fullscreenModeActive) {
 			return;
@@ -546,7 +565,7 @@ namespace xdl {
 	}
 
 
-	xdl_int XdevLWindowLinux::disableDecoration() {
+	xdl_int XdevLWindowX11::disableDecoration() {
 
 		xdl_bool decorations_removed = xdl_false;
 		Atom hintAtom;
@@ -628,7 +647,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLWindowLinux::enableDecoration() {
+	xdl_int XdevLWindowX11::enableDecoration() {
 		int                   ActivatedDecorations;
 		Atom                  HintAtom;
 
@@ -697,7 +716,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void XdevLWindowLinux::setFullscreen(xdl_bool state) {
+	void XdevLWindowX11::setFullscreen(xdl_bool state) {
 		if(state) {
 			setFullscreenVideoMode();
 		} else {
@@ -705,7 +724,7 @@ namespace xdl {
 		}
 	}
 
-	const XdevLWindowPosition& XdevLWindowLinux::getPosition() {
+	const XdevLWindowPosition& XdevLWindowX11::getPosition() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_position.x = wa.x;
@@ -713,7 +732,7 @@ namespace xdl {
 		return m_position;
 	}
 
-	const XdevLWindowSize& XdevLWindowLinux::getSize() {
+	const XdevLWindowSize& XdevLWindowX11::getSize() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_size.width 	= wa.width;
@@ -721,7 +740,7 @@ namespace xdl {
 		return m_size;
 	}
 
-	XdevLWindowSize::type  XdevLWindowLinux::getWidth() {
+	XdevLWindowSize::type  XdevLWindowX11::getWidth() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_size.width 	= wa.width;
@@ -729,7 +748,7 @@ namespace xdl {
 		return m_size.width;
 	}
 
-	XdevLWindowSize::type  XdevLWindowLinux::getHeight() {
+	XdevLWindowSize::type  XdevLWindowX11::getHeight() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_size.width 	= wa.width;
@@ -737,7 +756,7 @@ namespace xdl {
 		return m_size.height;
 	}
 
-	XdevLWindowPosition::type XdevLWindowLinux::getX() {
+	XdevLWindowPosition::type XdevLWindowX11::getX() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_position.x = wa.x;
@@ -745,7 +764,7 @@ namespace xdl {
 		return m_position.x;
 	}
 
-	XdevLWindowPosition::type XdevLWindowLinux::getY() {
+	XdevLWindowPosition::type XdevLWindowX11::getY() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_position.x = wa.x;
@@ -753,47 +772,47 @@ namespace xdl {
 		return m_position.y;
 	}
 
-	const XdevLWindowTitle& XdevLWindowLinux::getTitle() {
+	const XdevLWindowTitle& XdevLWindowX11::getTitle() {
 		return XdevLWindowImpl::getTitle();
 	}
 
-	xdl_bool XdevLWindowLinux::getFullscreen() {
+	xdl_bool XdevLWindowX11::getFullscreen() {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_bool XdevLWindowLinux::getHidePointer() {
+	xdl_bool XdevLWindowX11::getHidePointer() {
 		return XdevLWindowImpl::getHidePointer();
 	}
 
-	xdl_int XdevLWindowLinux::getColorDepth() {
+	xdl_int XdevLWindowX11::getColorDepth() {
 		return XdevLWindowImpl::getColorDepth();
 	}
 
-	void XdevLWindowLinux::setX(XdevLWindowPosition::type x) {
+	void XdevLWindowX11::setX(XdevLWindowPosition::type x) {
 		XdevLWindowImpl::setX(x);
 		XMoveWindow(m_display, m_window, m_position.x, m_position.y);
 		XMapWindow(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::setY(XdevLWindowPosition::type y) {
+	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
 		XdevLWindowImpl::setY(y);
 		XMoveWindow(m_display, m_window, m_position.x, m_position.y);
 		XMapWindow(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::setWidth(XdevLWindowSize::type width) {
+	void XdevLWindowX11::setWidth(XdevLWindowSize::type width) {
 		XdevLWindowImpl::setWidth(width);
 		XResizeWindow(m_display, m_window, m_size.width, m_size.height);
 		XMapWindow(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::setHeight(XdevLWindowSize::type height) {
+	void XdevLWindowX11::setHeight(XdevLWindowSize::type height) {
 		XdevLWindowImpl::setHeight(height);
 		XResizeWindow(m_display, m_window,  m_size.width, m_size.height);
 		XMapWindow(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::setSize(const XdevLWindowSize& size) {
+	void XdevLWindowX11::setSize(const XdevLWindowSize& size) {
 		m_size = size;
 
 		XSizeHints *sizehints = XAllocSizeHints();
@@ -819,13 +838,13 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::setPosition(const XdevLWindowPosition& position) {
+	void XdevLWindowX11::setPosition(const XdevLWindowPosition& position) {
 		m_position = position;
 		XMoveWindow(m_display, m_window, m_position.x, m_position.y);
 		XMapWindow(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::setResizeable(xdl_bool state) {
+	void XdevLWindowX11::setResizeable(xdl_bool state) {
 		XSizeHints* sizeHints 	= XAllocSizeHints();
 		sizeHints->flags		= USPosition | USSize | PPosition | PSize | PMinSize;
 		sizeHints->x			= m_position.x;
@@ -838,7 +857,7 @@ namespace xdl {
 		XFree(sizeHints);
 	}
 
-	void XdevLWindowLinux::setTitle(const XdevLWindowTitle& title) {
+	void XdevLWindowX11::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
 
 		XClassHint* class_hints = XAllocClassHint();
@@ -858,15 +877,15 @@ namespace xdl {
 		XFree(class_hints);
 	}
 
-	void XdevLWindowLinux::showPointer() {
+	void XdevLWindowX11::showPointer() {
 		showMousePointer(0);
 	}
 
-	void XdevLWindowLinux::hidePointer() {
+	void XdevLWindowX11::hidePointer() {
 		showMousePointer(1);
 	}
 
-	void XdevLWindowLinux::showMousePointer(xdl_bool state) {
+	void XdevLWindowX11::showMousePointer(xdl_bool state) {
 
 		if(state) {
 			Pixmap bm_no;
@@ -901,7 +920,7 @@ namespace xdl {
 			XUndefineCursor(m_display, m_window);
 	}
 
-	void XdevLWindowLinux::show() {
+	void XdevLWindowX11::show() {
 		XMapWindow(m_display, m_window);
 
 		//XEvent event;
@@ -909,7 +928,7 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::hide() {
+	void XdevLWindowX11::hide() {
 		XUnmapEvent event;
 		event.type = UnmapNotify;
 		event.window = m_window;
@@ -923,23 +942,23 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::raise() {
+	void XdevLWindowX11::raise() {
 		XRaiseWindow(m_display, m_window);
 		//XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::setPointerPosition(xdl_uint x, xdl_uint y) {
+	void XdevLWindowX11::setPointerPosition(xdl_uint x, xdl_uint y) {
 		XWindowAttributes wa;
 		XGetWindowAttributes(m_display, m_window, &wa);
 		// (display, src window, dst windiw, src x, src y, src width, src height, dst x, dst y)
 		XWarpPointer(m_display, m_window, m_window, 0, 0, wa.width, wa.height, x, y);
 	}
 
-	void XdevLWindowLinux::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
+	void XdevLWindowX11::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
 
 	}
 
-	xdl_bool XdevLWindowLinux::isHidden() {
+	xdl_bool XdevLWindowX11::isHidden() {
 		Atom actualType;
 		int actualFormat;
 		unsigned long i, numItems, bytesAfter;
@@ -960,7 +979,7 @@ namespace xdl {
 		return xdl_false; // TODO This may cause problems.
 	}
 
-	xdl_uint32 XdevLWindowLinux::getNetWMState() {
+	xdl_uint32 XdevLWindowX11::getNetWMState() {
 		Atom actualType;
 		int actualFormat;
 		unsigned long i, numItems, bytesAfter;
@@ -1000,7 +1019,7 @@ namespace xdl {
 		return flags;
 	}
 
-	void XdevLWindowLinux::setWindowBordered() {
+	void XdevLWindowX11::setWindowBordered() {
 
 		if(_MOTIF_WM_HINTS != None) {
 			/* Hints used by Motif compliant window managers */
@@ -1022,7 +1041,7 @@ namespace xdl {
 		}
 	}
 
-	void XdevLWindowLinux::grabPointer() {
+	void XdevLWindowX11::grabPointer() {
 		for(;;) {
 			static int counter = 0;
 			int result = XGrabPointer(m_display, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
@@ -1036,11 +1055,11 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::ungrabPointer() {
+	void XdevLWindowX11::ungrabPointer() {
 		XUngrabPointer(m_display, CurrentTime);
 	}
 
-	void XdevLWindowLinux::grabKeyboard() {
+	void XdevLWindowX11::grabKeyboard() {
 		for(;;) {
 			static int counter = 0;
 			int result = XGrabKeyboard(m_display, m_window, True, GrabModeAsync, GrabModeAsync, CurrentTime);
@@ -1054,11 +1073,11 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-	void XdevLWindowLinux::ungrabKeyboard() {
+	void XdevLWindowX11::ungrabKeyboard() {
 		XUngrabKeyboard(m_display, CurrentTime);
 	}
 
-	void XdevLWindowLinux::setInputFocus() {
+	void XdevLWindowX11::setInputFocus() {
 
 		XWindowAttributes attribute;
 		XGetWindowAttributes(m_display,m_window,&attribute);
@@ -1086,7 +1105,7 @@ namespace xdl {
 //
 	}
 
-	xdl_bool XdevLWindowLinux::hasFocus() {
+	xdl_bool XdevLWindowX11::hasFocus() {
 		Atom actualType;
 		int actualFormat;
 		unsigned long i, numItems, bytesAfter;
@@ -1107,23 +1126,11 @@ namespace xdl {
 		return xdl_false; // TODO This may cause problems.
 	}
 
-	xdl_int XdevLWindowLinux::getInputFocus(XdevLWindow** window) {
-		Window wnd;
-		int revert_to;
-		XGetInputFocus(m_display, &wnd, &revert_to);
-
-		*window = windowEventServer->getWindow(wnd);;
-		return ERR_OK;
-
-		*window = nullptr;
-		return ERR_ERROR;
-	}
-
-	void XdevLWindowLinux::setParent(XdevLWindow* window) {
+	void XdevLWindowX11::setParent(XdevLWindow* window) {
 		XdevLWindowImpl::setParent(window);
 	}
 
-	xdl_int XdevLWindowLinux::initializeEWMH() {
+	xdl_int XdevLWindowX11::initializeEWMH() {
 
 		_MOTIF_WM_HINTS 					= XInternAtom(m_display, "_MOTIF_WM_HINTS", False);
 		_NET_WM_WINDOW_TYPE					= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", False);
@@ -1221,7 +1228,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void XdevLWindowLinux::setType(XdevLWindowTypes type) {
+	void XdevLWindowX11::setType(XdevLWindowTypes type) {
 
 		switch(type) {
 
@@ -1280,7 +1287,7 @@ namespace xdl {
 	        const XdevLWindowPosition& position,
 	        const XdevLWindowSize& size) {
 
-		*window = new XdevLWindowLinux(nullptr);
+		*window = new XdevLWindowX11(nullptr);
 
 		return ERR_OK;
 	}
