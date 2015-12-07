@@ -80,6 +80,9 @@ xdl_int XdevLOpenGLWGL::setAttributes(const XdevLOpenGLContextAttributes& attrib
 }
 
 xdl_int XdevLOpenGLWGL::init() {
+	if (XdevLOpenGLContextBase::init() == ERR_ERROR) {
+		return ERR_ERROR;
+	}
 	//
 	// Let's get the extensions
 	//
@@ -246,15 +249,49 @@ xdl_int XdevLOpenGLWGL::initOpenGL() {
 			return ERR_ERROR;
 		}
 
-		int iContextAttribs[] =
-		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			0 // End of attributes list
-		};
 
-		m_RC = wglCreateContextAttribsARB(m_DC, 0, iContextAttribs);
+		//
+		// Set the core profile attributes.
+		//
+		std::vector<xdl_int> contextAttributes;
+		contextAttributes.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
+		contextAttributes.push_back(m_attributes.context_major_version);
+		contextAttributes.push_back(WGL_CONTEXT_MINOR_VERSION_ARB);
+		contextAttributes.push_back(m_attributes.context_minor_version);
+
+		contextAttributes.push_back(WGL_CONTEXT_PROFILE_MASK_ARB);
+		if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) {
+			contextAttributes.push_back(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
+		}
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
+			contextAttributes.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
+		}
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES) {
+			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
+			return ERR_ERROR;
+		}
+		else {
+			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
+			return ERR_ERROR;
+		}
+
+		//
+		// Set the WGL_CONTEXT_FLAGS_ARB
+		//
+		if (m_attributes.context_flags != XDEVL_OPENGL_CONTEXT_FLAGS_NONE || (m_debugMode == xdl_true)) {
+			contextAttributes.push_back(WGL_CONTEXT_FLAGS_ARB);
+			if (m_debugMode == xdl_true){
+				contextAttributes.push_back(WGL_CONTEXT_DEBUG_BIT_ARB);
+			}
+			if (m_attributes.context_flags == XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT){
+				contextAttributes.push_back(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+			}
+		}
+
+		contextAttributes.push_back(0);
+
+
+		m_RC = wglCreateContextAttribsARB(m_DC, 0, contextAttributes.data());
 		if (nullptr == m_RC) {
 			XDEVL_MODULE_ERROR("wglCreateContextAttribsARB failed.\n");
 			return ERR_ERROR;
@@ -274,123 +311,6 @@ xdl_int XdevLOpenGLWGL::initOpenGL() {
 			return ERR_ERROR;
 		}
 	}
-
-
-
-
-	//PIXELFORMATDESCRIPTOR m_PFD;
-	//m_PFD.nSize						= sizeof(PIXELFORMATDESCRIPTOR);
-	//m_PFD.nVersion        = 1;
-	//m_PFD.dwFlags = PFD_DRAW_TO_WINDOW |	// Format Must Support Window
-	//				PFD_SUPPORT_OPENGL;	// Format Must Support OpenGL
-	//if (m_attributes.double_buffer > 0) {
-	//	m_PFD.dwFlags |= PFD_DOUBLEBUFFER;
-	//}
-	//m_PFD.iPixelType      = PFD_TYPE_RGBA;
-
-
-	//m_PFD.cColorBits	= m_attributes.color_buffer_size;
-	//m_PFD.cDepthBits    = m_attributes.depth_size;
-	//m_PFD.cStencilBits  = m_attributes.stencil_size;
-
-	//
-	//m_PFD.cRedBits = m_attributes.red_size;
-	//m_PFD.cRedShift       = 0;
-	//m_PFD.cGreenBits = m_attributes.green_size;
-	//m_PFD.cGreenShift     = 0;
-	//m_PFD.cBlueBits = m_attributes.blue_size;
-	//m_PFD.cBlueShift      = 0;
-	//m_PFD.cAlphaBits = m_attributes.alpha_size;
-	//m_PFD.cAlphaShift     = 0;
-	//m_PFD.cAccumBits      = 0;
-	//m_PFD.cAccumRedBits   = 0;
-	//m_PFD.cAccumGreenBits = 0;
-	//m_PFD.cAccumBlueBits  = 0;
-	//m_PFD.cAccumAlphaBits = 0;
-	//m_PFD.cAccumBits      = 0;
-	//m_PFD.dwLayerMask     = PFD_MAIN_PLANE;
-	//m_PFD.bReserved       = 0;
-	//m_PFD.dwVisibleMask   = 0;
-	//m_PFD.dwDamageMask    = 0;
-
-
-	//if (!m_ARBMultisampleSupported) {
-	//		m_ARBMultisampleFormat[0] = ChoosePixelFormat( m_DC, &m_PFD );
-	//		if (m_ARBMultisampleFormat[0]==0) { // Let's choose a default index.
-	//			m_ARBMultisampleFormat[0] = 1;
-	//			if (DescribePixelFormat(m_DC, m_ARBMultisampleFormat[0], sizeof(PIXELFORMATDESCRIPTOR), &m_PFD)==0) {
-	//				return ERR_ERROR;
-	//			}
-	//		}
-	//	// Are We Able To Set The Pixel Format?
-	//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[0], &m_PFD ) == FALSE) {
-	//		XDEVL_MODULE_ERROR("Could not set pixel format.\n");
-	//		return ERR_ERROR;
-	//	}
-
-	//}
-	//else{
-		//xdl_bool found = xdl_false;
-		//for(UINT num = 0; num < numFormats; ++num){
-		//	// Are We Able To Set The Pixel Format?
-		//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[num], &m_PFD ) != TRUE) {
-		//		continue;
-		//	}else
-		//		found = xdl_true;
-		//}
-		//if(found == xdl_false){
-		//	XDEVL_MODULE_ERROR("Could not set pixel format.\n");
-		//	return ERR_ERROR;		
-		//}
-	//}
-
-	
-
-	//if (wglCreateContextAttribsARB){
-	//	std::vector<GLint> attribList;
-	//	if(m_major != -1 && m_minor != -1){
-	//		attribList.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
-	//		attribList.push_back(m_major);
-	//		attribList.push_back(WGL_CONTEXT_MINOR_VERSION_ARB);
-	//		attribList.push_back(m_minor);
-	//	}
-	//	
-	//	xdl_int context_flags = 0;
-	//	attribList.push_back(WGL_CONTEXT_FLAGS_ARB);
-	//	if(m_debugMode){
-	//		context_flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
-	//	}
-	//	attribList.push_back(context_flags);
-	//	
-	//	attribList.push_back(WGL_CONTEXT_PROFILE_MASK_ARB);
-	//	if(m_profile == "core"){
-	//		attribList.push_back(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
-	//	}else if(m_profile == "compatibility"){
-	//		attribList.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
-	//	}else{
-	//		attribList.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
-	//	}
-	//	attribList.push_back(0);
-
-
-	//	if (( m_RC=wglCreateContextAttribsARB( m_DC,0, &attribList[0] )) == 0) {
-	//		XDEVL_MODULE_ERROR("Could not create GL context.\n");
-	//		return ERR_ERROR;
-	//	}
-	//}else{
-	//	// Are We Able To Get A Rendering Context?
-	//	if (( m_RC=wglCreateContext( m_DC )) == 0) {
-	//		XDEVL_MODULE_ERROR("Could not create GL context.\n");
-	//		return ERR_ERROR;
-	//	}
-	//}
-
-
-	//// Try To Activate The Rendering Context
-	//if (wglMakeCurrent( m_DC, m_RC) == FALSE) {
-	//	XDEVL_MODULE_ERROR("Could not make GL context to the current context.\n");
-	//	return ERR_ERROR;
-	//}
 	return ERR_OK;
 }
 
