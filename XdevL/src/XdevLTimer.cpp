@@ -55,24 +55,25 @@
 //#include <XdevLTypes.h>
 
 xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
-	
-	xdl::xdl_int64 Frequency = 0;
-	xdl::xdl_int64 CurClock = 0;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency );
+
+	LARGE_INTEGER Frequency;
+	LARGE_INTEGER CurClock;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 	QueryPerformanceCounter((LARGE_INTEGER*)&CurClock);
 
-	return (CurClock/Frequency)*1000000;
+	return (CurClock.QuadPart * 1000000) / Frequency.QuadPart;
 }
 
 xdl::xdl_double getTimeGlobal() {
-	
-	xdl::xdl_int64 Frequency = 0;
-	xdl::xdl_int64 CurClock = 0;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency );
+
+	LARGE_INTEGER Frequency;
+	LARGE_INTEGER CurClock;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 	QueryPerformanceCounter((LARGE_INTEGER*)&CurClock);
 
-	return (xdl::xdl_double( CurClock ) / xdl::xdl_double( Frequency ));
+	return (xdl::xdl_double(CurClock.QuadPart) / xdl::xdl_double(Frequency.QuadPart));
 }
+
 
 // -----------------------------------------------------------------------------
 // Do timer stuff on UNIX systems.
