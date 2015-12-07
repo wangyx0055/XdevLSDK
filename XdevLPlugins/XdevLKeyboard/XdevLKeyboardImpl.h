@@ -470,7 +470,7 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_UP"),KEY_UP));
 
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_CAPSLOCK"),KEY_CAPSLOCK));
-		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_NUMLOCKCLEAR"),KEY_NUMLOCKCLEAR));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_NUMLOCK"),KEY_NUMLOCK));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_DIVIDE"),KEY_KP_DIVIDE));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_MULTIPLY"),KEY_KP_MULTIPLY));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_KP_MINUS"),KEY_KP_MINUS));

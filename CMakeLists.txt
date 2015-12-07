@@ -119,6 +119,7 @@ option(BUILD_MOUSE_SERVER "Builds the raw mouse server" ON)
 option(BUILD_FILESYSTEM "Builds the Directory module" ON)
 option(BUILD_NATIVE_WINDOWS "Build native window support" ON)
 option(BUILD_DEMOS "Builds all demos" ON)
+option(BUILD_EGL "Builds the EGL OpenGL context" ON)
 
 
 if(NOT PLATFORM_LINUX)
@@ -263,12 +264,12 @@ endif()
 
 # Build the Wayland Window plugin.
 if(BUILD_WAYLAND)
-	find_package(Wayland)
-	if(Wayland_FOUND)
+#	find_package(Wayland)
+#	if(Wayland_FOUND)
 		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWayland)
-	else()
-		message(STATUS "XdevLWindowWayland will not be build.")
-	endif()
+#	else()
+#		message(STATUS "XdevLWindowWayland will not be build.")
+#	endif()
 endif()
 
 
@@ -285,6 +286,10 @@ endif()
 
 # Build the new OpenGL Contect plugin.
 if(BUILD_GL_CONTEXT)
+	if(BUILD_EGL)
+		add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextEGL)
+	endif()
+		
 	if(OPENGL_FOUND)
 		find_package(SDL2)
 		if(SDL2_FOUND)

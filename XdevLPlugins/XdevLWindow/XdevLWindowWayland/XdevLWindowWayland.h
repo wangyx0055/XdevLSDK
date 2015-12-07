@@ -208,15 +208,81 @@ namespace xdl {
 
 
 			WaylandSharedMemoryPool	m_pool;
-			WaylandBuffer			m_buffer;
-			WaylandRegion			m_region;
+			WaylandBuffer	m_buffer;
+			WaylandRegion	m_region;
 
-			XdevLEGL							m_egl;
-			xdl_int								m_bufferSize;
+			XdevLEGL		m_egl;
+			xdl_int			m_bufferSize;
 			xdl_int m_fd;
-			xdl_uint8*							m_shm_data;
+			xdl_uint8*		m_shm_data;
 	};
 
+	class XdevLWindowServerWayland : public XdevLWindowServerImpl {
+		public:
+			XdevLWindowServerWayland(XdevLModuleCreateParameter* parameter);
+			virtual ~XdevLWindowServerWayland();
+
+			/// Creates a new window.
+			virtual xdl_int createWindow(XdevLWindow** window,
+			                             const XdevLWindowTitle& title,
+			                             const XdevLWindowPosition& position,
+			                             const XdevLWindowSize& size
+			                            );
+	};
+
+	class XdevLWindowEventServerWayland : public XdevLWindowEventServerImpl {
+		public:
+			XdevLWindowEventServerWayland(XdevLModuleCreateParameter* parameter);
+			virtual ~XdevLWindowEventServerWayland();
+
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+			virtual xdl_int update() override;
+
+			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
+			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
+			void flush() override;
+			
+			void setSeat(wl_seat* seat);
+			void setPointer(wl_pointer* pointer);
+			void setKeyboard(wl_keyboard* keyboard);
+			void setCurrentWindow(wl_surface* surface);
+			void setFocusWindow(XdevLWindow* window);
+			void setCurrentPointerPosition(xdl_int x, xdl_int y);
+
+			void getCurrentPointerPosition(xdl_int& x, xdl_int& y);
+			wl_surface* getCurrentWindow() {return m_currentSurface;}
+			XdevLWindow* getFocusWindow();
+
+		private:
+			wl_seat* m_seat;
+			wl_pointer* m_pointer; 
+			wl_keyboard* m_keyboard;
+			wl_surface* m_currentSurface;
+			XdevLWindow* m_focusWindow;
+			xdl_int m_pointerPositionX;
+			xdl_int m_pointerPositionY;
+	};
+
+
+	class XdevLCursorWayland : public XdevLModuleImpl<XdevLCursor>  {
+		public:
+			XdevLCursorWayland(XdevLModuleCreateParameter* parameter);
+			virtual ~XdevLCursorWayland();
+
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual void* getInternal(const XdevLInternalName& id) override;
+
+			virtual void show() override;
+			virtual void hide() override;
+			virtual void setPosition(xdl_uint x, xdl_uint y) override;
+			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;
+			virtual void releaseClip() override;
+			virtual xdl_int enableRelativeMotion() override;
+			virtual void disableRelativeMotion() override;
+	};
 }
 
 

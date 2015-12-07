@@ -19,14 +19,13 @@
 
 #include <iostream>
 #include <XdevLCore.h>
-#include <XdevLKeyboard/XdevLKeyboard.h>
-#include <XdevLMouse/XdevLMouse.h>
-#include <XdevLJoystick/XdevLJoystick.h>
 #include "XdevLWindowWayland.h"
+#include <XdevLInputSystem.h>
 #include <XdevLXstring.h>
 #include <XdevLUtils.h>
 #include <sstream>
 #include <cstddef>
+
 
 xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 	xdl::windowWaylandVendor,
@@ -39,7 +38,30 @@ xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 	xdl::XdevLWindowPatchVersion
 };
 
-xdl::XdevLPluginDescriptor m_pluginDescriptor {
+xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[2],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	XDEVLWAYLAND_EVENT_SERVER_MODULE_MAJOR_VERSION,
+	XDEVLWAYLAND_EVENT_SERVER_MODULE_MINOR_VERSION,
+	XDEVLWAYLAND_EVENT_SERVER_MODULE_PATCH_VERSION
+};
+
+xdl::XdevLModuleDescriptor cursorModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[3],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	XDEVLWAYLAND_CURSOR_MODULE_MAJOR_VERSION,
+	XDEVLWAYLAND_CURSOR_MODULE_MINOR_VERSION,
+	XDEVLWAYLAND_CURSOR_MODULE_PATCH_VERSION
+};
+
+
+xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::windowWaylandPluginName,
 	xdl::window_moduleNames,
 	xdl::XdevLWindowPluginMajorVersion,
@@ -47,20 +69,40 @@ xdl::XdevLPluginDescriptor m_pluginDescriptor {
 	xdl::XdevLWindowPluginPatchVersion
 };
 
+
+static xdl::XdevLCursorWayland* waylandCursor = nullptr;
+static xdl::XdevLWindowEventServerWayland* waylandEventServer = nullptr;
+
+
 static xdl::xdl_int reference_counter = 0;
 static xdl::WaylandDisplay display;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 
 	if(reference_counter == 0) {
-
 		display = wl_display_connect(nullptr);
 		if(display == nullptr) {
+			std::cerr << "## XdevLWindowWayland::wl_display_connect failed" << std::endl;
 			return xdl::ERR_ERROR;
 		}
 	}
 
-	if(xdl::XdevLWindowWayland::m_moduleDescriptor.getName() == parameter->getModuleName()) {
+	if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+		if(xdl::windowEventServer == nullptr) {
+			xdl::windowEventServer = new xdl::XdevLWindowEventServerWayland(parameter);
+			xdl::XdevLWindowEventServerParameter = parameter;
+		}
+		parameter->setModuleInstance(xdl::windowEventServer);
+		return xdl::ERR_OK;
+
+	} else if(xdl::XdevLWindowWayland::m_moduleDescriptor.getName() == parameter->getModuleName()) {
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			waylandEventServer = static_cast<xdl::XdevLWindowEventServerWayland*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowWayland")));
+			xdl::windowEventServer = waylandEventServer;
+		}
+
 		xdl::XdevLModule* obj = new xdl::XdevLWindowWayland(parameter);
 		if(nullptr == obj) {
 			return xdl::ERR_ERROR;
@@ -92,12 +134,20 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 }
 
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
-	return &m_pluginDescriptor;
+	return &pluginDescriptor;
 }
 
 namespace xdl {
 
+//	XdevLOpenGLContext* m_openglContext = nullptr;
 
+
+	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
+	const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
+	const XdevLID MouseButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
+	const XdevLID MouseButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
+	const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
+	const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
 
 
 	static void shm_format(void *data, struct wl_shm *wl_shm, uint32_t format) {
@@ -174,6 +224,8 @@ namespace xdl {
 		} else if(strcmp(interface, "wl_shm") == 0) {
 			windowWayland->setSharedMemory((WaylandSharedMemory)wl_registry_bind(registry, id, &wl_shm_interface, 1));
 			wl_shm_add_listener(windowWayland->getSharedMemory(), &shm_listener, NULL);
+		} else if(strcmp(interface, "wl_seat") == 0) {
+			waylandEventServer->setSeat((wl_seat*)wl_registry_bind(registry, id, &wl_seat_interface, 1));
 		}
 	}
 
@@ -198,6 +250,12 @@ namespace xdl {
 	xdl_int XdevLWindowWayland::init() {
 
 		XdevLWindowImpl::init();
+
+//		m_openglContext = static_cast<XdevLOpenGLContext*>(getMediator()->createModule(xdl::XdevLModuleName("XdevLOpenGLContext"), xdl::XdevLID("XdevLWaylandOpenGLContext")));
+//		if(nullptr == m_openglContext) {
+//			XDEVL_MODULE_ERROR("Could not create OpenGL context.\n");
+//			return ERR_ERROR;
+//		}
 
 		// We get the registry for the window which holds extension
 		// of the wayland server.
@@ -247,7 +305,7 @@ namespace xdl {
 		} else {
 			XDEVL_MODULE_SUCCESS("Created surface\n");
 		}
-
+		wl_surface_set_user_data(m_surface, this);
 
 		m_shellSurface = wl_shell_get_shell_surface(m_shell, m_surface);
 		if(m_shellSurface == nullptr) {
@@ -299,6 +357,7 @@ namespace xdl {
 //		wl_surface_attach(m_surface, m_buffer, 0, 0);
 //		wl_surface_commit(m_surface);
 
+
 		wl_display_flush(display);
 
 		return ERR_OK;
@@ -311,6 +370,11 @@ namespace xdl {
 	}
 
 	void* XdevLWindowWayland::getInternal(const XdevLInternalName& id) {
+		if(id == XdevLString("WAYLAND_DISPLAY")) {
+			return (void*)m_egl.m_eglWindow;
+		} else if(id == XdevLString("WAYLAND_WINDOW")) {
+			return (void*)m_egl.m_eglWindow;
+		}
 		return nullptr;
 	}
 
@@ -351,7 +415,7 @@ namespace xdl {
 		}
 		glClear(GL_COLOR_BUFFER_BIT);
 		if(!eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
-			XDEVL_MODULE_ERROR("eglSwapBuffers failed\n");
+			//XDEVL_MODULE_ERROR("eglSwapBuffers failed\n");
 		}
 
 		while(wl_display_prepare_read(display) < 0) {
@@ -360,10 +424,6 @@ namespace xdl {
 		wl_display_flush(display);
 		wl_display_read_events(display);
 		wl_display_dispatch_pending(display);
-
-		printf("sdfsdf\n");
-
-
 	}
 
 	void XdevLWindowWayland::setSize(const XdevLWindowSize& size) {
@@ -761,4 +821,604 @@ err:
 
 		return fd;
 	}
+
+
+//
+// -------------------------------------------------------------------------
+//
+
+	XdevLWindowServerWayland::XdevLWindowServerWayland(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowServerImpl(parameter) {
+
+	}
+
+	XdevLWindowServerWayland::~XdevLWindowServerWayland() {
+
+	}
+
+	xdl_int XdevLWindowServerWayland::createWindow(XdevLWindow** window,
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size) {
+
+		*window = new XdevLWindowWayland(nullptr);
+
+		return ERR_OK;
+	}
+
+
+
+//
+// XdevLWindowEventServerWayland -----------------------------------------------
+//
+
+
+
+// Keyboard ----------------------------
+
+
+#define BTN_MOUSE		0x110
+#define BTN_LEFT		0x110
+#define BTN_RIGHT		0x111
+#define BTN_MIDDLE		0x112
+#define BTN_SIDE		0x113
+#define BTN_EXTRA		0x114
+#define BTN_FORWARD		0x115
+#define BTN_BACK		0x116
+#define BTN_TASK		0x117
+
+const int scancodeTable[] = {
+					KEY_UNKNOWN,
+		/*  1 */    KEY_ESCAPE,
+		/*  2 */    KEY_1,
+		/*  3 */    KEY_2,
+		/*  4 */    KEY_3,
+		/*  5 */    KEY_4,
+		/*  6 */    KEY_5,
+		/*  7 */    KEY_6,
+		/*  8 */    KEY_7,
+		/*  9 */    KEY_8,
+		/*  10 */   KEY_9,
+		/*  11 */   KEY_0,
+		/*  12 */   KEY_MINUS,
+		/*  13 */   KEY_EQUALS,
+		/*  14 */   KEY_BACKSPACE,
+		/*  15 */   KEY_TAB,
+		/*  16 */   KEY_Q,
+		/*  17 */   KEY_W,
+		/*  18 */   KEY_E,
+		/*  19 */   KEY_R,
+		/*  20 */   KEY_T,
+		/*  21 */   KEY_Y,
+		/*  22 */   KEY_U,
+		/*  23 */   KEY_I,
+		/*  24 */   KEY_O,
+		/*  25 */   KEY_P,
+		/*  26 */   KEY_LEFTBRACKET,
+		/*  27 */   KEY_RIGHTBRACKET,
+		/*  28 */   KEY_ENTER,
+		/*  29 */   KEY_LCTRL,
+		/*  30 */   KEY_A,
+		/*  31 */   KEY_S,
+		/*  32 */   KEY_D,
+		/*  33 */   KEY_F,
+		/*  34 */   KEY_G,
+		/*  35 */   KEY_H,
+		/*  36 */   KEY_J,
+		/*  37 */   KEY_K,
+		/*  38 */   KEY_L,
+		/*  39 */   KEY_SEMICOLON,
+		/*  40 */   KEY_APOSTROPHE,
+		/*  41 */   KEY_GRAVE,
+		/*  42 */   KEY_LSHIFT,
+		/*  43 */   KEY_BACKSLASH,
+		/*  44 */   KEY_Z,
+		/*  45 */   KEY_X,
+		/*  46 */   KEY_C,
+		/*  47 */   KEY_V,
+		/*  48 */   KEY_B,
+		/*  49 */   KEY_N,
+		/*  50 */   KEY_M,
+		/*  51 */   KEY_COMMA,
+		/*  52 */   KEY_PERIOD,
+		/*  53 */   KEY_SLASH,
+		/*  54 */   KEY_RSHIFT,
+		/*  55 */   KEY_KP_MULTIPLY,
+		/*  56 */   KEY_LALT,
+		/*  57 */   KEY_SPACE,
+		/*  58 */   KEY_CAPSLOCK,
+		/*  59 */   KEY_F1,
+		/*  60 */   KEY_F2,
+		/*  61 */   KEY_F3,
+		/*  62 */   KEY_F4,
+		/*  63 */   KEY_F5,
+		/*  64 */   KEY_F6,
+		/*  65 */   KEY_F7,
+		/*  66 */   KEY_F8,
+		/*  67 */   KEY_F9,
+		/*  68 */   KEY_F10,
+		/*  69 */   KEY_NUMLOCK,
+		/*  70 */   KEY_SCROLLLOCK,
+		/*  71 */   KEY_KP_7,
+		/*  72 */   KEY_KP_8,
+		/*  73 */   KEY_KP_9,
+		/*  74 */   KEY_KP_MINUS,
+		/*  75 */   KEY_KP_4,
+		/*  76 */   KEY_KP_5,
+		/*  77 */   KEY_KP_6,
+		/*  78 */   KEY_KP_PLUS,
+		/*  79 */   KEY_KP_1,
+		/*  80 */   KEY_KP_2,
+		/*  81 */   KEY_KP_3,
+		/*  82 */   KEY_KP_0,
+		/*  83 */   KEY_KP_PERIOD,
+		/*  84 */   KEY_SYSREQ,    /* ???? */
+		/*  85 */   KEY_MODE,      /* ???? */
+		/*  86 */   KEY_NONUSBACKSLASH,
+		/*  87 */   KEY_F11,
+		/*  88 */   KEY_F12,
+		/*  89 */   KEY_UNKNOWN,
+		/*  90 */   KEY_UNKNOWN,   /* Katakana */
+		/*  91 */   KEY_UNKNOWN,   /* Hiragana */
+		/*  92 */   KEY_UNKNOWN,   /* Henkan_Mode */
+		/*  93 */   KEY_UNKNOWN,   /* Hiragana_Katakana */
+		/*  94 */   KEY_UNKNOWN,   /* Muhenkan */
+		/*  95 */   KEY_UNKNOWN,
+		/*  96 */   KEY_KP_ENTER,
+		/*  97 */   KEY_RCTRL,
+		/*  98 */   KEY_KP_DIVIDE,
+		/*  99 */   KEY_PRINTSCREEN,
+		/* 100 */   KEY_RALT,      /* ISO_Level3_Shift, ALTGR, RALT */
+		/* 101 */   KEY_UNKNOWN,   /* Linefeed */
+		/* 102 */   KEY_HOME,
+		/* 103 */   KEY_UP,
+		/* 104 */   KEY_PAGEUP,
+		/* 105 */   KEY_LEFT,
+		/* 106 */   KEY_RIGHT,
+		/* 107 */   KEY_END,
+		/* 108 */   KEY_DOWN,
+		/* 109 */   KEY_PAGEDOWN,
+		/* 110 */   KEY_INSERT,
+		/* 111 */   KEY_DELETE,
+		/* 112 */   KEY_UNKNOWN,
+		/* 113 */   KEY_MUTE,
+		/* 114 */   KEY_VOLUMEDOWN,
+		/* 115 */   KEY_VOLUMEUP,
+		/* 116 */   KEY_POWER,
+		/* 117 */   KEY_KP_EQUALS,
+		/* 118 */   KEY_UNKNOWN,   /* plusminus */
+		/* 119 */   KEY_PAUSE,
+		/* 120 */   KEY_UNKNOWN,   /* XF86LaunchA */
+		/* 121 */   KEY_UNKNOWN,   /* KP_Decimal */
+		/* 122 */   KEY_UNKNOWN,   /* Hangul */
+		/* 123 */   KEY_UNKNOWN,   /* Hangul_Hanja */
+		/* 124 */   KEY_UNKNOWN,
+		/* 125 */   KEY_LGUI,
+		/* 126 */   KEY_RGUI,
+		/* 127 */   KEY_APPLICATION,
+		/* 128 */   KEY_CANCEL,
+		/* 129 */   KEY_AGAIN,
+		/* 130 */   KEY_UNKNOWN,   /* SunProps */
+		/* 131 */   KEY_UNDO,
+		/* 132 */   KEY_UNKNOWN,   /* SunFront */
+		/* 133 */   KEY_COPY,
+		/* 134 */   KEY_UNKNOWN,   /* SunOpen */
+		/* 135 */   KEY_PASTE,
+		/* 136 */   KEY_FIND,
+		/* 137 */   KEY_CUT,
+		/* 138 */   KEY_HELP,
+		/* 139 */   KEY_UNKNOWN,   /* XF86MenuKB */
+		/* 140 */   KEY_CALCULATOR,
+		/* 141 */   KEY_UNKNOWN,
+		/* 142 */   KEY_SLEEP,
+		/* 143 */   KEY_UNKNOWN,   /* XF86WakeUp */
+		/* 144 */   KEY_UNKNOWN,   /* XF86Explorer */
+		/* 145 */   KEY_UNKNOWN,   /* XF86Send */
+		/* 146 */   KEY_UNKNOWN,
+		/* 147 */   KEY_UNKNOWN,   /* XF86Xfer */
+		/* 148 */   KEY_APP1,      /* XF86Launch1 */
+		/* 149 */   KEY_APP2,      /* XF86Launch2 */
+		/* 150 */   KEY_WWW,
+		/* 151 */   KEY_UNKNOWN,   /* XF86DOS */
+		/* 152 */   KEY_UNKNOWN,   /* XF86ScreenSaver */
+		/* 153 */   KEY_UNKNOWN,
+		/* 154 */   KEY_UNKNOWN,   /* XF86RotateWindows */
+		/* 155 */   KEY_MAIL,
+		/* 156 */   KEY_AC_BOOKMARKS,   /* XF86Favorites */
+		/* 157 */   KEY_COMPUTER,
+		/* 158 */   KEY_AC_BACK,
+		/* 159 */   KEY_AC_FORWARD,
+		/* 160 */   KEY_UNKNOWN,
+		/* 161 */   KEY_EJECT,
+		/* 162 */   KEY_EJECT,
+		/* 163 */   KEY_AUDIONEXT,
+		/* 164 */   KEY_AUDIOPLAY,
+		/* 165 */   KEY_AUDIOPREV,
+		/* 166 */   KEY_AUDIOSTOP,
+		/* 167 */   KEY_UNKNOWN,   /* XF86AudioRecord */
+		/* 168 */   KEY_UNKNOWN,   /* XF86AudioRewind */
+		/* 169 */   KEY_UNKNOWN,   /* XF86Phone */
+		/* 170 */   KEY_UNKNOWN,
+		/* 171 */   KEY_F13,       /* XF86Tools */
+		/* 172 */   KEY_AC_HOME,
+		/* 173 */   KEY_AC_REFRESH,
+		/* 174 */   KEY_UNKNOWN,   /* XF86Close */
+		/* 175 */   KEY_UNKNOWN,
+		/* 176 */   KEY_UNKNOWN,
+		/* 177 */   KEY_UNKNOWN,   /* XF86ScrollUp */
+		/* 178 */   KEY_UNKNOWN,   /* XF86ScrollDown */
+		/* 179 */   KEY_UNKNOWN,   /* parenleft */
+		/* 180 */   KEY_UNKNOWN,   /* parenright */
+		/* 181 */   KEY_UNKNOWN,   /* XF86New */
+		/* 182 */   KEY_AGAIN,
+		/* 183 */   KEY_F13,       /* XF86Tools */
+		/* 184 */   KEY_F14,       /* XF86Launch5 */
+		/* 185 */   KEY_F15,       /* XF86Launch6 */
+		/* 186 */   KEY_F16,       /* XF86Launch7 */
+		/* 187 */   KEY_F17,       /* XF86Launch8 */
+		/* 188 */   KEY_F18,       /* XF86Launch9 */
+		/* 189 */   KEY_F19,       /* null keysym */
+		/* 190 */   KEY_UNKNOWN,
+		/* 191 */   KEY_UNKNOWN,
+		/* 192 */   KEY_UNKNOWN,   /* XF86TouchpadToggle */
+		/* 193 */   KEY_UNKNOWN,
+		/* 194 */   KEY_UNKNOWN,
+		/* 195 */   KEY_MODE,
+		/* 196 */   KEY_UNKNOWN,
+		/* 197 */   KEY_UNKNOWN,
+		/* 198 */   KEY_UNKNOWN,
+		/* 199 */   KEY_UNKNOWN,
+		/* 200 */   KEY_AUDIOPLAY,
+		/* 201 */   KEY_UNKNOWN,   /* XF86AudioPause */
+		/* 202 */   KEY_UNKNOWN,   /* XF86Launch3 */
+		/* 203 */   KEY_UNKNOWN,   /* XF86Launch4 */
+		/* 204 */   KEY_UNKNOWN,   /* XF86LaunchB */
+		/* 205 */   KEY_UNKNOWN,   /* XF86Suspend */
+		/* 206 */   KEY_UNKNOWN,   /* XF86Close */
+		/* 207 */   KEY_AUDIOPLAY,
+		/* 208 */   KEY_AUDIONEXT,
+		/* 209 */   KEY_UNKNOWN,
+		/* 210 */   KEY_PRINTSCREEN,
+		/* 211 */   KEY_UNKNOWN,
+		/* 212 */   KEY_UNKNOWN,   /* XF86WebCam */
+		/* 213 */   KEY_UNKNOWN,
+		/* 214 */   KEY_UNKNOWN,
+		/* 215 */   KEY_MAIL,
+		/* 216 */   KEY_UNKNOWN,
+		/* 217 */   KEY_AC_SEARCH,
+		/* 218 */   KEY_UNKNOWN,
+		/* 219 */   KEY_UNKNOWN,   /* XF86Finance */
+		/* 220 */   KEY_UNKNOWN,
+		/* 221 */   KEY_UNKNOWN,   /* XF86Shop */
+		/* 222 */   KEY_UNKNOWN,
+		/* 223 */   KEY_STOP,
+		/* 224 */   KEY_BRIGHTNESSDOWN,
+		/* 225 */   KEY_BRIGHTNESSUP,
+		/* 226 */   KEY_MEDIASELECT,
+		/* 227 */   KEY_DISPLAYSWITCH,
+		/* 228 */   KEY_KBDILLUMTOGGLE,
+		/* 229 */   KEY_KBDILLUMDOWN,
+		/* 230 */   KEY_KBDILLUMUP,
+		/* 231 */   KEY_UNKNOWN,   /* XF86Send */
+		/* 232 */   KEY_UNKNOWN,   /* XF86Reply */
+		/* 233 */   KEY_UNKNOWN,   /* XF86MailForward */
+		/* 234 */   KEY_UNKNOWN,   /* XF86Save */
+		/* 235 */   KEY_UNKNOWN,   /* XF86Documents */
+		/* 236 */   KEY_UNKNOWN,   /* XF86Battery */
+		/* 237 */   KEY_UNKNOWN,   /* XF86Bluetooth */
+		/* 238 */   KEY_UNKNOWN,   /* XF86WLAN */
+	};
+
+	static void keyboardHandleKeymap(void *data, struct wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size) {
+
+	}
+
+	static void keyboardHandleEnter(void *data, struct wl_keyboard *keyboard,  uint32_t serial, struct wl_surface *surface, struct wl_array *keys) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(surface);
+		wes->setFocusWindow(window);
+
+		XdevLEvent ev;
+		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.type				= XDEVL_WINDOW_EVENT;
+		ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+		ev.window.windowid	= window->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+	}
+
+	static void keyboardHandleLeave(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+
+		XdevLEvent ev;
+		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.type				= XDEVL_WINDOW_EVENT;
+		ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_LOST;
+		ev.window.windowid	= wes->getFocusWindow()->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+	}
+
+	static void keyboardHandleKey(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state_w) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+
+		XdevLEvent ev;
+		ev.common.timestamp 	= wes->getMediator()->getTimer().getTime64();
+		ev.type 				= state_w ? ButtonPressed.getHashCode() : ButtonReleased.getHashCode();
+		ev.window.windowid		= wes->getFocusWindow()->getWindowID();
+//		ev.key.repeat 			= repeat;							// Is repeat on or off?
+		ev.key.keycode			= scancodeTable[key];								// Which key button state has changed.
+//		ev.key.mod 				= modstate;							// Save the modifier keys.
+
+		wes->getMediator()->fireEvent(ev);
+	}
+
+	static void keyboardHandleModifiers(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
+
+	}
+
+	static const struct wl_keyboard_listener keyboardListener = {
+		keyboardHandleKeymap,
+		keyboardHandleEnter,
+		keyboardHandleLeave,
+		keyboardHandleKey,
+		keyboardHandleModifiers,
+	};
+
+// Pointer -----------------------------
+
+	static void pointerHandleEnter(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t sx_w, wl_fixed_t sy_w) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+		wes->setCurrentWindow(surface);
+
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(surface);
+
+		XdevLEvent ev;
+		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.type				= XDEVL_WINDOW_EVENT;
+		ev.window.event 	= XDEVL_WINDOW_ENTER;
+		ev.window.data1		= sx_w;
+		ev.window.data2		= sy_w;
+		ev.window.windowid	= window->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+
+	}
+	static void pointerHandleLeave(void *data, struct wl_pointer *pointer, uint32_t serial, struct wl_surface *surface) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+		wes->setCurrentWindow(nullptr);
+
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(surface);
+
+		XdevLEvent ev;
+		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.type				= XDEVL_WINDOW_EVENT;
+		ev.window.event 	= XDEVL_WINDOW_LEAVE;
+
+		xdl_int x, y;
+		wes->getCurrentPointerPosition(x, y);
+
+		ev.window.data1	= x;
+		ev.window.data2	= y;
+
+		ev.window.windowid	= window->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+	}
+	static void pointerHandleMotion(void *data, struct wl_pointer *pointer, uint32_t time, wl_fixed_t sx_w, wl_fixed_t sy_w) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+
+		XdevLEvent ev;
+		ev.common.timestamp 	= wes->getMediator()->getTimer().getTime64();
+		ev.type 				= MouseMotion.getHashCode();
+		ev.motion.x				= wl_fixed_to_int(sx_w);
+		ev.motion.y				= wl_fixed_to_int(sy_w);
+
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
+		ev.window.windowid		= window->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+		wes->setCurrentPointerPosition(ev.motion.x, ev.motion.y);
+
+	}
+	static void pointerHandleButton(void *data, struct wl_pointer *pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state_w) {
+
+		XdevLEvent ev;
+		xdl_uint32 state = state_w;
+
+		switch (button) {
+			case BTN_LEFT:
+				ev.button.button = BUTTON_LEFT;
+				break;
+			case BTN_MIDDLE:
+				ev.button.button = BUTTON_MIDDLE;
+				break;
+			case BTN_RIGHT:
+				ev.button.button = BUTTON_RIGHT;
+				break;
+			case BTN_SIDE:
+				ev.button.button = BUTTON_SIDE;
+				break;
+			case BTN_EXTRA:
+				ev.button.button = BUTTON_EXTRA;
+				break;
+			default:
+				return;
+		}
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
+
+
+		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
+		ev.type = state ? MouseButtonPressed.getHashCode() : MouseButtonReleased.getHashCode();
+
+		xdl_int x, y;
+		wes->getCurrentPointerPosition(x, y);
+
+		ev.button.x				= x;
+		ev.button.y				= y;
+		ev.window.windowid		= window->getWindowID();
+
+		wes->getMediator()->fireEvent(ev);
+	}
+	static void pointerHandleAxis(void *data, struct wl_pointer *pointer, uint32_t time, uint32_t axis, wl_fixed_t value) {
+		// TODO
+	}
+
+	static const struct wl_pointer_listener pointerListener = {
+		pointerHandleEnter,
+		pointerHandleLeave,
+		pointerHandleMotion,
+		pointerHandleButton,
+		pointerHandleAxis,
+	};
+
+	static void seatHandleCapabilities(void *data, wl_seat* seat, uint32_t caps) {
+
+		if(caps & WL_SEAT_CAPABILITY_POINTER) {
+			waylandEventServer->setPointer(wl_seat_get_pointer(seat));
+		}
+
+		if( caps & WL_SEAT_CAPABILITY_KEYBOARD) {
+			waylandEventServer->setKeyboard(wl_seat_get_keyboard(seat));
+		}
+
+		if( caps & WL_SEAT_CAPABILITY_TOUCH) {
+
+		}
+	}
+
+	static const wl_seat_listener seatListener = {
+		seatHandleCapabilities
+	};
+
+	XdevLWindowEventServerWayland::XdevLWindowEventServerWayland(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
+		m_seat(nullptr),
+		m_pointer(nullptr),
+		m_currentSurface(nullptr),
+		m_pointerPositionX(0),
+		m_pointerPositionY(0) {
+	}
+
+	XdevLWindowEventServerWayland::~XdevLWindowEventServerWayland() {
+	}
+
+	xdl_int XdevLWindowEventServerWayland::registerWindowForEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::registerWindowForEvents(window);
+	}
+
+	xdl_int XdevLWindowEventServerWayland::unregisterWindowFromEvents(XdevLWindow* window) {
+		return XdevLWindowEventServerImpl::unregisterWindowFromEvents(window);
+	}
+
+	xdl_int XdevLWindowEventServerWayland::init() {
+		return ERR_OK;
+	}
+
+	void* XdevLWindowEventServerWayland::getInternal(const XdevLInternalName& id) {
+		return nullptr;
+	}
+
+	xdl_int XdevLWindowEventServerWayland::shutdown() {
+		if(m_pointer) {
+			wl_pointer_destroy(m_pointer);
+		}
+		return ERR_OK;
+	}
+
+	xdl_int XdevLWindowEventServerWayland::update() {
+		return ERR_OK;
+	}
+
+	void XdevLWindowEventServerWayland::flush() {
+	}
+
+	void XdevLWindowEventServerWayland::setSeat(wl_seat* seat) {
+		m_seat = seat;
+		wl_seat_add_listener(m_seat, &seatListener, this);
+		wl_seat_set_user_data(m_seat, this);
+	}
+	void XdevLWindowEventServerWayland::setPointer(wl_pointer* pointer) {
+		m_pointer = pointer;
+		wl_pointer_set_user_data(pointer, this);
+		wl_pointer_add_listener(pointer, &pointerListener, this);
+	}
+
+	void XdevLWindowEventServerWayland::setKeyboard(wl_keyboard* keyboard) {
+		m_keyboard = keyboard;
+		wl_keyboard_set_user_data(keyboard, this);
+		wl_keyboard_add_listener(keyboard, &keyboardListener, this);
+	}
+
+	void XdevLWindowEventServerWayland::setCurrentWindow(wl_surface* surface) {
+		m_currentSurface = surface;
+	}
+
+	void XdevLWindowEventServerWayland::setFocusWindow(XdevLWindow* window) {
+		m_focusWindow = window;
+	}
+
+	XdevLWindow* XdevLWindowEventServerWayland::getFocusWindow() {
+		return m_focusWindow;
+	}
+
+	void XdevLWindowEventServerWayland::setCurrentPointerPosition(xdl_int x, xdl_int y) {
+		m_pointerPositionX = x;
+		m_pointerPositionY = y;
+	}
+
+	void XdevLWindowEventServerWayland::getCurrentPointerPosition(xdl_int& x, xdl_int& y) {
+		x = m_pointerPositionX;
+		y = m_pointerPositionY;
+	}
+
+
+//
+// XdevLCursorWayland ----------------------------------------------------------
+//
+
+	XdevLCursorWayland::XdevLCursorWayland(XdevLModuleCreateParameter* parameter) :
+		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc) {
+	}
+
+	XdevLCursorWayland::~XdevLCursorWayland() {
+	}
+
+	xdl_int XdevLCursorWayland::init() {
+		return ERR_OK;
+	}
+
+	xdl_int XdevLCursorWayland::shutdown() {
+		return ERR_OK;
+	}
+
+	void* XdevLCursorWayland::getInternal(const XdevLInternalName& id) {
+		return nullptr;
+	}
+
+	void XdevLCursorWayland::show() {
+	}
+
+	void XdevLCursorWayland::hide() {
+	}
+
+	void XdevLCursorWayland::setPosition(xdl_uint x, xdl_uint y) {
+	}
+
+	xdl_int XdevLCursorWayland::clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) {
+		return ERR_OK;
+	}
+
+	void XdevLCursorWayland::releaseClip() {
+	}
+
+	xdl_int XdevLCursorWayland::enableRelativeMotion() {
+		return ERR_OK;
+	}
+
+	void XdevLCursorWayland::disableRelativeMotion() {
+
+	}
+
 }
