@@ -123,10 +123,10 @@ namespace xdl
 		xdl_uint64 sender;
 		
 		xdl_uint64 windowid;
-		xdl_uint32 x;
-		xdl_uint32 y;
-		xdl_uint32 xrel;
-		xdl_uint32 yrel;
+		xdl_int32 x;
+		xdl_int32 y;
+		xdl_int32 xrel;
+		xdl_int32 yrel;
 	};
 
 	/**
