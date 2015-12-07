@@ -104,7 +104,7 @@ protected:
 	xdl_int color_alpha_size;	
 private:
 	///initializes win32 OpenGL
-	xdl_int initOpenGL(HWND hwnd);
+	xdl_int initOpenGL();
 	/// Initialize FSAA.
 	bool initMultisample();
 	

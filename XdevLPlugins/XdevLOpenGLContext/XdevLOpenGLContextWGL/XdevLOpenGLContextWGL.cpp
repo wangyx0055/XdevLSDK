@@ -80,6 +80,9 @@ xdl_int XdevLOpenGLWGL::setAttributes(const XdevLOpenGLContextAttributes& attrib
 }
 
 xdl_int XdevLOpenGLWGL::init() {
+	if (XdevLOpenGLContextBase::init() == ERR_ERROR) {
+		return ERR_ERROR;
+	}
 	//
 	// Let's get the extensions
 	//
@@ -116,7 +119,7 @@ xdl_int XdevLOpenGLWGL::create(XdevLWindow* window) {
 		return ERR_ERROR;
 	}
 
-	if (initOpenGL(m_wnd) == ERR_ERROR) {
+	if (initOpenGL() == ERR_ERROR) {
 		XDEVL_MODULE_ERROR("Failed to initialize OpenGL.\n");
 		return ERR_ERROR;
 	}
@@ -125,7 +128,7 @@ xdl_int XdevLOpenGLWGL::create(XdevLWindow* window) {
 	setVSync(getVSync());
 
 	// TODO: This shouldn't be done maybe because it changes the initial state of the OpenGL context.
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	SwapBuffers(m_DC);
 
@@ -161,30 +164,21 @@ xdl_int XdevLOpenGLWGL::shutdown() {
 	return ERR_OK;
 }
 
-xdl_int XdevLOpenGLWGL::swapBuffers() {
-//	wglSwapLayerBuffers(m_DC, 1);
-	SwapBuffers(m_DC);
-	return ERR_OK;
-}
-
 xdl_int XdevLOpenGLWGL::reset(){
 	shutdown();
 	
-	if(initOpenGL(m_wnd) == ERR_ERROR)
+	if(initOpenGL() == ERR_ERROR)
 		return ERR_ERROR;
 	
 	return ERR_OK;
 }
 
-xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
-	m_DC = GetDC(hwnd);
+xdl_int XdevLOpenGLWGL::initOpenGL() {
+	m_DC = GetDC(m_wnd);
 	if(m_DC == NULL){
 		XDEVL_MODULE_ERROR("GetDC() failed.");
 		return ERR_ERROR;
 	}
-
-
-
 
 	PIXELFORMATDESCRIPTOR pfd;
 	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -192,15 +186,25 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
-	pfd.cDepthBits = 24;
-	pfd.cStencilBits = 8;
+	pfd.cColorBits = m_attributes.color_buffer_size;
+	pfd.cDepthBits = m_attributes.depth_size;
+	pfd.cStencilBits = m_attributes.stencil_size;
+	pfd.cRedBits = m_attributes.red_size;
+	pfd.cGreenBits = m_attributes.green_size;
+	pfd.cBlueBits = m_attributes.blue_size;
+	pfd.cAlphaBits = m_attributes.alpha_size;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
 	int iPixelFormat = ChoosePixelFormat(m_DC, &pfd);
-	if (iPixelFormat == 0)return false;
+	if (FALSE == iPixelFormat) {
+		XDEVL_MODULE_ERROR("ChoosePixelFormat failed.\n");
+		return ERR_ERROR;
+	}
 
-	if (!SetPixelFormat(m_DC, iPixelFormat, &pfd))return false;
+	if (SetPixelFormat(m_DC, iPixelFormat, &pfd) != TRUE) {
+		XDEVL_MODULE_ERROR("SetPixelFormat failed.\n");
+		return ERR_ERROR;
+	}
 
 	// Create the old style context (OpenGL 2.1 and before)
 	HGLRC hRC = wglCreateContext(m_DC);
@@ -220,157 +224,106 @@ xdl_int XdevLOpenGLWGL::initOpenGL(HWND hwnd) {
 			WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
 			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+			WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+			WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,
 			WGL_COLOR_BITS_ARB, 32,
 			WGL_DEPTH_BITS_ARB, 24,
 			WGL_STENCIL_BITS_ARB, 8,
-			0 // End of attributes list
-		};
-		int iContextAttribs[] =
-		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			WGL_ACCUM_BITS_ARB, 0,
+			WGL_RED_BITS_ARB, m_attributes.red_size,
+			WGL_GREEN_BITS_ARB, m_attributes.green_size,
+			WGL_BLUE_BITS_ARB, m_attributes.blue_size,
+			WGL_ALPHA_BITS_ARB, m_attributes.alpha_size,
 			0 // End of attributes list
 		};
 
 		int iPixelFormat, iNumFormats;
-		wglChoosePixelFormatARB(m_DC, iPixelFormatAttribList, NULL, 1, &iPixelFormat, (UINT*)&iNumFormats);
+		if (wglChoosePixelFormatARB(m_DC, iPixelFormatAttribList, NULL, 1, &iPixelFormat, (UINT*)&iNumFormats) != TRUE) {
+			XDEVL_MODULE_ERROR("wglChoosePixelFormatARB failed.\n");
+			return ERR_ERROR;
+		}
 
 		// PFD seems to be only redundant parameter now
 		if (SetPixelFormat(m_DC, iPixelFormat, &pfd) != TRUE) {
+			XDEVL_MODULE_ERROR("SetPixelFormat failed.\n");
 			return ERR_ERROR;
 		}
 
-		m_RC = wglCreateContextAttribsARB(m_DC, 0, iContextAttribs);
+
+		//
+		// Set the core profile attributes.
+		//
+		std::vector<xdl_int> contextAttributes;
+		contextAttributes.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
+		contextAttributes.push_back(m_attributes.context_major_version);
+		contextAttributes.push_back(WGL_CONTEXT_MINOR_VERSION_ARB);
+		contextAttributes.push_back(m_attributes.context_minor_version);
+
+		contextAttributes.push_back(WGL_CONTEXT_PROFILE_MASK_ARB);
+		if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) {
+			contextAttributes.push_back(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
+		}
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
+			contextAttributes.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
+		}
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES) {
+			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
+			return ERR_ERROR;
+		}
+		else {
+			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
+			return ERR_ERROR;
+		}
+
+		//
+		// Set the WGL_CONTEXT_FLAGS_ARB
+		//
+		if (m_attributes.context_flags != XDEVL_OPENGL_CONTEXT_FLAGS_NONE || (m_debugMode == xdl_true)) {
+			contextAttributes.push_back(WGL_CONTEXT_FLAGS_ARB);
+			if (m_debugMode == xdl_true){
+				contextAttributes.push_back(WGL_CONTEXT_DEBUG_BIT_ARB);
+			}
+			if (m_attributes.context_flags == XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT){
+				contextAttributes.push_back(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+			}
+		}
+
+		contextAttributes.push_back(0);
+
+
+		m_RC = wglCreateContextAttribsARB(m_DC, 0, contextAttributes.data());
+		if (nullptr == m_RC) {
+			XDEVL_MODULE_ERROR("wglCreateContextAttribsARB failed.\n");
+			return ERR_ERROR;
+		}
 		// If everything went OK
-		 wglMakeCurrent(m_DC, m_RC);
-
-	}
-
-
-
-
-	//PIXELFORMATDESCRIPTOR m_PFD;
-	//m_PFD.nSize						= sizeof(PIXELFORMATDESCRIPTOR);
-	//m_PFD.nVersion        = 1;
-	//m_PFD.dwFlags = PFD_DRAW_TO_WINDOW |	// Format Must Support Window
-	//				PFD_SUPPORT_OPENGL;	// Format Must Support OpenGL
-	//if (m_attributes.double_buffer > 0) {
-	//	m_PFD.dwFlags |= PFD_DOUBLEBUFFER;
-	//}
-	//m_PFD.iPixelType      = PFD_TYPE_RGBA;
-
-
-	//m_PFD.cColorBits	= m_attributes.color_buffer_size;
-	//m_PFD.cDepthBits    = m_attributes.depth_size;
-	//m_PFD.cStencilBits  = m_attributes.stencil_size;
-
-	//
-	//m_PFD.cRedBits = m_attributes.red_size;
-	//m_PFD.cRedShift       = 0;
-	//m_PFD.cGreenBits = m_attributes.green_size;
-	//m_PFD.cGreenShift     = 0;
-	//m_PFD.cBlueBits = m_attributes.blue_size;
-	//m_PFD.cBlueShift      = 0;
-	//m_PFD.cAlphaBits = m_attributes.alpha_size;
-	//m_PFD.cAlphaShift     = 0;
-	//m_PFD.cAccumBits      = 0;
-	//m_PFD.cAccumRedBits   = 0;
-	//m_PFD.cAccumGreenBits = 0;
-	//m_PFD.cAccumBlueBits  = 0;
-	//m_PFD.cAccumAlphaBits = 0;
-	//m_PFD.cAccumBits      = 0;
-	//m_PFD.dwLayerMask     = PFD_MAIN_PLANE;
-	//m_PFD.bReserved       = 0;
-	//m_PFD.dwVisibleMask   = 0;
-	//m_PFD.dwDamageMask    = 0;
-
-
-	//if (!m_ARBMultisampleSupported) {
-	//		m_ARBMultisampleFormat[0] = ChoosePixelFormat( m_DC, &m_PFD );
-	//		if (m_ARBMultisampleFormat[0]==0) { // Let's choose a default index.
-	//			m_ARBMultisampleFormat[0] = 1;
-	//			if (DescribePixelFormat(m_DC, m_ARBMultisampleFormat[0], sizeof(PIXELFORMATDESCRIPTOR), &m_PFD)==0) {
-	//				return ERR_ERROR;
-	//			}
-	//		}
-	//	// Are We Able To Set The Pixel Format?
-	//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[0], &m_PFD ) == FALSE) {
-	//		XDEVL_MODULE_ERROR("Could not set pixel format.\n");
-	//		return ERR_ERROR;
-	//	}
-
-	//}
-	//else{
-		//xdl_bool found = xdl_false;
-		//for(UINT num = 0; num < numFormats; ++num){
-		//	// Are We Able To Set The Pixel Format?
-		//	if (SetPixelFormat( m_DC, m_ARBMultisampleFormat[num], &m_PFD ) != TRUE) {
-		//		continue;
-		//	}else
-		//		found = xdl_true;
-		//}
-		//if(found == xdl_false){
-		//	XDEVL_MODULE_ERROR("Could not set pixel format.\n");
-		//	return ERR_ERROR;		
-		//}
-	//}
-
-	
-
-	if (wglCreateContextAttribsARB){
-		std::vector<GLint> attribList;
-		if(m_major != -1 && m_minor != -1){
-			attribList.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
-			attribList.push_back(m_major);
-			attribList.push_back(WGL_CONTEXT_MINOR_VERSION_ARB);
-			attribList.push_back(m_minor);
-		}
-		
-		xdl_int context_flags = 0;
-		attribList.push_back(WGL_CONTEXT_FLAGS_ARB);
-		if(m_debugMode){
-			context_flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
-		}
-		attribList.push_back(context_flags);
-		
-		attribList.push_back(WGL_CONTEXT_PROFILE_MASK_ARB);
-		if(m_profile == "core"){
-			attribList.push_back(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
-		}else if(m_profile == "compatibility"){
-			attribList.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
-		}else{
-			attribList.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
-		}
-		attribList.push_back(0);
-
-
-		if (( m_RC=wglCreateContextAttribsARB( m_DC,0, &attribList[0] )) == 0) {
-			XDEVL_MODULE_ERROR("Could not create GL context.\n");
+		if (wglMakeCurrent(m_DC, m_RC) != TRUE) {
+			XDEVL_MODULE_ERROR("wglMakeCurrent failed.\n");
 			return ERR_ERROR;
 		}
-	}else{
+
+	}
+	else {
 		// Are We Able To Get A Rendering Context?
-		if (( m_RC=wglCreateContext( m_DC )) == 0) {
+		m_RC = wglCreateContext(m_DC);
+		if (nullptr == m_RC) {
 			XDEVL_MODULE_ERROR("Could not create GL context.\n");
 			return ERR_ERROR;
 		}
-	}
-
-
-	// Try To Activate The Rendering Context
-	if (wglMakeCurrent( m_DC, m_RC) == FALSE) {
-		XDEVL_MODULE_ERROR("Could not make GL context to the current context.\n");
-		return ERR_ERROR;
 	}
 	return ERR_OK;
 }
 
-
+xdl_int XdevLOpenGLWGL::swapBuffers() {
+	//	wglSwapLayerBuffers(m_DC, 1);
+	SwapBuffers(m_DC);
+	return ERR_OK;
+}
 
 xdl_int XdevLOpenGLWGL::makeCurrent(XdevLWindow* window) {
 	// Try To Activate The Rendering Context
-	if (!wglMakeCurrent(m_DC, m_RC)) {
+	if (wglMakeCurrent(m_DC, m_RC) != TRUE) {
+		XDEVL_MODULE_ERROR("wglMakeCurrent failed.\n");
 		return ERR_ERROR;
 	}
 	return ERR_OK;
