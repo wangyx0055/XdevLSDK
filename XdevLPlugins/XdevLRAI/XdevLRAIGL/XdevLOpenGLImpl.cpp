@@ -113,6 +113,12 @@ namespace xdl {
 		if(m_gl_context->create(window) != xdl::ERR_OK) {
 			return ERR_ERROR;
 		}
+		m_gl_context->makeCurrent(window);
+
+		XDEVL_MODULE_INFO(glGetString(GL_VENDOR) << std::endl);
+		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
+		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
+
 		
 		if(initGLEW() != ERR_OK) {
 			return ERR_ERROR;

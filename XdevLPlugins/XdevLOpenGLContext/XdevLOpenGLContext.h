@@ -29,7 +29,8 @@ namespace xdl {
 	enum XdevLOpenGLContextProfiles {
 	    XDEVL_OPENGL_CONTEXT_CORE_PROFILE,
 	    XDEVL_OPENGL_CONTEXT_COMPATIBILITY,
-	    XDEVL_OPENGL_CONTEXT_ES
+	    XDEVL_OPENGL_CONTEXT_ES1,
+	    XDEVL_OPENGL_CONTEXT_ES2
 	};
 
 	enum XdevLOpenGLContextFlags {
@@ -63,25 +64,25 @@ namespace xdl {
 
 			}
 
-			xdl_uint	red_size;
-			xdl_uint	green_size;
-			xdl_uint	blue_size;
-			xdl_uint	alpha_size;
-			xdl_uint	color_buffer_size;
-			xdl_uint	double_buffer;
-			xdl_uint	depth_size;
-			xdl_uint	stencil_size;
-			xdl_uint	accum_red_size;
-			xdl_uint	accum_green_size;
-			xdl_uint	accum_blue_size;
-			xdl_uint	accum_alpha_size;
-			xdl_uint	stereo;
-			xdl_uint	multisample_buffers;
-			xdl_uint	multisample_samples;
-			xdl_uint	context_major_version;
-			xdl_uint	context_minor_version;
-			xdl_uint	context_profile_mask;
-			xdl_uint	context_flags;
+			xdl_int	red_size;
+			xdl_int	green_size;
+			xdl_int	blue_size;
+			xdl_int	alpha_size;
+			xdl_int	color_buffer_size;
+			xdl_int	double_buffer;
+			xdl_int	depth_size;
+			xdl_int	stencil_size;
+			xdl_int	accum_red_size;
+			xdl_int	accum_green_size;
+			xdl_int	accum_blue_size;
+			xdl_int	accum_alpha_size;
+			xdl_int	stereo;
+			xdl_int	multisample_buffers;
+			xdl_int	multisample_samples;
+			xdl_int	context_major_version;
+			xdl_int	context_minor_version;
+			xdl_int	context_profile_mask;
+			xdl_int	context_flags;
 	};
 
 	/**

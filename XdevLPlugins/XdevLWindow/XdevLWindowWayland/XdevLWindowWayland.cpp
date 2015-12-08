@@ -133,10 +133,6 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 
 namespace xdl {
 
-//	XdevLOpenGLContext* m_openglContext = nullptr;
-	static wl_display* display = nullptr;
-
-
 	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
 	const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
 	const XdevLID MouseButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
@@ -201,6 +197,7 @@ namespace xdl {
 		windowWayland->onPaint();
 	}
 
+	static wl_display* display = nullptr;
 	static wl_registry* m_registry = nullptr;
 	static wl_compositor* m_compositor = nullptr;
 	static wl_shell* m_shell = nullptr;
@@ -208,8 +205,6 @@ namespace xdl {
 	static wl_shm* m_sharedMemory = nullptr;
 
 	static void global_registry_handler(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
-
-		XdevLWindowWayland* windowWayland = (XdevLWindowWayland*)(data);
 
 		printf("Got a registry event for %s id %d\n", interface, id);
 		if(strcmp(interface, "wl_compositor") == 0) {
@@ -228,8 +223,7 @@ namespace xdl {
 		} else if(strcmp(interface, "wl_seat") == 0) {
 			if(m_seat == nullptr) {
 				m_seat = (wl_seat*)wl_registry_bind(registry, id, &wl_seat_interface, 1);
-
-				XdevLWindowEventServerWayland::setSeat(m_seat);
+				XdevLWindowEventServerWayland::setSeat();
 			}
 		}
 	}
@@ -245,6 +239,10 @@ namespace xdl {
 
 
 	xdl_int initWayland() {
+
+		//
+		// Connect to the Wayland server.
+		//
 		display = wl_display_connect(nullptr);
 		if(display == nullptr) {
 			std::cerr << "## XdevLWindowWayland::wl_display_connect failed" << std::endl;
@@ -267,6 +265,23 @@ namespace xdl {
 	}
 
 	void shutdownWayland() {
+
+		if(m_sharedMemory) {
+			wl_shm_destroy(m_sharedMemory);
+		}
+
+		if(m_shell) {
+			wl_shell_destroy(m_shell);
+		}
+
+		if(m_compositor) {
+			wl_compositor_destroy(m_compositor);
+		}
+
+		if(m_registry) {
+			wl_registry_destroy(m_registry);
+		}
+
 		if(display != nullptr) {
 			wl_display_disconnect(display);
 			display = nullptr;
@@ -384,6 +399,7 @@ namespace xdl {
 		if(!eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
 			XDEVL_MODULE_ERROR("eglSwapBuffers failed\n");
 		}
+
 		wl_display_flush(display);
 
 		return ERR_OK;
@@ -397,7 +413,7 @@ namespace xdl {
 
 	void* XdevLWindowWayland::getInternal(const XdevLInternalName& id) {
 		if(id == XdevLString("WAYLAND_DISPLAY")) {
-			return (void*)m_egl.m_eglWindow;
+			return (void*)display;
 		} else if(id == XdevLString("WAYLAND_WINDOW")) {
 			return (void*)m_egl.m_eglWindow;
 		}
@@ -411,57 +427,27 @@ namespace xdl {
 			m_egl.m_eglWindow = nullptr;
 		}
 
-		if(m_sharedMemory) {
-			wl_shm_destroy(m_sharedMemory);
-		}
-		if(m_shell) {
-			wl_shell_destroy(m_shell);
-		}
-		if(m_compositor) {
-			wl_compositor_destroy(m_compositor);
-		}
-		if(m_registry) {
-			wl_registry_destroy(m_registry);
-		}
-
 		return ERR_OK;
 	}
 
 	xdl_int XdevLWindowWayland::update() {
 
-//		wl_surface_commit(m_surface);
-//		static float red = 0.0;
-//		static float sign = 1.0;
-//		glClearColor(red, 0, 0, 1);
-//		red += sign*0.01;
-//		if(red <= 0.0f) {
-//			sign = 1.0f;
-//		} else if(red >= 1.0f) {
-//			sign = -1.0f;
-//		}
-
-		glClear(GL_COLOR_BUFFER_BIT);
-		if(!eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
-
-		}
-
-		while(wl_display_prepare_read(display) < 0) {
-			wl_display_dispatch_pending(display);
-		}
-		wl_display_flush(display);
-		wl_display_read_events(display);
-		wl_display_dispatch_pending(display);
 	}
 
 	void XdevLWindowWayland::setSize(const XdevLWindowSize& size) {
 		m_size = size;
 
 		wl_egl_window_resize(m_egl.m_eglWindow, m_size.width, m_size.height, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface);
 
 		wl_region* region = wl_compositor_create_region(m_compositor);
 		wl_region_add(region, 0, 0, size.width, size.height);
 		wl_surface_set_opaque_region(m_surface, region);
 		wl_region_destroy(region);
+
+		wl_surface_commit(m_surface);
+
 	}
 
 	void XdevLWindowWayland::setPosition(const XdevLWindowPosition& position) {
@@ -470,6 +456,7 @@ namespace xdl {
 
 	void XdevLWindowWayland::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
+		wl_shell_surface_set_title(m_shellSurface, m_title.toString().c_str());
 	}
 
 	void XdevLWindowWayland::setFullscreen(xdl_bool state) {
@@ -684,7 +671,7 @@ namespace xdl {
 			EGL_GREEN_SIZE, 1,
 			EGL_BLUE_SIZE, 1,
 			EGL_ALPHA_SIZE, 1,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
 			EGL_NONE
 		};
 
@@ -1236,10 +1223,25 @@ err:
 
 	}
 	static void pointerHandleButton(void *data, struct wl_pointer *pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state_w) {
+		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
+		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
 
+		//
+		// TODO For now we just allow to move the window just with a button press.
+		//
+		if( (button == BTN_RIGHT) && (state_w == WL_POINTER_BUTTON_STATE_PRESSED)) {
+			wl_shell_surface_move(window->getNativeShellSurface(), m_seat, serial);
+		} else if( (button == BTN_MIDDLE) && (state_w == WL_POINTER_BUTTON_STATE_PRESSED)) {
+			wl_shell_surface_resize(window->getNativeShellSurface(), m_seat, serial, 0);
+		}
+
+
+
+		//
+		// Set which button we use.
+		//
 		XdevLEvent ev;
 		xdl_uint32 state = state_w;
-
 		switch (button) {
 			case BTN_LEFT:
 				ev.button.button = BUTTON_LEFT;
@@ -1259,8 +1261,6 @@ err:
 			default:
 				return;
 		}
-		XdevLWindowEventServerWayland* wes = (XdevLWindowEventServerWayland*)data;
-		XdevLWindowWayland* window = (XdevLWindowWayland*)wl_surface_get_user_data(wes->getCurrentWindow());
 
 
 		ev.common.timestamp = wes->getMediator()->getTimer().getTime64();
@@ -1274,6 +1274,7 @@ err:
 		ev.window.windowid		= window->getWindowID();
 
 		wes->getMediator()->fireEvent(ev);
+
 	}
 	static void pointerHandleAxis(void *data, struct wl_pointer *pointer, uint32_t time, uint32_t axis, wl_fixed_t value) {
 		// TODO
@@ -1341,13 +1342,19 @@ err:
 	}
 
 	xdl_int XdevLWindowEventServerWayland::update() {
+
+		while(wl_display_prepare_read(display) < 0) {
+			wl_display_dispatch_pending(display);
+		}
+		wl_display_flush(display);
+		wl_display_read_events(display);
 		return ERR_OK;
 	}
 
 	void XdevLWindowEventServerWayland::flush() {
 	}
 
-	void XdevLWindowEventServerWayland::setSeat(wl_seat* seat) {
+	void XdevLWindowEventServerWayland::setSeat() {
 		wl_seat_add_listener(m_seat, &seatListener, windowEventServer);
 		wl_seat_set_user_data(m_seat, windowEventServer);
 	}

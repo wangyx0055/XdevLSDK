@@ -102,7 +102,7 @@ namespace xdl {
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, m_attributes.context_minor_version);
 		} else if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-		} else if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES) {
+		} else if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES1) {
 
 		}
 
