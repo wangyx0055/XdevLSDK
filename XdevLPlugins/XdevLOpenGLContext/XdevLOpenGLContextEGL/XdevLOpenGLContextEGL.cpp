@@ -53,6 +53,42 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
 
 namespace xdl {
 
+	XdevLString eglGetErrorString(EGLenum error) {
+		switch(error) {
+			case EGL_SUCCESS:
+				return XdevLString("EGL_SUCCESS");
+			case EGL_NOT_INITIALIZED:
+				return XdevLString("EGL_NOT_INITIALIZED");
+			case EGL_BAD_ACCESS:
+				return XdevLString("EGL_BAD_ACCESS");
+			case EGL_BAD_ALLOC:
+				return XdevLString("EGL_BAD_ALLOC");
+			case EGL_BAD_ATTRIBUTE:
+				return XdevLString("EGL_BAD_ATTRIBUTE");
+			case EGL_BAD_CONTEXT:
+				return XdevLString("EGL_BAD_CONTEXT");
+			case EGL_BAD_CONFIG:
+				return XdevLString("EGL_BAD_CONFIG");
+			case EGL_BAD_CURRENT_SURFACE:
+				return XdevLString("EGL_BAD_CURRENT_SURFACE");
+			case EGL_BAD_DISPLAY:
+				return XdevLString("EGL_BAD_DISPLAY");
+			case EGL_BAD_SURFACE:
+				return XdevLString("EGL_BAD_SURFACE");
+			case EGL_BAD_MATCH:
+				return XdevLString("EGL_BAD_MATCH");
+			case EGL_BAD_PARAMETER:
+				return XdevLString("EGL_BAD_PARAMETER");
+			case EGL_BAD_NATIVE_PIXMAP:
+				return XdevLString("EGL_BAD_NATIVE_PIXMAP");
+			case EGL_BAD_NATIVE_WINDOW:
+				return XdevLString("EGL_BAD_NATIVE_WINDOW");
+			case EGL_CONTEXT_LOST:
+				return XdevLString("EGL_CONTEXT_LOST");
+		}
+	}
+
+
 	XdevLOpenGLContextEGL::XdevLOpenGLContextEGL(XdevLModuleCreateParameter* parameter) :
 		XdevLOpenGLContextBase(parameter, moduleDescriptor) {
 	}
@@ -74,23 +110,7 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLContextEGL::create(XdevLWindow* window) {
 
-		static const EGLint context_attribs[] = {
-			EGL_CONTEXT_CLIENT_VERSION, 2,
-			EGL_NONE
-		};
-		const char *extensions;
-
-		EGLint config_attribs[] = {
-			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-			EGL_RED_SIZE, 1,
-			EGL_GREEN_SIZE, 1,
-			EGL_BLUE_SIZE, 1,
-			EGL_ALPHA_SIZE, 1,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-			EGL_NONE
-		};
-
-		EGLint major, minor, n, count, i, size;
+		EGLint major, minor, n, count;
 
 
 		EGLNativeDisplayType nativeDisplay;
@@ -142,8 +162,6 @@ namespace xdl {
 			nativeWindow = (EGLNativeWindowType)wnd;
 		}
 #endif
-
-
 		m_eglDisplay = eglGetDisplay(nativeDisplay);
 		if(m_eglDisplay == EGL_NO_DISPLAY) {
 			XDEVL_MODULE_ERROR("Can't create egl display\n");
@@ -152,13 +170,25 @@ namespace xdl {
 
 		EGLBoolean ret = eglInitialize(m_eglDisplay, &m_major, &m_minor);
 		if(ret != EGL_TRUE) {
-			XDEVL_MODULE_ERROR("Can't initialize egl display\n");
+			XDEVL_MODULE_ERROR("eglInitialize failed: " << eglGetErrorString(eglGetError()) << "\n");
 			return ERR_ERROR;
 		}
 
-		ret = eglBindAPI(EGL_OPENGL_ES_API);
+		xdl_int api = 0;
+		if( (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES1) ||
+		        (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES2)) {
+			api = EGL_OPENGL_ES_API;
+		} else if(	(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) ||
+		            (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) ) {
+			api = EGL_OPENGL_API;
+		} else {
+			XDEVL_MODULE_ERROR("Unkown context profile.\n");
+			return ERR_ERROR;
+		}
+
+		ret = eglBindAPI(api);
 		if(ret != EGL_TRUE) {
-			XDEVL_MODULE_ERROR("Can't bind egl API to EGL_OPENGL_ES_API\n");
+			XDEVL_MODULE_ERROR("eglBindAPI failed: " << eglGetErrorString(eglGetError()) << "\n");
 			return ERR_ERROR;
 		}
 
@@ -166,17 +196,42 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
+
+		// ---------------------------------------------------------------------------
+		// Prepare the attribute values for the glXChooseVisual function
+		//
+		std::vector<int> attribute_list {
+			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+			EGL_RED_SIZE, m_attributes.red_size,
+			EGL_GREEN_SIZE, m_attributes.green_size,
+			EGL_BLUE_SIZE, m_attributes.blue_size,
+			EGL_ALPHA_SIZE, m_attributes.alpha_size,
+			EGL_BUFFER_SIZE, m_attributes.color_buffer_size,
+			EGL_DEPTH_SIZE, m_attributes.depth_size,
+			EGL_STENCIL_SIZE,m_attributes.stencil_size,
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+			EGL_NONE
+		};
+
+		xdl_int numberOfConfigs = 0;
 		EGLConfig* configs = new EGLConfig[count];
-		ret = eglChooseConfig(m_eglDisplay, config_attribs, configs, count, &n);
+		ret = eglChooseConfig(m_eglDisplay, attribute_list.data(), configs, count, &numberOfConfigs);
 		if(ret != EGL_TRUE) {
+			XDEVL_MODULE_ERROR("eglChooseConfig failed: " << eglGetErrorString(eglGetError()) << "\n");
 			return ERR_ERROR;
 		}
 
 		// TODO This is at the moment for only test purpose. As you can see only the first
 		// config is used.
-		for(i = 0; i < n; i++) {
-			eglGetConfigAttrib(m_eglDisplay, configs[i], EGL_BUFFER_SIZE, &size);
-			printf("Buffer size for config %d is %d\n", i, size);
+		for(xdl_int i = 0; i < numberOfConfigs; i++) {
+			xdl_int bsize = 0;
+			xdl_int dsize = 0;
+			xdl_int ssize = 0;
+
+			eglGetConfigAttrib(m_eglDisplay, configs[i], EGL_BUFFER_SIZE, &bsize);
+			eglGetConfigAttrib(m_eglDisplay, configs[i], EGL_DEPTH_SIZE, &dsize);
+			eglGetConfigAttrib(m_eglDisplay, configs[i], EGL_STENCIL_SIZE, &ssize);
+			printf("Configuration: %d color buffer: %d, depth buffer: %d, stencil buffer: %d\n", i, bsize, dsize, ssize);
 			// For now just use the first one.
 			m_eglConfig = configs[0];
 
@@ -187,42 +242,67 @@ namespace xdl {
 		if(m_eglConfig == nullptr) {
 			return ERR_ERROR;
 		}
-		m_eglContext = eglCreateContext(m_eglDisplay, m_eglConfig, EGL_NO_CONTEXT, context_attribs);
+
+		//
+		// Create EGL context.
+		//
+		std::vector<EGLint> context_attribs {
+			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+			EGL_CONTEXT_MAJOR_VERSION, 3,
+			EGL_CONTEXT_MINOR_VERSION, 2,
+			EGL_NONE
+		};
+
+		m_eglContext = eglCreateContext(m_eglDisplay, m_eglConfig, EGL_NO_CONTEXT, context_attribs.data());
 		if(m_eglContext == nullptr) {
+			XDEVL_MODULE_ERROR("eglCreateContext failed: " << eglGetErrorString(eglGetError()) << "\n");
 			return ERR_ERROR;
 		}
 
 		m_eglSurface = eglCreateWindowSurface(m_eglDisplay, m_eglConfig, nativeWindow, nullptr);
 		if(m_eglSurface == nullptr) {
-			XDEVL_MODULE_ERROR("eglCreateWindowSurface failed\n");
+			XDEVL_MODULE_ERROR("eglCreateWindowSurface failed: " << eglGetErrorString(eglGetError()) << "\n");
 			return ERR_ERROR;
 		}
 
 		if(eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext) == EGL_FALSE) {
-			XDEVL_MODULE_ERROR("eglMakeCurrent failed\n");
+			XDEVL_MODULE_ERROR("eglMakeCurrent failed: " << eglGetErrorString(eglGetError()) << "\n");
 		}
+
+		XDEVL_MODULE_INFO(glGetString(GL_VENDOR) << std::endl);
+		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
+		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
 
 		return ERR_OK;
 	}
+
 	xdl_int XdevLOpenGLContextEGL::getAttributes(XdevLOpenGLContextAttributes& attributes) {
 		attributes = m_attributes;
 		return ERR_OK;
 	}
+
 	xdl_int XdevLOpenGLContextEGL::setAttributes(const XdevLOpenGLContextAttributes& attributes) {
 		m_attributes = attributes;
 		return ERR_OK;
 	}
+
 	xdl_int XdevLOpenGLContextEGL::makeCurrent(XdevLWindow* window) {
-		eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext);
-		return ERR_ERROR;
+		if(eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext) == EGL_FALSE) {
+			XDEVL_MODULE_ERROR("eglMakeCurrent failed\n");
+			return ERR_ERROR;
+		}
+		return ERR_OK;
 	}
+
 	xdl_int XdevLOpenGLContextEGL::swapBuffers() {
 		eglSwapBuffers(m_eglDisplay, m_eglSurface);
 		return ERR_ERROR;
 	}
+
 	void* XdevLOpenGLContextEGL::getProcAddress(const xdl_char* func) {
 		return (void*)eglGetProcAddress(func);
 	}
+
 	xdl_int XdevLOpenGLContextEGL::setVSync(xdl_bool enableVSync) {
 		return ERR_ERROR;
 	}

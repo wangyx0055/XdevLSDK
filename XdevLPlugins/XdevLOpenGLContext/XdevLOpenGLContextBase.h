@@ -95,8 +95,10 @@ namespace xdl {
 								} else if(tmp == XdevLString("compatibility")) {
 									m_attributes.context_profile_mask = XDEVL_OPENGL_CONTEXT_COMPATIBILITY;
 									XDEVL_MODULE_INFO("Core profile                  : " << "Compatibility" << std::endl);
-								} else if(tmp == XdevLString("ES")) {
-									m_attributes.context_profile_mask = XDEVL_OPENGL_CONTEXT_ES;
+								} else if(tmp == XdevLString("ES1")) {
+									m_attributes.context_profile_mask = XDEVL_OPENGL_CONTEXT_ES1;
+								} else if(tmp == XdevLString("ES2")) {
+									m_attributes.context_profile_mask = XDEVL_OPENGL_CONTEXT_ES2;
 								}
 							}
 							if(root->Attribute("major")) {

@@ -81,17 +81,13 @@ namespace xdl {
 		XdevLModuleName("XdevLWindow")
 	};
 
-
-	typedef wl_egl_window* 				WaylandEGLWindow;
-
-
 	class XdevLEGL {
 		public:
-			EGLDisplay 			m_eglDisplay;
-			EGLSurface 			m_eglSurface;
-			EGLContext 			m_eglContext;
-			EGLConfig  			m_eglConfig;
-			WaylandEGLWindow	m_eglWindow;
+			EGLDisplay 		m_eglDisplay;
+			EGLSurface 		m_eglSurface;
+			EGLContext 		m_eglContext;
+			EGLConfig  		m_eglConfig;
+			wl_egl_window*	m_eglWindow;
 	};
 
 	class XdevLWindowWayland : public XdevLWindowImpl  {
@@ -148,6 +144,10 @@ namespace xdl {
 			wl_buffer* getBuffer() const;
 			virtual void onPaint();
 			virtual void onSizeChanged(xdl_int width, xdl_int height);
+			
+			wl_surface* getNativeSurface() {return m_surface;}
+			wl_shell_surface* getNativeShellSurface() {return m_shellSurface;}
+			
 		protected:
 			int setCloexecOrClose(int fd);
 			int createTmpFileCloExec(char *tmpname) ;
@@ -198,7 +198,7 @@ namespace xdl {
 			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
 			void flush() override;
 			
-			static void setSeat(wl_seat* seat);
+			static void setSeat();
 			void setPointer(wl_pointer* pointer);
 			void setKeyboard(wl_keyboard* keyboard);
 			void setCurrentWindow(wl_surface* surface);
