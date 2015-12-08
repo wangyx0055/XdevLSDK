@@ -82,20 +82,6 @@ namespace xdl {
 	};
 
 
-
-	typedef struct wl_display* 			WaylandDisplay;
-	typedef struct wl_compositor* 		WaylandCompositor;
-	typedef struct wl_registry*			WaylandRegistry;
-	typedef struct wl_surface*			WaylandSurface;
-	typedef struct wl_shell*			WaylandShell;
-	typedef struct wl_shell_surface*	WaylandShellSurface;
-	typedef struct wl_shm*				WaylandSharedMemory;
-	typedef struct wl_shm_pool*			WaylandSharedMemoryPool;
-	typedef struct wl_buffer*			WaylandBuffer;
-	typedef struct wl_region*			WaylandRegion;
-	typedef struct wl_callback*			WaylandCallback;
-	typedef struct wl_callback_listener WaylandCallbackListener;
-
 	typedef wl_egl_window* 				WaylandEGLWindow;
 
 
@@ -155,32 +141,11 @@ namespace xdl {
 			virtual xdl_int getInputFocus(XdevLWindow** window);
 			virtual void setParent(XdevLWindow* window);
 
-			void setCompositor(WaylandCompositor compositor);
-			void setShell(WaylandShell shell);
-			void setSharedMemory(WaylandSharedMemory sharedMemory);
-			void setFrameCallback(WaylandCallback frameCallback) {
-				m_frameCallback = frameCallback;
-			}
-			WaylandSurface getSurface() const {
-				return m_surface;
-			}
-
-			WaylandShellSurface getShellSurface() const {
-				return m_shellSurface;
-			}
-
-			WaylandSharedMemory getSharedMemory() const {
-				return m_sharedMemory;
-			}
-
-			WaylandCallback getFrameCallback() const {
-				return m_frameCallback;
-			}
-
-			WaylandBuffer getBuffer() const {
-				return m_buffer;
-			}
-
+			void setFrameCallback(wl_callback* frameCallback);
+			wl_surface* getSurface() const;
+			wl_shell_surface* getShellSurface() const;
+			wl_callback* getFrameCallback() const;
+			wl_buffer* getBuffer() const;
 			virtual void onPaint();
 			virtual void onSizeChanged(xdl_int width, xdl_int height);
 		protected:
@@ -193,23 +158,17 @@ namespace xdl {
 			void paint_pixels();
 			xdl_int initializeEGL();
 		protected:
-			WaylandCompositor 		m_compositor;
-			WaylandRegistry			m_registry;
-			WaylandSurface			m_surface;
-			WaylandShell			m_shell;
-			WaylandShellSurface 	m_shellSurface;
-			WaylandSharedMemory		m_sharedMemory;
-			WaylandCallback			m_frameCallback;
+			wl_surface*			m_surface;
+			wl_shell_surface* 	m_shellSurface;
+			wl_callback*		m_frameCallback;
+			wl_shm_pool*		m_pool;
+			wl_buffer*			m_buffer;
+			wl_region*			m_region;
 
-
-			WaylandSharedMemoryPool	m_pool;
-			WaylandBuffer	m_buffer;
-			WaylandRegion	m_region;
-
-			XdevLEGL		m_egl;
-			xdl_int			m_bufferSize;
+			XdevLEGL m_egl;
+			xdl_int m_bufferSize;
 			xdl_int m_fd;
-			xdl_uint8*		m_shm_data;
+			xdl_uint8* m_shm_data;
 	};
 
 	class XdevLWindowServerWayland : public XdevLWindowServerImpl {
@@ -239,7 +198,7 @@ namespace xdl {
 			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
 			void flush() override;
 			
-			void setSeat(wl_seat* seat);
+			static void setSeat(wl_seat* seat);
 			void setPointer(wl_pointer* pointer);
 			void setKeyboard(wl_keyboard* keyboard);
 			void setCurrentWindow(wl_surface* surface);
@@ -250,8 +209,8 @@ namespace xdl {
 			wl_surface* getCurrentWindow() {return m_currentSurface;}
 			XdevLWindow* getFocusWindow();
 
+
 		private:
-			wl_seat* m_seat;
 			wl_pointer* m_pointer; 
 			wl_keyboard* m_keyboard;
 			wl_surface* m_currentSurface;
@@ -278,6 +237,9 @@ namespace xdl {
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
 	};
+	
+	extern xdl_int initWayland();
+	extern void shutdownWayland();
 }
 
 
