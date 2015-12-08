@@ -30,7 +30,7 @@
 xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 	xdl::windowWaylandVendor,
 	xdl::windowWaylandAuthor,
-	xdl::windowWaylandModuleNames[0],
+	xdl::windowWaylandModuleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
 	xdl::windowWaylandCopyright,
 	xdl::windowWaylandDescription,
 	xdl::XdevLWindowMajorVersion,
@@ -41,7 +41,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[2],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWAYLAND_EVENT_SERVER_MODULE_MAJOR_VERSION,
@@ -52,7 +52,7 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 xdl::XdevLModuleDescriptor cursorModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[3],
+	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWAYLAND_CURSOR_MODULE_MAJOR_VERSION,
@@ -72,19 +72,15 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 
 static xdl::XdevLCursorWayland* waylandCursor = nullptr;
 static xdl::XdevLWindowEventServerWayland* waylandEventServer = nullptr;
-
-
 static xdl::xdl_int reference_counter = 0;
-static xdl::WaylandDisplay display;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 
 	if(reference_counter == 0) {
-		display = wl_display_connect(nullptr);
-		if(display == nullptr) {
-			std::cerr << "## XdevLWindowWayland::wl_display_connect failed" << std::endl;
+		if(xdl::initWayland() == xdl::ERR_ERROR) {
 			return xdl::ERR_ERROR;
 		}
+		reference_counter++;
 	}
 
 	if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
@@ -93,6 +89,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			xdl::XdevLWindowEventServerParameter = parameter;
 		}
 		parameter->setModuleInstance(xdl::windowEventServer);
+		reference_counter++;
 		return xdl::ERR_OK;
 
 	} else if(xdl::XdevLWindowWayland::m_moduleDescriptor.getName() == parameter->getModuleName()) {
@@ -126,10 +123,7 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 
 	// Only Quit SDL if this is the last module.
 	if(reference_counter == 0) {
-		if(display != nullptr) {
-			wl_display_disconnect(display);
-			display = nullptr;
-		}
+		xdl::shutdownWayland();
 	}
 }
 
@@ -140,6 +134,7 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 namespace xdl {
 
 //	XdevLOpenGLContext* m_openglContext = nullptr;
+	static wl_display* display = nullptr;
 
 
 	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
@@ -194,11 +189,9 @@ namespace xdl {
 		handle_popup_done
 	};
 
-
-
 	void redraw(void *data, struct wl_callback *callback, uint32_t time);
 
-	WaylandCallbackListener frame_listener = {
+	wl_callback_listener frame_listener = {
 		redraw
 	};
 
@@ -208,9 +201,11 @@ namespace xdl {
 		windowWayland->onPaint();
 	}
 
-
-
-
+	static wl_registry* m_registry = nullptr;
+	static wl_compositor* m_compositor = nullptr;
+	static wl_shell* m_shell = nullptr;
+	static wl_seat* m_seat = nullptr;
+	static wl_shm* m_sharedMemory = nullptr;
 
 	static void global_registry_handler(void *data, struct wl_registry *registry, uint32_t id, const char *interface, uint32_t version) {
 
@@ -218,14 +213,24 @@ namespace xdl {
 
 		printf("Got a registry event for %s id %d\n", interface, id);
 		if(strcmp(interface, "wl_compositor") == 0) {
-			windowWayland->setCompositor((WaylandCompositor)wl_registry_bind(registry, id, &wl_compositor_interface, 1));
+			if(nullptr == m_compositor) {
+				m_compositor = (wl_compositor*)wl_registry_bind(registry, id, &wl_compositor_interface, 1);
+			}
 		} else if(strcmp(interface, "wl_shell") == 0) {
-			windowWayland->setShell((WaylandShell)wl_registry_bind(registry, id, &wl_shell_interface, 1));
+			if(nullptr == m_shell) {
+				m_shell = (wl_shell*)wl_registry_bind(registry, id, &wl_shell_interface, 1);
+			}
 		} else if(strcmp(interface, "wl_shm") == 0) {
-			windowWayland->setSharedMemory((WaylandSharedMemory)wl_registry_bind(registry, id, &wl_shm_interface, 1));
-			wl_shm_add_listener(windowWayland->getSharedMemory(), &shm_listener, NULL);
+			if(nullptr == m_sharedMemory) {
+				m_sharedMemory = (wl_shm*)wl_registry_bind(registry, id, &wl_shm_interface, 1);
+				wl_shm_add_listener(m_sharedMemory, &shm_listener, nullptr);
+			}
 		} else if(strcmp(interface, "wl_seat") == 0) {
-			waylandEventServer->setSeat((wl_seat*)wl_registry_bind(registry, id, &wl_seat_interface, 1));
+			if(m_seat == nullptr) {
+				m_seat = (wl_seat*)wl_registry_bind(registry, id, &wl_seat_interface, 1);
+
+				XdevLWindowEventServerWayland::setSeat(m_seat);
+			}
 		}
 	}
 
@@ -239,39 +244,67 @@ namespace xdl {
 	};
 
 
-	XdevLWindowWayland::XdevLWindowWayland(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, m_moduleDescriptor), m_compositor(NULL),
-		m_registry(NULL),
-		m_surface(NULL),
-		m_shell(NULL),
-		m_shellSurface(NULL) {}
-
-
-	xdl_int XdevLWindowWayland::init() {
-
-		XdevLWindowImpl::init();
-
-//		m_openglContext = static_cast<XdevLOpenGLContext*>(getMediator()->createModule(xdl::XdevLModuleName("XdevLOpenGLContext"), xdl::XdevLID("XdevLWaylandOpenGLContext")));
-//		if(nullptr == m_openglContext) {
-//			XDEVL_MODULE_ERROR("Could not create OpenGL context.\n");
-//			return ERR_ERROR;
-//		}
+	xdl_int initWayland() {
+		display = wl_display_connect(nullptr);
+		if(display == nullptr) {
+			std::cerr << "## XdevLWindowWayland::wl_display_connect failed" << std::endl;
+			return xdl::ERR_ERROR;
+		}
 
 		// We get the registry for the window which holds extension
 		// of the wayland server.
 		m_registry = wl_display_get_registry(display);
 		if(m_registry == nullptr) {
-			XDEVL_MODULE_ERROR("Could not get registry.");
+			std::cerr << "## XdevLWindowWayland::wl_display_get_registry failed" << std::endl;
 			return ERR_ERROR;
 		}
 
 		// Now we tell the registry that we want to listen to events.
-		wl_registry_add_listener(m_registry, &registry_listener, this);
-
-		// Sends event to get pointer to wayland extension.
+		wl_registry_add_listener(m_registry, &registry_listener, nullptr);
 		wl_display_dispatch(display);
 
-		// Wait until we get reply.
+		return ERR_OK;
+	}
+
+	void shutdownWayland() {
+		if(display != nullptr) {
+			wl_display_disconnect(display);
+			display = nullptr;
+		}
+	}
+
+
+
+	XdevLWindowWayland::XdevLWindowWayland(XdevLModuleCreateParameter* parameter) :
+		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, m_moduleDescriptor),
+		m_surface(NULL),
+		m_shellSurface(NULL) {
+	}
+
+	void XdevLWindowWayland::setFrameCallback(wl_callback* frameCallback) {
+		m_frameCallback = frameCallback;
+	}
+
+	wl_surface* XdevLWindowWayland::getSurface() const {
+		return m_surface;
+	}
+
+	wl_shell_surface* XdevLWindowWayland::getShellSurface() const {
+		return m_shellSurface;
+	}
+
+	wl_callback* XdevLWindowWayland::getFrameCallback() const {
+		return m_frameCallback;
+	}
+
+	wl_buffer* XdevLWindowWayland::getBuffer() const {
+		return m_buffer;
+	}
+
+	xdl_int XdevLWindowWayland::init() {
+
+		XdevLWindowImpl::init();
+
 		wl_display_roundtrip(display);
 
 		if(m_compositor == nullptr) {
@@ -348,16 +381,9 @@ namespace xdl {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glFlush();
 
-		if(eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
-			fprintf(stderr, "Swapped buffers\n");
-		} else {
-			fprintf(stderr, "Swapped buffers failed\n");
+		if(!eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
+			XDEVL_MODULE_ERROR("eglSwapBuffers failed\n");
 		}
-
-//		wl_surface_attach(m_surface, m_buffer, 0, 0);
-//		wl_surface_commit(m_surface);
-
-
 		wl_display_flush(display);
 
 		return ERR_OK;
@@ -403,19 +429,20 @@ namespace xdl {
 
 	xdl_int XdevLWindowWayland::update() {
 
-		wl_surface_commit(m_surface);
-		static float red = 0.0;
-		static float sign = 1.0;
-		glClearColor(red, 0, 0, 1);
-		red += sign*0.01;
-		if(red <= 0.0f) {
-			sign = 1.0f;
-		} else if(red >= 1.0f) {
-			sign = -1.0f;
-		}
+//		wl_surface_commit(m_surface);
+//		static float red = 0.0;
+//		static float sign = 1.0;
+//		glClearColor(red, 0, 0, 1);
+//		red += sign*0.01;
+//		if(red <= 0.0f) {
+//			sign = 1.0f;
+//		} else if(red >= 1.0f) {
+//			sign = -1.0f;
+//		}
+
 		glClear(GL_COLOR_BUFFER_BIT);
 		if(!eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface)) {
-			//XDEVL_MODULE_ERROR("eglSwapBuffers failed\n");
+
 		}
 
 		while(wl_display_prepare_read(display) < 0) {
@@ -617,19 +644,6 @@ namespace xdl {
 	//
 	// ---------------------------------------------------------------------------
 	//
-
-	void XdevLWindowWayland::setCompositor(WaylandCompositor compositor) {
-		m_compositor = compositor;
-	}
-
-	void XdevLWindowWayland::setShell(WaylandShell shell) {
-		m_shell = shell;
-	}
-
-	void XdevLWindowWayland::setSharedMemory(WaylandSharedMemory sharedMemory) {
-		m_sharedMemory = sharedMemory;
-	}
-
 
 	xdl_int XdevLWindowWayland::createBuffer() {
 
@@ -867,8 +881,8 @@ err:
 #define BTN_BACK		0x116
 #define BTN_TASK		0x117
 
-const int scancodeTable[] = {
-					KEY_UNKNOWN,
+	const int scancodeTable[] = {
+		KEY_UNKNOWN,
 		/*  1 */    KEY_ESCAPE,
 		/*  2 */    KEY_1,
 		/*  3 */    KEY_2,
@@ -1294,7 +1308,6 @@ const int scancodeTable[] = {
 
 	XdevLWindowEventServerWayland::XdevLWindowEventServerWayland(XdevLModuleCreateParameter* parameter) :
 		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
-		m_seat(nullptr),
 		m_pointer(nullptr),
 		m_currentSurface(nullptr),
 		m_pointerPositionX(0),
@@ -1335,9 +1348,8 @@ const int scancodeTable[] = {
 	}
 
 	void XdevLWindowEventServerWayland::setSeat(wl_seat* seat) {
-		m_seat = seat;
-		wl_seat_add_listener(m_seat, &seatListener, this);
-		wl_seat_set_user_data(m_seat, this);
+		wl_seat_add_listener(m_seat, &seatListener, windowEventServer);
+		wl_seat_set_user_data(m_seat, windowEventServer);
 	}
 	void XdevLWindowEventServerWayland::setPointer(wl_pointer* pointer) {
 		m_pointer = pointer;

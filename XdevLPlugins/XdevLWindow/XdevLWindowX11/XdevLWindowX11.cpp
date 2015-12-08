@@ -25,20 +25,30 @@
 #include <sstream>
 #include <cstddef>
 #include <climits>
-
 #include <vector>
-
 
 #define _NET_WM_STATE_REMOVE    0l
 #define _NET_WM_STATE_ADD       1l
 #define _NET_WM_STATE_TOGGLE    2l
 
-class m_keylayout;
+//
+// The XdevLWindow plugin descriptor.
+//
+xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
+	xdl::windowX11PluginName,
+	xdl::window_moduleNames,
+	xdl::XdevLWindowPluginMajorVersion,
+	xdl::XdevLWindowPluginMinorVersion,
+	xdl::XdevLWindowPluginPatchVersion
+};
 
+//
+// The XdevLWindow module descriptor.
+//
 xdl::XdevLModuleDescriptor windowX11ModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[0],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::window_x11_description,
 	xdl::XdevLWindowMajorVersion,
@@ -46,11 +56,13 @@ xdl::XdevLModuleDescriptor windowX11ModuleDesc {
 	xdl::XdevLWindowPatchVersion
 };
 
-
+//
+// The XdevLWindowEventServer module descriptor.
+//
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[2],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	xdl::XdevLWindowEventServerMajorVersion,
@@ -58,10 +70,13 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::XdevLWindowEventServerPatchVersion
 };
 
+//
+// The XdevLCursor module descriptor.
+//
 xdl::XdevLModuleDescriptor cursorModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[3],
+	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	xdl::XdevLWindowEventServerMajorVersion,
@@ -69,21 +84,12 @@ xdl::XdevLModuleDescriptor cursorModuleDesc {
 	xdl::XdevLWindowEventServerPatchVersion
 };
 
-
-xdl::XdevLPluginDescriptor m_windowX11PluginDescriptor {
-	xdl::window_x11_pluginName,
-	xdl::window_moduleNames,
-	xdl::XdevLWindowPluginMajorVersion,
-	xdl::XdevLWindowPluginMinorVersion,
-	xdl::XdevLWindowPluginPatchVersion
-};
-
 static xdl::XdevLCursorX11* x11cursor = nullptr;
-
 static Display* m_display = nullptr;
 static Window 	m_rootWindow;
 static Colormap defaultColorMap;
 
+// Reference counter for XdevLWindow plugin modules.
 static xdl::xdl_int reference_counter = 0;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
@@ -125,6 +131,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::XdevLWindowX11* window = new xdl::XdevLWindowX11(parameter);
 		parameter->setModuleInstance(window);
 	} 
+
 	//
 	// Create XdevLWindowServer instance.
 	//
@@ -138,6 +145,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
 		parameter->setModuleInstance(windowServer);
 	}
+
 	//
 	// Create XdevLEventServer instance.
 	//
@@ -149,6 +157,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		parameter->setModuleInstance(xdl::windowEventServer);
 
 	}
+
 	//
 	// Create XdevLCursor instance.
 	//
@@ -181,7 +190,7 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 }
 
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
-	return &m_windowX11PluginDescriptor;
+	return &windowX11PluginDescriptor;
 }
 
 

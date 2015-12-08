@@ -32,6 +32,17 @@
 
 namespace xdl {
 
+	/**
+		@enum XdevLWindowModuleName
+		@brief ID to get the correct modules names for the XdevLWindow plugins.
+	*/
+	enum XdevLWindowModuleName {
+		XDEVL_WINDOW_MODULE_NAME,
+		XDEVL_WINDOW_SERVER_MODULE_NAME,
+		XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME,
+		XDEVL_CURSOR_MODULE_NAME
+	};
+
 	static const XdevLString window_vendor 				{"www.codeposer.net"};
 	static const XdevLString window_author				{"Cengiz Terzibas"};
 	static const XdevLString window_copyright			{"(c) 2005 - 2015 Cengiz Terzibas."};
