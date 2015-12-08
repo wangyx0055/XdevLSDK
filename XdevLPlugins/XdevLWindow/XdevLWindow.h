@@ -212,6 +212,10 @@ namespace xdl {
 			virtual void setWindowDecoration(xdl_bool enable) = 0;
 
 			virtual xdl_bool isPointerInside() = 0;
+			
+			/// Returns the window type.
+			virtual XdevLWindowTypes getType() = 0;
+			
 	};
 
 	/**

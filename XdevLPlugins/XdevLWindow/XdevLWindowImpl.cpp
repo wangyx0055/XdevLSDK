@@ -210,6 +210,10 @@ namespace xdl {
 	void XdevLWindowImpl::setWindowDecoration(xdl_bool enable) {
 		m_border = enable;
 	}
+	
+	XdevLWindowTypes XdevLWindowImpl::getType() {
+		return m_windowType;
+	}
 
 	int XdevLWindowImpl::readWindowInfo(TiXmlDocument& document) {
 		TiXmlHandle docHandle(&document);

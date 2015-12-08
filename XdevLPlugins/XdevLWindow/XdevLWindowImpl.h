@@ -88,6 +88,7 @@ namespace xdl {
 			virtual xdl_int notify(XdevLEvent& event) override;
 			virtual void setWindowDecoration(xdl_bool enable);
 			virtual xdl_bool isPointerInside() override;
+			virtual XdevLWindowTypes getType() override;
 		protected:
 			// Holds the root window.
 			XdevLWindow*	m_rootWindow;
