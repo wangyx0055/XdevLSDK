@@ -140,7 +140,6 @@ namespace xdl {
 		protected:
 			SDL_Window*				m_window;
 			SDL_SysWMinfo 			m_wmInfo;
-			SDL_Joystick*			m_joy;
 
 	};
 
@@ -165,6 +164,7 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
 			virtual xdl_int update() override;
+			virtual xdl_int notify(XdevLEvent& event) override;
 
 			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
 			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;

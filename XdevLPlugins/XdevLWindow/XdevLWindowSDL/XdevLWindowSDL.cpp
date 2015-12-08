@@ -77,13 +77,39 @@ static xdl::xdl_int reference_counter = 0;
 static std::map<xdl::xdl_uint32, xdl::XdevLWindow*> windowMap;
 
 
+// TODO This might be changed in future releases
+static xdl::xdl_uint numberOfJoystickDevices = 0;
 
+struct XdevLJoysticks {
+	SDL_Joystick* instance;
+	xdl::xdl_uint numberOfJoystickButtons;
+	xdl::xdl_uint numberOfJoystickAxis;
+};
 
+static std::vector<XdevLJoysticks> joysticks;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	// Only init SDL if this is the first module.
 	if(reference_counter == 0) {
 		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+
+		numberOfJoystickDevices = SDL_NumJoysticks();
+		if(numberOfJoystickDevices > 0) {
+			for(xdl::xdl_uint idx = 0; idx < numberOfJoystickDevices; idx++) {
+				SDL_Joystick* js = SDL_JoystickOpen(idx);
+				if(js != nullptr) {
+					XdevLJoysticks jse;
+					jse.instance = js;
+					jse.numberOfJoystickButtons = SDL_JoystickNumButtons(js);
+					jse.numberOfJoystickAxis = SDL_JoystickNumAxes(js);
+					joysticks.push_back(jse);
+				} else {
+					numberOfJoystickDevices--;
+				}
+			}
+			SDL_JoystickEventState(SDL_ENABLE);
+		}
+
 		reference_counter++;
 	}
 
@@ -137,6 +163,12 @@ extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 			xdl::windowEventServer = nullptr;
 		}
 
+		if(joysticks.size() > 0) {
+			for(auto& js : joysticks) {
+				SDL_JoystickClose(js.instance);
+			}
+		}
+
 		SDL_Quit();
 	}
 }
@@ -153,7 +185,7 @@ namespace xdl {
 	static const XdevLID MouseButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
 	static const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
 	static const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
-	
+
 	std::map<int, XdevLButtonId> KeySymToXdevLKeyCode = {
 		{ SDLK_a, KEY_A},
 		{ SDLK_b, KEY_B},
@@ -218,7 +250,7 @@ namespace xdl {
 		{ SDLK_F22, KEY_F22},
 		{ SDLK_F23, KEY_F23},
 		{ SDLK_F24, KEY_F24},
-		
+
 		{ SDLK_ESCAPE, KEY_ESCAPE},
 		{ SDLK_HOME, KEY_HOME },
 		{ SDLK_END, KEY_END },
@@ -267,19 +299,18 @@ namespace xdl {
 		{ SDLK_KP_MINUS, KEY_KP_MINUS },
 		{ SDLK_KP_PLUS, KEY_KP_PLUS },
 		{ SDLK_KP_ENTER, KEY_KP_ENTER },
-		
+
 		{ SDLK_PRINTSCREEN, KEY_PRINTSCREEN },
 		{ SDLK_SCROLLLOCK, KEY_SCROLLLOCK },
 		{ SDLK_PAUSE, KEY_PAUSE },
 
 	};
 
-	
+
 	XdevLWindowSDL::XdevLWindowSDL(XdevLModuleCreateParameter* parameter) :
 		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, windowSDLModuleDesc),
-		m_window(nullptr),
-		m_joy(NULL)
-	{}
+		m_window(nullptr) {
+	}
 
 	XdevLWindowSDL::~XdevLWindowSDL() {
 
@@ -325,7 +356,7 @@ namespace xdl {
 		SDL_Renderer* renderer = SDL_CreateRenderer(m_window, -1, 0);
 		SDL_SetRenderDrawColor(renderer, m_backgroundColor[0], m_backgroundColor[1], m_backgroundColor[2], m_backgroundColor[3]);
 		SDL_RenderClear(renderer);
-		
+
 		SDL_SetRenderDrawColor(renderer,255,0, 0, 255);
 		SDL_RenderDrawLine(renderer, 0, 0, 500, 500);
 
@@ -340,20 +371,6 @@ namespace xdl {
 		SDL_GetWindowWMInfo(m_window,&m_wmInfo);
 		SDL_UpdateWindowSurface(m_window);
 
-
-		m_numberOfJoystickDevices = SDL_NumJoysticks();
-		if(m_numberOfJoystickDevices < 1) {
-			// TODO What do we have to do here?
-		} else {
-			m_joy = SDL_JoystickOpen(0);
-			if(m_joy == nullptr) {
-				//	XDEVL_MODULE_WARNING("No joystick detected." << std::endl);
-			} else {
-				m_numberOfJoystickButtons = SDL_JoystickNumButtons(m_joy);
-				m_numberOfJoystickAxis = SDL_JoystickNumAxes(m_joy);
-				SDL_JoystickEventState(SDL_ENABLE);
-			}
-		}
 
 		//
 		// Star the main event polling thread.
@@ -414,16 +431,13 @@ namespace xdl {
 
 		Join();
 
-		if(m_joy != nullptr) {
-			SDL_JoystickClose(m_joy);
-		}
-
 		// We have to call this before SDL_DestroyWindow to get all pending events.
 		XdevLWindowImpl::shutdown();
 
-		SDL_DestroyWindow(m_window);
-		m_window = nullptr;
-
+		if(nullptr != m_window) {
+			SDL_DestroyWindow(m_window);
+			m_window = nullptr;
+		}
 
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 
@@ -1017,6 +1031,33 @@ namespace xdl {
 		}
 
 		return ERR_OK;
+	}
+
+	xdl_int XdevLWindowSDLEventServer::notify(XdevLEvent& event) {
+
+		switch(event.type) {
+			case XDEVL_JOYSTICK_REQ_DEVICES_INFO: {
+				XdevLEvent event;
+				event.type = XDEVL_JOYSTICK_RPLY_DEVICES_INFO;
+				event.jdeviceinfo.sender = this->getID().getHashCode();
+				event.jdeviceinfo.timestamp = this->getMediator()->getTimer().getTime64();
+				event.jdeviceinfo.number_devices = joysticks.size();
+				
+				xdl_int i = 0;
+				for(auto& joy : joysticks) {
+					event.jdeviceinfo.number_buttons[i] = joy.numberOfJoystickButtons;
+					event.jdeviceinfo.number_axis[i] = joy.numberOfJoystickAxis;
+					i++;
+					if(i == 4) {
+						break;
+					}
+				}
+				getMediator()->fireEvent(event);
+			}
+			break;
+		}
+
+		return 	XdevLModuleAutoImpl::notify(event);;
 	}
 
 	void XdevLWindowSDLEventServer::flush() {

@@ -158,15 +158,19 @@ namespace xdl
 	};
 	
 	
+	/**
+		@struct XdevLJoystickDevicesInfo
+		@brief Max. 4 supported
+	*/
 	struct XdevLJoystickDevicesInfo {
 		xdl_uint64 type;
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
 		xdl_uint8 command;
-		xdl_uint64 number_devices;
-		xdl_uint64 number_buttons;
-		xdl_uint64 number_axis;
+		xdl_uint16 number_devices;
+		xdl_uint16 number_buttons[4];
+		xdl_uint16 number_axis[4];
 	};
 	
 	/**
