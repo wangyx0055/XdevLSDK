@@ -30,7 +30,7 @@
 xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 	xdl::windowWaylandVendor,
 	xdl::windowWaylandAuthor,
-	xdl::windowWaylandModuleNames[0],
+	xdl::windowWaylandModuleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
 	xdl::windowWaylandCopyright,
 	xdl::windowWaylandDescription,
 	xdl::XdevLWindowMajorVersion,
@@ -41,7 +41,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLWindowWayland::m_moduleDescriptor {
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[2],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWAYLAND_EVENT_SERVER_MODULE_MAJOR_VERSION,
@@ -52,7 +52,7 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 xdl::XdevLModuleDescriptor cursorModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[3],
+	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWAYLAND_CURSOR_MODULE_MAJOR_VERSION,

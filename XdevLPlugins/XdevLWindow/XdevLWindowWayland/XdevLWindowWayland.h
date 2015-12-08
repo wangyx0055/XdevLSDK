@@ -62,11 +62,6 @@ namespace xdl {
 	// Holds the Patch version number.
 	const xdl_uint XdevLWindowPatchVersion = XDEVLWAYLAND_MODULE_PATCH_VERSION;
 
-	enum XdevLWindowWaylandModules {
-	    WAYLAND_MODULE_1,
-	    SDL_NUMBER_OF_MODULES
-	};
-
 	static const XdevLString windowWaylandVendor {
 		"www.codeposer.net"
 	};

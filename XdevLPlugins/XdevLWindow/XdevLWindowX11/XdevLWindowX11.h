@@ -83,7 +83,7 @@ namespace xdl {
 	const xdl_uint XdevLCursorPatchVersion = XDEVLX11CURSOR_MODULE_PATCH_VERSION;
 
 
-	static const XdevLString window_x11_pluginName {
+	static const XdevLString windowX11PluginName {
 		"XdevLWindowX11"
 	};
 	static const XdevLString window_x11_description {
@@ -285,9 +285,6 @@ namespace xdl {
 			                             const XdevLWindowPosition& position,
 			                             const XdevLWindowSize& size
 			                            );
-
-
-
 	};
 
 
