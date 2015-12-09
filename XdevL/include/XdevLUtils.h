@@ -41,9 +41,9 @@ namespace xdl {
 #define XDEVL_ASSERT(exp, message)	if ( !(exp) ) XdevLAssertGeneric( message, __FILE__, __LINE__ )
 
 #ifdef _LOG
-#define XDEVL_MODULE_SUCCESS(errMsg)	{std::cerr << this->getDescriptor().getName() << ": " << errMsg;}
-#define XDEVL_MODULE_ERROR(errMsg)		{std::cerr << "## " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__  << ": " << errMsg;}
-#define XDEVL_MODULE_WARNING(errMsg)	{std::cerr << "!! " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__ << ": " << errMsg;}
+#define XDEVL_MODULE_SUCCESS(errMsg)	{std::cerr << "\033[1;32m>> " << this->getDescriptor().getName() << ": " << errMsg << "\033[0m";}
+#define XDEVL_MODULE_ERROR(errMsg)		{std::cerr << "\033[1;31m## " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__  << ": " << errMsg << "\033[0m";}
+#define XDEVL_MODULE_WARNING(errMsg)	{std::cerr << "\033[1;35m!! " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__ << ": " << errMsg << "\033[0m";}
 #define XDEVL_MODULE_INFO(errMsg)		{std::cerr << this->getDescriptor().getName() << ": " << errMsg;}
 #else
 #define XDEVL_MODULE_SUCCESS(errMsg)
@@ -51,7 +51,6 @@ namespace xdl {
 #define XDEVL_MODULE_WARNING(errMsg)
 #define XDEVL_MODULE_INFO(errMsg)
 #endif
-
 
 	// Returns the module information. (Path, Plugins Name, Version)
 	xdl_int getPluginInformationFromFilename(
@@ -100,7 +99,7 @@ namespace xdl {
 				FreeAll();
 			}
 
-			~XdevLFreeList(void) {
+			~XdevLFreeList() {
 				// If we have allocated memory,
 				// then we must free it.
 				if(m_bFreeOnDestroy) {
@@ -110,7 +109,7 @@ namespace xdl {
 			}
 
 			/// Returns a pointer to a free instance of T.
-			T* New(void) {
+			T* New() {
 				return m_freeObjects[--m_iTop];
 			}
 
@@ -120,7 +119,7 @@ namespace xdl {
 			}
 
 			/// Makes all instances available for allocation.
-			void FreeAll(void) {
+			void FreeAll() {
 				xdl_int iIndex = (m_numObjects-1);
 
 				for(m_iTop = 0; m_iTop < m_numObjects; m_iTop++) {
@@ -129,12 +128,12 @@ namespace xdl {
 			}
 
 			/// Returns the total number of objects managed by this XdevLFreeList.
-			xdl_int GetSize(void) {
+			xdl_int GetSize() {
 				return m_numObjects;
 			}
 
 			/// Returns the number of instances available for allocation.
-			xdl_int GetFree(void) {
+			xdl_int GetFree() {
 				return m_iTop;
 			}
 
