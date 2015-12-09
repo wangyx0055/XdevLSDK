@@ -110,10 +110,10 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			SDL_JoystickEventState(SDL_ENABLE);
 		}
 
+		//
+		// CAUTION: This counter has to be increased before any createModule method.
+		//
 		reference_counter++;
-	}
-
-	if(windowSDLModuleDesc.getName() == parameter->getModuleName()) {
 
 		// If there is not event server first create one.
 		if(xdl::windowEventServer == nullptr) {
@@ -121,26 +121,53 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
 		}
 
+		if(xdl::cursor == nullptr) {
+			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+		}
+	}
+
+	//
+	// Create XdevLWindow instance.
+	//
+	if(windowSDLModuleDesc.getName() == parameter->getModuleName()) {
+
 		xdl::XdevLWindowSDL* window = new xdl::XdevLWindowSDL(parameter);
 		parameter->setModuleInstance(window);
-	} else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
 
-		// If there is not event server first create one.
-		if(xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
-		}
+		reference_counter++;
+	}
+
+	//
+	// Create XdevLWindowServer instance.
+	//
+	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
 
 		xdl::XdevLWindowServerSDL* windowServer = new xdl::XdevLWindowServerSDL(parameter);
 		parameter->setModuleInstance(windowServer);
-	}  else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
 
-		xdl::XdevLCursorSDL* cursor = new xdl::XdevLCursorSDL(parameter);
-		parameter->setModuleInstance(cursor);
-	} else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+		reference_counter++;
+	}
+
+	//
+	// Create XdevLEventServer instance.
+	//
+	else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
 		xdl::windowEventServer = new xdl::XdevLWindowSDLEventServer(parameter);
 		parameter->setModuleInstance(xdl::windowEventServer);
 		xdl::XdevLWindowEventServerParameter = parameter;
+
+		reference_counter++;
+	}
+
+	//
+	// Create XdevLCursor instance.
+	//
+	else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
+
+		xdl::XdevLCursorSDL* cursor = new xdl::XdevLCursorSDL(parameter);
+		parameter->setModuleInstance(cursor);
+
+		reference_counter++;
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
@@ -1042,7 +1069,7 @@ namespace xdl {
 				event.jdeviceinfo.sender = this->getID().getHashCode();
 				event.jdeviceinfo.timestamp = this->getMediator()->getTimer().getTime64();
 				event.jdeviceinfo.number_devices = joysticks.size();
-				
+
 				xdl_int i = 0;
 				for(auto& joy : joysticks) {
 					event.jdeviceinfo.number_buttons[i] = joy.numberOfJoystickButtons;

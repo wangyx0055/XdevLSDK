@@ -115,35 +115,46 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			std::clog << "Vendor              : " << XServerVendor(m_display) << "\n";
 			std::clog << "Release             : " << XVendorRelease(m_display)<< "\n";
 			std::clog << "Number of Screens   : " << XScreenCount(m_display) 	<< std::endl;
+
+			//
+			// CAUTION: This counter has to be increased before any createModule method.
+			//
+			reference_counter++;
+
+			// If there is not event server first create one.
+			if(xdl::windowEventServer == nullptr) {
+				// If there is no even server active, create and activate it.
+				xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+			}
+
+			if(xdl::cursor == nullptr) {
+				xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+			}
+
 		}
+
 	}
 
 	//
 	// Create XdevLWindow instance.
 	//
 	if(windowX11ModuleDesc.getName() == parameter->getModuleName()) {
-		// If there is not event server first create one.
-		if(xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowX11")));
-		}
 
 		xdl::XdevLWindowX11* window = new xdl::XdevLWindowX11(parameter);
 		parameter->setModuleInstance(window);
-	} 
+
+		reference_counter++;
+	}
 
 	//
 	// Create XdevLWindowServer instance.
 	//
 	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
-		// If there is not event server first create one.
-		if(xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
-		}
 
 		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
 		parameter->setModuleInstance(windowServer);
+
+		reference_counter++;
 	}
 
 	//
@@ -156,6 +167,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		}
 		parameter->setModuleInstance(xdl::windowEventServer);
 
+		reference_counter++;
 	}
 
 	//
@@ -165,11 +177,11 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		x11cursor =  new xdl::XdevLCursorX11(parameter);
 		xdl::cursor = x11cursor;
 		parameter->setModuleInstance(xdl::cursor);
+
+		reference_counter++;
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
-
-	reference_counter++;
 
 	return xdl::ERR_OK;
 }
@@ -245,8 +257,8 @@ namespace xdl {
 		return ERR_OK;
 	}
 	xdl_int XdevLWindowX11::create(const XdevLWindowTitle& title,
-	                                 const XdevLWindowPosition& position,
-	                                 const XdevLWindowSize& size) {
+	                               const XdevLWindowPosition& position,
+	                               const XdevLWindowSize& size) {
 		return ERR_ERROR;
 	}
 
@@ -957,6 +969,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11::setPointerPosition(xdl_uint x, xdl_uint y) {
+
 		XWindowAttributes wa;
 		XGetWindowAttributes(m_display, m_window, &wa);
 		// (display, src window, dst windiw, src x, src y, src width, src height, dst x, dst y)
@@ -1052,12 +1065,8 @@ namespace xdl {
 
 	void XdevLWindowX11::grabPointer() {
 		for(;;) {
-			static int counter = 0;
-			int result = XGrabPointer(m_display, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
-
+			xdl_int result = XGrabPointer(m_display, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
 			if(result == GrabSuccess) {
-				std::cout << "result == GrabSuccess: Grab trials: " << counter++ << std::endl;
-				counter = 0;
 				break;
 			}
 		}
@@ -1309,6 +1318,7 @@ namespace xdl {
 
 	XdevLWindowX11EventServer::XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter) :
 		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
+		m_focusWindow(nullptr),
 		m_keyboard(nullptr) {
 		m_keyboard = new XdevLWindowX11Keyboard(m_display, getMediator());
 
@@ -1373,7 +1383,7 @@ namespace xdl {
 				XGetEventData(m_display, cookie);
 
 				if(x11cursor) {
-					x11cursor->onHandleXinputEvent(cookie);
+					x11cursor->onHandleXinputEvent(cookie, m_focusWindow);
 				}
 
 				XFreeEventData(m_display, cookie);
@@ -1596,6 +1606,7 @@ namespace xdl {
 				// Input focus gained.
 				//
 				case FocusIn: {
+					m_focusWindow = window;
 
 					ev.type					= XDEVL_WINDOW_EVENT;
 					ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
@@ -1604,6 +1615,7 @@ namespace xdl {
 					focusGained(window);
 
 					getMediator()->fireEvent(ev);
+
 				}
 				break;
 
@@ -1611,6 +1623,7 @@ namespace xdl {
 				// Input focus lost focus.
 				//
 				case FocusOut: {
+					m_focusWindow = window;
 
 					ev.type					= XDEVL_WINDOW_EVENT;
 					ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_LOST;
@@ -1904,7 +1917,7 @@ namespace xdl {
 
 	}
 
-	void XdevLCursorX11::onHandleXinputEvent(XGenericEventCookie* cookie) {
+	void XdevLCursorX11::onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) {
 
 		// Only handle xinput2 events.
 		if(cookie->extension != m_xinput2_opcode) {
@@ -1921,6 +1934,17 @@ namespace xdl {
 				double relative_cords[2];
 				parseValuators(rawev->raw_values,rawev->valuators.mask, rawev->valuators.mask_len,relative_cords,2);
 				printf("rel. (%f %f)\n", relative_cords[0], relative_cords[1]);
+
+				XdevLEvent ev;
+				ev.type 				= MouseMotion.getHashCode();
+				ev.motion.timestamp		= getMediator()->getTimer().getTime64();
+				ev.motion.x				= 0;
+				ev.motion.y				= 0;
+				ev.motion.xrel			= relative_cords[0];
+				ev.motion.yrel			= relative_cords[1];
+				ev.window.windowid		= window->getWindowID();
+				getMediator()->fireEvent(ev);
+
 				return;
 			}
 			break;

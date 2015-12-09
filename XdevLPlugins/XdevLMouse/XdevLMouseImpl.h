@@ -347,21 +347,26 @@ namespace xdl {
 			xdl_uint32 x = event.motion.x;
 			xdl_uint32 y = event.motion.y;
 
+			std::cout << "x: " << x << ", y: " << y << std::endl;
+
 			m_mouse_old_x = m_mouse_curr_x;
 			m_mouse_curr_x = x;
 			m_mouse_old_y = m_mouse_curr_y;
 			m_mouse_curr_y = y;
 			m_mouse_moved = true;
 
+			std::cout << "m_mouse_curr_x: " << m_mouse_curr_x << ", m_mouse_curr_y: " << m_mouse_curr_y << std::endl;
+
+
 			if(m_window && m_relativeMode) {
-				if((x <= 0 || x >= m_windowWidth - 1) ||
-				        (y <= 0 || y >= m_windowHeight - 1))   {
+				m_window->grabPointer();
+
+				if( (x <= 0) || (x >= m_windowWidth - 1) || (y <= 0) || (y >= m_windowHeight - 1))   {
 					m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
 					m_mouse_old_x 	= m_windowWidth/2;
 					m_mouse_old_y 	= m_windowHeight/2;
 					m_mouse_curr_x 	= m_windowWidth/2;
 					m_mouse_curr_y 	= m_windowHeight/2;
-
 					return ERR_OK;
 				}
 
@@ -380,8 +385,10 @@ namespace xdl {
 			}
 
 			if(m_Axes.size() > 0) {
-				m_Axes[AXIS_0]->setValue(((xdl_float)(x) / (xdl_float)m_windowWidth));
-				m_Axes[AXIS_1]->setValue(((xdl_float)(y) / (xdl_float)m_windowHeight));
+				m_Axes[AXIS_0]->setValue(((xdl_float)(m_mouse_curr_x) / (xdl_float)m_windowWidth));
+				m_Axes[AXIS_1]->setValue(((xdl_float)(m_mouse_curr_y) / (xdl_float)m_windowHeight));
+				m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
+				m_Axes[AXIS_1]->setDeltaValue((xdl_float)(m_mouse_curr_y - m_mouse_old_y));
 
 				for(auto& delegate : m_axisDelegates) {
 					delegate(AXIS_0, m_Axes[AXIS_0]->getValue());

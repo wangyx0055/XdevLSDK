@@ -303,7 +303,7 @@ namespace xdl {
 
 		private:
 			int pollEvents();
-
+			XdevLWindow* m_focusWindow;
 			XdevLWindowX11Keyboard* m_keyboard;
 			xdl_int m_event_basep;
 			xdl_int m_error_basep;
@@ -335,7 +335,7 @@ namespace xdl {
 			virtual void disableRelativeMotion() override;
 			
 			
-			void onHandleXinputEvent(XGenericEventCookie* cookie) ;
+			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
 	private:
 			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
 	private:

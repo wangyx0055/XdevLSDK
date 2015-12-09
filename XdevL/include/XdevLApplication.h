@@ -111,6 +111,10 @@ namespace xdl {
 					if(!m_window)
 						throw;
 
+					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
+					if(!m_cursor)
+						throw;
+
 					// Get the keyboard instance.
 					m_keyboard = xdl::getModule<xdl::XdevLKeyboard*>(getCore(),  xdl::XdevLID("MyKeyboard"));
 					if(!m_keyboard)
@@ -144,6 +148,10 @@ namespace xdl {
 					// Create an instance of the windows module.
 					m_window = xdl::createModule<xdl::XdevLWindow*>(getCore(), XdevLModuleName("XdevLWindowDevice"), XdevLID("MyWindow"));
 					if(!m_window)
+						throw;
+
+					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
+					if(!m_cursor)
 						throw;
 
 					// Create an instance of the keyboard module.
@@ -217,6 +225,10 @@ namespace xdl {
 				return m_window;
 			}
 
+			XdevLCursor* getCursor() {
+				return m_cursor;
+			}
+
 			XdevLKeyboard* getKeyboard() {
 				return m_keyboard;
 			}
@@ -233,6 +245,7 @@ namespace xdl {
 
 			xdl::XdevLCore* 		m_core;
 			xdl::XdevLWindow* 		m_window;
+			xdl::XdevLCursor*		m_cursor;
 			xdl::XdevLKeyboard* 	m_keyboard;
 			xdl::XdevLMouse*		m_mouse;
 			xdl::XdevLJoystick*		m_joystick;

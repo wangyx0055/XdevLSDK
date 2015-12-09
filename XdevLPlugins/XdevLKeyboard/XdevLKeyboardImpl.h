@@ -389,6 +389,7 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_MINUS"),KEY_MINUS));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_PERIOD"),KEY_PERIOD));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_SLASH"),KEY_SLASH));
+		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_BACKSLASH"),KEY_BACKSLASH));
 
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_0"),KEY_0));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_1"),KEY_1));
@@ -551,11 +552,25 @@ namespace xdl {
 		m_Buttons[KEY_F23] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_F24] = new XdevLButtonImpl(&m_mutex);
 
+		m_Buttons[KEY_HOME] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_END] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_PAGEUP] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_PAGEDOWN] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_DELETE] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_INSERT] = new XdevLButtonImpl(&m_mutex);
+
+		m_Buttons[KEY_UP] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_DOWN] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_LEFT] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_RIGHT] = new XdevLButtonImpl(&m_mutex);
+
 		m_Buttons[KEY_ESCAPE] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_ENTER] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_TAB] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_SPACE] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_BACKSPACE] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_SLASH] = new XdevLButtonImpl(&m_mutex);
+		m_Buttons[KEY_BACKSLASH] = new XdevLButtonImpl(&m_mutex);
 
 		m_Buttons[KEY_PLUS] = new XdevLButtonImpl(&m_mutex);
 		m_Buttons[KEY_MINUS] = new XdevLButtonImpl(&m_mutex);

@@ -53,6 +53,7 @@ set(SOURCE_FILES
 )
 
 include_directories(
+	${XdevLOpenGLContextEGL_SOURCE_DIR}
 	${XDEVL_HOME}/include
 	${XDEVL_PLUGINS}
 )

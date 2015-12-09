@@ -277,9 +277,13 @@ namespace xdl {
 			// Invisible for the user.
 			//
 			void setValue(xdl_float value) {
-				m_deltaValue = value - m_value;
+//				m_deltaValue = value - m_value;
 				m_valueOld = m_value;
 				m_value = value;
+			}
+			
+			void setDeltaValue(xdl_float value) {
+				m_deltaValue = value;
 			}
 
 			void addValue(xdl_float value) {
