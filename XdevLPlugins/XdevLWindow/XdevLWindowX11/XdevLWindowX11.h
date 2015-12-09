@@ -141,7 +141,7 @@ namespace xdl {
 			virtual void setParent(XdevLWindow* window) override;
 			virtual void setType(XdevLWindowTypes type) override;
 
-
+			Window getNativeWindow();
 		protected:
 			/// Holds the default root window. Mostly it is the desktop.
 			Window m_rootWindow;
@@ -326,6 +326,7 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
 
+			virtual xdl_int attach(XdevLWindow* window) override;
 			virtual void show() override;
 			virtual void hide() override;
 			virtual void setPosition(xdl_uint x, xdl_uint y) override;

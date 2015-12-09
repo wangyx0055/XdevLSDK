@@ -1285,7 +1285,9 @@ namespace xdl {
 		XFlush(m_display);
 	}
 
-
+	Window XdevLWindowX11::getNativeWindow() {
+		return m_window;
+	}
 
 //
 // -------------------------------------------------------------------------
@@ -1785,7 +1787,7 @@ namespace xdl {
 	}
 
 	xdl_int XdevLCursorX11::init() {
-		m_defaultRootWindow = DefaultRootWindow(m_display);
+
 		m_screenNumber 		= DefaultScreen(m_display);
 		m_defaultColorMap 	= DefaultColormap(m_display, DefaultScreen(m_display));
 		m_screenWidth 		= DisplayWidth(m_display, DefaultScreen(m_display));
@@ -1793,15 +1795,6 @@ namespace xdl {
 
 		// Lets first create black color for the specific color map we use.
 		XAllocNamedColor(m_display, m_defaultColorMap, "black", &m_black, &m_dummy);
-
-		// Now we create an empty bitmap where we will fill nothing with the color.
-		static char bm_no_data[] = {0, 0, 0, 0, 0, 0, 0, 0};
-		m_invisibleCursorPixmap = XCreateBitmapFromData(m_display, m_defaultRootWindow, bm_no_data, 8, 8);
-
-		// Now create the new cursor bitmap which is of course back, transparent.
-		m_invisibleCursor = XCreatePixmapCursor(m_display, m_invisibleCursorPixmap, m_invisibleCursorPixmap, &m_black, &m_black, 0, 0);
-		XFlush(m_display);
-
 
 
 		// Check for pointer barrier support.
@@ -1813,6 +1806,27 @@ namespace xdl {
 		if(XQueryExtension(m_display, "XInputExtension", &m_xinput2_opcode, &m_xinput2_event, &m_xinput2_error)) {
 			m_xinput2Supported = xdl_true;
 		}
+
+		return ERR_OK;
+	}
+
+	xdl_int XdevLCursorX11::attach(XdevLWindow* window) {
+		XDEVL_ASSERT(window, "Invalid window used.");
+
+		Window wnd = static_cast<XdevLWindowX11*>(window)->getNativeWindow();
+		if(wnd == m_defaultRootWindow) {
+			return ERR_OK;
+		}
+
+		m_defaultRootWindow = wnd;
+
+		// Now we create an empty bitmap where we will fill nothing with the color.
+		static char bm_no_data[] = {0, 0, 0, 0, 0, 0, 0, 0};
+		m_invisibleCursorPixmap = XCreateBitmapFromData(m_display, m_defaultRootWindow, bm_no_data, 8, 8);
+
+		// Now create the new cursor bitmap which is of course back, transparent.
+		m_invisibleCursor = XCreatePixmapCursor(m_display, m_invisibleCursorPixmap, m_invisibleCursorPixmap, &m_black, &m_black, 0, 0);
+		XFlush(m_display);
 
 		return ERR_OK;
 	}

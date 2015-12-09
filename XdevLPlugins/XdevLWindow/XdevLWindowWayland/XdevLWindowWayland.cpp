@@ -1416,6 +1416,10 @@ err:
 		return nullptr;
 	}
 
+	xdl_int XdevLCursorWayland::attach(XdevLWindow* window) {
+		return ERR_OK;
+	}
+
 	void XdevLCursorWayland::show() {
 	}
 

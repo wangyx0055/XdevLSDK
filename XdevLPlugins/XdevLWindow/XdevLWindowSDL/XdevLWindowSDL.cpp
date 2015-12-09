@@ -1112,6 +1112,10 @@ namespace xdl {
 		return nullptr;
 	}
 
+	xdl_int XdevLCursorSDL::attach(XdevLWindow* window) {
+		return ERR_OK;
+	}
+
 	void XdevLCursorSDL::show() {
 		SDL_ShowCursor(SDL_TRUE);
 	}
