@@ -42,6 +42,24 @@
   "arguments": [],
   "parentProject": ""
  }, {
+  "name": "Debug_Win32",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
+  "name": "Debug_Win64",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
   "name": "Release_Linux32",
   "enabled": false,
   "buildDirectory": "build",
@@ -92,6 +110,16 @@
   <Dependencies Name="Debug"/>
   <Dependencies Name="Debug_MacOSX_64"/>
   <Dependencies Name="Release_MacOSX_64"/>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -103,9 +131,7 @@
       <Linker Options="">
         <LibraryPath Value="."/>
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
-        <LibraryPath Value="$(XDEVL_PLUGINS)/lib"/>
-        <LibraryPath Value="$(XDEVL_EXTERNAL)/lib"/>
-        <LibraryPath Value="/usr/lib/nvidia-358"/>
+        <LibraryPath Value="$(XDEVL_EXTERNAL)"/>
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
@@ -231,11 +257,9 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="Debug_Win32" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+    <Configuration Name="Debug_Win32" CompilerType="MinGW ( CodeLite-4.8.1 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-ggdb;-m32" C_Options="-ggdb;-m32" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0"/>
       <Linker Options="-m32" Required="yes">
-        <LibraryPath Value="$(XDEVL_HOME)/lib"/>
-        <LibraryPath Value="$(XDEVL_PLUGINS)/lib"/>
         <Library Value="XdevLd"/>
         <Library Value="opengl32"/>
       </Linker>
@@ -272,7 +296,7 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="Debug_Win64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+    <Configuration Name="Debug_Win64" CompilerType="MinGW ( CodeLite-4.8.1 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-ggdb;-m64" C_Options="-ggdb;-m64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0"/>
       <Linker Options="" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
@@ -515,14 +539,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
-  <Dependencies Name="Debug_MacOSX64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
-  <Dependencies Name="Release_MacOSX64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>

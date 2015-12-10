@@ -5,6 +5,7 @@
 
 #if XDEVL_PLATFORM_WINDOWS
 #include <Windows.h>
+
 #elif XDEVL_PLATFORM_LINUX
 #include <X11/Xlib.h>
 #include <wayland-client.h>
@@ -117,18 +118,18 @@ namespace xdl {
 		EGLNativeWindowType nativeWindow;
 
 #if XDEVL_PLATFORM_WINDOWS
-		HINSTANCE	hInstance = static_cast<HWND>(m_window->getInternal(XdevLInternalName("WIN32_INSTANCE")));
+		HINSTANCE hInstance = static_cast<HINSTANCE>(window->getInternal(XdevLInternalName("WIN32_INSTANCE")));
 		if(nullptr == hInstance) {
 			XDEVL_MODULE_ERROR("Could not get native WIN32_INSTANCE information.\n");
 			return ERR_ERROR;
 		}
 
-		HWND	hWnd = static_cast<HWND>(m_window->getInternal(XdevLInternalName("WIN32_HWND")));
+		HWND	hWnd = static_cast<HWND>(window->getInternal(XdevLInternalName("WIN32_HWND")));
 		if(nullptr == hWnd) {
 			XDEVL_MODULE_ERROR("Could not get native WIN32_HWND information.\n");
 			return ERR_ERROR;
 		}
-		HDC hDC = static_cast<HWND>(m_window->getInternal(XdevLInternalName("WIN32_DC")));
+		HDC hDC = static_cast<HDC>(window->getInternal(XdevLInternalName("WIN32_DC")));
 		if(nullptr == hDC) {
 			XDEVL_MODULE_ERROR("Could not get native WIN32_DC information.\n");
 			return ERR_ERROR;
@@ -268,10 +269,6 @@ namespace xdl {
 		if(eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext) == EGL_FALSE) {
 			XDEVL_MODULE_ERROR("eglMakeCurrent failed: " << eglGetErrorString(eglGetError()) << "\n");
 		}
-
-		XDEVL_MODULE_INFO(glGetString(GL_VENDOR) << std::endl);
-		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
-		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
 
 		return ERR_OK;
 	}

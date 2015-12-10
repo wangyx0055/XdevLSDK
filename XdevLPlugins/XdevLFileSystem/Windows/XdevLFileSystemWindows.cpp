@@ -169,6 +169,7 @@ namespace xdl {
 //			default:
 //				return XdevLDirectoryEntity::Type::UNKNOWN;
 //		}
+		return XdevLDirectoryEntity::Type::UNKNOWN;
 	}
 
 //
@@ -453,8 +454,7 @@ xdl_int XdevLDirectoryWatcherWindows::addDirectoryToWatch(const XdevLString& fol
 	void XdevLDirectoryWatcherWindows::threadHandle() {
 		XDEVL_MODULE_INFO("Starting Thread ...");
 		
-		struct inotify_event* event;
-		
+
 		// TODO As you can see this part is quite inefficient. Using a vector and
 		// collecting first all events and then call the delegates.
 		while(m_runThread) {

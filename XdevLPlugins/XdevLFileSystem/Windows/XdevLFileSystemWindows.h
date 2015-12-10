@@ -24,6 +24,7 @@
 #include <XdevLPluginImpl.h>
 #include <vector>
 
+#include <iostream>
 #include <array>
 #include <thread>
 #include <mutex>
@@ -172,26 +173,21 @@ namespace xdl {
 			}
 
 			virtual xdl_int seek(const XdevLSeekSet& mode, xdl_uint64 offset) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 			virtual xdl_int seek(const XdevLSeekCurr& mode, xdl_uint64 offset) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 			virtual xdl_int seek(const XdevLSeekEnd& mode, xdl_uint64 offset) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int read(xdl_uint8* dst, xdl_int size) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int write(xdl_uint8* src, xdl_int size) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int flush() {
@@ -200,54 +196,44 @@ namespace xdl {
 			}
 
 			virtual xdl_int readU8(xdl_uint8& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 
 			virtual xdl_int read8(xdl_int8& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readU16(xdl_uint16& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int read16(xdl_int16& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readU32(xdl_uint32& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int read32(xdl_int32& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readU64(xdl_uint64& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int read64(xdl_int64& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readFloat(xdl_float& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readDouble(xdl_double& value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int readString(XdevLString& value) {
@@ -268,58 +254,47 @@ namespace xdl {
 			}
 
 			virtual xdl_int writeU8(xdl_uint8 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int write8(xdl_int8 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeU16(xdl_uint16 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int write16(xdl_int16 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeU32(xdl_uint32 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int write32(xdl_int32 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeU64(xdl_uint64 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int write64(xdl_int64 value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeFloat(xdl_float value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeDouble(xdl_double value) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 			virtual xdl_int writeString(const XdevLString& str) {
-				ssize_t ret = -1;
-				return ret;
+				return 0;
 			}
 
 		private:

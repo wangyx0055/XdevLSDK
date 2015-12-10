@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="XdevLDemosWin" Database="./XdevLDemosWin.tags">
-  <Project Name="opengl_demo" Path="opengl_demo/opengl_demo.project" Active="Yes"/>
-  <Project Name="bluetooth_demo" Path="bluetooth_demo/bluetooth_demo.project" Active="No"/>
   <Project Name="serial_demo" Path="serial_demo/serial_demo.project" Active="No"/>
   <Project Name="udp_server_demo" Path="udp_server_demo/udp_server_demo.project" Active="No"/>
   <Project Name="udp_client_demo" Path="udp_client_demo/udp_client_demo.project" Active="No"/>
@@ -12,9 +10,9 @@
   <Project Name="udp_client_array_demo" Path="udp_client_array_demo/udp_client_array_demo.project" Active="No"/>
   <Project Name="udp_server_array_demo" Path="udp_server_array_demo/udp_server_array_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
+  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_Win32" Selected="yes">
-      <Project Name="opengl_demo" ConfigName="Debug_Win32"/>
       <Project Name="bluetooth_demo" ConfigName="Debug_Win32"/>
       <Project Name="serial_demo" ConfigName="Debug_Win32"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Win32"/>
@@ -26,9 +24,9 @@
       <Project Name="udp_client_array_demo" ConfigName="Debug_Win32"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Win32"/>
       <Project Name="xml_demo" ConfigName="Debug_Win32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Win32"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_Win32" Selected="no">
-      <Project Name="opengl_demo" ConfigName="Release_Win32"/>
       <Project Name="bluetooth_demo" ConfigName="Release_Win32"/>
       <Project Name="serial_demo" ConfigName="Release_Win32"/>
       <Project Name="udp_server_demo" ConfigName="Release_Win32"/>
@@ -40,6 +38,33 @@
       <Project Name="udp_client_array_demo" ConfigName="Release_Win32"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Win32"/>
       <Project Name="xml_demo" ConfigName="Release_Win32"/>
+      <Project Name="rai_demo" ConfigName="Release_Win32"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_Win64" Selected="no">
+      <Project Name="audio_demo" ConfigName="Debug_Win32"/>
+      <Project Name="devices_demo" ConfigName="Debug_Win32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Win64"/>
+      <Project Name="serial_demo" ConfigName="Debug_Win32"/>
+      <Project Name="tcp_client_demo" ConfigName="Debug_Win32"/>
+      <Project Name="tcp_server_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_client_array_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_client_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_server_array_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_server_demo" ConfigName="Debug_Win32"/>
+      <Project Name="xml_demo" ConfigName="Debug_Win32"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_Win64" Selected="no">
+      <Project Name="audio_demo" ConfigName="Debug_Win32"/>
+      <Project Name="devices_demo" ConfigName="Debug_Win32"/>
+      <Project Name="rai_demo" ConfigName="Debug_Win32"/>
+      <Project Name="serial_demo" ConfigName="Debug_Win32"/>
+      <Project Name="tcp_client_demo" ConfigName="Debug_Win32"/>
+      <Project Name="tcp_server_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_client_array_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_client_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_server_array_demo" ConfigName="Debug_Win32"/>
+      <Project Name="udp_server_demo" ConfigName="Debug_Win32"/>
+      <Project Name="xml_demo" ConfigName="Debug_Win32"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
