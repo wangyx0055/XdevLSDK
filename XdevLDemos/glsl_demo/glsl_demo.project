@@ -114,11 +114,10 @@
   </VirtualDirectory>
   <VirtualDirectory Name="resources">
     <VirtualDirectory Name="shaders">
-      <File Name="fs1.fs"/>
-      <File Name="gs1.gs"/>
-      <File Name="vs1.vs"/>
-      <File Name="frameBuffer_vs.glsl"/>
-      <File Name="frameBuffer_fs.glsl"/>
+      <File Name="../bin/frameBuffer_fs.glsl"/>
+      <File Name="../bin/frameBuffer_vs.glsl"/>
+      <File Name="../bin/fs1.fs"/>
+      <File Name="../bin/vs1.vs"/>
     </VirtualDirectory>
     <File Name="glsl_demo.xml"/>
   </VirtualDirectory>

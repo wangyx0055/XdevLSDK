@@ -5,10 +5,10 @@
 
 	<!-- Plug necessary plugins -->
 	<XdevLPlugins>
-		<XdevLPlugin name="XdevLWindowSDL"			version="1.0.0"/>
+		<XdevLPlugin name="XdevLWindowWindow"		version="1.0.0"/>
 		<XdevLPlugin name="XdevLKeyboard"			version="1.0.0"/>
 		<XdevLPlugin name="XdevLMouse"				version="1.0.0"/>
-		<XdevLPlugin name="XdevLOpenGLContextSDL"	version="0.1.0"/>
+		<XdevLPlugin name="XdevLOpenGLContextWGL"	version="0.1.0"/>
 		<XdevLPlugin name="XdevLRAIGL"				version="0.1.0"/>
         <XdevLPlugin name="XdevLFont"				version="1.0.0"/>
 	</XdevLPlugins>
