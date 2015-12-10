@@ -78,6 +78,15 @@
   "arguments": [],
   "parentProject": ""
  }, {
+  "name": "Release_MacOSX64",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
   "name": "Release_MacOSX_64",
   "enabled": false,
   "buildDirectory": "build",
@@ -123,6 +132,16 @@
   </VirtualDirectory>
   <Dependencies Name="Debug_MacOSX_64"/>
   <Dependencies Name="Release_MacOSX_64"/>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -159,12 +178,7 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
-      <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
-      </PostBuild>
+      <PostBuild/>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
         <CleanCommand/>
@@ -209,12 +223,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
-        <Command Enabled="yes">cp frameBuffer_vs.glsl ../bin</Command>
-        <Command Enabled="yes">cp frameBuffer_fs.glsl ../bin</Command>
+        <Command Enabled="yes"/>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -255,10 +264,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
+        <Command Enabled="yes"/>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -381,12 +387,7 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
-      <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
-      </PostBuild>
+      <PostBuild/>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
         <CleanCommand/>
@@ -429,10 +430,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
+        <Command Enabled="yes"/>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -473,10 +471,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp glsl_demo.xml ../bin</Command>
-        <Command Enabled="yes">cp fs1.fs ../bin</Command>
-        <Command Enabled="yes">cp vs1.vs ../bin</Command>
-        <Command Enabled="yes">cp gs1.gs ../bin</Command>
+        <Command Enabled="yes"/>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -580,14 +575,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
-  <Dependencies Name="Debug_MacOSX64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
-  <Dependencies Name="Release_MacOSX64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>
