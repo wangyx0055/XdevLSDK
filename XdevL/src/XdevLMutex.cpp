@@ -26,7 +26,7 @@
 namespace thread {
 
 Mutex::Mutex() {
-#if defined (__GNUC__) && !defined (WIN32)
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	if ( pthread_mutex_init(&m_mutex, NULL) != 0 ) {
 		throw("Mutex::Could not create mutex");
 	}
@@ -36,7 +36,7 @@ Mutex::Mutex() {
 }
 
 Mutex::~Mutex() {
-#if defined (__GNUC__) && !defined (WIN32)
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	pthread_mutex_destroy(&m_mutex);
 #else
 	DeleteCriticalSection(&m_mutex);
@@ -45,7 +45,7 @@ Mutex::~Mutex() {
 }
 
 int Mutex::Lock() {
-#if defined (__GNUC__) && !defined (WIN32)
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	if (pthread_mutex_lock(&m_mutex) != 0) {
 		std::cerr << "Mutex::Could not lock mutex: " << strerror(errno) << std::endl;
 		return 1;
@@ -57,7 +57,7 @@ int Mutex::Lock() {
 }
 
 int Mutex::Unlock() {
-#if defined (__GNUC__) && !defined (WIN32)
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	if (pthread_mutex_unlock(&m_mutex) != 0) {
 		std::cerr << "Mutex::Could not unlock mutex: " << strerror(errno) << std::endl;
 		return 1;

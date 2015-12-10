@@ -23,9 +23,9 @@
 #include <XdevLTypes.h>
 #include <XdevLMutex.h>
 
-#ifdef XDEVL_PLATFORM_UNIX
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 typedef pthread_cond_t THREAD_COND;
-#elif defined (XDEVL_PLATFORM_WINDOWS) || defined(XDEVL_PLATFORM_MINGW)
+#elif XDEVL_PLATFORM_WINDOWS 
 typedef CONDITION_VARIABLE THREAD_COND;
 #else
 #error "No implementation for this platform."

@@ -24,6 +24,10 @@
 #include "XdevLWindowWin32.h"
 #include <sstream>
 
+#if XDEVL_PLATFORM_MINGW
+#define MAPVK_VSC_TO_VK_EX 3
+#endif
+
 xdl::XdevLPluginDescriptor windowWindowPluginDescriptor{
 	xdl::windowPluginName,
 	xdl::window_moduleNames,

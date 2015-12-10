@@ -36,27 +36,27 @@ namespace thread {
 	}
 
 	Thread::~Thread() {
-#ifdef _WIN32
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#else
 		if(m_thread) {
 			if(CloseHandle(m_thread) == 0) {
 				std::cerr << "Thread::Can't close thread handle.\n";
 			} else
 				m_thread = NULL;
 		}
-#else
 #endif
 	}
 
 	int Thread::Start(ThreadArgument* arg) {
 		Arguments(arg);
-#ifdef _WIN32
-		m_thread = CreateThread(0, 0, Thread::ThreadProc, this, 0, &m_threadId);
-		if(m_thread == NULL) {
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+		if(pthread_create(&m_thread, NULL, Thread::ThreadProc, this) != 0) {
+			std::cerr << "Thread::Could not create thread." << std::endl;
 			return 1;
 		}
 #else
-		if(pthread_create(&m_thread, NULL, Thread::ThreadProc, this) != 0) {
-			std::cerr << "Thread::Could not create thread." << std::endl;
+		m_thread = CreateThread(0, 0, Thread::ThreadProc, this, 0, &m_threadId);
+		if(m_thread == NULL) {
 			return 1;
 		}
 #endif
@@ -64,17 +64,17 @@ namespace thread {
 	}
 
 int Thread::StartUsingFuncPointer() {
-
-#ifdef _WIN32
-		m_thread = CreateThread(0, 0, Thread::ThreadProc2, this, 0, &m_threadId);
-		if(m_thread == NULL) {
-			return 1;
-		}
-#else
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 		if(pthread_create(&m_thread, NULL, Thread::ThreadProc2, this) != 0) {
 			std::cerr << "Thread::Could not create thread." << std::endl;
 			return 1;
 		}
+#else
+		m_thread = CreateThread(0, 0, Thread::ThreadProc2, this, 0, &m_threadId);
+		if(m_thread == NULL) {
+			return 1;
+		}
+
 #endif
 		return 0;
 	}
@@ -85,49 +85,50 @@ int Thread::StartUsingFuncPointer() {
 			return 1;
 
 		int ret = 0;
-#ifdef _WIN32
-		if(WaitForSingleObject(m_thread,INFINITE) == WAIT_FAILED)
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+		if(pthread_join(m_thread, NULL) != 0)
 			ret = 1;
 #else
-		if(pthread_join(m_thread, NULL) != 0)
+		if(WaitForSingleObject(m_thread,INFINITE) == WAIT_FAILED)
 			ret = 1;
 #endif
 		return ret;
 	}
 
 	void Thread::Exit(int exitCode) {
-#ifdef _WIN32
-		ExitThread((DWORD)exitCode);
-#else
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 		int tmp = exitCode;
 		pthread_exit(&tmp);
+#else
+		ExitThread((DWORD)exitCode);
 #endif
 	}
 
-#ifdef _WIN32
-	unsigned long __stdcall Thread::ThreadProc(void* p_this) {
-#else
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	void* Thread::ThreadProc(void* p_this) {
+#else
+	unsigned long __stdcall Thread::ThreadProc(void* p_this) {
 #endif
 		Thread* ptr = static_cast<Thread*>(p_this);
-#ifdef _WIN32
-		return static_cast<unsigned long>(ptr->RunThread(ptr->Arguments()));
-#else
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 		return reinterpret_cast<void*>(ptr->RunThread(ptr->Arguments()));
+#else
+		return static_cast<unsigned long>(ptr->RunThread(ptr->Arguments()));
 #endif
 
 	}
 
-#ifdef _WIN32
-	unsigned long __stdcall Thread::ThreadProc2(void* p_this) {
-#else
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 	void* Thread::ThreadProc2(void* p_this) {
+#else
+	unsigned long __stdcall Thread::ThreadProc2(void* p_this) {
 #endif
 		Thread* ptr = static_cast<Thread*>(p_this);
-#ifdef _WIN32
-		return static_cast<unsigned long>(ptr->callbackFunction());
-#else
+
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 		return reinterpret_cast<void*>(ptr->callbackFunction());
+#else
+		return static_cast<unsigned long>(ptr->callbackFunction());
 #endif
 
 	}

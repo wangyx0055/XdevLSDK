@@ -22,11 +22,11 @@
 
 #include <XdevLPlatform.h>
 
-#ifdef XDEVL_PLATFORM_UNIX
+#if XDEVL_PLATFORM_UNIX  || XDEVL_PLATFORM_MINGW
 	typedef pthread_t THREAD_THREAD;
 	#define THREAD_INIT(THREAD) THREAD(0)
 	const int THREAD_INVALID = 0;
-#elif defined (XDEVL_PLATFORM_WINDOWS) || defined(XDEVL_PLATFORM_MINGW)
+#elif XDEVL_PLATFORM_WINDOWS
 	typedef HANDLE THREAD_THREAD;
 	#define THREAD_INIT(THREAD) THREAD(NULL)
 	const HANDLE THREAD_INVALID = NULL;
@@ -153,15 +153,16 @@ namespace thread {
 			/// Override this function for your purpose.
 			virtual int RunThread(ThreadArgument* arg);
 
-#ifdef _WIN32
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+			/// Don't touch this function.
+			static void* ThreadProc(void* p_this);
+			static void* ThreadProc2(void* p_this);
+#else
 			/// Don't touch this function
 			static unsigned long __stdcall ThreadProc(void* p_this);
 			static unsigned long __stdcall ThreadProc2(void* p_this);
 			DWORD 		m_threadId;
-#else
-			/// Don't touch this function.
-			static void* ThreadProc(void* p_this);
-			static void* ThreadProc2(void* p_this);
+
 #endif
 			// Holds the thread object.
 			THREAD_THREAD m_thread;

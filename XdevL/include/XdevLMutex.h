@@ -22,9 +22,9 @@
 
 #include <XdevLPlatform.h>
 
-#ifdef XDEVL_PLATFORM_UNIX
+#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
 typedef pthread_mutex_t THREAD_MUTEX;
-#elif defined (XDEVL_PLATFORM_WINDOWS) || defined(XDEVL_PLATFORM_MINGW)
+#elif XDEVL_PLATFORM_WINDOWS
 typedef CRITICAL_SECTION THREAD_MUTEX;
 #else
 #error "No implementation for this platform."
