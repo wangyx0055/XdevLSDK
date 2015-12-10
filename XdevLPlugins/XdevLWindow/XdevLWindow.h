@@ -258,6 +258,9 @@ namespace xdl {
 		public:
 			virtual ~XdevLCursor() {}
 
+			/// Attach the cursor to a window.
+			virtual xdl_int attach(XdevLWindow* window) = 0;
+
 			/// Show the pointer.
 			virtual void show() = 0;
 

@@ -1096,7 +1096,8 @@ namespace xdl {
 //
 
 	XdevLCursorSDL::XdevLCursorSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc)  {
+		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc),
+		m_window(nullptr) {
 
 	}
 
@@ -1113,6 +1114,9 @@ namespace xdl {
 	}
 
 	xdl_int XdevLCursorSDL::attach(XdevLWindow* window) {
+		XDEVL_ASSERT(window, "Invalid window parameter");
+
+		m_window = static_cast<XdevLWindowSDL*>(window);
 		return ERR_OK;
 	}
 
@@ -1125,16 +1129,20 @@ namespace xdl {
 	}
 
 	void XdevLCursorSDL::setPosition(xdl_uint x, xdl_uint y) {
-		//SDL_WarpMouseGlobal(x, y);
+		XDEVL_ASSERT(m_window, "Cursor not attached to a window.");
+
+		xdl_int mx, my;
+		SDL_GetMouseState(&mx, &my);
+		SDL_WarpMouseInWindow(m_window->getNativeWindow(), m_window->getWidth()/2, m_window->getHeight()/2); 
 	}
 
 	xdl_int XdevLCursorSDL::clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-		// Not supported by SDL
+		XDEVL_ASSERT(nullptr, "Not supported by SDL2");
 		return ERR_ERROR;
 	}
 
 	void XdevLCursorSDL::releaseClip() {
-
+		XDEVL_ASSERT(nullptr, "Not supported by SDL2");
 	}
 
 	xdl_int XdevLCursorSDL::enableRelativeMotion() {

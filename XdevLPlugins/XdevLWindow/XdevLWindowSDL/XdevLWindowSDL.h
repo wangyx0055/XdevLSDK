@@ -130,6 +130,8 @@ namespace xdl {
 			virtual void setParent(XdevLWindow* window);
 
 			virtual xdl_int create() override;
+			
+			SDL_Window* getNativeWindow() {return m_window;}
 
 		protected:
 
@@ -192,6 +194,8 @@ namespace xdl {
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion();
 			virtual void disableRelativeMotion();
+		private:
+			XdevLWindowSDL* m_window;
 
 	};
 }
