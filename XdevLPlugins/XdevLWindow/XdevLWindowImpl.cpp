@@ -27,6 +27,25 @@ namespace xdl {
 
 	static xdl_uint windowCounter = 1;
 
+	xdl_int initDefaultWindowInstances(xdl::XdevLModuleCreateParameter* parameter) {
+
+		if (xdl::windowEventServer == nullptr) {
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+			if (nullptr == xdl::windowEventServer) {
+				return ERR_ERROR;
+			}
+		}
+
+		if (xdl::cursor == nullptr) {
+			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+			if (nullptr == xdl::cursor) {
+				return ERR_ERROR;
+			}
+		}
+
+		return ERR_OK;
+	}
+
 	xdl::XdevLModuleDescriptor xdl::XdevLWindowServerImpl::m_windowServerModuleDesc {
 		window_vendor,
 		window_author,

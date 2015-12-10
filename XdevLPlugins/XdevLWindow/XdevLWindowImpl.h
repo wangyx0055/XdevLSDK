@@ -196,7 +196,7 @@ namespace xdl {
 	extern xdl::XdevLWindowEventServer* windowEventServer;
 	extern xdl::XdevLCursor* cursor;
 	extern xdl::XdevLModuleCreateParameter* XdevLWindowEventServerParameter;
-
+	extern xdl::xdl_int initDefaultWindowInstances(xdl::XdevLModuleCreateParameter* parameter);
 }
 
 #endif

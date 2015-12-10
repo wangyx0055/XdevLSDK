@@ -37,7 +37,7 @@ namespace xdl {
 				m_size = size;
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_id);
-				glBufferData(GL_ARRAY_BUFFER, size, src, GL_STREAM_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, size, src, GL_DYNAMIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 				return ERR_OK;

@@ -46,40 +46,34 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 
 
 	if (event.type == ButtonPressed.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED: %s\n"), event.window.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
+		printf(("WindowID: %ld -> XDEVL_KEY_PRESSED: %s\n"), event.key.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
 		
 	}
 	else if (event.type == ButtonReleased.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_KEY_RELEASED: %s\n"), event.window.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
+		printf(("WindowID: %ld -> XDEVL_KEY_RELEASED: %s\n"), event.key.windowid, xdl::xdevLButtonIdToString((xdl::XdevLButtonId)event.key.keycode).toString().c_str());
 		if (event.key.keycode == xdl::KEY_ESCAPE) {
 			run = xdl::xdl_false;
 		}
 	}
 	else if (event.type == MouseButtonPressed.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_PRESSED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
+		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_PRESSED (%d, %d)\n"), event.button.windowid, event.button.x, event.button.y);
 		currentCursorPosition.pressed = true;
 		currentCursorPosition.released = false;
 		currentCursorPosition.x = event.button.x;
 		currentCursorPosition.y = event.button.y;
 	}
 	else if (event.type == MouseButtonReleased.getHashCode()) {
-		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_RELEASED (%d, %d)\n"), event.window.windowid, event.button.x, event.button.y);
+		printf(("WindowID: %ld -> XDEVL_MOUSE_BUTTON_RELEASED (%d, %d)\n"), event.button.windowid, event.button.x, event.button.y);
 		currentCursorPosition.pressed = false;
 		currentCursorPosition.released = true;
 		currentCursorPosition.x = event.button.x;
 		currentCursorPosition.y = event.button.y;
 	}
 	else if (event.type == MouseMouseMotion.getHashCode()) {
-		printf(("WindowID: %d -> XDEVL_MOUSE_MOTION (%d, %d)\n"), event.window.windowid, event.motion.x, event.motion.y);
-		if (currentCursorPosition.pressed) {
-			xdl::IPXdevLWindow tmp = windowsMap[event.window.windowid];
-			if (tmp != nullptr) {
-				tmp->setPosition(xdl::XdevLWindowPosition(currentCursorPosition.x + event.motion.x, currentCursorPosition.y + event.motion.y));
-			}
-		}
+		std::cout << "WindowID: " << event.motion.windowid << " -> XDEVL_MOUSE_MOTION ( " << event.motion.x << "," << event.motion.y << "," << event.motion.xrel << "," << event.motion.yrel << std::endl;
 	}
 
 

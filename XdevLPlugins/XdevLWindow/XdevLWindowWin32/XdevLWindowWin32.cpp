@@ -35,7 +35,7 @@ xdl::XdevLPluginDescriptor windowWindowPluginDescriptor{
 xdl::XdevLModuleDescriptor windowModuleDesc{
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[0],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowDescription,
 	XDEVLWINDOWS_MODULE_MAJOR_VERSION,
@@ -46,7 +46,7 @@ xdl::XdevLModuleDescriptor windowModuleDesc{
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc{
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[2],
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWINDOWS_EVENT_SERVER_MODULE_MAJOR_VERSION,
@@ -57,7 +57,7 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc{
 xdl::XdevLModuleDescriptor windowCursorModuleDesc{
 	xdl::window_vendor,
 	xdl::window_author,
-	xdl::window_moduleNames[3],
+	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
 	XDEVLWINDOWS_CURSOR_MODULE_MAJOR_VERSION,
@@ -70,41 +70,56 @@ static xdl::xdl_uint64 windowID = 0;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
 
+	//
+	// Create XdevLWindow instance.
+	//
 	if (windowModuleDesc.getName() == parameter->getModuleName()) {
 
-		// If there is not event server first create one.
-		if (xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowWindowsEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowWindowsEventServerID"), xdl::XdevLPluginName("XdevLWindowWindow")));
+		// Initialize once default instances
+		if (xdl::initDefaultWindowInstances(parameter) != xdl::ERR_OK) {
+			return xdl::ERR_ERROR;
 		}
 
 		xdl::XdevLWindowDeviceWin32* window = new xdl::XdevLWindowDeviceWin32(parameter);
 		parameter->setModuleInstance(window);
 	}
-	else if (windowCursorModuleDesc.getName() == parameter->getModuleName()) {
-		cursorWindows = new xdl::XdevLCursorWindows(parameter);
-		xdl::cursor = cursorWindows;
-		parameter->setModuleInstance(xdl::cursor);
-	}
-	
-	else if (windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::windowEventServer = new xdl::XdevLWindowWindowsEventServer(parameter);
-		parameter->setModuleInstance(xdl::windowEventServer);
-		xdl::XdevLWindowEventServerParameter = parameter;
-	} else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
-		// If there is not event server first create one.
-		if (xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowWindowsEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+
+	//
+	// Create XdevLWindowServer instance.
+	//
+	else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+
+		// Initialize once default instances
+		if (xdl::initDefaultWindowInstances(parameter) != xdl::ERR_OK) {
+			return xdl::ERR_ERROR;
 		}
 
 		xdl::XdevLWindowServerWindows* windowServer = new xdl::XdevLWindowServerWindows(parameter);
 		parameter->setModuleInstance(windowServer);
 	}
-	else {
+
+	//
+	// Create XdevLWindowEventServer instance.
+	//
+	else if (windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+
+		xdl::windowEventServer = new xdl::XdevLWindowWindowsEventServer(parameter);
+		parameter->setModuleInstance(xdl::windowEventServer);
+		xdl::XdevLWindowEventServerParameter = parameter;
+	} 
+	
+	//
+	// Create XdevLCursor instance.
+	//
+	else if (windowCursorModuleDesc.getName() == parameter->getModuleName()) {
+
+		cursorWindows = new xdl::XdevLCursorWindows(parameter);
+		xdl::cursor = cursorWindows;
+		parameter->setModuleInstance(xdl::cursor);
+
+	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
-
 
 	return xdl::ERR_OK;
 }
@@ -1064,13 +1079,17 @@ void XdevLWindowWindowsEventServer::flush() {
 	}
 
 	xdl_int XdevLCursorWindows::init() {
-		return ERR_ERROR;
+		return ERR_OK;
 	}
 	xdl_int XdevLCursorWindows::shutdown() {
-		return ERR_ERROR;
+		return ERR_OK;
 	}
 	void* XdevLCursorWindows::getInternal(const XdevLInternalName& id) {
 		return nullptr;
+	}
+
+	xdl_int XdevLCursorWindows::attach(XdevLWindow* window) {
+		return ERR_OK;
 	}
 
 	void XdevLCursorWindows::show() {

@@ -6,6 +6,7 @@ namespace xdl {
 
     void openGLDebugOutput(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length, const GLchar* message, const void* userParam);
 	void shaderLog(xdl_uint shaderId);
+	void checkOpenGLError(const char* funcName);
 }
 
 #endif

@@ -40,6 +40,7 @@ namespace xdl {
 	xdl_int XdevLOpenGLProgramImpl::getUniformLocation(const char* id) {
 		GLint tmp =  glGetUniformLocation(this->m_id, id);
 		if(tmp == -1) {
+			checkOpenGLError("glGetUniformLocation");
 		}
 		return tmp;
 	}
@@ -47,6 +48,7 @@ namespace xdl {
 	xdl_int XdevLOpenGLProgramImpl::getAttribLocation(const char* id) {
 		GLint tmp = glGetAttribLocation(this->m_id, id);
 		if(tmp == -1) {
+			checkOpenGLError("glGetAttribLocation");
 		}
 		return tmp;
 	}

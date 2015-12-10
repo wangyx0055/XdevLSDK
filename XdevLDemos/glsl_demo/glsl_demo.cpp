@@ -10,8 +10,6 @@
 #include <XdevL.h>
 #include <XdevLApplication.h>
 
-#include <XdevLOpenGLContext/XdevLOpenGLContext.h>
-
 #include <XdevLRAI/GL/glew.h>
 #include <XdevLRAI/XdevLRAI.h>
 
@@ -165,7 +163,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 		MyOpenGLApp(int argc, char** argv, const xdl::XdevLFileName& xml_filename) throw() :
 			xdl::XdevLApplication(argc, argv, xml_filename),
-			m_opengl(nullptr),
+			m_rai(nullptr),
 			m_frameBuffer(nullptr),
 			m_frameBufferArray(nullptr),
 			m_appIsRunning(xdl::xdl_true)	{
@@ -174,10 +172,10 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 		~MyOpenGLApp() {
 
-			m_opengl->destroy(m_frameBuffer);
-			m_opengl->destroy(m_vs);
-			m_opengl->destroy(m_fs);
-			m_opengl->destroy(m_sp);
+			m_rai->destroy(m_frameBuffer);
+			m_rai->destroy(m_vs);
+			m_rai->destroy(m_fs);
+			m_rai->destroy(m_sp);
 
 		}
 
@@ -250,8 +248,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		void handleGraphics(xdl::xdl_double dT) {
 
 			if(m_left_mouse_button->getPressed()) {
-				rx += static_cast<GLfloat>(y_axis->getDeltaValue()*230.0);
-				ry += static_cast<GLfloat>(x_axis->getDeltaValue()*230.0);
+				rx += static_cast<GLfloat>(y_axis->getDeltaValue());
+				ry += static_cast<GLfloat>(x_axis->getDeltaValue());
 			}
 
 			//
@@ -295,10 +293,10 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_sp->setUniformMatrix4(m_modelMatrix, 1, model);
 			m_sp->deactivate();
 
-			m_opengl->setActiveVertexArray(m_va);
-			m_opengl->setActiveShaderProgram(m_sp);
+			m_rai->setActiveVertexArray(m_va);
+			m_rai->setActiveShaderProgram(m_sp);
 
-			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 36);
+			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 36);
 
 
 
@@ -313,12 +311,12 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			// Render into the second half of the normal framebuffer.
 			//
 
-			m_opengl->setViewport(0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
-			m_opengl->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
-			m_opengl->clearDepthTarget(1.0);
+			m_rai->setViewport(0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
+			m_rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
+			m_rai->clearDepthTarget(1.0);
 
 			m_sp->activate();
-			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
+			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
 			m_sp->deactivate();
 
 
@@ -343,13 +341,13 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_frameBuffer->getTexture(0)->activate(0);
 			m_frameBufferSP->deactivate();
 
-			m_opengl->setActiveShaderProgram(m_frameBufferSP);
-			m_opengl->setActiveVertexArray(m_frameBufferArray);
+			m_rai->setActiveShaderProgram(m_frameBufferSP);
+			m_rai->setActiveVertexArray(m_frameBufferArray);
 
-			m_opengl->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
+			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
 
 
-			m_opengl->swapBuffers();
+			m_rai->swapBuffers();
 		}
 
 		//
@@ -357,21 +355,13 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		//
 		xdl::xdl_int initRenderDevice() {
 			// Get OpenGL Rendering System.
-			m_opengl = xdl::getModule<xdl::IPXdevLRAI>(getCore(),  xdl::XdevLID("MyRAIGL"));
-			if(!m_opengl) {
+			m_rai = xdl::getModule<xdl::IPXdevLRAI>(getCore(),  xdl::XdevLID("MyRAIGL"));
+			if(!m_rai) {
 				return xdl::ERR_ERROR;
 			}
 
 			// We must attach the OpenGL context to a render m_window.
-			if(m_opengl->create(getWindow()) != xdl::ERR_OK) {
-				return xdl::ERR_ERROR;
-			}
-
-			// If we want we can get the OpenGL context to change some behaviour. Do get this module before
-			// creating the XdevLRAI module. That module will create a context for itself. If you plan in using
-			// only XdevLRAI interface do not get this module here. This is rather a hack to show how things work.
-			m_gl_context = xdl::getModule<xdl::XdevLOpenGLContext*>(getCore(), xdl::XdevLID("XdevLRAIOpenGLContext"));
-			if(!m_gl_context) {
+			if(m_rai->create(getWindow()) != xdl::ERR_OK) {
 				return xdl::ERR_ERROR;
 			}
 
@@ -419,7 +409,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		//
 		xdl::xdl_int initFramebuffer() {
 
-			m_opengl->createFrameBuffer(&m_frameBuffer);
+			m_rai->createFrameBuffer(&m_frameBuffer);
 			m_frameBuffer->init(16, 16);
 			m_frameBuffer->addColorTarget(0	, xdl::XDEVL_FB_COLOR_RGBA);
 			m_frameBuffer->getTexture(0)->lock();
@@ -432,12 +422,12 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 			createScreenVertexArray(getWindow());
 
-			m_opengl->createShaderProgram(&m_frameBufferSP);
+			m_rai->createShaderProgram(&m_frameBufferSP);
 
-			m_opengl->createVertexShader(&m_frameBufferVS);
+			m_rai->createVertexShader(&m_frameBufferVS);
 			m_frameBufferVS->compileFromFile("frameBuffer_vs.glsl");
 
-			m_opengl->createFragmentShader(&m_frameBufferFS);
+			m_rai->createFragmentShader(&m_frameBufferFS);
 			m_frameBufferFS->compileFromFile("frameBuffer_fs.glsl");
 
 			m_frameBufferSP->attach(m_frameBufferVS);
@@ -467,17 +457,17 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			list.push_back((xdl::xdl_uint8*)g_normal_buffer_data);
 
 
-			m_opengl->createVertexArray(&m_va);
+			m_rai->createVertexArray(&m_va);
 			m_va->init(list.size(), list.data(), 36, m_vd);
 
 
 			// Create the shader program.
-			m_opengl->createShaderProgram(&m_sp);
+			m_rai->createShaderProgram(&m_sp);
 
-			m_opengl->createVertexShader(&m_vs);
+			m_rai->createVertexShader(&m_vs);
 			m_vs->compileFromFile("vs1.vs");
 
-			m_opengl->createFragmentShader(&m_fs);
+			m_rai->createFragmentShader(&m_fs);
 			m_fs->compileFromFile("fs1.fs");
 
 			m_sp->attach(m_vs);
@@ -498,7 +488,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 			// Layz destroying of the previous vertex array.
 			if(m_frameBufferArray != nullptr) {
-				m_opengl->destroy(m_frameBufferArray);
+				m_rai->destroy(m_frameBufferArray);
 			}
 
 
@@ -530,14 +520,13 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			list2.push_back((xdl::xdl_uint8*)screen_vertex);
 			list2.push_back((xdl::xdl_uint8*)screen_uv);
 
-			m_opengl->createVertexArray(&m_frameBufferArray);
+			m_rai->createVertexArray(&m_frameBufferArray);
 			m_frameBufferArray->init(list2.size(), list2.data(), 6, vd2);
 		}
 
 	private:
 
-		xdl::XdevLOpenGLContext* 	m_gl_context;
-		xdl::IPXdevLRAI 			m_opengl;
+		xdl::IPXdevLRAI 			m_rai;
 		xdl::XdevLFrameBuffer*		m_frameBuffer;
 		xdl::XdevLVertexArray*		m_frameBufferArray;
 		xdl::XdevLVertexShader*		m_frameBufferVS;

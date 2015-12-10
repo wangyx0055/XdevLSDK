@@ -347,16 +347,11 @@ namespace xdl {
 			xdl_uint32 x = event.motion.x;
 			xdl_uint32 y = event.motion.y;
 
-			std::cout << "x: " << x << ", y: " << y << std::endl;
-
 			m_mouse_old_x = m_mouse_curr_x;
 			m_mouse_curr_x = x;
 			m_mouse_old_y = m_mouse_curr_y;
 			m_mouse_curr_y = y;
 			m_mouse_moved = true;
-
-			std::cout << "m_mouse_curr_x: " << m_mouse_curr_x << ", m_mouse_curr_y: " << m_mouse_curr_y << std::endl;
-
 
 			if(m_window && m_relativeMode) {
 				m_window->grabPointer();

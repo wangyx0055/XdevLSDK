@@ -266,7 +266,11 @@ xdl_int XdevLOpenGLWGL::initOpenGL() {
 		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
 			contextAttributes.push_back(WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
 		}
-		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES) {
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES1) {
+			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
+			return ERR_ERROR;
+		}
+		else if (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES2) {
 			XDEVL_MODULE_ERROR("Not supported WGL_CONTEXT_PROFILE_MASK_ARB .\n");
 			return ERR_ERROR;
 		}

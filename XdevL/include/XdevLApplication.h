@@ -108,22 +108,26 @@ namespace xdl {
 
 					// Get the window instance.
 					m_window = xdl::getModule<xdl::XdevLWindow*>(getCore(), xdl::XdevLID("MyWindow"));
-					if(!m_window)
+					if (!m_window) {
 						throw;
+					}
 
 					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
-					if(!m_cursor)
+					if (!m_cursor) {
 						throw;
+					}
 
 					// Get the keyboard instance.
 					m_keyboard = xdl::getModule<xdl::XdevLKeyboard*>(getCore(),  xdl::XdevLID("MyKeyboard"));
-					if(!m_keyboard)
+					if (!m_keyboard) {
 						throw;
+					}
 
 					// Get the mouse instance.
 					m_mouse = xdl::getModule<xdl::XdevLMouse*>(getCore(),  xdl::XdevLID("MyMouse"));
-					if(!m_mouse)
+					if(!m_mouse) {
 						throw;
+					}
 
 					// Get the joystick instance.
 					m_joystick = xdl::getModule<xdl::XdevLJoystick*>(getCore(),  xdl::XdevLID("MyJoystick"));
