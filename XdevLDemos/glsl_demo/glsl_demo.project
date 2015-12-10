@@ -119,7 +119,7 @@
       <File Name="../bin/fs1.fs"/>
       <File Name="../bin/vs1.vs"/>
     </VirtualDirectory>
-    <File Name="glsl_demo.xml"/>
+    <File Name="../bin/glsl_demo.xml"/>
   </VirtualDirectory>
   <Dependencies Name="Debug_MacOSX_64"/>
   <Dependencies Name="Release_MacOSX_64"/>
