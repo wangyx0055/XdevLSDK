@@ -85,15 +85,15 @@
 	#endif
 	#include <Winsock2.h>
 	#include <Ws2tcpip.h>
-	#if defined (XDEVL_PLATFORM_WINDOWS) || defined(XDEVL_PLATFORM_MINGW)
+	#if defined (XDEVL_PLATFORM_WINDOWS) && !defined(XDEVL_PLATFORM_MINGW)
 		#include <Wspiapi.h>
+		#include <Synchapi.h>
 	#endif
 	#include <Windows.h>
 	#include <Mmsystem.h>
 	#include <iphlpapi.h>
 	#include <Process.h>
 	#include <WinBase.h>
-	#include <Synchapi.h>
 #elif defined (XDEVL_PLATFORM_APPLE)
 	#include <dlfcn.h>
 	#include <semaphore.h>

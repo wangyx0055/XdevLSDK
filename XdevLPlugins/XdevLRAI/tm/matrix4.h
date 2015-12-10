@@ -320,13 +320,13 @@ namespace tmath {
 	
 	/// Creates a perspective frustum matrix using left, right, bottom, top near and far.
 	template<typename T>
-	matrix<T,4,4>& frustum(T left, T right, T bottom, T top, T near, T far, matrix<T,4,4>& mat) {
-		T d = (right-left);
-		T c = (top-bottom);
-		mat[0] = 2.0f*near/d; mat[1] = 0.0f; mat[2] = 0.0f; mat[3] = 0.0f;
-		mat[4] = 0.0f; mat[5] = 2.0f*near/c; mat[6] = 0.0f; mat[7] = 0.0f;
-		mat[8] =(right+left)/d; mat[9] = (top+bottom)/c; mat[10] = -(far+near)/(far-near); mat[11] = -1.0f;
-		mat[12] = 0.0f; mat[13] = 0.0f; mat[14] = -2.0f*far*near/(far-near); mat[15] = 0.0f;
+	matrix<T,4,4>& frustum(T left_plane, T right_plane, T bottom_plane, T top_plane, T near_plane, T far_plane, matrix<T,4,4>& mat) {
+		T d = (right_plane-left_plane);
+		T c = (top_plane-bottom_plane);
+		mat[0] = 2.0f*near_plane/d; mat[1] = 0.0f; mat[2] = 0.0f; mat[3] = 0.0f;
+		mat[4] = 0.0f; mat[5] = 2.0f*near_plane/c; mat[6] = 0.0f; mat[7] = 0.0f;
+		mat[8] =(right_plane+left_plane)/d; mat[9] = (top_plane+bottom_plane)/c; mat[10] = -(far_plane+near_plane)/(far_plane-near_plane); mat[11] = -1.0f;
+		mat[12] = 0.0f; mat[13] = 0.0f; mat[14] = -2.0f*far_plane*near_plane/(far_plane-near_plane); mat[15] = 0.0f;
 		return mat;
 	}
 	
