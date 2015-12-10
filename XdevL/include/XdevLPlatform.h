@@ -77,6 +77,7 @@
 #endif
 
 #ifdef _WIN32
+	#undef NOMINMAX
 	#define NOMINMAX // Window uses macros using min,max which gets in conflict with std::max, std::min.
 
 	// We need this definition to tell the gcc compiler that we need at least the win32 api for WindowsXP

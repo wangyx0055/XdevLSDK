@@ -109,6 +109,10 @@ elseif(UNIX)
 		${XDEVL_PLUGINS}/XdevLFileSystem/Unix/XdevLFileSystemUnix.h
 		${XDEVL_PLUGINS}/XdevLFileSystem/Linux/XdevLFileSystemLinux.h
 	)
+elseif(WIN32)
+	set(HEADER_FILES ${HEADER_FILES}
+		${XDEVL_PLUGINS}/XdevLFileSystem/Windows/XdevLFileSystemWindows.h
+	)
 endif()
 #
 # Set the source files for the library.
@@ -122,7 +126,11 @@ elseif(UNIX)
 	set(SOURCE_FILES
 		${XDEVL_PLUGINS}/XdevLFileSystem/Unix/XdevLFileSystemUnix.cpp
 		${XDEVL_PLUGINS}/XdevLFileSystem/Linux/XdevLFileSystemLinux.cpp
-	)	
+	)
+elseif(WIN32)
+	set(SOURCE_FILES
+		${XDEVL_PLUGINS}/XdevLFileSystem/Windows/XdevLFileSystemWindows.cpp
+	)
 endif()
 
 #
@@ -164,6 +172,10 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 		target_link_libraries(${XdevLFileSystemLibrary}
 			XdevLd
 		)
+	elseif(WINDOWS)
+		target_link_libraries(${XdevLFileSystemLibrary}
+				XdevLd
+			)
 	else()
 		target_link_libraries(${XdevLFileSystemLibrary}
 			XdevLd
@@ -179,6 +191,10 @@ else()
 		)
 	elseif(UNIX)
 		target_link_libraries(${XdevLFileSystemLibrary}
+			XdevL
+		)
+	elseif(WINDOWS)
+			target_link_libraries(${XdevLFileSystemLibrary}
 			XdevL
 		)
 	else()
