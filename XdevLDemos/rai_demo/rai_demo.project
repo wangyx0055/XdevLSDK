@@ -95,6 +95,15 @@
   "buildType": "",
   "arguments": [],
   "parentProject": ""
+ }, {
+  "name": "Release_Win64",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
  }]]]>
     </Plugin>
   </Plugins>
@@ -260,6 +269,7 @@
     <Configuration Name="Debug_Win32" CompilerType="MinGW ( CodeLite-4.8.1 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-ggdb;-m32" C_Options="-ggdb;-m32" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0"/>
       <Linker Options="-m32" Required="yes">
+        <LibraryPath Value="$(XDEVL_HOME)/lib"/>
         <Library Value="XdevLd"/>
         <Library Value="opengl32"/>
       </Linker>
@@ -300,7 +310,6 @@
       <Compiler Options="-ggdb;-m64" C_Options="-ggdb;-m64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0"/>
       <Linker Options="" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
-        <LibraryPath Value="$(XDEVL_PLUGINS)/lib"/>
         <Library Value="XdevLd"/>
         <Library Value="opengl32"/>
       </Linker>
@@ -467,7 +476,7 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../bin/$(ProjectName)" IntermediateDirectory="$(ConfigurationName)" Command="$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="Default" DbgSetName="Default">
+      <Environment EnvVarSetName="Default" DbgSetName="">
         <![CDATA[]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">

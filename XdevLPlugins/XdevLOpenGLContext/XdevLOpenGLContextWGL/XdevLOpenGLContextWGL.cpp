@@ -10,22 +10,24 @@
 //#include <GL/wglew.h>
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLWGL::m_moduleDescriptor { vendor,
-        author,
-        moduleNames[0],
-        copyright,
-        description,
-        XdevLOpenGLContextWGLMajorVersion,
-        XdevLOpenGLContextWGLMinorVersion,
-        XdevLOpenGLContextWGLPatchVersion
-                                                                   };
+xdl::XdevLModuleDescriptor xdl::XdevLOpenGLWGL::m_moduleDescriptor {
+	vendor,
+	author,
+	moduleNames[0],
+	copyright,
+	description,
+	XdevLOpenGLContextWGLMajorVersion,
+	XdevLOpenGLContextWGLMinorVersion,
+	XdevLOpenGLContextWGLPatchVersion
+};
 
-xdl::XdevLPluginDescriptor wglPluginDescriptor { xdl::pluginName,
-        xdl::moduleNames,
-        xdl::XdevLOpenGLContextWGLPluginMajorVersion,
-        xdl::XdevLOpenGLContextWGLPluginMinorVersion,
-        xdl::XdevLOpenGLContextWGLPluginPatchVersion
-                                               };
+xdl::XdevLPluginDescriptor wglPluginDescriptor {
+	xdl::pluginName,
+	xdl::moduleNames,
+	xdl::XdevLOpenGLContextWGLPluginMajorVersion,
+	xdl::XdevLOpenGLContextWGLPluginMinorVersion,
+	xdl::XdevLOpenGLContextWGLPluginPatchVersion
+};
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	// Create the "OpenGL" module.
@@ -344,14 +346,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLWGL::setEnableFSAA(xdl_bool state) {
-//	if(m_ARBMultisampleSupported){
-//		if(state)
-//			glEnable(GL_MULTISAMPLE_ARB);
-//		else{
-//			glDisable(GL_MULTISAMPLE_ARB);
-//		}
-//		return ERR_OK;
-//	}
 		return ERR_ERROR;
 	}
 

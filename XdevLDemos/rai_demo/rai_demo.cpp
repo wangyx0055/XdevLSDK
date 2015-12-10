@@ -379,8 +379,8 @@ int main(int argc, char* argv[]) {
 		}
 
 		if(left_mouse_button->getPressed()) {
-			rx += static_cast<float>(y_axis->getDeltaValue()*230.0);
-			ry += static_cast<float>(x_axis->getDeltaValue()*230.0);
+			rx += static_cast<float>(y_axis->getDeltaValue());
+			ry += static_cast<float>(x_axis->getDeltaValue());
 		}
 		
 		rai->setActiveDepthTest(xdl::xdl_true);
