@@ -5,10 +5,10 @@
 
 	<!-- Plug necessary plugins -->
 	<XdevLPlugins>
-		<XdevLPlugin name="XdevLWindowSDL"	version="1.0.0"/>
-		<XdevLPlugin name="XdevLMouse"		version="1.0.0"/>
-		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>
-		<XdevLPlugin name="XdevLOpenGLContextSDL" version="0.1.0"/>
+		<XdevLPlugin name="XdevLWindowWindow"		version="1.0.0"/>
+		<XdevLPlugin name="XdevLKeyboard"			version="1.0.0"/>
+		<XdevLPlugin name="XdevLMouse"				version="1.0.0"/>
+		<XdevLPlugin name="XdevLOpenGLContextWGL"	version="0.1.0"/>
 		<XdevLPlugin name="XdevLRAIGL"		version="0.1.0"/>
 	</XdevLPlugins>
 
@@ -32,17 +32,7 @@
 	</XdevLWindow>
 
 	<!-- Setting some properties of the XdevLOpenGL module. -->
-	<XdevLOpenGL 
-		id="MyOpenGL"
-		profile="core"
-		major="3"
-		minor="2" 
-		framebuffer_depth="32" 
-		z_buffer_depth="24" 
-		stencil_buffer_depth="0"  
-		vsync="0" 
-		fsaa="0"
-	/> 
+	<XdevLOpenGLContext id="XdevLRAIOpenGLContext" vsync="0" />
 
 
 </XdevLCoreProperties>

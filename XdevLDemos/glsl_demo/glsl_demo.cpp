@@ -248,8 +248,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		void handleGraphics(xdl::xdl_double dT) {
 
 			if(m_left_mouse_button->getPressed()) {
-				rx += static_cast<GLfloat>(y_axis->getDeltaValue());
-				ry += static_cast<GLfloat>(x_axis->getDeltaValue());
+				rx += static_cast<float>(y_axis->getDeltaValue());
+				ry += static_cast<float>(x_axis->getDeltaValue());
 			}
 
 			//
@@ -264,32 +264,21 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_frameBuffer->activateDepthTarget(xdl::xdl_true);
 			m_frameBuffer->clearDepthTarget(1.0f);
 
-			tmath::mat4 proj, view, model, rotx, roty, rotz, trans, projView;
-			tmath::quat qrotx, qroty, qrotz;
-			//tmath::frustum(-0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 6.0f, proj);
-			tmath::perspective(45.0f, 3.0f/4.0f, 1.0f, 110.0f, proj);
-			//tmath::ortho(-5.25f, 5.25f, -5.25f, 5.25f, -2.0f, 6.0f, proj);
-			tmath::identity(view);
-			tmath::identity(model);
-			tmath::identity(rotx);
-			tmath::identity(roty);
-			tmath::identity(rotz);
+			xdl::xdl_float aspect_ratio = getWindow()->getWidth()/getWindow()->getHeight();
 
-			tmath::translate(0.0f, 0.0f, -3.0f,trans);
-			tmath::rotate_x(rx, rotz);
-			//tmath::rotate_x(rx, rotx);
+			tmath::mat4 proj, rotx, roty, trans, model;
+			tmath::perspective(45.0f, aspect_ratio, 1.0f, 110.0f, proj);
+
+			tmath::rotate_x(rx, rotx);
 			tmath::rotate_y(ry, roty);
-			//	tmath::convert(qrotx, rotx);
+			tmath::translate(0.0f, 0.0f, -3.0f, trans);
 
-			model =  trans * rotz * roty * rotx;
-
-
-			projView = proj;
+			model =   trans * rotx * roty;
 
 
 
 			m_sp->activate();
-			m_sp->setUniformMatrix4(m_projViewMatrix, 1, projView);
+			m_sp->setUniformMatrix4(m_projViewMatrix, 1, proj);
 			m_sp->setUniformMatrix4(m_modelMatrix, 1, model);
 			m_sp->deactivate();
 
