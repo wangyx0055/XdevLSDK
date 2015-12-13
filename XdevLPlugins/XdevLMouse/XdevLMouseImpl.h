@@ -289,6 +289,8 @@ namespace xdl {
 	xdl_int XdevLMouseBase<T>::notify(XdevLEvent& event) {
 
 		if(event.type == XDEVL_WINDOW_EVENT) {
+			XDEVL_ASSERT(m_window, "Mouse not attached to window.");
+
 			if(event.window.event == XDEVL_WINDOW_RESIZED) {
 				if(m_window->getWindowID() == event.window.windowid) {
 					m_windowWidth = event.window.width;
