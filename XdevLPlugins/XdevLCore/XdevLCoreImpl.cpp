@@ -146,9 +146,11 @@ namespace xdl {
 		// Delete all modules.
 		XDEVL_MODULE_INFO("Removing all modules.\n");
 		
+		auto module = m_modules.rbegin();
 		// TODO Destroy backwards to hack the create and destroy order until the dependency fix is finished.
-		for(auto module = m_modules.rbegin(); module != m_modules.rend(); module++) {
+		while(module != m_modules.rend()) {
 			deleteModule(module->second->getModuleCreateParameter()->getModuleInstance()->getID());
+			module = m_modules.rbegin();
 		}
 		m_modules.clear();
 
