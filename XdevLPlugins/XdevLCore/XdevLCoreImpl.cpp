@@ -145,20 +145,26 @@ namespace xdl {
 
 		// Delete all modules.
 		XDEVL_MODULE_INFO("Removing all modules.\n");
-		
-		auto module = m_modules.rbegin();
+
 		// TODO Destroy backwards to hack the create and destroy order until the dependency fix is finished.
-		while(module != m_modules.rend()) {
-			deleteModule(module->second->getModuleCreateParameter()->getModuleInstance()->getID());
-			module = m_modules.rbegin();
+		moduleMap::const_iterator moduleIterator = m_modules.begin();
+		while(moduleIterator != m_modules.end()) {
+			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
+			
+			if(module->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
+				deleteModule(module->getID());
+				moduleIterator = m_modules.erase(moduleIterator);
+			} else {
+				moduleIterator++;
+			}
 		}
-		m_modules.clear();
 
 		// Go through all plugins and delete them from the system.
 		XDEVL_MODULE_INFO("Removing all plugins.\n");
-		for(auto plugin : m_plugins) {
-			XDEVL_MODULE_INFO("Removing plugin: " << plugin.first << std::endl);
-			delete(plugin.second);
+		moduleMap::const_iterator pluginIterator = m_plugins.begin();
+		while(moduleIterator != m_modules.end()) {
+			XDEVL_MODULE_INFO("Removing plugin: " << pluginIterator->first << std::endl);
+			unplug(pluginIterator->first);
 		}
 
 		m_listener.clear();
@@ -338,8 +344,11 @@ namespace xdl {
 		// Get the plugins basic create, delete and descriptor functions.
 		//
 		XdevLGetPluginDescriptorFunction 	plugin_descriptor	= (XdevLGetPluginDescriptorFunction)(modulesSharedLibrary->getFunctionAddress("_getDescriptor"));
-		XdevLCreateModuleFunction 			create_module		= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
-		XdevLDeleteModuleFunction 			delete_module		= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
+		XdevLCreateModuleFunction create_module		= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
+		XdevLDeleteModuleFunction delete_module		= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
+		XdevLPluginInitFunction init_plugin = (XdevLPluginInitFunction)(modulesSharedLibrary->getFunctionAddress("_init"));
+		XdevLPluginShutdownFunction shtudown_plugin = (XdevLPluginShutdownFunction)(modulesSharedLibrary->getFunctionAddress("_shutdown"));
+
 
 		// Check if we have all necessary module functions from the dynamic library.
 		if((plugin_descriptor == nullptr) || (create_module == nullptr) || (delete_module == nullptr)) {
@@ -347,7 +356,7 @@ namespace xdl {
 			assert(0 && "Plugin has not the right functions defined or another problem exists.");
 		}
 
-		auto plugininfo 	= new XdevLPluginInfo(create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
+		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shtudown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
 		m_plugins.insert(pluginMap::value_type(plugin_descriptor()->getName(), plugininfo));
 
 		// Add all module names into a map. We need that later if the user only
@@ -356,6 +365,19 @@ namespace xdl {
 		for(int module = 0; module < plugin_descriptor()->getNumModules(); ++module) {
 			m_modulesMap[plugin_descriptor()->getModuleName(module).toString()] = plugininfo;
 			XDEVL_MODULE_INFO("Found Module: " << plugin_descriptor()->getModuleName(module).toString() << ".\n");
+		}
+
+		// Initialize the plugin if supported.
+		if(plugininfo->isInitPluginValid()) {
+			XDEVL_MODULE_INFO("Initializing plugin: " << plugin_descriptor()->getName() << "\n");
+			XdevLPluginCreateParameter parameter(this);
+
+			if(plugininfo->initPlugin(&parameter) != ERR_OK) {
+				XDEVL_MODULE_WARNING("Pluing initialisation faild. " << ".\n");
+			} else {
+				XDEVL_MODULE_SUCCESS("Initializing plugin: " << plugin_descriptor()->getName() << " was succesful.\n");
+
+			}
 		}
 
 		XdevLVersion pluginVersion = plugin_descriptor()->getVersion();
@@ -379,14 +401,21 @@ namespace xdl {
 
 		// Ok if we are here this means the plugin exists. First we have to remove all
 		// modules which belongs to this plugin. But if a module is in use don't remove it.
-		auto ic(m_modules.begin());
-		while(ic != m_modules.end()) {
-			if(ic->second->getPluginInfo()->getPluginDescriptor()->getName() == i->second->getPluginDescriptor()->getName()) {
-				XDEVL_MODULE_ERROR("Module: '" << ic->first << "' belongs to the plugin '" << name_file <<"'.\n");
+		for(auto& ic : m_modules) {
+			if(ic.second->getPluginInfo()->getPluginDescriptor()->getName() == i->second->getPluginDescriptor()->getName()) {
+				XDEVL_MODULE_ERROR("Module: '" << ic.first << "' belongs to the plugin '" << name_file <<"'.\n");
 				XDEVL_MODULE_ERROR("Can't remove plugin: '" << name_file << "'.\n");
 				return ERR_ERROR;
 			}
-			ic++;
+		}
+
+		if(i->second->isShutdownPluginValid()) {
+			XDEVL_MODULE_INFO("Shutting down plugin: " << pluginName << "\n");
+			if(i->second->shutdownPlugin() != ERR_OK) {
+				XDEVL_MODULE_WARNING("Shutting down plugin failed.\n");
+			} else {
+				XDEVL_MODULE_SUCCESS("Shutting down plugin was successful.\n");
+			}
 		}
 
 		// Ok, delete the dynlib.
@@ -399,9 +428,9 @@ namespace xdl {
 	}
 
 	XdevLModule* XdevLCoreImpl::createModule(const XdevLModuleName& moduleName,
-	        const XdevLID& id,
-	        const XdevLPluginName& pluginName,
-	        XdevLUserData* userParameter) {
+	    const XdevLID& id,
+	    const XdevLPluginName& pluginName,
+	    XdevLUserData* userParameter) {
 
 		auto parameter = new XdevLModuleCreateParameter();
 
@@ -539,7 +568,7 @@ namespace xdl {
 		delete moduleIterator->second;
 
 		// Remove it from the module list.
-		m_modules.erase(moduleIterator);
+//		m_modules.erase(moduleIterator);
 
 		return ERR_OK;
 	}

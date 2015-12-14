@@ -38,11 +38,16 @@ namespace xdl {
 		@brief Supported Module messages.
 	*/
 	enum XdevLModuleEvents {
-	    XDEVL_MODULE_INIT,
-	    XDEVL_MODULE_SHUTDOWN,
-	    XDEVL_MODULE_UPDATE,
-	    XDEVL_MODULE_RESTART,
-	    XDEVL_MODULE_RESET
+	  XDEVL_MODULE_INIT,
+	  XDEVL_MODULE_SHUTDOWN,
+	  XDEVL_MODULE_UPDATE,
+	  XDEVL_MODULE_RESTART,
+	  XDEVL_MODULE_RESET
+	};
+
+	enum XdevLModuleStates {
+		XDEVL_MODULE_STATE_NONE = 1,
+		XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY = 2
 	};
 
 	/**
@@ -53,7 +58,8 @@ namespace xdl {
 		public:
 			XdevLModuleDescriptor(const XdevLModuleName& moduleName, const XdevLVersion& version):
 				m_moduleName(moduleName),
-				m_version(version) {
+				m_version(version),
+				m_states(XDEVL_MODULE_STATE_NONE) {
 			}
 
 			XdevLModuleDescriptor(const XdevLString& vendor,
@@ -69,7 +75,27 @@ namespace xdl {
 				m_moduleName(moduleName),
 				m_copyright(copyright),
 				m_description(description),
-				m_version(major, minor, patch) {
+				m_version(major, minor, patch),
+				m_states(XDEVL_MODULE_STATE_NONE) {
+
+			}
+
+			XdevLModuleDescriptor(const XdevLString& vendor,
+			                      const XdevLString& author,
+			                      const XdevLModuleName& moduleName,
+			                      const XdevLString& copyright,
+			                      const XdevLString& description,
+			                      xdl_uint major,
+			                      xdl_uint minor,
+			                      xdl_uint patch,
+														xdl_uint32 states) :
+				m_vendor(vendor),
+				m_author(author),
+				m_moduleName(moduleName),
+				m_copyright(copyright),
+				m_description(description),
+				m_version(major, minor, patch),
+				m_states(states) {
 
 			}
 
@@ -104,6 +130,11 @@ namespace xdl {
 			virtual const XdevLVersion& getVersion() const {
 				return m_version;
 			}
+			
+			/// Return the state of the module.
+			virtual xdl_bool getState(XdevLModuleStates state) const {
+				return (m_states & state);
+			}
 
 		private:
 			// Holds the name of the vendor.
@@ -123,6 +154,8 @@ namespace xdl {
 
 			// Holds the version of the module.
 			XdevLVersion 		m_version;
+			
+			xdl_uint32			m_states;
 	};
 
 

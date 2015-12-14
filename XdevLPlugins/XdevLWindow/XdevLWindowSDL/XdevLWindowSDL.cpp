@@ -50,7 +50,8 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::windowServerDescription,
 	xdl::XdevLWindowEventServerMajorVersion,
 	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
+	xdl::XdevLWindowEventServerPatchVersion,
+	xdl::XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY
 };
 
 xdl::XdevLModuleDescriptor cursorModuleDesc {
@@ -88,43 +89,63 @@ struct XdevLJoysticks {
 
 static std::vector<XdevLJoysticks> joysticks;
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	// Only init SDL if this is the first module.
-	if(reference_counter == 0) {
-		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 
-		numberOfJoystickDevices = SDL_NumJoysticks();
-		if(numberOfJoystickDevices > 0) {
-			for(xdl::xdl_uint idx = 0; idx < numberOfJoystickDevices; idx++) {
-				SDL_Joystick* js = SDL_JoystickOpen(idx);
-				if(js != nullptr) {
-					XdevLJoysticks jse;
-					jse.instance = js;
-					jse.numberOfJoystickButtons = SDL_JoystickNumButtons(js);
-					jse.numberOfJoystickAxis = SDL_JoystickNumAxes(js);
-					joysticks.push_back(jse);
-				} else {
-					numberOfJoystickDevices--;
-				}
+extern "C" XDEVL_EXPORT xdl::xdl_int _init(xdl::XdevLPluginCreateParameter* parameter) {
+
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+
+	numberOfJoystickDevices = SDL_NumJoysticks();
+	if(numberOfJoystickDevices > 0) {
+		for(xdl::xdl_uint idx = 0; idx < numberOfJoystickDevices; idx++) {
+			SDL_Joystick* js = SDL_JoystickOpen(idx);
+			if(js != nullptr) {
+				XdevLJoysticks jse;
+				jse.instance = js;
+				jse.numberOfJoystickButtons = SDL_JoystickNumButtons(js);
+				jse.numberOfJoystickAxis = SDL_JoystickNumAxes(js);
+				joysticks.push_back(jse);
+			} else {
+				numberOfJoystickDevices--;
 			}
-			SDL_JoystickEventState(SDL_ENABLE);
 		}
+		SDL_JoystickEventState(SDL_ENABLE);
+	}
 
-		//
-		// CAUTION: This counter has to be increased before any createModule method.
-		//
-		reference_counter++;
+	// If there is not event server first create one.
+	if(xdl::windowEventServer == nullptr) {
+		// If there is no even server active, create and activate it.
+		xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
+	}
 
-		// If there is not event server first create one.
-		if(xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
-		}
+	if(xdl::cursor == nullptr) {
+		xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+	}
 
-		if(xdl::cursor == nullptr) {
-			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown() {
+
+	// If the last window was destroy make sure to destroy the event server too.
+	if(xdl::windowEventServer != nullptr) {
+		xdl::XdevLWindowEventServerParameter->getMediator()->deleteModule(xdl::windowEventServer->getID());
+		xdl::windowEventServer = nullptr;
+	}
+
+	if(joysticks.size() > 0) {
+		for(auto& js : joysticks) {
+			SDL_JoystickClose(js.instance);
 		}
 	}
+
+	SDL_Quit();
+
+	return xdl::ERR_OK;
+}
+
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+
 
 	//
 	// Create XdevLWindow instance.
@@ -178,26 +199,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 	if(obj)
 		delete obj;
-
-	reference_counter--;
-
-	// Only Quit SDL if this is the last module.
-	if(reference_counter == 0) {
-
-		// If the last window was destroy make sure to destroy the event server too.
-		if(xdl::windowEventServer != nullptr) {
-			xdl::XdevLWindowEventServerParameter->getMediator()->deleteModule(xdl::windowEventServer->getID());
-			xdl::windowEventServer = nullptr;
-		}
-
-		if(joysticks.size() > 0) {
-			for(auto& js : joysticks) {
-				SDL_JoystickClose(js.instance);
-			}
-		}
-
-		SDL_Quit();
-	}
 }
 
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
@@ -665,9 +666,9 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size) {
 
 		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
 		sdlWindow->setTitle(title);
@@ -1133,7 +1134,7 @@ namespace xdl {
 
 		xdl_int mx, my;
 		SDL_GetMouseState(&mx, &my);
-		SDL_WarpMouseInWindow(m_window->getNativeWindow(), m_window->getWidth()/2, m_window->getHeight()/2); 
+		SDL_WarpMouseInWindow(m_window->getNativeWindow(), m_window->getWidth()/2, m_window->getHeight()/2);
 	}
 
 	xdl_int XdevLCursorSDL::clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
