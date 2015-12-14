@@ -150,9 +150,9 @@ namespace xdl {
 		moduleMap::const_iterator moduleIterator = m_modules.begin();
 		while(moduleIterator != m_modules.end()) {
 			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
-			
+
 			if(module->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
-				deleteModule(module->getID());
+				_deleteModule(module->getID());
 				moduleIterator = m_modules.erase(moduleIterator);
 			} else {
 				moduleIterator++;
@@ -161,10 +161,11 @@ namespace xdl {
 
 		// Go through all plugins and delete them from the system.
 		XDEVL_MODULE_INFO("Removing all plugins.\n");
-		moduleMap::const_iterator pluginIterator = m_plugins.begin();
+		pluginMap::const_iterator pluginIterator = m_plugins.begin();
 		while(moduleIterator != m_modules.end()) {
 			XDEVL_MODULE_INFO("Removing plugin: " << pluginIterator->first << std::endl);
-			unplug(pluginIterator->first);
+			_unplug(pluginIterator->first);
+			pluginIterator = m_plugins.erase(pluginIterator);
 		}
 
 		m_listener.clear();
@@ -385,8 +386,24 @@ namespace xdl {
 		return ERR_OK;
 	}
 
+
+	//
+	// Unplug Plugin
+	//
 	xdl_int XdevLCoreImpl::unplug(const XdevLPluginName& pluginName) {
 
+		auto i = _unplug(pluginName);
+		if(i == m_plugins.end()) {
+			return ERR_ERROR;
+		}
+
+		// Remove it from the plugin list.
+		m_plugins.erase(i);
+
+		return ERR_OK;
+	}
+
+	pluginMap::iterator XdevLCoreImpl::_unplug(const XdevLPluginName& pluginName) {
 		XDEVL_MODULE_INFO("Unplug plugin: '" << pluginName << "'" << std::endl);
 
 		auto name_file(pluginName.toString());
@@ -396,7 +413,7 @@ namespace xdl {
 		auto i = m_plugins.find(XdevLPluginName(name_file));
 		if(i == m_plugins.end()) {
 			XDEVL_MODULE_ERROR("Plugin: '" << name_file << "' doesn't exist. Can't remove plugin.\n");
-			return ERR_ERROR;
+			return m_plugins.end();
 		}
 
 		// Ok if we are here this means the plugin exists. First we have to remove all
@@ -405,7 +422,7 @@ namespace xdl {
 			if(ic.second->getPluginInfo()->getPluginDescriptor()->getName() == i->second->getPluginDescriptor()->getName()) {
 				XDEVL_MODULE_ERROR("Module: '" << ic.first << "' belongs to the plugin '" << name_file <<"'.\n");
 				XDEVL_MODULE_ERROR("Can't remove plugin: '" << name_file << "'.\n");
-				return ERR_ERROR;
+				return m_plugins.end();;
 			}
 		}
 
@@ -421,10 +438,7 @@ namespace xdl {
 		// Ok, delete the dynlib.
 		delete(i->second);
 
-		// Remove it from the plugin list.
-		m_plugins.erase(i);
-
-		return ERR_OK;
+		return i;
 	}
 
 	XdevLModule* XdevLCoreImpl::createModule(const XdevLModuleName& moduleName,
@@ -538,12 +552,24 @@ namespace xdl {
 
 	xdl_int XdevLCoreImpl::deleteModule(const XdevLID& id) {
 
+		auto moduleIterator = _deleteModule(id);
+		if(moduleIterator == m_modules.end()) {
+			return ERR_ERROR;
+		}
+
+		// Remove it from the module list.
+		m_modules.erase(moduleIterator);
+
+		return ERR_OK;
+	}
+
+	moduleMap::iterator XdevLCoreImpl::_deleteModule(const XdevLID& id) {
 		XDEVL_MODULE_INFO("Removing Module " << id << std::endl);
 
 		auto moduleIterator = m_modules.find(id.getName());
 		if(m_modules.end() == moduleIterator) {
 			XDEVL_MODULE_ERROR("Module id: '" << id << "' doesn't exist. Cannot remove module.\n");
-			return ERR_ERROR;
+			return m_modules.end();
 		}
 
 		//
@@ -566,12 +592,10 @@ namespace xdl {
 
 		// Delete the XdevLModuleInfo object.
 		delete moduleIterator->second;
-
-		// Remove it from the module list.
-//		m_modules.erase(moduleIterator);
-
-		return ERR_OK;
+		
+		return moduleIterator;
 	}
+
 
 	XdevLModule* XdevLCoreImpl::getModule(const XdevLID& id) {
 		auto imi = m_modules.find(id.getName());

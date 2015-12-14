@@ -153,6 +153,9 @@ namespace xdl {
 			xdl_bool coreInitialized();
 
 		protected:
+			pluginMap::iterator _unplug(const XdevLPluginName& pluginName);
+			moduleMap::iterator _deleteModule(const XdevLID& id);
+		protected:
 
 			// Holds the initialized state.
 			xdl_bool m_initialized;
