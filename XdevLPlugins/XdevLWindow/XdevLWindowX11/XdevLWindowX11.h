@@ -141,8 +141,11 @@ namespace xdl {
 			virtual void setParent(XdevLWindow* window) override;
 			virtual void setType(XdevLWindowTypes type) override;
 
+			Display* getNativeDisplay();
 			Window getNativeWindow();
-		protected:
+	protected:
+			Display* m_display;
+
 			/// Holds the default root window. Mostly it is the desktop.
 			Window m_rootWindow;
 
@@ -340,7 +343,7 @@ namespace xdl {
 	private:
 			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
 	private:
-			Window		m_defaultRootWindow;
+			XdevLWindowX11* m_window;
 			Cursor		m_invisibleCursor;
 			Pixmap		m_invisibleCursorPixmap;
 			XColor		m_black;

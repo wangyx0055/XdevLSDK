@@ -238,10 +238,6 @@ void main(void) {                                                               
 			m_shaderProgram = nullptr;
 		}
 
-		if(nullptr != m_font) {
-			delete m_font;
-			m_font = nullptr;
-		}
 		return ERR_OK;
 	}
 

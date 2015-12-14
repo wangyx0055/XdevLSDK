@@ -288,121 +288,119 @@ namespace xdl {
 	template<typename T>
 	xdl_int XdevLMouseBase<T>::notify(XdevLEvent& event) {
 
-		if(event.type == XDEVL_WINDOW_EVENT) {
-			XDEVL_ASSERT(m_window, "Mouse not attached to window.");
+		//
+		// Do this only if the user attached a window.
+		//
+		if(nullptr != m_window) {
 
-			if(event.window.event == XDEVL_WINDOW_RESIZED) {
-				if(m_window->getWindowID() == event.window.windowid) {
-					m_windowWidth = event.window.width;
-					m_windowHeight = event.window.height;
+			if(event.type == XDEVL_WINDOW_EVENT) {
+				if(event.window.event == XDEVL_WINDOW_RESIZED) {
+					if(m_window->getWindowID() == event.window.windowid) {
+						m_windowWidth = event.window.width;
+						m_windowHeight = event.window.height;
+					}
 				}
-			}
-		} else if( event.type == ButtonPressed.getHashCode()) {
-			if(m_Buttons.size() == 0)
-				return xdl_false;
+			} else if( event.type == ButtonPressed.getHashCode()) {
+				if(m_Buttons.size() == 0)
+					return xdl_false;
 
-			xdl_int idx = event.button.button;
-			if(!m_mouse_button_down)
-				m_Buttons[idx]->capturePressTime(event.common.timestamp);
+				xdl_int idx = event.button.button;
+				if(!m_mouse_button_down)
+					m_Buttons[idx]->capturePressTime(event.common.timestamp);
 
-			m_mouse_button_down = xdl_true;
-			m_Buttons[idx]->setState(xdl_true);
+				m_mouse_button_down = xdl_true;
+				m_Buttons[idx]->setState(xdl_true);
 
-			for(auto& delegate : m_buttonDelegates) {
-				delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
-			}
-
-
-
-			XdevLButtonId id = covertIdxToXdevLButton(idx);
-			auto pp = m_buttonIdDelegates.equal_range(id);
-			for (auto it = pp.first; it != pp.second; ++it) {
-				auto delegate = it->second;
-				delegate(BUTTON_PRESSED);
-			}
-
-		} else if( event.type == ButtonReleased.getHashCode()) {
-			if(m_Buttons.size() == 0)
-				return xdl_false;
-
-			xdl_int idx = event.button.button;
-
-			if(m_mouse_button_down)
-				m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
-
-			m_mouse_button_down = xdl_false;
-			m_Buttons[idx]->setState(xdl_false);
-
-			for(auto& delegate : m_buttonDelegates) {
-				delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
-			}
-
-			XdevLButtonId id = covertIdxToXdevLButton(idx);
-			auto pp = m_buttonIdDelegates.equal_range(id);
-			for (auto it = pp.first; it != pp.second; ++it) {
-				auto delegate = it->second;
-				delegate(BUTTON_RELEASED);
-			}
-
-		} else if( event.type == MouseMotion.getHashCode()) {
-
-			xdl_uint32 x = event.motion.x;
-			xdl_uint32 y = event.motion.y;
-
-			m_mouse_old_x = m_mouse_curr_x;
-			m_mouse_curr_x = x;
-			m_mouse_old_y = m_mouse_curr_y;
-			m_mouse_curr_y = y;
-			m_mouse_moved = true;
-
-			if(m_window && m_relativeMode) {
-				m_window->grabPointer();
-
-				if( (x <= 0) || (x >= m_windowWidth - 1) || (y <= 0) || (y >= m_windowHeight - 1))   {
-					m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
-					m_mouse_old_x 	= m_windowWidth/2;
-					m_mouse_old_y 	= m_windowHeight/2;
-					m_mouse_curr_x 	= m_windowWidth/2;
-					m_mouse_curr_y 	= m_windowHeight/2;
-					return ERR_OK;
+				for(auto& delegate : m_buttonDelegates) {
+					delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
 				}
 
-			}
 
-			//
-			// Why do I do x + 1? Because: 0 <= x < width. The same goes for y.
-			//
 
-			if(x >= m_windowWidth - 1) {
-				x = m_windowWidth;
-			}
-
-			if(y >= m_windowHeight - 1) {
-				y = m_windowHeight;
-			}
-
-			if(m_Axes.size() > 0) {
-				m_Axes[AXIS_0]->setValue(((xdl_float)(m_mouse_curr_x) / (xdl_float)m_windowWidth));
-				m_Axes[AXIS_1]->setValue(((xdl_float)(m_mouse_curr_y) / (xdl_float)m_windowHeight));
-				m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
-				m_Axes[AXIS_1]->setDeltaValue((xdl_float)(m_mouse_curr_y - m_mouse_old_y));
-
-				for(auto& delegate : m_axisDelegates) {
-					delegate(AXIS_0, m_Axes[AXIS_0]->getValue());
-					delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
+				XdevLButtonId id = covertIdxToXdevLButton(idx);
+				auto pp = m_buttonIdDelegates.equal_range(id);
+				for (auto it = pp.first; it != pp.second; ++it) {
+					auto delegate = it->second;
+					delegate(BUTTON_PRESSED);
 				}
-			}
-			
-//			std::cout << ((xdl_float)(x) / (xdl_float)m_windowWidth) << "x" << ((xdl_float)(y) / (xdl_float)m_windowHeight) << std::endl;
 
-		} else if (event.type == XDEVL_MODULE_EVENT) {
-			if(event.module.event == XDEVL_MODULE_INIT) {
-				init();
-			} else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
-				shutdown();
+			} else if( event.type == ButtonReleased.getHashCode()) {
+				if(m_Buttons.size() == 0)
+					return xdl_false;
+
+				xdl_int idx = event.button.button;
+
+				if(m_mouse_button_down)
+					m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
+
+				m_mouse_button_down = xdl_false;
+				m_Buttons[idx]->setState(xdl_false);
+
+				for(auto& delegate : m_buttonDelegates) {
+					delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
+				}
+
+				XdevLButtonId id = covertIdxToXdevLButton(idx);
+				auto pp = m_buttonIdDelegates.equal_range(id);
+				for (auto it = pp.first; it != pp.second; ++it) {
+					auto delegate = it->second;
+					delegate(BUTTON_RELEASED);
+				}
+
+			} else if( event.type == MouseMotion.getHashCode()) {
+
+				xdl_uint32 x = event.motion.x;
+				xdl_uint32 y = event.motion.y;
+
+				m_mouse_old_x = m_mouse_curr_x;
+				m_mouse_curr_x = x;
+				m_mouse_old_y = m_mouse_curr_y;
+				m_mouse_curr_y = y;
+				m_mouse_moved = true;
+
+				if(m_window && m_relativeMode) {
+					m_window->grabPointer();
+
+					if( (x <= 0) || (x >= m_windowWidth - 1) || (y <= 0) || (y >= m_windowHeight - 1))   {
+						m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
+						m_mouse_old_x 	= m_windowWidth/2;
+						m_mouse_old_y 	= m_windowHeight/2;
+						m_mouse_curr_x 	= m_windowWidth/2;
+						m_mouse_curr_y 	= m_windowHeight/2;
+						return ERR_OK;
+					}
+
+				}
+
+				//
+				// Why do I do x + 1? Because: 0 <= x < width. The same goes for y.
+				//
+
+				if(x >= m_windowWidth - 1) {
+					x = m_windowWidth;
+				}
+
+				if(y >= m_windowHeight - 1) {
+					y = m_windowHeight;
+				}
+
+				if(m_Axes.size() > 0) {
+					m_Axes[AXIS_0]->setValue(((xdl_float)(m_mouse_curr_x) / (xdl_float)m_windowWidth));
+					m_Axes[AXIS_1]->setValue(((xdl_float)(m_mouse_curr_y) / (xdl_float)m_windowHeight));
+					m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
+					m_Axes[AXIS_1]->setDeltaValue((xdl_float)(m_mouse_curr_y - m_mouse_old_y));
+
+					for(auto& delegate : m_axisDelegates) {
+						delegate(AXIS_0, m_Axes[AXIS_0]->getValue());
+						delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
+					}
+				}
+
 			}
+
 		}
-		return ERR_OK;
+
+		return XdevLModuleImpl<T>::notify(event);
 	}
 
 	template<typename T>

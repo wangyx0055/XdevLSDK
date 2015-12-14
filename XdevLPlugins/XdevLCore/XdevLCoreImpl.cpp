@@ -710,9 +710,9 @@ namespace xdl {
 		//
 		// Call all update methods of registered modules.
 		//
-		for(auto module : m_modules) {
+		for(auto& module : m_modules) {
 			XdevLEvent event;
-			event.type 					= XDEVL_MODULE_EVENT;
+			event.type 			= XDEVL_MODULE_EVENT;
 			event.module.event 	= XDEVL_MODULE_UPDATE;
 			sendEventTo(module.second->getModuleCreateParameter()->getModuleId().getHashCode(), event);
 		}

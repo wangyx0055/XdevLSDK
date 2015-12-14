@@ -35,7 +35,7 @@
 #include <XdevLTimer.h>
 #include <XdevLPluginImpl.h>
 
-// TODO Destroying of modules that depend on each other causes issues when destroying. Plugins and Modules must have a dependency list that can be check 
+// TODO Destroying of modules that depend on each other causes issues when destroying. Plugins and Modules must have a dependency list that can be check
 // for destroy order.
 
 namespace xdl {
@@ -163,12 +163,6 @@ namespace xdl {
 			// Holds the logger.
 			XdevLLog*		m_logger;
 
-			// Holds modules.
-			moduleMap		m_modules;
-
-			// Holds plugins.
-			pluginMap		m_plugins;
-
 			// Holds listener.
 			listenerMap m_listener;
 
@@ -198,6 +192,8 @@ namespace xdl {
 
 			std::map<xdl_uint64, XdevLUserData*> m_userDataMap;
 			std::map<std::string, XdevLPluginInfo*> m_modulesMap;
+			moduleMap		m_modules;
+			pluginMap		m_plugins;
 			callbackListenerType m_listenerCallbackFuncList;
 	};
 
