@@ -168,6 +168,12 @@ void main(void) {                                                               
 		m_shaderProgram(nullptr),
 		m_vertexShader(nullptr),
 		m_fragmentShader(nullptr),
+		m_texture(nullptr),
+		m_vertexArray(nullptr),
+		m_vd(nullptr),
+		m_vertexBuffer(nullptr),
+		m_staticVertexArray(nullptr),
+		m_staticVertexBuffer(nullptr),
 		m_gamma(0.2f),
 		m_buffer(0.4f),
 		m_dft(0),
@@ -179,6 +185,64 @@ void main(void) {                                                               
 		m_usePixelUnits(xdl_false) {
 		m_shadowOffset[0] = 0.0f;
 		m_shadowOffset[1] = 0.0f;
+	}
+
+	xdl_int XdevLTextLayoutImpl::shutdown() {
+
+		//
+		// Destroy XdevLRAI objects
+		//
+		
+		if(nullptr != m_vd) {
+			m_rai->destroy(m_vd);
+			m_vd = nullptr;
+		}
+
+		if(nullptr != m_texture) {
+			m_rai->destroy(m_texture);
+			m_texture = nullptr;
+		}
+
+		if(nullptr != m_vertexArray) {
+			m_rai->destroy(m_vertexArray);
+			m_vertexArray = nullptr;
+		}
+
+		if(nullptr != m_vertexBuffer) {
+			m_rai->destroy(m_vertexBuffer);
+			m_vertexBuffer = nullptr;
+		}
+
+		if(nullptr != m_staticVertexArray) {
+			m_rai->destroy(m_staticVertexArray);
+			m_staticVertexArray = nullptr;
+		}
+
+		if(nullptr != m_staticVertexBuffer) {
+			m_rai->destroy(m_staticVertexBuffer);
+			m_staticVertexBuffer = nullptr;
+		}
+
+		if(nullptr != m_vertexShader) {
+			m_rai->destroy(m_vertexShader);
+			m_vertexShader = nullptr;
+		}
+
+		if(nullptr != m_fragmentShader) {
+			m_rai->destroy(m_fragmentShader);
+			m_fragmentShader = nullptr;
+		}
+
+		if(nullptr != m_shaderProgram) {
+			m_rai->destroy(m_shaderProgram);
+			m_shaderProgram = nullptr;
+		}
+
+		if(nullptr != m_font) {
+			delete m_font;
+			m_font = nullptr;
+		}
+		return ERR_OK;
 	}
 
 	xdl_int XdevLTextLayoutImpl::notify(xdl::XdevLEvent& event) {
@@ -199,7 +263,7 @@ void main(void) {                                                               
 			}
 			break;
 		}
-		return ERR_OK;
+		return XdevLModuleImpl::notify(event);
 	}
 
 	void XdevLTextLayoutImpl::usePixelUnits(xdl_bool state) {
@@ -275,6 +339,11 @@ void main(void) {                                                               
 
 	void XdevLTextLayoutImpl::useFont(XdevLFont* font) {
 		assert(font && "XdevLTextLayoutImpl::render: Font value invalid (nullptr).");
+
+		if(nullptr != m_font) {
+			delete m_font;
+			m_font = nullptr;
+		}
 
 		m_font = font;
 		//

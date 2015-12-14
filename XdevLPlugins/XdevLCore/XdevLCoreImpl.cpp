@@ -145,12 +145,12 @@ namespace xdl {
 
 		// Delete all modules.
 		XDEVL_MODULE_INFO("Removing all modules.\n");
-		moduleMap::const_iterator ic(m_modules.begin());
-		moduleMap::const_iterator ie(m_modules.end());
-		while(ic != ie) {
-			deleteModule(ic->second->getModuleCreateParameter()->getModuleInstance()->getID());
-			ic  = m_modules.begin();
+		
+		// TODO Destroy backwards to hack the create and destroy order until the dependency fix is finished.
+		for(auto module = m_modules.rbegin(); module != m_modules.rend(); module++) {
+			deleteModule(module->second->getModuleCreateParameter()->getModuleInstance()->getID());
 		}
+		m_modules.clear();
 
 		// Go through all plugins and delete them from the system.
 		XDEVL_MODULE_INFO("Removing all plugins.\n");
@@ -519,7 +519,7 @@ namespace xdl {
 		// Send the shutdown message to the module.
 		//
 		XdevLEvent moduleInit;
-		moduleInit.type 					= XDEVL_MODULE_EVENT;
+		moduleInit.type 			= XDEVL_MODULE_EVENT;
 		moduleInit.module.sender 	= getID().getHashCode();
 		moduleInit.module.event 	= XDEVL_MODULE_SHUTDOWN;
 

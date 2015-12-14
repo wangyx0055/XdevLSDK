@@ -96,7 +96,7 @@ namespace xdl {
 
 			}
 			virtual	~XdevlKeyboardBase() {
-
+				keyButtonId.clear();
 			}
 			typedef std::map<const XdevLString, XdevLButtonId> KeyMapType;
 		protected:

@@ -172,6 +172,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 		~MyOpenGLApp() {
 
+			m_rai->destroy(m_vd);
+			m_rai->destroy(m_vertexDeclaration);
 			m_rai->destroy(m_frameBuffer);
 			m_rai->destroy(m_vs);
 			m_rai->destroy(m_fs);
@@ -435,7 +437,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		//
 		xdl::xdl_int initRenderAssets() {
 
-			m_vd = new xdl::XdevLVertexDeclaration();
+			m_rai->createVertexDeclaration(&m_vd);
 			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);		// Position
 			m_vd->add(4, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 1);		// Color
 			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 2);		// Normal
@@ -501,22 +503,23 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 				0.0f, 0.0f
 			};
 
-			xdl::XdevLVertexDeclaration* vd2 = new xdl::XdevLVertexDeclaration();
-			vd2->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);
-			vd2->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 9);
+			m_rai->createVertexDeclaration(&m_vertexDeclaration);
+			m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);
+			m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 9);
 
 			std::vector<xdl::xdl_uint8*> list2;
 			list2.push_back((xdl::xdl_uint8*)screen_vertex);
 			list2.push_back((xdl::xdl_uint8*)screen_uv);
 
 			m_rai->createVertexArray(&m_frameBufferArray);
-			m_frameBufferArray->init(list2.size(), list2.data(), 6, vd2);
+			m_frameBufferArray->init(list2.size(), list2.data(), 6, m_vertexDeclaration);
 		}
 
 	private:
 
 		xdl::IPXdevLRAI 			m_rai;
 		xdl::XdevLFrameBuffer*		m_frameBuffer;
+		xdl::XdevLVertexDeclaration* m_vertexDeclaration;
 		xdl::XdevLVertexArray*		m_frameBufferArray;
 		xdl::XdevLVertexShader*		m_frameBufferVS;
 		xdl::XdevLFragmentShader*	m_frameBufferFS;

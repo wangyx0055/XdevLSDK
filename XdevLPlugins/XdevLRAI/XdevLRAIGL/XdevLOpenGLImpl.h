@@ -98,6 +98,8 @@ namespace xdl {
 			virtual xdl_int setActiveRenderWindow(XdevLWindow* window);
 			virtual xdl_int swapBuffers();
 
+
+			virtual xdl_int createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration);
 			virtual xdl_int createVertexShader(XdevLVertexShader** vertex_shader);
 			virtual xdl_int createFragmentShader(XdevLFragmentShader** fragment_shader);
 			virtual xdl_int createGeometryShader(XdevLGeometryShader** geometry_shader);
@@ -125,6 +127,7 @@ namespace xdl {
 			virtual xdl_int createVertexBuffer(XdevLVertexBuffer** vertexBuffer);
 			virtual xdl_int createIndexBuffer(XdevLIndexBuffer** indexBuffer);
 
+			virtual xdl_int destroy(XdevLVertexDeclaration* vertexDeclaration);
 			virtual xdl_int destroy(XdevLShaderProgram* shaderProgram);
 			virtual xdl_int destroy(XdevLShader* shader);
 			virtual xdl_int destroy(XdevLVertexArray* vertexArray);

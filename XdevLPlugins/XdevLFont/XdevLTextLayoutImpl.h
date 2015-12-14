@@ -52,6 +52,8 @@ namespace xdl {
 
 			virtual xdl_int init(XdevLWindow* window, XdevLRAI* rai) override;
 
+			virtual xdl_int shutdown() override;
+
 			virtual void useFont(XdevLFont* font) override;
 
 			virtual void printText(const std::wstring& text, xdl_float x, xdl_float y) override;

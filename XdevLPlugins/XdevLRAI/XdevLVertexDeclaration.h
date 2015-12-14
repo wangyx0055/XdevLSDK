@@ -41,10 +41,8 @@ namespace xdl {
 	class XdevLVertexDeclaration {
 		public:
 			~XdevLVertexDeclaration() {
-				std::vector<XdevLVertexDeclarationItem*>::iterator ib(m_list.begin());
-				while(ib != m_list.end()) {
-					delete (*ib);
-					ib++;
+				for(auto& vertexDeclerationitem : m_list) {
+					delete vertexDeclerationitem;
 				}
 			}
 

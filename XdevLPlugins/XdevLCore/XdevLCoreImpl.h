@@ -35,6 +35,9 @@
 #include <XdevLTimer.h>
 #include <XdevLPluginImpl.h>
 
+// TODO Destroying of modules that depend on each other causes issues when destroying. Plugins and Modules must have a dependency list that can be check 
+// for destroy order.
+
 namespace xdl {
 
 	// Holds the plugin major version.

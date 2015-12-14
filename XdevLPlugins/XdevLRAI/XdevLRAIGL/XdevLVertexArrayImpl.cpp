@@ -9,14 +9,17 @@
 namespace xdl {
 
 	XdevLVertexArrayImpl::XdevLVertexArrayImpl() : 	m_id(-1),
-		m_vd(NULL),
-		m_indexBuffer(NULL),
+		m_vd(nullptr),
+		m_indexBuffer(nullptr),
 		m_activated(xdl_false) {
 	}
 
 	XdevLVertexArrayImpl::~XdevLVertexArrayImpl() {
-		glDeleteVertexArrays(1, &m_id);
-		delete m_vd;
+		if(m_id != -1) {
+			glDeleteVertexArrays(1, &m_id);
+			m_id = -1;
+			m_vd = nullptr;
+		}
 	}
 
 	xdl_int XdevLVertexArrayImpl::init() {
@@ -58,7 +61,7 @@ namespace xdl {
 		glVertexAttribPointer(shaderAttribute, numberOfComponents, itemSizeType, GL_FALSE, 0, (void*)(0));
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-			
+
 		m_vertexBufferList.push_back(vertexBuffer);
 		return ERR_OK;
 	}
@@ -72,7 +75,7 @@ namespace xdl {
 		// Bind the Index Buffer to the array object.
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		
+
 		return ERR_OK;
 	}
 
@@ -236,7 +239,7 @@ namespace xdl {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 //		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		
+
 		return ERR_OK;
 	}
 

@@ -119,7 +119,7 @@ namespace xdl {
 		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
 		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
 
-		
+
 		if(initGLEW() != ERR_OK) {
 			return ERR_ERROR;
 		}
@@ -332,6 +332,12 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLImpl::swapBuffers() {
 		m_gl_context->swapBuffers();
+		return ERR_OK;
+	}
+
+	xdl_int XdevLOpenGLImpl::createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration) {
+		XdevLVertexDeclaration* vd = new XdevLVertexDeclaration();
+		*vertexDeclaration = vd;
 		return ERR_OK;
 	}
 
@@ -564,6 +570,11 @@ namespace xdl {
 			glDisableVertexAttribArray(vertexDeclaration->get(idx)->shaderAttribute);
 		}
 
+		return ERR_OK;
+	}
+
+	xdl_int XdevLOpenGLImpl::destroy(XdevLVertexDeclaration* vertexDeclaration) {
+		delete vertexDeclaration;
 		return ERR_OK;
 	}
 

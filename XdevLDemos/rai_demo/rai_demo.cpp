@@ -299,7 +299,8 @@ int main(int argc, char* argv[]) {
 	// Create Buffers
 	//
 
-	xdl::XdevLVertexDeclaration* vd = new xdl::XdevLVertexDeclaration();
+	xdl::XdevLVertexDeclaration* vd = nullptr;
+	rai->createVertexDeclaration(&vd);
 	vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);		// Position
 	vd->add(4, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 1);		// Color
 	vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 2);		// Normal
@@ -418,6 +419,12 @@ int main(int argc, char* argv[]) {
 		rai->swapBuffers();
 
 	}
+
+	rai->destroy(vd);
+	rai->destroy(va);
+	rai->destroy(vs);
+	rai->destroy(fs);
+	rai->destroy(sp);
 
 	xdl::destroyCore(core);
 

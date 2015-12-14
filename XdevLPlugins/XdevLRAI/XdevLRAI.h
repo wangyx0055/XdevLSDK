@@ -127,6 +127,9 @@ namespace xdl {
 			// Creation methods.
 			//
 
+			/// Create a Vertex Declaration
+			virtual xdl_int createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration) = 0;
+
 			/// Create a Vertex Shader.
 			virtual xdl_int createVertexShader(XdevLVertexShader** vertex_shader) = 0;
 
@@ -203,6 +206,8 @@ namespace xdl {
 			//
 			// Destroying methods.
 			//
+			/// Destroy a Vertex Declaration.
+			virtual xdl_int destroy(XdevLVertexDeclaration* vertexDeclaration) = 0;
 
 			/// Destroy a Shader Program.
 			virtual xdl_int destroy(XdevLShaderProgram* shaderProgram) = 0;
