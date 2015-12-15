@@ -279,6 +279,7 @@ void main(void) {                                                               
 
 	xdl_int XdevLTextLayoutImpl::init(XdevLWindow* window, XdevLRAI* rai) {
 		m_rai = rai;
+		m_rai->getDescriptor().registerDependency(this);
 		m_window = window;
 		m_screenWidth = window->getWidth();
 		m_screenHeight = window->getHeight();

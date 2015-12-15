@@ -89,51 +89,53 @@ static Display* globalDisplay = nullptr;
 static Window 	m_rootWindow;
 static Colormap defaultColorMap;
 
-// Reference counter for XdevLWindow plugin modules.
-static xdl::xdl_int reference_counter = 0;
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
 
-	//
-	// Initialize Xlib for threading and open a connections to the X server only once.
-	//
-	if(reference_counter == 0) {
+	// Start X server with thread support.
+	XInitThreads();
 
-		// Start X server with thread support.
-		XInitThreads();
-
-		// Connect to X server.
+	// Connect to X server.
+	if(globalDisplay == nullptr) {
+		globalDisplay = XOpenDisplay(nullptr);
 		if(globalDisplay == nullptr) {
-			globalDisplay = XOpenDisplay(nullptr);
-			if(globalDisplay == nullptr) {
-				return xdl::ERR_ERROR;
-			}
-			m_rootWindow = DefaultRootWindow(globalDisplay);
+			return xdl::ERR_ERROR;
+		}
+		m_rootWindow = DefaultRootWindow(globalDisplay);
 
-			// Print out some useless information :D
-			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
-			std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
-			std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
-			std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
+		// Print out some useless information :D
+		std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
+		std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
+		std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
+		std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
 
-			//
-			// CAUTION: This counter has to be increased before any createModule method.
-			//
-			reference_counter++;
+		// If there is not event server first create one.
+		if(xdl::windowEventServer == nullptr) {
+			// If there is no even server active, create and activate it.
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+		}
 
-			// If there is not event server first create one.
-			if(xdl::windowEventServer == nullptr) {
-				// If there is no even server active, create and activate it.
-				xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
-			}
-
-			if(xdl::cursor == nullptr) {
-				xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
-			}
-
+		if(xdl::cursor == nullptr) {
+			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
 		}
 
 	}
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+
+	// And now close the window.
+	if(globalDisplay) {
+		XCloseDisplay(globalDisplay);
+		globalDisplay = nullptr;
+	}
+
+	return xdl::ERR_OK;
+}
+
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
 
 	//
 	// Create XdevLWindow instance.
@@ -142,8 +144,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		xdl::XdevLWindowX11* window = new xdl::XdevLWindowX11(parameter);
 		parameter->setModuleInstance(window);
-
-		reference_counter++;
 	}
 
 	//
@@ -153,8 +153,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
 		parameter->setModuleInstance(windowServer);
-
-		reference_counter++;
 	}
 
 	//
@@ -166,8 +164,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			xdl::XdevLWindowEventServerParameter = parameter;
 		}
 		parameter->setModuleInstance(xdl::windowEventServer);
-
-		reference_counter++;
 	}
 
 	//
@@ -178,7 +174,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::cursor = x11cursor;
 		parameter->setModuleInstance(xdl::cursor);
 
-		reference_counter++;
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}
@@ -189,16 +184,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 	if(obj)
 		delete obj;
-
-	reference_counter--;
-
-	if(reference_counter == 0) {
-		// And now close the window.
-		if(globalDisplay) {
-			XCloseDisplay(globalDisplay);
-			globalDisplay = nullptr;
-		}
-	}
 }
 
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {

@@ -74,7 +74,6 @@ xdl::XdevLPluginDescriptor m_windowSDLPluginDescriptor {
 	xdl::XdevLWindowPluginPatchVersion
 };
 
-static xdl::xdl_int reference_counter = 0;
 static std::map<xdl::xdl_uint32, xdl::XdevLWindow*> windowMap;
 
 
@@ -90,7 +89,7 @@ struct XdevLJoysticks {
 static std::vector<XdevLJoysticks> joysticks;
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init(xdl::XdevLPluginCreateParameter* parameter) {
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 
@@ -124,7 +123,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init(xdl::XdevLPluginCreateParameter* para
 	return xdl::ERR_OK;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown() {
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 
 	// If the last window was destroy make sure to destroy the event server too.
 	if(xdl::windowEventServer != nullptr) {
@@ -154,8 +153,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		xdl::XdevLWindowSDL* window = new xdl::XdevLWindowSDL(parameter);
 		parameter->setModuleInstance(window);
-
-		reference_counter++;
 	}
 
 	//
@@ -165,8 +162,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		xdl::XdevLWindowServerSDL* windowServer = new xdl::XdevLWindowServerSDL(parameter);
 		parameter->setModuleInstance(windowServer);
-
-		reference_counter++;
 	}
 
 	//
@@ -176,8 +171,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::windowEventServer = new xdl::XdevLWindowSDLEventServer(parameter);
 		parameter->setModuleInstance(xdl::windowEventServer);
 		xdl::XdevLWindowEventServerParameter = parameter;
-
-		reference_counter++;
 	}
 
 	//
@@ -188,7 +181,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 		xdl::XdevLCursorSDL* cursor = new xdl::XdevLCursorSDL(parameter);
 		parameter->setModuleInstance(cursor);
 
-		reference_counter++;
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
 	}

@@ -146,20 +146,44 @@ namespace xdl {
 		// Delete all modules.
 		XDEVL_MODULE_INFO("Removing all modules.\n");
 
+		//
+		// First find all modules that depends on another module and put them in a list
+		// so that they can be removed first. This version is rather a hack then a real solution.
+		// TODO
+		std::list<XdevLModule*> tmp;
+		for(auto moduleIterator : m_modules) {
 
-		// TODO Destroy backwards to hack the create and destroy order until the dependency fix is finished.
+			XdevLModule* module = moduleIterator.second->getModuleCreateParameter()->getModuleInstance();
+			auto& dependency = module->getDescriptor().getDependencies();
+
+			for(auto& dependencyModule : dependency) {
+				XDEVL_MODULE_INFO("Module: " << dependencyModule->getDescriptor().getName() << " depends on Module: " <<  module->getDescriptor().getName() << "\n");
+				if(dependencyModule->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
+					auto it = std::find(tmp.begin(), tmp.end(), dependencyModule);
+					if(it == tmp.end()) {
+						tmp.push_back(dependencyModule);
+					}
+				}
+			}
+		}
+
+		//
+		// Now remove the modules that depends on other modules.
+		//
+		for(auto module : tmp) {
+			XDEVL_MODULE_INFO("Removing first: " << module->getDescriptor().getName() << "\n");
+			deleteModule(module->getID());
+		}
+
+
+		//
+		// Now remove all other modules left.
+		//
 		moduleMap::const_iterator moduleIterator = m_modules.begin();
 		while(moduleIterator != m_modules.end()) {
 			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
 			auto& dependency = module->getDescriptor().getDependencies();
-			
-			for(auto& dependencyModule : dependency) {
-				if(dependencyModule->getID() == module->getID()) {
-					 // TODO Do something here
-				}
-			}
-			
-			
+
 			if(module->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
 				_deleteModule(module->getID());
 				moduleIterator = m_modules.erase(moduleIterator);
@@ -171,8 +195,7 @@ namespace xdl {
 		// Go through all plugins and delete them from the system.
 		XDEVL_MODULE_INFO("Removing all plugins.\n");
 		pluginMap::const_iterator pluginIterator = m_plugins.begin();
-		while(moduleIterator != m_modules.end()) {
-			XDEVL_MODULE_INFO("Removing plugin: " << pluginIterator->first << std::endl);
+		while(pluginIterator != m_plugins.end()) {
 			_unplug(pluginIterator->first);
 			pluginIterator = m_plugins.erase(pluginIterator);
 		}
@@ -356,8 +379,8 @@ namespace xdl {
 		XdevLGetPluginDescriptorFunction 	plugin_descriptor	= (XdevLGetPluginDescriptorFunction)(modulesSharedLibrary->getFunctionAddress("_getDescriptor"));
 		XdevLCreateModuleFunction create_module		= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
 		XdevLDeleteModuleFunction delete_module		= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
-		XdevLPluginInitFunction init_plugin = (XdevLPluginInitFunction)(modulesSharedLibrary->getFunctionAddress("_init"));
-		XdevLPluginShutdownFunction shtudown_plugin = (XdevLPluginShutdownFunction)(modulesSharedLibrary->getFunctionAddress("_shutdown"));
+		XdevLPluginInitFunction init_plugin = (XdevLPluginInitFunction)(modulesSharedLibrary->getFunctionAddress("_init_plugin"));
+		XdevLPluginShutdownFunction shtudown_plugin = (XdevLPluginShutdownFunction)(modulesSharedLibrary->getFunctionAddress("_shutdown_plugin"));
 
 
 		// Check if we have all necessary module functions from the dynamic library.
@@ -425,16 +448,10 @@ namespace xdl {
 			return m_plugins.end();
 		}
 
-		// Ok if we are here this means the plugin exists. First we have to remove all
-		// modules which belongs to this plugin. But if a module is in use don't remove it.
-		for(auto& ic : m_modules) {
-			if(ic.second->getPluginInfo()->getPluginDescriptor()->getName() == i->second->getPluginDescriptor()->getName()) {
-				XDEVL_MODULE_ERROR("Module: '" << ic.first << "' belongs to the plugin '" << name_file <<"'.\n");
-				XDEVL_MODULE_ERROR("Can't remove plugin: '" << name_file << "'.\n");
-				return m_plugins.end();;
-			}
-		}
 
+		//
+		// Let's try first to shutdown the plugin. There might be some modules left.
+		//
 		if(i->second->isShutdownPluginValid()) {
 			XDEVL_MODULE_INFO("Shutting down plugin: " << pluginName << "\n");
 			if(i->second->shutdownPlugin() != ERR_OK) {
@@ -451,9 +468,9 @@ namespace xdl {
 	}
 
 	XdevLModule* XdevLCoreImpl::createModule(const XdevLModuleName& moduleName,
-	    const XdevLID& id,
-	    const XdevLPluginName& pluginName,
-	    XdevLUserData* userParameter) {
+	        const XdevLID& id,
+	        const XdevLPluginName& pluginName,
+	        XdevLUserData* userParameter) {
 
 		auto parameter = new XdevLModuleCreateParameter();
 
@@ -601,7 +618,7 @@ namespace xdl {
 
 		// Delete the XdevLModuleInfo object.
 		delete moduleIterator->second;
-		
+
 		return moduleIterator;
 	}
 
