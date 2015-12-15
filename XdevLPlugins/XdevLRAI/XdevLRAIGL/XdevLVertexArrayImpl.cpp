@@ -100,9 +100,6 @@ namespace xdl {
 
 			GLuint shaderAttribute 	= m_vd->get(idx)->shaderAttribute;
 
-			XdevLVertexDeclaration* vdecl = new XdevLVertexDeclaration();
-			vdecl->add(m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, m_vd->get(idx)->shaderAttribute);
-
 			m_vertexBufferList[idx]->init(srcOfSreamBuffers[idx],  m_vd->vertexSize()*numberOfVertex);
 			glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferList[idx]->id());
 
