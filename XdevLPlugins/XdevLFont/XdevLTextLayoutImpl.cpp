@@ -337,11 +337,6 @@ void main(void) {                                                               
 	void XdevLTextLayoutImpl::useFont(XdevLFont* font) {
 		assert(font && "XdevLTextLayoutImpl::render: Font value invalid (nullptr).");
 
-		if(nullptr != m_font) {
-			delete m_font;
-			m_font = nullptr;
-		}
-
 		m_font = font;
 		//
 		// Set two pixel shadow offset.

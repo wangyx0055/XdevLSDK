@@ -37,6 +37,21 @@ namespace xdl {
 		m_rai->getDescriptor().registerDependency(this);
 		return ERR_OK;
 	}
+	
+	xdl_int XdevLFontSystemImpl::shutdown() {
+		for(auto& font : m_fonts) {
+			delete font;
+		}
+		return ERR_OK;
+	}
+	
+	void XdevLFontSystemImpl::destroy(XdevLFont* font) {
+		auto tmp = std::find(m_fonts.begin(), m_fonts.end(), font);
+		if(tmp != m_fonts.end()) {
+			m_fonts.erase(tmp);
+			delete *tmp;
+		}
+	}
 
 	void XdevLFontSystemImpl::setCreateTextureCallback(XdevLFontSystem::createTextureFromFileCallbackFunction function) {
 		assert(function && " XdevLFontImpl::setCreateTextureCallback: Parameter not valid.");
@@ -126,6 +141,7 @@ namespace xdl {
 
 			calculateGlyphInformation(font, infile);
 
+			m_fonts.push_back(font);
 			return font;
 		}
 

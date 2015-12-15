@@ -46,6 +46,9 @@ namespace xdl {
 			
 			/// Returns the screen height.
 			virtual xdl_uint getScreenHeight() const = 0;
+			
+			/// Destroy font
+			virtual void destroy(XdevLFont* font) = 0;
 	};
 
 	typedef XdevLFontSystem		IXdevLFontSystem;
