@@ -135,6 +135,16 @@ namespace xdl {
 			virtual xdl_bool getState(XdevLModuleStates state) const {
 				return (m_states & state);
 			}
+			
+			/// Add module that depends on this module.
+			virtual void registerDependency(XdevLModule* module) {
+				m_dependency.push_back(module);
+			}
+			
+			/// Return the list of dependency modules.
+			const std::vector<XdevLModule*>& getDependencies() const {
+				return m_dependency;
+			}
 
 		private:
 			// Holds the name of the vendor.
@@ -156,6 +166,8 @@ namespace xdl {
 			XdevLVersion 		m_version;
 			
 			xdl_uint32			m_states;
+			
+			std::vector<XdevLModule*> m_dependency;
 	};
 
 
@@ -190,7 +202,7 @@ namespace xdl {
 				Every module has a descriptor which gives you detailed information like, version, author etc.
 				@return A valid pointer to the descriptor.
 			*/
-			virtual const XdevLModuleDescriptor& getDescriptor() const = 0;
+			virtual XdevLModuleDescriptor& getDescriptor() = 0;
 	};
 
 	/**

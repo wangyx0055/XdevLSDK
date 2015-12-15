@@ -34,6 +34,7 @@ namespace xdl {
 
 	xdl_int XdevLFontSystemImpl::init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) {
 		m_rai = rai;
+		m_rai->getDescriptor().registerDependency(this);
 		return ERR_OK;
 	}
 

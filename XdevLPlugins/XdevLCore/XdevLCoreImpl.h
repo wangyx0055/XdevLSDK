@@ -124,7 +124,7 @@ namespace xdl {
 
 			static XdevLModuleDescriptor m_coreDescriptor;
 
-			virtual const XdevLModuleDescriptor& getDescriptor() const;
+			virtual XdevLModuleDescriptor& getDescriptor();
 			virtual void* getInternal(const XdevLInternalName& id);
 			virtual xdl_int update();
 			virtual xdl_int shutdown();

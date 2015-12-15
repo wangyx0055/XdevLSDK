@@ -101,7 +101,7 @@ namespace xdl {
 		}
 	}
 
-	const XdevLModuleDescriptor& XdevLCoreImpl::getDescriptor() const {
+	XdevLModuleDescriptor& XdevLCoreImpl::getDescriptor() {
 		return m_coreDescriptor;
 	}
 
@@ -146,11 +146,20 @@ namespace xdl {
 		// Delete all modules.
 		XDEVL_MODULE_INFO("Removing all modules.\n");
 
+
 		// TODO Destroy backwards to hack the create and destroy order until the dependency fix is finished.
 		moduleMap::const_iterator moduleIterator = m_modules.begin();
 		while(moduleIterator != m_modules.end()) {
 			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
-
+			auto& dependency = module->getDescriptor().getDependencies();
+			
+			for(auto& dependencyModule : dependency) {
+				if(dependencyModule->getID() == module->getID()) {
+					 // TODO Do something here
+				}
+			}
+			
+			
 			if(module->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
 				_deleteModule(module->getID());
 				moduleIterator = m_modules.erase(moduleIterator);

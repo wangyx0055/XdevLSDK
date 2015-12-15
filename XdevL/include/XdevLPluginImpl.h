@@ -121,7 +121,7 @@ namespace xdl {
 				return nullptr;
 			}
       
-      virtual const XdevLModuleDescriptor& getDescriptor() const {
+      virtual XdevLModuleDescriptor& getDescriptor() {
         return m_descriptor;
       }
       
@@ -146,7 +146,7 @@ namespace xdl {
 				return ERR_OK;
 			}
   protected:
-      const XdevLModuleDescriptor m_descriptor;
+      XdevLModuleDescriptor m_descriptor;
 	};
 
 	/**
