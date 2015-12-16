@@ -31,6 +31,14 @@ xdl::XdevLPluginDescriptor m_serialPluginDescriptor {
 	xdl::XdevLSerialPluginPatchVersion
 };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
+
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(xdl::XdevLSerialLinux::m_moduleDescriptor.getName() == parameter->getModuleName()) {
 		xdl::XdevLModule* obj  = new xdl::XdevLSerialLinux(parameter);
