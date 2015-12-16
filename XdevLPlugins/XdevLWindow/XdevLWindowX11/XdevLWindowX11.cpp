@@ -1065,24 +1065,6 @@ namespace xdl {
 		XUngrabPointer(globalDisplay, CurrentTime);
 	}
 
-	void XdevLWindowX11::grabKeyboard() {
-		for(;;) {
-			static int counter = 0;
-			int result = XGrabKeyboard(globalDisplay, m_window, True, GrabModeAsync, GrabModeAsync, CurrentTime);
-
-			if(result == GrabSuccess) {
-				std::cout << "result == GrabSuccess: Grab trials: " << counter++ << std::endl;
-				counter = 0;
-				break;
-			}
-		}
-		XFlush(globalDisplay);
-	}
-
-	void XdevLWindowX11::ungrabKeyboard() {
-		XUngrabKeyboard(globalDisplay, CurrentTime);
-	}
-
 	void XdevLWindowX11::setInputFocus() {
 
 		XWindowAttributes attribute;

@@ -193,12 +193,6 @@ namespace xdl {
 			/// Ungrabs the pointer.
 			virtual void ungrabPointer() = 0;
 
-			/// Grabs the keyboard.
-			virtual void grabKeyboard() = 0;
-
-			/// Ungrabs the keyboard.
-			virtual void ungrabKeyboard() = 0;
-
 			/// Sets the input focus.
 			virtual void setInputFocus() = 0;
 

@@ -96,6 +96,10 @@ namespace xdl {
 			XdevLWindowX11(XdevLModuleCreateParameter* parameter);
 			virtual ~XdevLWindowX11();
 
+			//
+			// XdevLModule related methods.
+			//
+
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
@@ -134,8 +138,6 @@ namespace xdl {
 			virtual void raise() override;
 			virtual void grabPointer() override;
 			virtual void ungrabPointer() override;
-			virtual void grabKeyboard() override;
-			virtual void ungrabKeyboard() override;
 			virtual void setInputFocus() override;
 			virtual xdl_bool hasFocus() override;
 			virtual void setParent(XdevLWindow* window) override;

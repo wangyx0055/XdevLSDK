@@ -96,46 +96,56 @@ namespace xdl {
 
 			static XdevLModuleDescriptor m_moduleDescriptor;
 
+			//
+			// XdevLModule related methods.
+			//
+
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
 			virtual xdl_int update() override;
 
-			virtual const XdevLWindowPosition& getPosition();
-			virtual const XdevLWindowSize& getSize();
-			virtual XdevLWindowPosition::type getX();
-			virtual XdevLWindowPosition::type getY();
-			virtual XdevLWindowSize::type getWidth();
-			virtual XdevLWindowSize::type getHeight();
-			virtual const XdevLWindowTitle& getTitle();
-			virtual xdl_bool getFullscreen();
-			virtual xdl_bool getHidePointer();
-			virtual xdl_int getColorDepth();
-			virtual void setPosition(const XdevLWindowPosition& position);
-			virtual void setSize(const XdevLWindowSize& size);
-			virtual void setX(XdevLWindowPosition::type x);
-			virtual void setY(XdevLWindowPosition::type y);
-			virtual void setWidth(XdevLWindowSize::type width);
-			virtual void setHeight(XdevLWindowSize::type height);
-			virtual void setTitle(const XdevLWindowTitle& title);
-			virtual void setFullscreen(xdl_bool state);
-			virtual void setType(XdevLWindowTypes type);
-			virtual void showPointer();
-			virtual void hidePointer();
-			virtual void setPointerPosition(xdl_uint x, xdl_uint y);
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height);
-			virtual void show();
-			virtual void hide();
-			virtual xdl_bool isHidden();
-			virtual void raise();
-			virtual void grabPointer();
-			virtual void ungrabPointer();
-			virtual void grabKeyboard();
-			virtual void ungrabKeyboard();
-			virtual void setInputFocus();
-			virtual xdl_bool hasFocus();
-			virtual xdl_int getInputFocus(XdevLWindow** window);
-			virtual void setParent(XdevLWindow* window);
+			//
+			// XdevLWindow related methods.
+			//
+
+			virtual xdl_int create() override;
+			virtual const XdevLWindowPosition& getPosition() override;
+			virtual const XdevLWindowSize& getSize() override;
+			virtual XdevLWindowPosition::type getX() override;
+			virtual XdevLWindowPosition::type getY() override;
+			virtual XdevLWindowSize::type getWidth() override;
+			virtual XdevLWindowSize::type getHeight() override;
+			virtual const XdevLWindowTitle& getTitle() override;
+			virtual xdl_bool getFullscreen() override;
+			virtual xdl_bool getHidePointer() override;
+			virtual xdl_int getColorDepth() override;
+			virtual void setPosition(const XdevLWindowPosition& position) override;
+			virtual void setSize(const XdevLWindowSize& size) override;
+			virtual void setX(XdevLWindowPosition::type x) override;
+			virtual void setY(XdevLWindowPosition::type y) override;
+			virtual void setWidth(XdevLWindowSize::type width) override;
+			virtual void setHeight(XdevLWindowSize::type height) override;
+			virtual void setTitle(const XdevLWindowTitle& title) override;
+			virtual void setFullscreen(xdl_bool state) override;
+			virtual void showPointer() override;
+			virtual void hidePointer() override;
+			virtual void setPointerPosition(xdl_uint x, xdl_uint y) override;
+			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) override;
+			virtual void show() override;
+			virtual void hide() override;
+			virtual xdl_bool isHidden() override;
+			virtual void raise() override;
+			virtual void grabPointer() override;
+			virtual void ungrabPointer() override;
+			virtual void setInputFocus() override;
+			virtual xdl_bool hasFocus() override;
+			virtual void setParent(XdevLWindow* window) override;
+			virtual void setType(XdevLWindowTypes type) override;
+
+			//
+			// Internal used methods
+			//
 
 			void setFrameCallback(wl_callback* frameCallback);
 			wl_surface* getSurface() const;

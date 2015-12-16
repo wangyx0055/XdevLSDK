@@ -622,14 +622,6 @@ namespace xdl {
 
 	}
 
-	void XdevLWindowSDL::grabKeyboard() {
-
-	}
-
-	void XdevLWindowSDL::ungrabKeyboard() {
-
-	}
-
 	void XdevLWindowSDL::setInputFocus() {
 
 	}

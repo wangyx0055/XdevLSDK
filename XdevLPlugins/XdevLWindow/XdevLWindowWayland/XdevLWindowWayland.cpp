@@ -563,24 +563,12 @@ namespace xdl {
 
 	}
 
-	void XdevLWindowWayland::grabKeyboard() {
-
-	}
-
-	void XdevLWindowWayland::ungrabKeyboard() {
-
-	}
-
 	void XdevLWindowWayland::setInputFocus() {
 
 	}
 
 	xdl_bool XdevLWindowWayland::hasFocus() {
 		return xdl_false;
-	}
-
-	xdl_int XdevLWindowWayland::getInputFocus(XdevLWindow** window) {
-
 	}
 
 	void XdevLWindowWayland::setParent(XdevLWindow* window) {
