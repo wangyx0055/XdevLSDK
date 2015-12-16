@@ -21,10 +21,11 @@
 
 xdl::IPXdevLCore core					= nullptr;
 xdl::IPXdevLWindow window				= nullptr;
+xdl::IPXdevLCursor cursor				= nullptr;
 xdl::IPXdevLKeyboard keyboard 			= nullptr;
 xdl::IPXdevLMouse mouse					= nullptr;
-xdl::IPXdevLRAI rai						= nullptr; 
-xdl::IPXdevLFontSystem fontSystem		= nullptr; 
+xdl::IPXdevLRAI rai						= nullptr;
+xdl::IPXdevLFontSystem fontSystem		= nullptr;
 xdl::IPXdevLTextLayout textLayoutSystem	= nullptr;
 
 static xdl::xdl_bool fullscreenflag = false;
@@ -223,6 +224,13 @@ int main(int argc, char* argv[]) {
 		return xdl::ERR_ERROR;
 	}
 
+	// Create a window so that we can draw something.
+	cursor = xdl::getModule<xdl::IPXdevLCursor>(core, xdl::XdevLID("XdevLCursor"));
+	if(!cursor) {
+		xdl::destroyCore(core);
+		return xdl::ERR_ERROR;
+	}
+
 	// Get the instance to the keyboard module.
 	keyboard = xdl::getModule<xdl::IPXdevLKeyboard>(core, xdl::XdevLID("MyKeyboard"));
 	if(!keyboard) {
@@ -233,6 +241,11 @@ int main(int argc, char* argv[]) {
 	// Get the instance to the keyboard module.
 	mouse = xdl::getModule<xdl::IPXdevLMouse>(core, xdl::XdevLID("MyMouse"));
 	if(!mouse) {
+		xdl::destroyCore(core);
+		return xdl::ERR_ERROR;
+	}
+
+	if(cursor->attach(window) != xdl::ERR_OK) {
 		xdl::destroyCore(core);
 		return xdl::ERR_ERROR;
 	}
@@ -370,9 +383,14 @@ int main(int argc, char* argv[]) {
 	xdl::xdl_float rx = 0.0f;
 	xdl::xdl_float ry = 0.0f;
 
+//	cursor->hide();
+	cursor->setPosition(400, 300);
+//	cursor->enableRelativeMotion();
+
 	// Start main loop.
 	while(!esc->getClicked()) {
 		core->update();
+
 
 		if(fullscreen->getClicked()) {
 			fullscreenflag = !fullscreenflag;
@@ -380,10 +398,11 @@ int main(int argc, char* argv[]) {
 		}
 
 		if(left_mouse_button->getPressed()) {
-			rx += static_cast<float>(y_axis->getDeltaValue());
-			ry += static_cast<float>(x_axis->getDeltaValue());
+			rx += static_cast<float>(y_axis->getDeltaValue()) * 0.01;
+			ry += static_cast<float>(x_axis->getDeltaValue())* 0.01;
+//			std::cout << rx << " : " << ry << std::endl;
 		}
-		
+
 		rai->setActiveDepthTest(xdl::xdl_true);
 		rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
 		rai->clearDepthTarget(1.0f);

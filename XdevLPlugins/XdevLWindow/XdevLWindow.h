@@ -65,6 +65,17 @@ namespace xdl {
 
 	typedef XdevLString XdevLWindowTitle;
 
+	/**
+		@class XdevLWindowAttributes
+		@brief Structure that holds Window information.
+	*/
+	class XdevLWindowAttributes {
+		public:
+			XdevLWindowPosition position;
+			XdevLWindowSize size;
+			XdevLWindowTitle title;
+			XdevLWindowTypes type;
+	};
 
 	/**
 		@class XdevLWindow
@@ -206,10 +217,10 @@ namespace xdl {
 			virtual void setWindowDecoration(xdl_bool enable) = 0;
 
 			virtual xdl_bool isPointerInside() = 0;
-			
+
 			/// Returns the window type.
 			virtual XdevLWindowTypes getType() = 0;
-			
+
 	};
 
 	/**
@@ -269,10 +280,10 @@ namespace xdl {
 
 			/// Release clipping position.
 			virtual void releaseClip() = 0;
-			
+
 			/// Enable relative motion mode.
 			virtual xdl_int enableRelativeMotion() = 0;
-			
+
 			/// Disable relative motion mode.
 			virtual void disableRelativeMotion() = 0;
 	};

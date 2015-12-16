@@ -395,6 +395,12 @@ namespace xdl {
 						delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
 					}
 				}
+				
+//				printf("abs. (%f %f), rel. (%f %f)\n", m_Axes[AXIS_0]->getValue(), 
+//														m_Axes[AXIS_1]->getValue(), 
+//														m_Axes[AXIS_0]->getDeltaValue(), 
+//														m_Axes[AXIS_0]->getDeltaValue());
+
 
 			}
 

@@ -145,6 +145,8 @@ namespace xdl {
 
 			Display* getNativeDisplay();
 			Window getNativeWindow();
+			Window getNativeRootWindow();
+
 	protected:
 			Display* m_display;
 
@@ -339,7 +341,7 @@ namespace xdl {
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
-			
+			virtual xdl_bool isRelativeMotionEnabled();
 			
 			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
 	private:
@@ -369,6 +371,8 @@ namespace xdl {
 			
 			xdl_int m_screenWidth;
 			xdl_int m_screenHeight;
+			
+			xdl_bool m_reltaiveModeEnabled;
 	};
 
 }

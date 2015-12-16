@@ -198,6 +198,7 @@ namespace xdl {
 	const XdevLID MouseButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
 	const XdevLID MouseButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
 	const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
+	const XdevLID MouseMotionRelative("XDEVL_MOUSE_MOTION_RELATIVE");
 	const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
 
 
@@ -1262,6 +1263,10 @@ namespace xdl {
 	Window XdevLWindowX11::getNativeWindow() {
 		return m_window;
 	}
+	
+	Window XdevLWindowX11::getNativeRootWindow() {
+		return m_rootWindow;
+	}
 
 //
 // -------------------------------------------------------------------------
@@ -1415,39 +1420,13 @@ namespace xdl {
 				// Mouse pointer moved.
 				//
 				case MotionNotify: {
-
-					ev.type 				= MouseMotion.getHashCode();
-					ev.motion.x				= event.xmotion.x;
-					ev.motion.y				= event.xmotion.y;
-					ev.window.windowid		= window->getWindowID();
-
-//					if(event.xmotion.state & Button1Mask) {
-//						std::cout << "Button 1 was pressed during motion.\n";
-//					} else if(event.xmotion.state & Button2Mask) {
-//						std::cout << "Button 2 was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Button3Mask) {
-//						std::cout << "Button 3 was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Button4Mask) {
-//						std::cout << "Button 5 was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Button5Mask) {
-//						std::cout << "Button 5 was pressed during motion.\n";
-//					}	else if(event.xmotion.state & ControlMask) {
-//						std::cout << "Control was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Mod1Mask) {
-//						std::cout << "Mod1Mask was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Mod2Mask) {
-//						std::cout << "Mod2Mask was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Mod3Mask) {
-//						std::cout << "Mod3Mask was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Mod4Mask) {
-//						std::cout << "Mod4Mask was pressed during motion.\n";
-//					}	else if(event.xmotion.state & Mod5Mask) {
-//						std::cout << "Mod5Mask was pressed during motion.\n";
-//					}
-
-					ev.window.data1				= event.xmotion.state;
-
-					getMediator()->fireEvent(ev);
+					if(x11cursor->isRelativeMotionEnabled() == xdl_false) {
+						ev.type 				= MouseMotion.getHashCode();
+						ev.motion.x				= event.xmotion.x;
+						ev.motion.y				= event.xmotion.y;
+						ev.motion.windowid		= window->getWindowID();
+						getMediator()->fireEvent(ev);
+					}
 				}
 				break;
 
@@ -1757,7 +1736,8 @@ namespace xdl {
 		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc),
 		m_window(nullptr),
 		m_barriersSupported(xdl_false),
-		m_xinput2Supported(xdl_false) {
+		m_xinput2Supported(xdl_false),
+		m_reltaiveModeEnabled(xdl_false) {
 		memset(m_barriers, 0, sizeof(PointerBarrier)*4);
 	}
 
@@ -1770,8 +1750,6 @@ namespace xdl {
 		XDEVL_ASSERT(window, "Invalid window used.");
 
 		m_window = static_cast<XdevLWindowX11*>(window);
-
-		Window nativeWindow = m_window->getNativeWindow();
 
 		m_screenNumber 		= DefaultScreen(m_window->getNativeDisplay());
 		m_defaultColorMap 	= DefaultColormap(m_window->getNativeDisplay(), DefaultScreen(m_window->getNativeDisplay()));
@@ -1900,11 +1878,15 @@ namespace xdl {
 			m_xinput2Supported = xdl_false;
 			return ERR_ERROR;
 		}
-
+		m_reltaiveModeEnabled = xdl_true;
 		return ERR_OK;
 	}
 	void XdevLCursorX11::disableRelativeMotion() {
-
+		m_reltaiveModeEnabled = xdl_false;
+	}
+	
+	xdl_bool XdevLCursorX11::isRelativeMotionEnabled() {
+		return m_reltaiveModeEnabled;
 	}
 
 	void XdevLCursorX11::onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) {
@@ -1923,13 +1905,20 @@ namespace xdl {
 
 				double relative_cords[2];
 				parseValuators(rawev->raw_values,rawev->valuators.mask, rawev->valuators.mask_len,relative_cords,2);
-				printf("rel. (%f %f)\n", relative_cords[0], relative_cords[1]);
+
+
+				Window rootWindow = None;
+				Window childWindow = None;
+				xdl_int x_root, y_root;
+				xdl_int x_window, y_window;
+				xdl_uint modifier_mask;
+				XQueryPointer(m_window->getNativeDisplay(), m_window->getNativeWindow(), &rootWindow, &childWindow, &x_root, &y_root, &x_window, &y_window, &modifier_mask);
 
 				XdevLEvent ev;
 				ev.type 				= MouseMotion.getHashCode();
 				ev.motion.timestamp		= getMediator()->getTimer().getTime64();
-				ev.motion.x				= 0;
-				ev.motion.y				= 0;
+				ev.motion.x				= x_window;
+				ev.motion.y				= y_window;
 				ev.motion.xrel			= relative_cords[0];
 				ev.motion.yrel			= relative_cords[1];
 				ev.window.windowid		= window->getWindowID();

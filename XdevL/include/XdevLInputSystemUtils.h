@@ -254,7 +254,6 @@ namespace xdl {
 				xdl_float tmp;
 				m_mutex->Lock();
 				tmp = m_deltaValue;
-				m_deltaValue = 0.0f;
 				m_mutex->Unlock();
 				return tmp;
 			}
