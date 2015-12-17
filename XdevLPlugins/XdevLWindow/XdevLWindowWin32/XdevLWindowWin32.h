@@ -133,12 +133,6 @@ namespace xdl {
 			DEVMODE m_matchingVideoMode;
 			std::vector<DISPLAY_DEVICE> displayInfoList;
 			xdl_bool m_isHidden;
-		private:
-			///creates a win32 window
-			int create();
-
-//	virtual xdl_int recvEvent(XdevLEvent* ev);
-
 	};
 
 

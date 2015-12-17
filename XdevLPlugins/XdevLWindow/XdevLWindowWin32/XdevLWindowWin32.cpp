@@ -426,7 +426,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	int XdevLWindowDeviceWin32::create() {
+	xdl_int XdevLWindowDeviceWin32::create() {
 
 
 		m_instance					=	GetModuleHandle(NULL);
@@ -790,17 +790,13 @@ namespace xdl {
 		SetWindowText(m_wnd, title.toString().c_str());
 	}
 
-	void XdevLWindowDeviceWin32::setHidePointer(xdl_bool state) {
-		if (state)
-			ShowCursor(TRUE);
-		else
-			ShowCursor(FALSE);
-	}
-
 	HWND XdevLWindowDeviceWin32::getNativeWindow() {
 		return m_wnd;
 	}
 
+	void XdevLWindowDeviceWin32::setParent(XdevLWindow* window) {
+		XdevLWindowImpl::setParent(window);
+	}
 //
 // -------------------------------------------------------------------------
 //
@@ -1175,23 +1171,35 @@ namespace xdl {
 	}
 
 	void XdevLCursorWindows::show() {
-
+		while (::ShowCursor(true) < 0);
 	}
+
 	void XdevLCursorWindows::hide() {
-
+		while (::ShowCursor(false) >= 0);
 	}
+
 	void XdevLCursorWindows::setPosition(xdl_uint x, xdl_uint y) {
-
+		::SetCursorPos(x, y);
 	}
+
 	xdl_int XdevLCursorWindows::clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) {
+		RECT rect;
+		rect.left = x1;
+		rect.top = y1;
+		rect.right = x2;
+		rect.bottom = y2;
+		ClipCursor(&rect);
 		return ERR_ERROR;
 	}
-	void XdevLCursorWindows::releaseClip() {
 
+	void XdevLCursorWindows::releaseClip() {
+		ClipCursor(nullptr);
 	}
+
 	xdl_int XdevLCursorWindows::enableRelativeMotion() {
 		return ERR_ERROR;
 	}
+
 	void XdevLCursorWindows::disableRelativeMotion() {
 
 	}
