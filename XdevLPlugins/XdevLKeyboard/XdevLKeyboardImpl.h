@@ -298,7 +298,7 @@ namespace xdl {
 	template<typename T>
 	xdl_int XdevlKeyboardBase<T>::attach(XdevLWindow* window, const xdl_char* moduleName) {
 		if(!window) {
-			XDEVL_MODULE_ERROR("Could not attach device to window. No vaild XdevLWindowDevice specified.\n");
+			XDEVL_MODULE_ERROR("Could not attach device to window. No valid XdevLWindowDevice specified.\n");
 			return ERR_ERROR;
 		}
 
