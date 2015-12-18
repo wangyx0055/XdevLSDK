@@ -276,7 +276,7 @@ namespace xdl {
 		{ SDLK_END, KEY_END },
 		{ SDLK_INSERT, KEY_INSERT },
 		{ SDLK_DELETE, KEY_DELETE },
-		{ SDLK_DOWN, KEY_PAGEDOWN},
+		{ SDLK_PAGEDOWN, KEY_PAGEDOWN},
 		{ SDLK_PAGEUP, KEY_PAGEUP },
 
 		{ SDLK_SPACE, KEY_SPACE},
@@ -717,17 +717,17 @@ namespace xdl {
 					// Register button up event in the Core.
 					XdevLEvent ev;
 					ev.type 			= ButtonPressed.getHashCode();
-					ev.common.timestamp	= getMediator()->getTimer().getTime64();
+					ev.key.timestamp	= getMediator()->getTimer().getTime64();
 
 
-					ev.key.windowid		=window->getWindowID();
+					ev.key.windowid		= window->getWindowID();
 					ev.key.repeat 		= event.key.repeat;
 					ev.key.keycode		= KeySymToXdevLKeyCode[event.key.keysym.sym];
 					ev.key.mod 			= event.key.keysym.mod;
 
 					getMediator()->fireEvent(ev);
 
-
+					std::cout << ev.key.keycode << std::endl;
 				}
 				break;
 				case SDL_KEYUP: {
