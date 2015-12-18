@@ -20,20 +20,20 @@ class wrappPrimitiveType;
 
 
 xdl::XdevLModuleDescriptor openGLModuleDesc {xdl::vendor,
-        xdl::author,
-        xdl::moduleNames[0],
-        xdl::copyright,
-        xdl::description,
-        xdl::XdevLRAIGLMajorVersion,
-        xdl::XdevLRAIGLMinorVersion,
-        xdl::XdevLRAIGLPatchVersion
+    xdl::author,
+    xdl::moduleNames[0],
+    xdl::copyright,
+    xdl::description,
+    xdl::XdevLRAIGLMajorVersion,
+    xdl::XdevLRAIGLMinorVersion,
+    xdl::XdevLRAIGLPatchVersion
                                             };
 
 xdl::XdevLPluginDescriptor m_openglDescriptor {	xdl::pluginName,
-        xdl::moduleNames,
-        xdl::XdevLRAIGLPluginMajorVersion,
-        xdl::XdevLRAIGLPluginMinorVersion,
-        xdl::XdevLRAIGLPluginPatchVersion
+    xdl::moduleNames,
+    xdl::XdevLRAIGLPluginMajorVersion,
+    xdl::XdevLRAIGLPluginMinorVersion,
+    xdl::XdevLRAIGLPluginPatchVersion
                                               };
 
 
@@ -254,6 +254,14 @@ namespace xdl {
 
 	const xdl_char* XdevLOpenGLImpl::getShaderVersion() {
 		return (xdl_char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+	}
+
+	void XdevLOpenGLImpl::setPointSize(xdl_float size) {
+		glPointSize(size);
+	}
+
+	void XdevLOpenGLImpl::setLineSize(xdl_float size) {
+		glLineWidth(size);
 	}
 
 	void XdevLOpenGLImpl::setActiveDepthTest(xdl_bool enableDepthTest) {
@@ -509,9 +517,9 @@ namespace xdl {
 
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	        xdl_uint numberOfElements,
-	        XdevLVertexBuffer* vertexBuffer,
-	        XdevLVertexDeclaration* vertexDeclaration) {
+	    xdl_uint numberOfElements,
+	    XdevLVertexBuffer* vertexBuffer,
+	    XdevLVertexDeclaration* vertexDeclaration) {
 
 		glBindVertexArray(m_activeVertexArray->id());
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
@@ -541,10 +549,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	        xdl_uint numberOfElements,
-	        XdevLVertexBuffer* vertexBuffer,
-	        XdevLVertexDeclaration* vertexDeclaration,
-	        XdevLIndexBuffer* indexBuffer) {
+	    xdl_uint numberOfElements,
+	    XdevLVertexBuffer* vertexBuffer,
+	    XdevLVertexDeclaration* vertexDeclaration,
+	    XdevLIndexBuffer* indexBuffer) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());

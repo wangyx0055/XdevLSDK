@@ -88,6 +88,13 @@ namespace xdl {
 			virtual xdl_int create(XdevLWindow* window) = 0;
 
 			//
+			// Change Point and Line size.
+			// 
+
+			virtual void setPointSize(xdl_float size) = 0;
+			virtual void setLineSize(xdl_float size) = 0;
+
+			//
 			// Depth test
 			//
 			virtual void setActiveDepthTest(xdl_bool enableDepthTest) = 0;

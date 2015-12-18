@@ -48,7 +48,7 @@ namespace xdl {
 	const xdl_uint XdevLRAIGLMinorVersion = XDEVLRAIGL_MODULE_MINOR_VERSION;
 	// Holds the Patch version number.
 	const xdl_uint XdevLRAIGLPatchVersion = XDEVLRAIGL_MODULE_PATCH_VERSION;
-	
+
 	static const XdevLString	vendor 				{"www.codeposer.net"
 	};
 	static const XdevLString	author				{"Cengiz Terzibas"
@@ -88,13 +88,17 @@ namespace xdl {
 
 			virtual const xdl_char* getShaderVersion();
 
+
+			virtual void setPointSize(xdl_float size) override;
+			virtual void setLineSize(xdl_float size) override;
+
 			virtual void setActiveDepthTest(xdl_bool enableDepthTest) override;
 			virtual void setActiveBlendMode(xdl_bool enableBlendMode) override;
 			virtual xdl_int setBlendMode(XdevLBlendModes src, XdevLBlendModes dst) override;
 			virtual xdl_int clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) override;
 			virtual xdl_int clearDepthTarget(xdl_float clear_value) override;
 			virtual xdl_int setViewport(xdl_float x, xdl_float y, xdl_float width, xdl_float height) override;
-			
+
 			virtual xdl_int setActiveRenderWindow(XdevLWindow* window);
 			virtual xdl_int swapBuffers();
 
