@@ -52,7 +52,6 @@ namespace xdl {
 		{ XK_8, KEY_8},
 		{ XK_9, KEY_9},
 
-
 		{ XK_F1, KEY_F1},
 		{ XK_F2, KEY_F2},
 		{ XK_F3, KEY_F3},
@@ -156,8 +155,6 @@ namespace xdl {
 		{ XK_Pause, KEY_PAUSE },
 
 		{ XK_Caps_Lock, KEY_CAPSLOCK },
-		
-
 	};
 
 	XdevLWindowX11Keyboard::XdevLWindowX11Keyboard(Display* display, XdevLCoreMediator* core) :
@@ -168,7 +165,7 @@ namespace xdl {
 	XdevLWindowX11Keyboard::~XdevLWindowX11Keyboard() {
 	}
 
-	void XdevLWindowX11Keyboard::sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint windowID) {
+	void XdevLWindowX11Keyboard::sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint8 repeat, xdl_uint windowID) {
 		XdevLButtonId code = x11KeyCodeToXdevLButtonId(keycode);
 		if(keycode == KEY_UNKNOWN) {
 			// TODO Do we have to inform someone?
@@ -177,7 +174,6 @@ namespace xdl {
 
 		xdl_int mod =0;
 		xdl_uint16 modstate = 0;
-		xdl_uint8 repeat = 0;
 
 		if(state == ButtonPressed.getHashCode()) {
 			switch(code) {
@@ -250,13 +246,13 @@ namespace xdl {
 		}
 
 		XdevLEvent ev;
-		ev.common.timestamp 	= m_core->getTimer().getTime64();
-		ev.type 				= state;							// Is is BUTTON_PRESSED or BUTTON_RELEASED
+		ev.common.timestamp = m_core->getTimer().getTime64();
+		ev.type 			= state;	// Is is BUTTON_PRESSED or BUTTON_RELEASED
 
-		ev.window.windowid		= windowID;
-		ev.key.repeat 			= repeat;							// Is repeat on or off?
-		ev.key.keycode			= code;								// Which key button state has changed.
-		ev.key.mod 				= modstate;							// Save the modifier keys.
+		ev.key.windowid	= windowID;
+		ev.key.repeat 	= repeat;	// Is repeat on or off?
+		ev.key.keycode	= code;		// Which key button state has changed.
+		ev.key.mod 			= modstate;	// Save the modifier keys.
 
 		m_core->fireEvent(ev);
 	}
@@ -275,8 +271,6 @@ namespace xdl {
 			XdevLButtonId tmp = X11KeySymToXdevLButtonIdMap[keysym];
 			int b = 0;
 		}
-
-
 		return it->second;
 	}
 

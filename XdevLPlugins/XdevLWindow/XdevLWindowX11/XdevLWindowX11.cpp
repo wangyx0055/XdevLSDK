@@ -205,13 +205,13 @@ namespace xdl {
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
 	enum {
-	    KDE_noDecoration = 0,
-	    KDE_normalDecoration = 1,
-	    KDE_tinyDecoration = 2,
-	    KDE_noFocus = 256,
-	    KDE_standaloneMenuBar = 512,
-	    KDE_desktopIcon = 1024 ,
-	    KDE_staysOnTop = 2048
+	  KDE_noDecoration = 0,
+	  KDE_normalDecoration = 1,
+	  KDE_tinyDecoration = 2,
+	  KDE_noFocus = 256,
+	  KDE_standaloneMenuBar = 512,
+	  KDE_desktopIcon = 1024 ,
+	  KDE_staysOnTop = 2048
 	};
 
 
@@ -355,7 +355,7 @@ namespace xdl {
 		//
 		XWMHints* wmHints 	= XAllocWMHints();
 		wmHints->flags = 	StateHint | // We want to set the initial state of this window (NormalState)
-		                    InputHint;  // We want to set the input focus model.
+		                  InputHint;  // We want to set the input focus model.
 		wmHints->input = True;          // Does this application rely on the window manager to get keyboard input?
 		wmHints->initial_state = NormalState; // Most applications start this way. WithdrawnState would hide the window and IconicState would start as icon.
 		XSetWMHints(globalDisplay, m_window, wmHints);
@@ -1263,7 +1263,7 @@ namespace xdl {
 	Window XdevLWindowX11::getNativeWindow() {
 		return m_window;
 	}
-	
+
 	Window XdevLWindowX11::getNativeRootWindow() {
 		return m_rootWindow;
 	}
@@ -1282,9 +1282,9 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerX11::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size) {
 
 		*window = new XdevLWindowX11(nullptr);
 
@@ -1372,7 +1372,7 @@ namespace xdl {
 			}
 
 			// Handle window events.
-			XdevLWindow* window = getWindow(event.xany.window);
+			XdevLWindowX11* window = static_cast<XdevLWindowX11*>(getWindow(event.xany.window));
 			if(window == nullptr) {
 				// We didn't find the window in the list. That means we are not managing it so
 				// we skip this event.
@@ -1404,7 +1404,8 @@ namespace xdl {
 				// Keyboard pressed.
 				//
 				case KeyPress: {
-					m_keyboard->sendKeyboardEvent(ButtonPressed.getHashCode(), event.xkey.keycode, window->getWindowID());
+					xdl_uint8 repeat = 0;
+					m_keyboard->sendKeyboardEvent(ButtonPressed.getHashCode(), event.xkey.keycode, repeat, window->getWindowID());
 				}
 				break;
 
@@ -1412,7 +1413,20 @@ namespace xdl {
 				// Keyboard released.
 				//
 				case KeyRelease: {
-					m_keyboard->sendKeyboardEvent(ButtonReleased.getHashCode(), event.xkey.keycode, window->getWindowID());
+					
+					//
+					// Check if the auto repeat is on.
+					//
+					xdl_uint8 repeat = 0;
+					if (XPending(window->getNativeDisplay())) {
+						XEvent nev;
+						XPeekEvent(window->getNativeDisplay(), &nev);
+
+						if (nev.type == KeyPress && nev.xkey.time == event.xkey.time && nev.xkey.keycode == event.xkey.keycode) {
+							repeat = 1;
+						}
+					}
+					m_keyboard->sendKeyboardEvent(ButtonReleased.getHashCode(), event.xkey.keycode, repeat, window->getWindowID());
 				}
 				break;
 
@@ -1617,8 +1631,8 @@ namespace xdl {
 
 				case ClientMessage: {
 					if((event.xclient.message_type == WM_PROTOCOLS) &&
-					        (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
-					        (event.xclient.format == 32)) {
+					    (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
+					    (event.xclient.format == 32)) {
 
 						ev.type					= XDEVL_WINDOW_EVENT;
 						ev.window.event 		= XDEVL_WINDOW_CLOSE;
@@ -1884,7 +1898,7 @@ namespace xdl {
 	void XdevLCursorX11::disableRelativeMotion() {
 		m_reltaiveModeEnabled = xdl_false;
 	}
-	
+
 	xdl_bool XdevLCursorX11::isRelativeMotionEnabled() {
 		return m_reltaiveModeEnabled;
 	}

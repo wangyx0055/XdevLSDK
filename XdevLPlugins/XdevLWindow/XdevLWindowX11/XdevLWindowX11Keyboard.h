@@ -21,7 +21,7 @@ namespace xdl {
 			~XdevLWindowX11Keyboard();
 
 			/// Cast key event.
-			void sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint windowID);
+			void sendKeyboardEvent(xdl_uint64 state, KeyCode keycode, xdl_uint8 repeat, xdl_uint windowID);
 
 			/// Convert keycode to Unicode.
 			xdl_uint32 keyCodeToUcs4(KeyCode keycode);
