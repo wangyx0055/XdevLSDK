@@ -30,6 +30,13 @@ xdl::XdevLModuleDescriptor moduleDescriptorCapture {
 	XDEVLAUDIOALSA_MODULE_PATCH_VERSION
 };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(moduleDescriptorPlayback.getName() == parameter->getModuleName()) {

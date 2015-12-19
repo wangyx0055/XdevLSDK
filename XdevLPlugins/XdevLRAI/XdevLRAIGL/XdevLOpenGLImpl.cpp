@@ -36,6 +36,13 @@ xdl::XdevLPluginDescriptor m_openglDescriptor {	xdl::pluginName,
     xdl::XdevLRAIGLPluginPatchVersion
                                               };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
 
 extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	// Create the "OpenGL" module.

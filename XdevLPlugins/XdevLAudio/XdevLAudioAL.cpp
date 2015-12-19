@@ -7,31 +7,44 @@
 
 #include <fstream>
 
-xdl::XdevLModuleDescriptor audioALModuleDesc {xdl::vendor,
-                                              xdl::author,
-                                              xdl::moduleNames[0],
-                                              xdl::copyright,
-                                              xdl::description,
-                                              xdl::XdevLAudioALMajorVersion,
-                                              xdl::XdevLAudioALMinorVersion,
-                                              xdl::XdevLAudioALPatchVersion };
+xdl::XdevLModuleDescriptor audioALModuleDesc {
+	xdl::vendor,
+	xdl::author,
+	xdl::moduleNames[0],
+	xdl::copyright,
+	xdl::description,
+	xdl::XdevLAudioALMajorVersion,
+	xdl::XdevLAudioALMinorVersion,
+	xdl::XdevLAudioALPatchVersion
+};
 
-xdl::XdevLModuleDescriptor xdl::XdevLAudioALRecord::m_moduleRecordDescriptor {vendor,
-                                                                              author,
-                                                                              moduleNames[1],
-                                                                              copyright,
-                                                                              description2,
-                                                                              XdevLAudioALRecordMajorVersion,
-                                                                              XdevLAudioALRecordMinorVersion,
-                                                                              XdevLAudioALRecordPatchVersion };
+xdl::XdevLModuleDescriptor xdl::XdevLAudioALRecord::m_moduleRecordDescriptor {
+	vendor,
+	author,
+	moduleNames[1],
+	copyright,
+	description2,
+	XdevLAudioALRecordMajorVersion,
+	XdevLAudioALRecordMinorVersion,
+	XdevLAudioALRecordPatchVersion
+};
 
-xdl::XdevLPluginDescriptor pluginDescriptor {	xdl::pluginName,
-                                              xdl::moduleNames,
-                                              xdl::XdevLAudioPluginMajorVersion,
-                                              xdl::XdevLAudioPluginMinorVersion,
-                                              xdl::XdevLAudioPluginPatchVersion };
+xdl::XdevLPluginDescriptor pluginDescriptor {
+	xdl::pluginName,
+	xdl::moduleNames,
+	xdl::XdevLAudioPluginMajorVersion,
+	xdl::XdevLAudioPluginMinorVersion,
+	xdl::XdevLAudioPluginPatchVersion
+};
 
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(audioALModuleDesc.getName() == parameter->getModuleName()) {
@@ -243,7 +256,7 @@ namespace xdl {
 		setPos(0.0f, 0.0f, 0.0f);
 		setOri(0.0f, 0.0f, 0.0f);
 		setVel(0.0f, 0.0f, 0.0f);
-		
+
 		alDistanceModel(AL_NONE);
 
 
@@ -289,11 +302,11 @@ namespace xdl {
 			if(isRIFFID(riff_type, 'W', 'A', 'V', 'E')) {
 
 				do {
-					
+
 					// Read chunck header.
 					RIFF_Header	wave_format_header {0};
 					ifile.read((char*)&wave_format_header, sizeof(RIFF_Header));
-					
+
 					//
 					// Check which chunck type it is.
 					//
@@ -317,7 +330,7 @@ namespace xdl {
 						}
 
 					} else if(isChunckID(wave_format_header, 'd', 'a', 't', 'a')) {
-						
+
 						//
 						// Read the raw data here.
 						//
@@ -329,14 +342,14 @@ namespace xdl {
 						// TODO Do the info stuff
 						ifile.seekg(wave_format_header.chunkSize, std::ios_base::cur);
 					}
-					
+
 					// Stop if we have a problem.
 					// TODO better solution.
 					if(ifile.tellg() == -1) break;
-					
-					
-				}while(true);
-				
+
+
+				} while(true);
+
 			}
 
 		}

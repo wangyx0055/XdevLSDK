@@ -19,6 +19,14 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	XDEVLCOREAUDIO_MODULE_PATCH_VERSION
 };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
+
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(moduleDescriptor.getName() == parameter->getModuleName()) {
 		xdl::XdevLModule* obj  = new xdl::XdevLAudioCoreAudio(parameter);

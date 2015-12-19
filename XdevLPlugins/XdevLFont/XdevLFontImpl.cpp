@@ -63,6 +63,13 @@ xdl::XdevLModuleDescriptor textLayoutModuleDesc {
 	xdl::XdevLTextLayoutPatchVersion
 };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(fontSystemModuleDesc.getName() == parameter->getModuleName()) {
