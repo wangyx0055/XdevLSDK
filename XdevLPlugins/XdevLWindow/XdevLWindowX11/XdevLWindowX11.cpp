@@ -86,7 +86,6 @@ xdl::XdevLModuleDescriptor cursorModuleDesc {
 
 static xdl::XdevLCursorX11* x11cursor = nullptr;
 static Display* globalDisplay = nullptr;
-static Window 	m_rootWindow;
 static Colormap defaultColorMap;
 
 
@@ -101,7 +100,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 		if(globalDisplay == nullptr) {
 			return xdl::ERR_ERROR;
 		}
-		m_rootWindow = DefaultRootWindow(globalDisplay);
 
 		// Print out some useless information :D
 		std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
@@ -1379,8 +1377,6 @@ namespace xdl {
 				continue;
 			}
 
-//			std::cout << "Size: " << window->getWidth() << ":" << window->getHeight() << std::endl;
-
 			XdevLEvent ev;
 			ev.common.timestamp = getMediator()->getTimer().getTime64();
 
@@ -1493,7 +1489,7 @@ namespace xdl {
 					sevent.xselection.time = event.xselectionrequest.time;
 
 					// Check if  we have a cut buffer.
-					if(XGetWindowProperty(globalDisplay, m_rootWindow,
+					if(XGetWindowProperty(globalDisplay, window->getNativeRootWindow(),
 					                      XA_CUT_BUFFER0, 0, INT_MAX/4, False, event.xselectionrequest.target,
 					                      &sevent.xselection.target, &seln_format, &nbytes,
 					                      &overflow, &seln_data) == Success) {

@@ -72,16 +72,24 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 
 static xdl::XdevLCursorWayland* waylandCursor = nullptr;
 static xdl::XdevLWindowEventServerWayland* waylandEventServer = nullptr;
-static xdl::xdl_int reference_counter = 0;
+
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	if(xdl::initWayland() == xdl::ERR_ERROR) {
+		return xdl::ERR_ERROR;
+	}
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	xdl::shutdownWayland();
+	return xdl::ERR_OK;
+}
+
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 
-	if(reference_counter == 0) {
-		if(xdl::initWayland() == xdl::ERR_ERROR) {
-			return xdl::ERR_ERROR;
-		}
-		reference_counter++;
-	}
+
 
 	if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
 		if(xdl::windowEventServer == nullptr) {
@@ -89,7 +97,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 			xdl::XdevLWindowEventServerParameter = parameter;
 		}
 		parameter->setModuleInstance(xdl::windowEventServer);
-		reference_counter++;
 		return xdl::ERR_OK;
 
 	} else if(xdl::XdevLWindowWayland::m_moduleDescriptor.getName() == parameter->getModuleName()) {
@@ -107,8 +114,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 		parameter->setModuleInstance(obj);
 
-		reference_counter++;
-
 		return xdl::ERR_OK;
 	}
 
@@ -118,13 +123,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 	if(obj)
 		delete obj;
-
-	reference_counter--;
-
-	// Only Quit SDL if this is the last module.
-	if(reference_counter == 0) {
-		xdl::shutdownWayland();
-	}
 }
 
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
@@ -402,6 +400,10 @@ namespace xdl {
 
 		wl_display_flush(display);
 
+		return ERR_OK;
+	}
+
+	xdl_int XdevLWindowWayland::create() {
 		return ERR_OK;
 	}
 
@@ -826,9 +828,9 @@ err:
 	}
 
 	xdl_int XdevLWindowServerWayland::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size) {
 
 		*window = new XdevLWindowWayland(nullptr);
 
