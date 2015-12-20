@@ -171,12 +171,19 @@ namespace xdl {
 			nativeWindow = (EGLNativeWindowType)wnd;
 		}
 #endif
+
+		//
+		// Get EGL display from the native display type.
+		//
 		m_eglDisplay = eglGetDisplay(nativeDisplay);
 		if(m_eglDisplay == EGL_NO_DISPLAY) {
 			XDEVL_MODULE_ERROR("Can't create egl display\n");
 			return ERR_ERROR;
 		}
 
+		//
+		// Now initialize EGL platform.
+		//
 		EGLBoolean ret = eglInitialize(m_eglDisplay, &m_major, &m_minor);
 		if(ret != EGL_TRUE) {
 			XDEVL_MODULE_ERROR("eglInitialize failed: " << eglGetErrorString(eglGetError()) << "\n");
@@ -185,7 +192,7 @@ namespace xdl {
 
 		xdl_int api = 0;
 		if( (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES1) ||
-		        (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES2)) {
+		    (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_ES2)) {
 			api = EGL_OPENGL_ES_API;
 		} else if(	(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) ||
 		            (m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) ) {
@@ -256,9 +263,11 @@ namespace xdl {
 		// Create EGL context.
 		//
 		std::vector<EGLint> context_attribs {
-			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
-			EGL_CONTEXT_MAJOR_VERSION, 3,
-			EGL_CONTEXT_MINOR_VERSION, 2,
+//			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+//			EGL_CONTEXT_MAJOR_VERSION, 3,
+//			EGL_CONTEXT_MINOR_VERSION, 2,
+//			EGL_NONE
+			EGL_CONTEXT_CLIENT_VERSION, 2,
 			EGL_NONE
 		};
 

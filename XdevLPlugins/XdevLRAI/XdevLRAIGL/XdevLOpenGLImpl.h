@@ -142,6 +142,8 @@ namespace xdl {
 			virtual xdl_int destroy(XdevLTextureCube* textureCube);
 
 			void shaderLog(xdl_uint shaderID);
+			xdl_int initExtensions();
+
 		protected:
 			XdevLWindow* m_window;
 			XdevLOpenGLContext* m_gl_context;

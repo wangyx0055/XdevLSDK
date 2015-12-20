@@ -633,4 +633,42 @@ namespace xdl {
 		return ERR_OK;
 	}
 
+	xdl_int XdevLOpenGLImpl::initExtensions() {
+		glGenVertexArrays =  (PFNGLGENVERTEXARRAYSPROC)m_gl_context->getProcAddress("glGenVertexArrays");
+		glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)m_gl_context->getProcAddress("glDeleteVertexArrays");
+		glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)m_gl_context->getProcAddress("glBindVertexArray");
+		glIsVertexArray = (PFNGLISVERTEXARRAYPROC)m_gl_context->getProcAddress("glIsVertexArray");
+
+		glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)m_gl_context->getProcAddress("glEnableVertexAttribArray");
+		glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERARBPROC)m_gl_context->getProcAddress("glVertexAttribPointer");
+
+
+
+		glGenBuffers = (PFNGLGENBUFFERSARBPROC)m_gl_context->getProcAddress("glGenBuffers");
+		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)m_gl_context->getProcAddress("glDeleteBuffers");
+		glBindBuffer = (PFNGLBINDBUFFERARBPROC)m_gl_context->getProcAddress("glBindBuffer");
+		glBufferData = (PFNGLBUFFERDATAPROC)m_gl_context->getProcAddress("glBindBuffer");
+
+		glGetShaderiv = (PFNGLGETSHADERIVPROC)m_gl_context->getProcAddress("glGetShaderiv");
+		glCreateProgram = (PFNGLCREATEPROGRAMPROC)m_gl_context->getProcAddress("glCreateProgram");
+		glLinkProgram = (PFNGLLINKPROGRAMARBPROC)m_gl_context->getProcAddress("glLinkProgram");
+		glUseProgram = (PFNGLUSEPROGRAMPROC)m_gl_context->getProcAddress("glUseProgram");
+
+		glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)m_gl_context->getProcAddress("glBindProgram");
+		glGetProgramiv = (PFNGLGETPROGRAMIVPROC)m_gl_context->getProcAddress("glGetProgramiv");
+		glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)m_gl_context->getProcAddress("glGetUniformLocation");
+
+		glUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVARBPROC)m_gl_context->getProcAddress("glUniformMatrix2fv");
+		glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVARBPROC)m_gl_context->getProcAddress("glUniformMatrix3fv");
+		glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVARBPROC)m_gl_context->getProcAddress("glUniformMatrix4fv");
+
+		glCreateShader = (PFNGLCREATESHADERPROC)m_gl_context->getProcAddress("glCreateShader");
+		glDeleteShader = (PFNGLDELETESHADERPROC)m_gl_context->getProcAddress("glDeleteShader");
+		glCompileShader = (PFNGLCOMPILESHADERARBPROC)m_gl_context->getProcAddress("glCompileShader");
+		glShaderSource = (PFNGLSHADERSOURCEPROC)m_gl_context->getProcAddress("glShaderSource");
+		glAttachShader = (PFNGLATTACHSHADERPROC)m_gl_context->getProcAddress("glAttachShader");
+		glShaderSource = (PFNGLSHADERSOURCEPROC)m_gl_context->getProcAddress("glShaderSource");
+
+		glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)m_gl_context->getProcAddress("glDrawArraysEXT");
+	}
 }
