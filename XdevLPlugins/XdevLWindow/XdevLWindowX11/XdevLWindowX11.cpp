@@ -308,7 +308,10 @@ namespace xdl {
 
 		XSetWindowAttributes WindowAttributes;
 
-		if((m_attribute.type == WINDOW_TOOLTIP) || (m_attribute.type == WINDOW_POPUP) || (m_attribute.type == WINDOW_SPLASH) || (m_attribute.type == WINDOW_NOTIFICATION)) {
+		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) || 
+				(m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) || 
+				(m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) || 
+				(m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
 			// Tell the WM not to controll our window.
 			WindowAttributes.override_redirect	= True;
 		} else {
@@ -816,12 +819,6 @@ namespace xdl {
 		return XdevLWindowImpl::getHidePointer();
 	}
 
-	xdl_int XdevLWindowX11::getColorDepth() {
-		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
-
-		return XdevLWindowImpl::getColorDepth();
-	}
-
 	void XdevLWindowX11::setX(XdevLWindowPosition::type x) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
@@ -1214,35 +1211,35 @@ namespace xdl {
 
 		switch(type) {
 
-			case WINDOW_NORMAL: {
+			case XDEVL_WINDOW_TYPE_NORMAL: {
 				if(_NET_WM_WINDOW_TYPE_NORMAL != 0) {
 					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
 				} else {
 				}
 			}
 			break;
-			case WINDOW_TOOLTIP: {
+			case XDEVL_WINDOW_TYPE_TOOLTIP: {
 				if(_NET_WM_WINDOW_TYPE_TOOLTIP != 0) {
 					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_TOOLTIP, 1);
 				} else {
 				}
 			}
 			break;
-			case WINDOW_DROPDOWN_MENU: {
+			case XDEVL_WINDOW_TYPE_DROPDOWN_MENU: {
 				if(_NET_WM_WINDOW_TYPE_DROPDOWN_MENU != 0) {
 					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_DROPDOWN_MENU, 1);
 				} else {
 				}
 			}
 			break;
-			case WINDOW_SPLASH: {
+			case XDEVL_WINDOW_TYPE_SPLASH: {
 				if(_NET_WM_WINDOW_TYPE_SPLASH != 0) {
 					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_SPLASH, 1);
 				} else {
 				}
 			}
 			break;
-			case WINDOW_UNKNOWN:
+			case XDEVL_WINDOW_TYPE_UNKNOWN:
 			default:
 				break;
 		}

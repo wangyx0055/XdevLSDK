@@ -121,7 +121,6 @@ namespace xdl {
 			virtual const XdevLWindowTitle& getTitle() override;
 			virtual xdl_bool getFullscreen() override;
 			virtual xdl_bool getHidePointer() override;
-			virtual xdl_int getColorDepth() override;
 			virtual void setPosition(const XdevLWindowPosition& position) override;
 			virtual void setSize(const XdevLWindowSize& size) override;
 			virtual void setX(XdevLWindowPosition::type x) override;

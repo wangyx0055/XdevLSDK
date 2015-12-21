@@ -574,10 +574,6 @@ namespace xdl {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_int  XdevLWindowSDL::getColorDepth() {
-		return XdevLWindowImpl::getColorDepth();
-	}
-
 	xdl_bool  XdevLWindowSDL::getHidePointer() {
 		return XdevLWindowImpl::getHidePointer();
 	}

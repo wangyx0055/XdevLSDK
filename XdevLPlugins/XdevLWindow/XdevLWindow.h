@@ -49,13 +49,13 @@ namespace xdl {
 
 
 	enum XdevLWindowTypes {
-	    WINDOW_NORMAL,
-	    WINDOW_TOOLTIP,
-	    WINDOW_POPUP,
-	    WINDOW_DROPDOWN_MENU,
-	    WINDOW_SPLASH,
-	    WINDOW_NOTIFICATION,
-	    WINDOW_UNKNOWN
+	    XDEVL_WINDOW_TYPE_NORMAL,
+	    XDEVL_WINDOW_TYPE_TOOLTIP,
+	    XDEVL_WINDOW_TYPE_POPUP,
+	    XDEVL_WINDOW_TYPE_DROPDOWN_MENU,
+	    XDEVL_WINDOW_TYPE_SPLASH,
+	    XDEVL_WINDOW_TYPE_NOTIFICATION,
+			XDEVL_WINDOW_TYPE_UNKNOWN
 	};
 
 
@@ -72,10 +72,10 @@ namespace xdl {
 	class XdevLWindowAttribute {
 		public:
 			XdevLWindowAttribute() :
-				title(XdevLWindowTitle("XdevL (c) 2007 - 2009 Cengiz Terzibas")),
+				title(XdevLWindowTitle("XdevL (c) 2007 - 20015 Cengiz Terzibas")),
 				position(0, 0),
 				size(640, 480),
-				type(WINDOW_NORMAL) {}
+				type(XDEVL_WINDOW_TYPE_NORMAL) {}
 
 			XdevLWindowTitle title;
 			XdevLWindowPosition position;
@@ -110,9 +110,7 @@ namespace xdl {
 				and call the create method. After calling this method the OS window
 				will be created using the parameters specified.
 			*/
-			virtual xdl_int create() {
-				return ERR_ERROR;
-			}
+			virtual xdl_int create() = 0;
 
 			/// Create a window using the attribute structure.
 			virtual xdl_int create(const XdevLWindowAttribute& attribute) = 0;
@@ -120,11 +118,17 @@ namespace xdl {
 			/// Returns the ID of the windows in the window server.
 			virtual xdl_uint64 getWindowID() = 0;
 
+			/// Returns the title of the window
+			virtual const XdevLWindowTitle& getTitle() = 0;
+
 			/// Returns the x position of the window on the desktop
 			virtual const XdevLWindowPosition& getPosition() = 0;
 
 			/// Returns the size of the window.
 			virtual const XdevLWindowSize& getSize() = 0;
+
+			/// Returns the window type.
+			virtual XdevLWindowTypes getType() = 0;
 
 			/// Returns the x position of the window.
 			virtual XdevLWindowPosition::type getX() = 0;
@@ -138,23 +142,23 @@ namespace xdl {
 			/// Returns the height of the window.
 			virtual XdevLWindowSize::type getHeight() = 0;
 
-			/// Returns the title of the window
-			virtual const XdevLWindowTitle& getTitle() = 0;
-
 			/// Returns the screen mode state.
 			virtual xdl_bool getFullscreen() = 0;
 
 			/// Return if the mouse pointer is hidden.
 			virtual xdl_bool getHidePointer() = 0;
 
-			/// Returns the color buffer depth.
-			virtual xdl_int getColorDepth() = 0;
+			/// Sets the title of the window.
+			virtual void setTitle(const XdevLWindowTitle& title) = 0;
 
 			/// Sets the position of the window.
 			virtual void setPosition(const XdevLWindowPosition& position) = 0;
 
 			/// Sets the size of the window.
 			virtual void setSize(const XdevLWindowSize& size) = 0;
+
+			/// Sets the window type.
+			virtual void setType(XdevLWindowTypes type) = 0;
 
 			/// Sets the x position of the window.
 			virtual void setX(XdevLWindowPosition::type x) = 0;
@@ -168,14 +172,8 @@ namespace xdl {
 			/// Sets the height of the window.
 			virtual void setHeight(XdevLWindowSize::type height) = 0;
 
-			/// Sets the title of the window.
-			virtual void setTitle(const XdevLWindowTitle& title) = 0;
-
 			/// Sets the fullscreen mode.
 			virtual void setFullscreen(xdl_bool state) = 0;
-
-			/// Sets the window type.
-			virtual void setType(XdevLWindowTypes type) = 0;
 
 			/// Show the window.
 			/**
@@ -216,10 +214,8 @@ namespace xdl {
 			/// Sets the window decoration
 			virtual void setWindowDecoration(xdl_bool enable) = 0;
 
+			/// Checks if the cursor is inside the window.
 			virtual xdl_bool isPointerInside() = 0;
-
-			/// Returns the window type.
-			virtual XdevLWindowTypes getType() = 0;
 
 	};
 

@@ -311,11 +311,11 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowImpl::stringToWindowType(const std::string& tmp) {
-		if(tmp == "WINDOW_NORMAL") {
-			return WINDOW_NORMAL;
+		if(tmp == "XDEVL_WINDOW_TYPE_NORMAL") {
+			return XDEVL_WINDOW_TYPE_NORMAL;
 		}
 
-		return WINDOW_UNKNOWN;
+		return XDEVL_WINDOW_TYPE_UNKNOWN;
 	}
 
 	xdl_bool XdevLWindowImpl::isPointerInside() {

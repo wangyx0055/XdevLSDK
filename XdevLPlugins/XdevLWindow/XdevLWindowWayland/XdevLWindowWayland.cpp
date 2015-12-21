@@ -521,10 +521,6 @@ namespace xdl {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_int  XdevLWindowWayland::getColorDepth() {
-		return XdevLWindowImpl::getColorDepth();
-	}
-
 	xdl_bool  XdevLWindowWayland::getHidePointer() {
 		return XdevLWindowImpl::getHidePointer();
 	}
@@ -570,20 +566,11 @@ namespace xdl {
 	}
 
 	void XdevLWindowWayland::setParent(XdevLWindow* window) {
-
+		XdevLWindowImpl::setParent(window);
 	}
+
 	void XdevLWindowWayland::setType(XdevLWindowTypes type) {
-
-		switch(type) {
-
-			case WINDOW_NORMAL: {
-			}
-			break;
-			case WINDOW_TOOLTIP: {
-			}
-			break;
-
-		}
+		XdevLWindowImpl::setType(type);
 	}
 
 	void XdevLWindowWayland::onPaint() {
@@ -826,9 +813,9 @@ err:
 	}
 
 	xdl_int XdevLWindowServerWayland::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size) {
 
 		*window = new XdevLWindowWayland(nullptr);
 
