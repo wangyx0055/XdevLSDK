@@ -709,6 +709,7 @@ namespace xdl {
 				// filename of the plugin.
 				XdevLPluginName pluginName;
 				XdevLVersion version;
+				XdevLString platform("");
 				if(child->Attribute("filename")) {
 					pluginName = child->Attribute("filename");
 				} else {
@@ -721,11 +722,23 @@ namespace xdl {
 						XdevLString versionAsString(child->Attribute("version"));
 						version.fromString(versionAsString);
 					}
-				}
 
-				if(plug(pluginName, version) != ERR_OK) {
-					XDEVL_MODULE_ERROR("Could not register plugin: " << child->Attribute("filename") << "\n");
-					return ERR_ERROR;
+					if(child->Attribute("platform")) {
+						platform = child->Attribute("platform");
+					}
+				}
+				if(platform == XdevLString("")) {
+					if(plug(pluginName, version) != ERR_OK) {
+						XDEVL_MODULE_ERROR("Could not plug plugin: " << child->Attribute("filename") << "\n");
+						return ERR_ERROR;
+					}
+				} else if(XDEVL_CURRENT_PLATFORM_AS_STRING == platform) {
+					if(plug(pluginName, version) != ERR_OK) {
+						XDEVL_MODULE_ERROR("Could not plug plugin: " << child->Attribute("filename") << "\n");
+						return ERR_ERROR;
+					}
+				} else {
+					// TODO Shall we put some info here? I think for now it is not necessary.
 				}
 			} else {
 				XDEVL_MODULE_WARNING("No plugin tag found in the xml file.\n");
