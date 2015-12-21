@@ -103,9 +103,6 @@ set(HEADER_FILES
 	${HEADERS_DIR}/XdevLWindowX11.h
 	${HEADERS_DIR}/XdevLWindowX11Keyboard.h
 	${HEADERS_DIR}/imKStoUCS.h
-	${HEADERS_DIR}/scancodes_linux.h
-	${HEADERS_DIR}/scancodes_xfree86.h
-	${HEADERS_DIR}/scancodes_darwin.h
 )
 
 #
