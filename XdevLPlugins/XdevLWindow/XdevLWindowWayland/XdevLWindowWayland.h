@@ -110,6 +110,7 @@ namespace xdl {
 			//
 
 			virtual xdl_int create() override;
+			virtual xdl_int create(const XdevLWindowAttribute& attribute) override;
 			virtual const XdevLWindowPosition& getPosition() override;
 			virtual const XdevLWindowSize& getSize() override;
 			virtual XdevLWindowPosition::type getX() override;

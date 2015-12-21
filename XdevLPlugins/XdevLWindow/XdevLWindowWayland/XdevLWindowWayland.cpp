@@ -340,7 +340,6 @@ namespace xdl {
 		} else {
 			XDEVL_MODULE_SUCCESS("Received Wayland shared memory object proxy\n");
 		}
-
 		//
 		// Now we create the surface we can see on the screen.
 		//
@@ -403,7 +402,14 @@ namespace xdl {
 		return ERR_OK;
 	}
 
+	xdl_int XdevLWindowWayland::create(const XdevLWindowAttribute& attribute) {
+		XdevLWindowImpl::create(attribute);
+
+		return create();
+	}
+
 	xdl_int XdevLWindowWayland::create() {
+
 		return ERR_OK;
 	}
 
@@ -826,9 +832,9 @@ err:
 	}
 
 	xdl_int XdevLWindowServerWayland::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size) {
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size) {
 
 		*window = new XdevLWindowWayland(nullptr);
 
