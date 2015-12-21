@@ -87,6 +87,8 @@ namespace xdl {
 			virtual XdevLWindowSize::type getWidth() const;
 			virtual XdevLWindowSize::type getHeight() const;
 			virtual const XdevLWindowTitle& getTitle();
+			virtual const XdevLWindowSize& getSize();
+			virtual const XdevLWindowPosition& getPosition();
 			virtual xdl_bool getFullscreen() const;
 			virtual xdl_int getColorDepth() const;
 			virtual xdl_bool getHidePointer() const;

@@ -670,5 +670,7 @@ namespace xdl {
 		glShaderSource = (PFNGLSHADERSOURCEPROC)m_gl_context->getProcAddress("glShaderSource");
 
 		glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)m_gl_context->getProcAddress("glDrawArraysEXT");
+		
+		return ERR_OK;
 	}
 }

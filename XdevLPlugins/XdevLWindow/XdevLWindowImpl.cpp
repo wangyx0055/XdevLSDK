@@ -101,6 +101,7 @@ namespace xdl {
 
 	xdl_int XdevLWindowImpl::create(const XdevLWindowAttribute& attribute) {
 		m_attribute = attribute;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLWindowImpl::notify(XdevLEvent& event) {
@@ -162,6 +163,14 @@ namespace xdl {
 
 	const XdevLWindowTitle& XdevLWindowImpl::getTitle() {
 		return m_attribute.title;
+	}
+
+	const XdevLWindowPosition& XdevLWindowImpl::getPosition() {
+		return m_attribute.position;
+	}
+
+	const XdevLWindowSize& XdevLWindowImpl::getSize() {
+		return m_attribute.size;
 	}
 
 	xdl_bool XdevLWindowImpl::getFullscreen() const {

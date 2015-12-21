@@ -204,9 +204,6 @@ namespace xdl {
 			/// Set pointer position on the screen.
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
 
-			/// Clip pointer movement in a specific rectangle area.
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) = 0;
-
 			/// Grabs the pointer.
 			virtual void grabPointer() = 0;
 

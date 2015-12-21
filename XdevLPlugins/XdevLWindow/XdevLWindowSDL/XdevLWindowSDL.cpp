@@ -610,10 +610,6 @@ namespace xdl {
 		SDL_WarpMouseInWindow(m_window, x,y);
 	}
 
-	void XdevLWindowSDL::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-
-	}
-
 	void XdevLWindowSDL::grabPointer() {
 
 	}
