@@ -73,7 +73,7 @@ void eventCallbackFunction(xdl::XdevLEvent& event) {
 		currentCursorPosition.y = event.button.y;
 	}
 	else if (event.type == MouseMouseMotion.getHashCode()) {
-		std::cout << "WindowID: " << event.motion.windowid << " -> XDEVL_MOUSE_MOTION ( " << event.motion.x << "," << event.motion.y << "," << event.motion.xrel << "," << event.motion.yrel << std::endl;
+		std::cout << "WindowID: " << event.motion.windowid << " -> XDEVL_MOUSE_MOTION ( " << event.motion.x << "," << event.motion.y << "," << event.motion.xrel << "," << event.motion.yrel << ")" << std::endl;
 	}
 
 
