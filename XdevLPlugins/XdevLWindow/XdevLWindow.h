@@ -195,12 +195,6 @@ namespace xdl {
 			*/
 			virtual void raise() = 0;
 
-			/// Show pointer.
-			virtual void showPointer() = 0;
-
-			/// Hide pointer.
-			virtual void hidePointer() = 0;
-
 			/// Set pointer position on the screen.
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
 

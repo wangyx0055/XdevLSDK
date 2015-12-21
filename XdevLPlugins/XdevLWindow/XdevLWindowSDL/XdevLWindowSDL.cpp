@@ -512,14 +512,6 @@ namespace xdl {
 
 	}
 
-	void XdevLWindowSDL::showPointer() {
-		SDL_ShowCursor(1);
-	}
-
-	void XdevLWindowSDL::hidePointer() {
-		SDL_ShowCursor(0);
-	}
-
 	void XdevLWindowSDL::setX(XdevLWindowPosition::type x) {
 		xdl_int tmp, y;
 		SDL_GetWindowPosition(m_window, &tmp, &y);

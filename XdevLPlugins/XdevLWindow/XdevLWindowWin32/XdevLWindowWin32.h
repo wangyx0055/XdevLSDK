@@ -95,8 +95,6 @@ namespace xdl {
 			virtual void setHeight(XdevLWindowSize::type height) override;
 			virtual void setTitle(const XdevLWindowTitle& title) override;
 			virtual void setFullscreen(xdl_bool state) override;
-			virtual void showPointer() override;
-			virtual void hidePointer() override;
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y) override;
 			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) override;
 			virtual void show() override;

@@ -386,7 +386,7 @@ namespace xdl {
 		// Check if we have all necessary module functions from the dynamic library.
 		if((plugin_descriptor == nullptr) || (create_module == nullptr) || (delete_module == nullptr)) {
 			XDEVL_MODULE_ERROR("Unable to acquire necessary module function from the dynamic library.\n");
-			assert(0 && "Plugin has not the right functions defined or another problem exists.");
+			XDEVL_ASSERT(nullptr, "Plugin has not the right functions defined or another problem exists.");
 		}
 
 		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shtudown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
@@ -407,6 +407,7 @@ namespace xdl {
 
 			if(plugininfo->initPlugin(&parameter) != ERR_OK) {
 				XDEVL_MODULE_WARNING("Pluing initialisation faild. " << ".\n");
+				return shutdown();
 			} else {
 				XDEVL_MODULE_SUCCESS("Initializing plugin: " << plugin_descriptor()->getName() << " was succesful.\n");
 
@@ -729,12 +730,12 @@ namespace xdl {
 				}
 				if(platform == XdevLString("")) {
 					if(plug(pluginName, version) != ERR_OK) {
-						XDEVL_MODULE_ERROR("Could not plug plugin: " << child->Attribute("filename") << "\n");
+						XDEVL_MODULE_ERROR("Could not plug plugin: " << pluginName << "\n");
 						return ERR_ERROR;
 					}
 				} else if(XDEVL_CURRENT_PLATFORM_AS_STRING == platform) {
 					if(plug(pluginName, version) != ERR_OK) {
-						XDEVL_MODULE_ERROR("Could not plug plugin: " << child->Attribute("filename") << "\n");
+						XDEVL_MODULE_ERROR("Could not plug plugin: " << pluginName << "\n");
 						return ERR_ERROR;
 					}
 				} else {

@@ -228,10 +228,6 @@ namespace xdl {
 
 	void  XdevLMouseImpl::setRelativeMode(xdl_bool state) {
 		m_relativeMode = state;
-		if(state)
-			m_window->hidePointer();
-		else
-			m_window->showPointer();
 	}
 
 

@@ -203,13 +203,13 @@ namespace xdl {
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
 	enum {
-	    KDE_noDecoration = 0,
-	    KDE_normalDecoration = 1,
-	    KDE_tinyDecoration = 2,
-	    KDE_noFocus = 256,
-	    KDE_standaloneMenuBar = 512,
-	    KDE_desktopIcon = 1024 ,
-	    KDE_staysOnTop = 2048
+	  KDE_noDecoration = 0,
+	  KDE_normalDecoration = 1,
+	  KDE_tinyDecoration = 2,
+	  KDE_noFocus = 256,
+	  KDE_standaloneMenuBar = 512,
+	  KDE_desktopIcon = 1024 ,
+	  KDE_staysOnTop = 2048
 	};
 
 
@@ -232,14 +232,7 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowX11::init() {
-
-		XdevLWindowImpl::init();
-
-		if(create() != ERR_OK) {
-			return ERR_ERROR;
-		}
-
-		return ERR_OK;
+		return XdevLWindowImpl::init();
 	}
 
 	xdl_int XdevLWindowX11::create(const XdevLWindowAttribute& attribute) {
@@ -371,7 +364,7 @@ namespace xdl {
 		//
 		XWMHints* wmHints 	= XAllocWMHints();
 		wmHints->flags = 	StateHint | // We want to set the initial state of this window (NormalState)
-		                    InputHint;  // We want to set the input focus model.
+		                  InputHint;  // We want to set the input focus model.
 		wmHints->input = True;          // Does this application rely on the window manager to get keyboard input?
 		wmHints->initial_state = NormalState; // Most applications start this way. WithdrawnState would hide the window and IconicState would start as icon.
 		XSetWMHints(globalDisplay, m_window, wmHints);
@@ -395,8 +388,6 @@ namespace xdl {
 
 		// Set the border property.
 		setWindowBordered();
-
-		showMousePointer(getHidePointer());
 
 		XFlush(globalDisplay);
 
@@ -464,6 +455,7 @@ namespace xdl {
 	}
 
 	int XdevLWindowX11::update() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 		return ERR_OK;
 	}
 
@@ -751,6 +743,8 @@ namespace xdl {
 	}
 
 	const XdevLWindowPosition& XdevLWindowX11::getPosition() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.position.x = wa.x;
@@ -759,6 +753,8 @@ namespace xdl {
 	}
 
 	const XdevLWindowSize& XdevLWindowX11::getSize() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
@@ -767,6 +763,7 @@ namespace xdl {
 	}
 
 	XdevLWindowSize::type  XdevLWindowX11::getWidth() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
@@ -775,6 +772,7 @@ namespace xdl {
 	}
 
 	XdevLWindowSize::type  XdevLWindowX11::getHeight() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
@@ -783,6 +781,7 @@ namespace xdl {
 	}
 
 	XdevLWindowPosition::type XdevLWindowX11::getX() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.position.x = wa.x;
@@ -791,6 +790,7 @@ namespace xdl {
 	}
 
 	XdevLWindowPosition::type XdevLWindowX11::getY() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
 //		m_attribute.position.x = wa.x;
@@ -799,46 +799,64 @@ namespace xdl {
 	}
 
 	const XdevLWindowTitle& XdevLWindowX11::getTitle() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		return XdevLWindowImpl::getTitle();
 	}
 
 	xdl_bool XdevLWindowX11::getFullscreen() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		return XdevLWindowImpl::getFullscreen();
 	}
 
 	xdl_bool XdevLWindowX11::getHidePointer() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		return XdevLWindowImpl::getHidePointer();
 	}
 
 	xdl_int XdevLWindowX11::getColorDepth() {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		return XdevLWindowImpl::getColorDepth();
 	}
 
 	void XdevLWindowX11::setX(XdevLWindowPosition::type x) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		XdevLWindowImpl::setX(x);
 		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		XdevLWindowImpl::setY(m_screenHeight - y);
 		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setWidth(XdevLWindowSize::type width) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		XdevLWindowImpl::setWidth(width);
 		XResizeWindow(globalDisplay, m_window, m_attribute.size.width, m_attribute.size.height);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setHeight(XdevLWindowSize::type height) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		XdevLWindowImpl::setHeight(height);
 		XResizeWindow(globalDisplay, m_window,  m_attribute.size.width, m_attribute.size.height);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setSize(const XdevLWindowSize& size) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		m_attribute.size = size;
 
 		XSizeHints *sizehints = XAllocSizeHints();
@@ -865,6 +883,8 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11::setPosition(const XdevLWindowPosition& position) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		m_attribute.position.x = position.x;
 		m_attribute.position.y = m_screenHeight - position.y;
 		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
@@ -885,6 +905,8 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11::setTitle(const XdevLWindowTitle& title) {
+		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
+
 		XdevLWindowImpl::setTitle(title);
 
 		XClassHint* class_hints = XAllocClassHint();
@@ -904,48 +926,6 @@ namespace xdl {
 		XFree(class_hints);
 	}
 
-	void XdevLWindowX11::showPointer() {
-		showMousePointer(0);
-	}
-
-	void XdevLWindowX11::hidePointer() {
-		showMousePointer(1);
-	}
-
-	void XdevLWindowX11::showMousePointer(xdl_bool state) {
-
-		if(state) {
-			Pixmap bm_no;
-			Colormap cmap;
-			Cursor no_ptr;
-			XColor black, dummy;
-
-			cmap 		= m_defaultColorMap;
-
-			// Lets first create black color for the specific color map we use.
-			XAllocNamedColor(globalDisplay, cmap, "black", &black, &dummy);
-
-			// Now we create an empty bitmap where we will fill nothing with the color.
-			static char bm_no_data[] = {0, 0, 0, 0, 0, 0, 0, 0};
-			bm_no 	= XCreateBitmapFromData(globalDisplay, m_window, bm_no_data, 8, 8);
-
-			// Now create the new cursor bitmap which is of course back, transparent.
-			no_ptr 	= XCreatePixmapCursor(globalDisplay, bm_no, bm_no, &black, &black, 0, 0);
-
-			// Set the new shape of the cursor.
-			XDefineCursor(globalDisplay, m_window, no_ptr);
-
-			// Free everything.
-			XFreeCursor(globalDisplay, no_ptr);
-
-			if(bm_no != None) {
-				XFreePixmap(globalDisplay, bm_no);
-			}
-
-			XFreeColors(globalDisplay, cmap, &black.pixel, 1, 0);
-		} else
-			XUndefineCursor(globalDisplay, m_window);
-	}
 
 	void XdevLWindowX11::show() {
 		XMapWindow(globalDisplay, m_window);
@@ -1295,10 +1275,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerX11::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size,
-	        const XdevLWindowTypes& type) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size,
+	    const XdevLWindowTypes& type) {
 
 		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr);
 		wnd->create(title, position, size, type);
@@ -1645,8 +1625,8 @@ namespace xdl {
 
 				case ClientMessage: {
 					if((event.xclient.message_type == WM_PROTOCOLS) &&
-					        (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
-					        (event.xclient.format == 32)) {
+					    (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
+					    (event.xclient.format == 32)) {
 
 						ev.type					= XDEVL_WINDOW_EVENT;
 						ev.window.event 		= XDEVL_WINDOW_CLOSE;

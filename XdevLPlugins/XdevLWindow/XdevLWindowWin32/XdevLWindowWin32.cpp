@@ -741,14 +741,6 @@ namespace xdl {
 		}
 	}
 
-	void XdevLWindowDeviceWin32::showPointer() {
-		while (::ShowCursor(true) < 0);
-	}
-
-	void XdevLWindowDeviceWin32::hidePointer() {
-		while (::ShowCursor(false) >= 0);
-	}
-
 	void XdevLWindowDeviceWin32::setPointerPosition(xdl_uint x, xdl_uint y) {
 		::SetCursorPos(x, y);
 	}

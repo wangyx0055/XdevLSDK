@@ -489,12 +489,6 @@ namespace xdl {
 	void XdevLWindowWayland::setHeight(XdevLWindowSize::type height) {
 	}
 
-	void XdevLWindowWayland::showPointer() {
-	}
-
-	void XdevLWindowWayland::hidePointer() {
-	}
-
 	XdevLWindowPosition::type XdevLWindowWayland::getX() {
 		return XdevLWindowImpl::getX();
 	}
