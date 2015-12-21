@@ -184,7 +184,9 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	window->setType(xdl::WINDOW_NORMAL);
+	window->create();
+
+	window->setType(xdl::XDEVL_WINDOW_TYPE_NORMAL);
 	windowsMap[window->getWindowID()] = window;
 
 	xdl::IPXdevLWindow tooltip = xdl::createModule<xdl::IPXdevLWindow>(core, xdl::XdevLModuleName("XdevLWindow"), xdl::XdevLID("Tooltip"));
@@ -193,7 +195,9 @@ int main(int argc, char* argv[]) {
 	}
 	windowsMap[tooltip->getWindowID()] = tooltip;
 
-	tooltip->setType(xdl::WINDOW_NORMAL);
+	tooltip->create();
+
+	tooltip->setType(xdl::XDEVL_WINDOW_TYPE_NORMAL);
 	tooltip->setPosition(xdl::XdevLWindowPosition(600, 10));
 	tooltip->setSize(xdl::XdevLWindowSize(320, 200));
 

@@ -373,11 +373,10 @@ namespace xdl {
 		XSetWMHints(globalDisplay, m_window, wmHints);
 		XFree(wmHints);
 
+		// Set title of the window.
 		setTitle(m_attribute.title);
 
-		// Initialize Extented Window Manager Hints.
-
-
+		// Set type of the window.
 		setType(m_attribute.type);
 
 		// Check if the user specified fullscreen mode.

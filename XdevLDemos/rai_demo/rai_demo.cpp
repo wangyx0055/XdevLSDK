@@ -223,6 +223,8 @@ int main(int argc, char* argv[]) {
 		xdl::destroyCore(core);
 		return xdl::ERR_ERROR;
 	}
+	
+	window->create();
 
 	// Create a window so that we can draw something.
 	cursor = xdl::getModule<xdl::IPXdevLCursor>(core, xdl::XdevLID("XdevLCursor"));

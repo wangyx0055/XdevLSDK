@@ -111,6 +111,8 @@ namespace xdl {
 					if (!m_window) {
 						throw;
 					}
+					
+					m_window->create();
 
 					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
 					if (!m_cursor) {

@@ -114,9 +114,12 @@ int main(int argc, char* argv[]) {
 
 	// Create a window because we can use keyboard/mouse only if we have one (hopefully will be fixed in later versions of XdevL).
 	xdl::IPXdevLWindow window = xdl::createModule<xdl::IPXdevLWindow>(core, xdl::XdevLModuleName("XdevLWindow"), xdl::XdevLID("MyWindow"));
-	if(nullptr == window)
+	if(nullptr == window) {
 		return xdl::ERR_ERROR;
-
+	}
+	
+	window->create();
+	
 	// Create the keyboard module to get access to the keyboard device.
 	xdl::IPXdevLKeyboard keyboard = xdl::createModule<xdl::IPXdevLKeyboard>(core, xdl::XdevLModuleName("XdevLKeyboard"), xdl::XdevLID("MyKeyboard"));
 	if(nullptr == keyboard)

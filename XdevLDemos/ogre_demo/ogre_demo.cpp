@@ -92,6 +92,8 @@ int createDevicesAndModules(xdl::XdevLCore* core){
 	if(!window)
 		return xdl::ERR_ERROR;
 
+	window->create();
+
 	keyboard = xdl::getModule<xdl::IPXdevLKeyboard>(core, xdl::XdevLID("MyKeyboard"));
 	if(!keyboard)
 		return xdl::ERR_ERROR;
