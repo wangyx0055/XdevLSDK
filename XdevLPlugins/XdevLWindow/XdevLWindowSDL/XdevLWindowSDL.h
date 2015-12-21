@@ -75,7 +75,7 @@ namespace xdl {
 	static const XdevLString windowDescription {
 		"Support for creating a window using SDL."
 	};
-	
+
 	static const XdevLString cursorDescription {
 		"Support for handling the cursor using SDL."
 	};
@@ -136,7 +136,9 @@ namespace xdl {
 			// Internal used methods
 			//
 
-			SDL_Window* getNativeWindow() {return m_window;}
+			SDL_Window* getNativeWindow() {
+				return m_window;
+			}
 
 		protected:
 
@@ -160,7 +162,8 @@ namespace xdl {
 			virtual xdl_int createWindow(XdevLWindow** window,
 			                             const XdevLWindowTitle& title,
 			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size);
+			                             const XdevLWindowSize& size,
+			                             const XdevLWindowTypes& type);
 	};
 
 
@@ -179,12 +182,12 @@ namespace xdl {
 		private:
 			int pollEvents();
 	};
-	
-	
+
+
 	class XdevLCursorSDL : public XdevLModuleImpl<XdevLCursor>  {
 		public:
 			virtual ~XdevLCursorSDL() {}
-			
+
 			XdevLCursorSDL(XdevLModuleCreateParameter* parameter);
 
 			virtual xdl_int init() override;

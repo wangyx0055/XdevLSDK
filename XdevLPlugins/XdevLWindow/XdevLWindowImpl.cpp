@@ -85,18 +85,11 @@ namespace xdl {
 		XdevLModuleAutoImpl<XdevLWindow>(parameter, desriptor),
 		m_rootWindow(NULL),
 		m_id(id),
-		m_title("XdevL (c) 2007 - 2009 Cengiz Terzibas"),
 		m_rootTitle(""),
 		m_fullScreen(xdl_false),
 		m_colorDepth(32),
 		m_hideMouse(xdl_false),
-		m_border(xdl_true),
-		m_windowType(WINDOW_NORMAL) {
-
-		m_position.x = 0;
-		m_position.y = 0;
-		m_size.width = 640;
-		m_size.height = 480;
+		m_border(xdl_true) {
 
 		// Set background color.
 		m_backgroundColor[0] = 0;
@@ -106,22 +99,26 @@ namespace xdl {
 
 	}
 
+	xdl_int XdevLWindowImpl::create(const XdevLWindowAttribute& attribute) {
+		m_attribute = attribute;
+	}
+
 	xdl_int XdevLWindowImpl::notify(XdevLEvent& event) {
 
 		switch(event.type) {
 			case XDEVL_WINDOW_EVENT: {
 				switch(event.window.event) {
 					case XDEVL_WINDOW_MOVED: {
-						m_position.x = event.window.x;
-						m_position.y = event.window.y;
-						m_size.width = event.window.width;
-						m_size.height = event.window.height;
+						m_attribute.position.x = event.window.x;
+						m_attribute.position.y = event.window.y;
+						m_attribute.size.width = event.window.width;
+						m_attribute.size.height = event.window.height;
 					}break;
 					case XDEVL_WINDOW_RESIZED:  {
-						m_position.x = event.window.x;
-						m_position.y = event.window.y;
-						m_size.width = event.window.width;
-						m_size.height = event.window.height;
+						m_attribute.position.x = event.window.x;
+						m_attribute.position.y = event.window.y;
+						m_attribute.size.width = event.window.width;
+						m_attribute.size.height = event.window.height;
 					} break;
 				}
 			}
@@ -148,23 +145,23 @@ namespace xdl {
 	}
 
 	XdevLWindowSize::type XdevLWindowImpl::getWidth() const {
-		return m_size.width;
+		return m_attribute.size.width;
 	}
 
 	XdevLWindowSize::type XdevLWindowImpl::getHeight() const {
-		return m_size.height;
+		return m_attribute.size.height;
 	}
 
 	XdevLWindowPosition::type XdevLWindowImpl::getX() const {
-		return m_position.x;
+		return m_attribute.position.x;
 	}
 
 	XdevLWindowPosition::type XdevLWindowImpl::getY() const {
-		return m_position.y;
+		return m_attribute.position.y;
 	}
 
 	const XdevLWindowTitle& XdevLWindowImpl::getTitle() {
-		return m_title;
+		return m_attribute.title;
 	}
 
 	xdl_bool XdevLWindowImpl::getFullscreen() const {
@@ -176,19 +173,19 @@ namespace xdl {
 	}
 
 	void XdevLWindowImpl::setX(XdevLWindowPosition::type x) {
-		m_position.x = x;
+		m_attribute.position.x = x;
 	}
 
 	void XdevLWindowImpl::setY(XdevLWindowPosition::type y) {
-		m_position.y = y;
+		m_attribute.position.y = y;
 	}
 
 	void XdevLWindowImpl::setWidth(XdevLWindowSize::type width) {
-		m_size.width = width;
+		m_attribute.size.width = width;
 	}
 
 	void XdevLWindowImpl::setHeight(XdevLWindowSize::type height) {
-		m_size.height = height;
+		m_attribute.size.height = height;
 	}
 
 	void XdevLWindowImpl::setColorDepth(int depth) {
@@ -196,7 +193,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowImpl::setTitle(const XdevLWindowTitle& title) {
-		m_title = title;
+		m_attribute.title = title;
 	}
 
 	xdl_bool XdevLWindowImpl::getHidePointer() const {
@@ -216,7 +213,7 @@ namespace xdl {
 	}
 	
 	XdevLWindowTypes XdevLWindowImpl::getType() {
-		return m_windowType;
+		return  m_attribute.type;
 	}
 
 	int XdevLWindowImpl::readWindowInfo(TiXmlDocument& document) {
@@ -241,17 +238,17 @@ namespace xdl {
 						if(child->ValueTStr() == "Root")
 							m_rootTitle = XdevLString(child->GetText());
 						if(child->ValueTStr() == "Title")
-							m_title = XdevLString(child->GetText());
+							m_attribute.title = XdevLString(child->GetText());
 						if(child->ValueTStr() == "Fullscreen")
 							m_fullScreen = xstd::from_string<bool>(child->GetText());
 						if(child->ValueTStr() == "X")
-							m_position.x = xstd::from_string<int>(child->GetText());
+							m_attribute.position.x = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "Y")
-							m_position.y = xstd::from_string<int>(child->GetText());
+							m_attribute.position.y = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "Width")
-							m_size.width = xstd::from_string<int>(child->GetText());
+							m_attribute.size.width = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "Height")
-							m_size.height = xstd::from_string<int>(child->GetText());
+							m_attribute.size.height = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "HidePointer")
 							m_hideMouse = xstd::from_string<xdl_bool>(child->GetText());
 						if(child->ValueTStr() == "Border")
@@ -314,6 +311,14 @@ namespace xdl {
 
 	xdl_bool XdevLWindowImpl::isPointerInside() {
 		return m_pointerIsInside;
+	}
+
+	void XdevLWindowImpl::setPosition(const XdevLWindowPosition& position) {
+		m_attribute.position = position;
+	}
+
+	void XdevLWindowImpl::setSize(const XdevLWindowSize& size) {
+		m_attribute.size = size;
 	}
 
 	//

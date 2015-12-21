@@ -37,16 +37,20 @@ namespace xdl {
 		@brief ID to get the correct modules names for the XdevLWindow plugins.
 	*/
 	enum XdevLWindowModuleName {
-		XDEVL_WINDOW_MODULE_NAME,
-		XDEVL_WINDOW_SERVER_MODULE_NAME,
-		XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME,
-		XDEVL_CURSOR_MODULE_NAME
+	    XDEVL_WINDOW_MODULE_NAME,
+	    XDEVL_WINDOW_SERVER_MODULE_NAME,
+	    XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME,
+	    XDEVL_CURSOR_MODULE_NAME
 	};
 
-	static const XdevLString window_vendor 				{"www.codeposer.net"};
-	static const XdevLString window_author				{"Cengiz Terzibas"};
-	static const XdevLString window_copyright			{"(c) 2005 - 2015 Cengiz Terzibas."};
-	static const XdevLString windowServerDescription	{"Window Server that manages windows."};
+	static const XdevLString window_vendor 				{"www.codeposer.net"
+	};
+	static const XdevLString window_author				{"Cengiz Terzibas"
+	};
+	static const XdevLString window_copyright			{"(c) 2005 - 2015 Cengiz Terzibas."
+	};
+	static const XdevLString windowServerDescription	{"Window Server that manages windows."
+	};
 
 	static const std::vector<XdevLModuleName>	window_moduleNames	{
 		XdevLModuleName("XdevLWindow"),
@@ -57,10 +61,10 @@ namespace xdl {
 
 	// Holds the Major version number.
 	const xdl_uint XdevLWindowServerMajorVersion = 1;
-	
+
 	// Holds the Minor version number.
 	const xdl_uint XdevLWindowServerMinorVersion = 0;
-	
+
 	// Holds the Patch version number.
 	const xdl_uint XdevLWindowServerPatchVersion = 0;
 
@@ -76,6 +80,7 @@ namespace xdl {
 
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
+			virtual xdl_int create(const XdevLWindowAttribute& attribute);
 			virtual xdl_uint64 getWindowID();
 			virtual XdevLWindowPosition::type getX() const;
 			virtual XdevLWindowPosition::type getY() const;
@@ -91,6 +96,8 @@ namespace xdl {
 			virtual void setHeight(XdevLWindowSize::type height);
 			void setColorDepth(int depth);
 			virtual void setTitle(const XdevLWindowTitle& title);
+			virtual void setPosition(const XdevLWindowPosition& position);
+			virtual void setSize(const XdevLWindowSize& size);
 			virtual void setHidePointer(xdl_bool state);
 			xdl_bool getWindowBorder();
 			static void increaseWindowCounter();
@@ -107,19 +114,16 @@ namespace xdl {
 			// The identification code.
 			xdl_uint64 m_id;
 
+			// Holds the window attributes.
+			XdevLWindowAttribute m_attribute;
+
 			// Holds the windows title.
 			XdevLWindowTitle m_title;
 
 			// The name of the root window.
 			XdevLWindowTitle m_rootTitle;
 
-			/// Holds the position of the window.
-			XdevLWindowPosition m_position;
-
-			/// Holds the size of the window.
-			XdevLWindowSize			m_size;
-
-			/// fullscreen yes or no
+			/// Full screen yes or no
 			xdl_bool m_fullScreen;
 
 			/// color depth of the framebuffer
@@ -133,10 +137,6 @@ namespace xdl {
 
 			// Holds the background color.
 			xdl_uint m_backgroundColor[4];
-
-
-			
-			XdevLWindowTypes m_windowType;
 
 			xdl_bool m_pointerIsInside;
 		protected:
@@ -165,25 +165,25 @@ namespace xdl {
 	};
 
 	class XdevLWindowEventServerImpl : public XdevLModuleAutoImpl<XdevLWindowEventServer> {
-	public:
-		typedef std::map<xdl_uint64, XdevLWindow*> WindowEventMapType;
+		public:
+			typedef std::map<xdl_uint64, XdevLWindow*> WindowEventMapType;
 
-		XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
-		virtual ~XdevLWindowEventServerImpl() {}
+			XdevLWindowEventServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
+			virtual ~XdevLWindowEventServerImpl() {}
 
-		virtual xdl_bool isWindowRegistered(XdevLWindow* window) override;
-		virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
-		virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
-		virtual XdevLWindow* getWindow(xdl_uint64 id) override;
-		virtual XdevLWindow* getFocus() const override;
-		virtual void flush() override;
+			virtual xdl_bool isWindowRegistered(XdevLWindow* window) override;
+			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
+			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
+			virtual XdevLWindow* getWindow(xdl_uint64 id) override;
+			virtual XdevLWindow* getFocus() const override;
+			virtual void flush() override;
 
-		void focusGained(XdevLWindow* window);
+			void focusGained(XdevLWindow* window);
 
-	private:
-		XdevLWindow* m_focusWindow;
-		WindowEventMapType m_windows;
-		
+		private:
+			XdevLWindow* m_focusWindow;
+			WindowEventMapType m_windows;
+
 
 	};
 
@@ -192,7 +192,7 @@ namespace xdl {
 	extern void startEventThread();
 
 	extern void stopEventThread();
-	
+
 	extern xdl::XdevLWindowEventServer* windowEventServer;
 	extern xdl::XdevLCursor* cursor;
 	extern xdl::XdevLModuleCreateParameter* XdevLWindowEventServerParameter;

@@ -369,7 +369,7 @@ namespace xdl {
 //		m_frameCallback = wl_surface_frame(m_surface);
 //		wl_callback_add_listener(m_frameCallback, &frame_listener, this);
 
-		createOpaqueRegion(m_position.x, m_position.y, m_size.width, m_size.height);
+		createOpaqueRegion(m_attribute.position.x, m_attribute.position.y, m_attribute.size.width, m_attribute.size.height);
 
 		xdl_int ret = initializeEGL();
 		if(ret == ERR_ERROR) {
@@ -437,9 +437,9 @@ namespace xdl {
 	}
 
 	void XdevLWindowWayland::setSize(const XdevLWindowSize& size) {
-		m_size = size;
+		XdevLWindowImpl::setSize(size);
 
-		wl_egl_window_resize(m_egl.m_eglWindow, m_size.width, m_size.height, 0, 0);
+		wl_egl_window_resize(m_egl.m_eglWindow, size.width, size.height, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		eglSwapBuffers(m_egl.m_eglDisplay, m_egl.m_eglSurface);
 
@@ -453,12 +453,12 @@ namespace xdl {
 	}
 
 	void XdevLWindowWayland::setPosition(const XdevLWindowPosition& position) {
-		m_position = position;
+		XdevLWindowImpl::setPosition(position);
 	}
 
 	void XdevLWindowWayland::setTitle(const XdevLWindowTitle& title) {
 		XdevLWindowImpl::setTitle(title);
-		wl_shell_surface_set_title(m_shellSurface, m_title.toString().c_str());
+		wl_shell_surface_set_title(m_shellSurface, title.toString().c_str());
 	}
 
 	void XdevLWindowWayland::setFullscreen(xdl_bool state) {
@@ -490,31 +490,31 @@ namespace xdl {
 	}
 
 	XdevLWindowPosition::type XdevLWindowWayland::getX() {
-		return m_position.x;
+		return XdevLWindowImpl::getX();
 	}
 
 	XdevLWindowPosition::type XdevLWindowWayland::getY() {
-		return m_position.y;
+		return XdevLWindowImpl::getY();
 	}
 
 	XdevLWindowSize::type XdevLWindowWayland::getWidth() {
-		return m_size.width;
+		return XdevLWindowImpl::getWidth();
 	}
 
 	XdevLWindowSize::type XdevLWindowWayland::getHeight() {
-		return m_size.height;
+		return XdevLWindowImpl::getHeight();
 	}
 
 	const XdevLWindowSize& XdevLWindowWayland::getSize() {
-		return m_size;
+		return XdevLWindowImpl::getSize();
 	}
 
 	const XdevLWindowPosition& XdevLWindowWayland::getPosition() {
-		return m_position;
+		return XdevLWindowImpl::getPosition();
 	}
 
 	const XdevLWindowTitle& XdevLWindowWayland::getTitle() {
-		return m_title;
+		return XdevLWindowImpl::getTitle();
 	}
 
 	xdl_bool  XdevLWindowWayland::getFullscreen() {
@@ -592,7 +592,9 @@ namespace xdl {
 
 	void XdevLWindowWayland::onPaint() {
 		wl_callback_destroy(m_frameCallback);
-		wl_surface_damage(m_surface, m_position.x, m_position.y, m_size.width, m_size.height);
+		XdevLWindowPosition position = getPosition();
+		XdevLWindowSize size = getSize();
+		wl_surface_damage(m_surface, position.x, position.y, size.width, size.height);
 
 		paint_pixels();
 
@@ -607,8 +609,8 @@ namespace xdl {
 
 	void XdevLWindowWayland::onSizeChanged(xdl_int width, xdl_int height) {
 		XDEVL_MODULE_INFO("Size changed: (width, height): (" << width << ", " << height << ")\n");
-		m_size.width = width;
-		m_size.height = height;
+		XdevLWindowSize size(width, height);
+		setSize(size);
 
 		wl_egl_window_resize(m_egl.m_eglWindow, width, height, 0, 0);
 

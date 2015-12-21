@@ -203,13 +203,13 @@ namespace xdl {
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
 	enum {
-	  KDE_noDecoration = 0,
-	  KDE_normalDecoration = 1,
-	  KDE_tinyDecoration = 2,
-	  KDE_noFocus = 256,
-	  KDE_standaloneMenuBar = 512,
-	  KDE_desktopIcon = 1024 ,
-	  KDE_staysOnTop = 2048
+	    KDE_noDecoration = 0,
+	    KDE_normalDecoration = 1,
+	    KDE_tinyDecoration = 2,
+	    KDE_noFocus = 256,
+	    KDE_standaloneMenuBar = 512,
+	    KDE_desktopIcon = 1024 ,
+	    KDE_staysOnTop = 2048
 	};
 
 
@@ -241,10 +241,22 @@ namespace xdl {
 
 		return ERR_OK;
 	}
+
+	xdl_int XdevLWindowX11::create(const XdevLWindowAttribute& attribute) {
+		XdevLWindowImpl::create(attribute);
+		return create();
+	}
+
 	xdl_int XdevLWindowX11::create(const XdevLWindowTitle& title,
 	                               const XdevLWindowPosition& position,
-	                               const XdevLWindowSize& size) {
-		return ERR_ERROR;
+	                               const XdevLWindowSize& size,
+	                               const XdevLWindowTypes& type) {
+		m_attribute.title = title;
+		m_attribute.position = position;
+		m_attribute.size = size;
+		m_attribute.type = type;
+
+		return create();
 	}
 
 	int XdevLWindowX11::create() {
@@ -303,7 +315,7 @@ namespace xdl {
 
 		XSetWindowAttributes WindowAttributes;
 
-		if((m_windowType == WINDOW_TOOLTIP) || (m_windowType == WINDOW_POPUP) || (m_windowType == WINDOW_SPLASH) || (m_windowType == WINDOW_NOTIFICATION)) {
+		if((m_attribute.type == WINDOW_TOOLTIP) || (m_attribute.type == WINDOW_POPUP) || (m_attribute.type == WINDOW_SPLASH) || (m_attribute.type == WINDOW_NOTIFICATION)) {
 			// Tell the WM not to controll our window.
 			WindowAttributes.override_redirect	= True;
 		} else {
@@ -316,8 +328,10 @@ namespace xdl {
 
 		m_window = XCreateWindow(globalDisplay,
 		                         m_rootWindow,
-		                         m_position.x, m_position.y,
-		                         m_size.width, m_size.height,
+		                         m_attribute.position.x,
+		                         m_screenHeight - m_attribute.position.y,
+		                         m_attribute.size.width,
+		                         m_attribute.size.height,
 		                         borderwith,
 		                         CopyFromParent,
 		                         InputOutput,
@@ -325,6 +339,10 @@ namespace xdl {
 		                         CWOverrideRedirect | CWColormap | CWBackPixmap | CWBackPixel,
 		                         &WindowAttributes);
 
+		if(None == m_window) {
+			XDEVL_MODULE_ERROR("Couldn't create X11 window.\n");
+			return ERR_ERROR;
+		}
 		// Initialize all EWMH to tell the Window Manager which protocols we are going to handle.
 		initializeEWMH();
 
@@ -353,18 +371,18 @@ namespace xdl {
 		//
 		XWMHints* wmHints 	= XAllocWMHints();
 		wmHints->flags = 	StateHint | // We want to set the initial state of this window (NormalState)
-		                  InputHint;  // We want to set the input focus model.
+		                    InputHint;  // We want to set the input focus model.
 		wmHints->input = True;          // Does this application rely on the window manager to get keyboard input?
 		wmHints->initial_state = NormalState; // Most applications start this way. WithdrawnState would hide the window and IconicState would start as icon.
 		XSetWMHints(globalDisplay, m_window, wmHints);
 		XFree(wmHints);
 
-		setTitle(m_title);
+		setTitle(m_attribute.title);
 
 		// Initialize Extented Window Manager Hints.
 
 
-		setType(m_windowType);
+		setType(m_attribute.type);
 
 		// Check if the user specified fullscreen mode.
 		if(getFullscreen()) {
@@ -735,49 +753,49 @@ namespace xdl {
 	const XdevLWindowPosition& XdevLWindowX11::getPosition() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_position.x = wa.x;
-//		m_position.y = wa.y;
-		return m_position;
+//		m_attribute.position.x = wa.x;
+//		m_attribute.position.y = wa.y;
+		return m_attribute.position;
 	}
 
 	const XdevLWindowSize& XdevLWindowX11::getSize() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_size.width 	= wa.width;
-//		m_size.height = wa.height;
-		return m_size;
+//		m_attribute.size.width 	= wa.width;
+//		m_attribute.size.height = wa.height;
+		return m_attribute.size;
 	}
 
 	XdevLWindowSize::type  XdevLWindowX11::getWidth() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_size.width 	= wa.width;
-//		m_size.height = wa.height;
-		return m_size.width;
+//		m_attribute.size.width 	= wa.width;
+//		m_attribute.size.height = wa.height;
+		return m_attribute.size.width;
 	}
 
 	XdevLWindowSize::type  XdevLWindowX11::getHeight() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_size.width 	= wa.width;
-//		m_size.height = wa.height;
-		return m_size.height;
+//		m_attribute.size.width 	= wa.width;
+//		m_attribute.size.height = wa.height;
+		return m_attribute.size.height;
 	}
 
 	XdevLWindowPosition::type XdevLWindowX11::getX() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_position.x = wa.x;
-//		m_position.y = wa.y;
-		return m_position.x;
+//		m_attribute.position.x = wa.x;
+//		m_attribute.position.y = wa.y;
+		return m_attribute.position.x;
 	}
 
 	XdevLWindowPosition::type XdevLWindowX11::getY() {
 //		XWindowAttributes wa;
 //		XGetWindowAttributes(globalDisplay, m_window, &wa);
-//		m_position.x = wa.x;
-//		m_position.y = wa.y;
-		return m_position.y;
+//		m_attribute.position.x = wa.x;
+//		m_attribute.position.y = wa.y;
+		return m_attribute.position.y;
 	}
 
 	const XdevLWindowTitle& XdevLWindowX11::getTitle() {
@@ -798,38 +816,38 @@ namespace xdl {
 
 	void XdevLWindowX11::setX(XdevLWindowPosition::type x) {
 		XdevLWindowImpl::setX(x);
-		XMoveWindow(globalDisplay, m_window, m_position.x, m_position.y);
+		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
-		XdevLWindowImpl::setY(y);
-		XMoveWindow(globalDisplay, m_window, m_position.x, m_position.y);
+		XdevLWindowImpl::setY(m_screenHeight - y);
+		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setWidth(XdevLWindowSize::type width) {
 		XdevLWindowImpl::setWidth(width);
-		XResizeWindow(globalDisplay, m_window, m_size.width, m_size.height);
+		XResizeWindow(globalDisplay, m_window, m_attribute.size.width, m_attribute.size.height);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setHeight(XdevLWindowSize::type height) {
 		XdevLWindowImpl::setHeight(height);
-		XResizeWindow(globalDisplay, m_window,  m_size.width, m_size.height);
+		XResizeWindow(globalDisplay, m_window,  m_attribute.size.width, m_attribute.size.height);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setSize(const XdevLWindowSize& size) {
-		m_size = size;
+		m_attribute.size = size;
 
 		XSizeHints *sizehints = XAllocSizeHints();
 		long userhints;
 
 		XGetWMNormalHints(globalDisplay, m_window, sizehints, &userhints);
 
-		sizehints->min_width = sizehints->max_width = m_size.width;
-		sizehints->min_height = sizehints->max_height = m_size.height;
+		sizehints->min_width = sizehints->max_width = m_attribute.size.width;
+		sizehints->min_height = sizehints->max_height = m_attribute.size.height;
 		sizehints->flags |= PMinSize | PMaxSize;
 
 		XSetWMNormalHints(globalDisplay, m_window, sizehints);
@@ -840,27 +858,28 @@ namespace xdl {
 		// resize only after either the user move/resize the window or within the code
 		// or first unmapping then mapping.
 
-		XResizeWindow(globalDisplay, m_window, m_size.width, m_size.height);
-		XMoveWindow(globalDisplay, m_window, m_position.x, m_position.y);
+		XResizeWindow(globalDisplay, m_window, m_attribute.size.width, m_attribute.size.height);
+		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XRaiseWindow(globalDisplay, m_window);
 		XFlush(globalDisplay);
 	}
 
 	void XdevLWindowX11::setPosition(const XdevLWindowPosition& position) {
-		m_position = position;
-		XMoveWindow(globalDisplay, m_window, m_position.x, m_position.y);
+		m_attribute.position.x = position.x;
+		m_attribute.position.y = m_screenHeight - position.y;
+		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
 
 	void XdevLWindowX11::setResizeable(xdl_bool state) {
 		XSizeHints* sizeHints 	= XAllocSizeHints();
 		sizeHints->flags		= USPosition | USSize | PPosition | PSize | PMinSize;
-		sizeHints->x			= m_position.x;
-		sizeHints->y			= m_position.y;
-		sizeHints->width		= m_size.width;
-		sizeHints->height		= m_size.height;
-		sizeHints->min_width	= m_size.width;
-		sizeHints->min_height	= m_size.height;
+		sizeHints->x			= m_attribute.position.x;
+		sizeHints->y			= m_attribute.position.y;
+		sizeHints->width		= m_attribute.size.width;
+		sizeHints->height		= m_attribute.size.height;
+		sizeHints->min_width	= m_attribute.size.width;
+		sizeHints->min_height	= m_attribute.size.height;
 		XSetWMNormalHints(globalDisplay, m_window, sizeHints);
 		XFree(sizeHints);
 	}
@@ -1051,17 +1070,17 @@ namespace xdl {
 	}
 
 	void XdevLWindowX11::grabPointer() {
-		for(;;) {
-			xdl_int result = XGrabPointer(globalDisplay, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
-			if(result == GrabSuccess) {
-				break;
-			}
-		}
-		XFlush(globalDisplay);
+//		for(;;) {
+//			xdl_int result = XGrabPointer(globalDisplay, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
+//			if(result == GrabSuccess) {
+//				break;
+//			}
+//		}
+//		XFlush(globalDisplay);
 	}
 
 	void XdevLWindowX11::ungrabPointer() {
-		XUngrabPointer(globalDisplay, CurrentTime);
+//		XUngrabPointer(globalDisplay, CurrentTime);
 	}
 
 	void XdevLWindowX11::setInputFocus() {
@@ -1280,12 +1299,15 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerX11::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size) {
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size,
+	        const XdevLWindowTypes& type) {
 
-		*window = new XdevLWindowX11(nullptr);
-
+		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr);
+		wnd->create(title, position, size, type);
+		*window = wnd;
+		m_windowList[wnd->getWindowID()] = wnd;
 		return ERR_OK;
 	}
 
@@ -1409,7 +1431,7 @@ namespace xdl {
 				// Keyboard released.
 				//
 				case KeyRelease: {
-					
+
 					//
 					// Check if the auto repeat is on.
 					//
@@ -1627,8 +1649,8 @@ namespace xdl {
 
 				case ClientMessage: {
 					if((event.xclient.message_type == WM_PROTOCOLS) &&
-					    (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
-					    (event.xclient.format == 32)) {
+					        (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
+					        (event.xclient.format == 32)) {
 
 						ev.type					= XDEVL_WINDOW_EVENT;
 						ev.window.event 		= XDEVL_WINDOW_CLOSE;

@@ -799,7 +799,7 @@ namespace xdl {
 
 		// TODO This sections needs redesign. The update and listener methods
 		// maybe block the whole system which is not so good. For the moment
-		// we accept this crapy limitation.
+		// we accept this crappy limitation.
 
 		//
 		// Call all update methods of registered modules.

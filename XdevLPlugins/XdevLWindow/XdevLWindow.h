@@ -66,14 +66,20 @@ namespace xdl {
 	typedef XdevLString XdevLWindowTitle;
 
 	/**
-		@class XdevLWindowAttributes
+		@class XdevLWindowAttribute
 		@brief Structure that holds Window information.
 	*/
-	class XdevLWindowAttributes {
+	class XdevLWindowAttribute {
 		public:
+			XdevLWindowAttribute() :
+				title(XdevLWindowTitle("XdevL (c) 2007 - 2009 Cengiz Terzibas")),
+				position(0, 0),
+				size(640, 480),
+				type(WINDOW_NORMAL) {}
+
+			XdevLWindowTitle title;
 			XdevLWindowPosition position;
 			XdevLWindowSize size;
-			XdevLWindowTitle title;
 			XdevLWindowTypes type;
 	};
 
@@ -107,6 +113,9 @@ namespace xdl {
 			virtual xdl_int create() {
 				return ERR_ERROR;
 			}
+
+			/// Create a window using the attribute structure.
+			virtual xdl_int create(const XdevLWindowAttribute& attribute) = 0;
 
 			/// Returns the ID of the windows in the window server.
 			virtual xdl_uint64 getWindowID() = 0;
@@ -241,7 +250,8 @@ namespace xdl {
 			virtual xdl_int createWindow(XdevLWindow** window,
 			                             const XdevLWindowTitle& title,
 			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size) = 0;
+			                             const XdevLWindowSize& size,
+			                             const XdevLWindowTypes& type) = 0;
 
 			/// Destroys the specified window.
 			virtual xdl_int destroy(XdevLWindow* window) = 0;

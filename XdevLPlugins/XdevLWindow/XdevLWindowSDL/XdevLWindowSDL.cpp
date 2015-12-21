@@ -469,7 +469,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowSDL::setSize(const XdevLWindowSize& size) {
-		m_size = size;
+		XdevLWindowImpl::setSize(size);
 
 		if(m_window) {
 			SDL_SetWindowSize(m_window, size.width, size.height);
@@ -477,7 +477,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowSDL::setPosition(const XdevLWindowPosition& position) {
-		m_position = position;
+		XdevLWindowImpl::setPosition(position);
 
 		if(m_window) {
 			SDL_SetWindowPosition(m_window, position.x, position.y);
@@ -503,8 +503,9 @@ namespace xdl {
 			SDL_SetWindowFullscreen(m_window, flags);
 		}
 
-		SDL_GetWindowSize(m_window, &m_size.width, &m_size.height);
-
+		XdevLWindowSize size;
+		SDL_GetWindowSize(m_window, &size.width, &size.height);
+		setSize(size);
 	}
 
 	void XdevLWindowSDL::setType(XdevLWindowTypes type) {
@@ -544,38 +545,37 @@ namespace xdl {
 	}
 
 	XdevLWindowPosition::type XdevLWindowSDL::getX() {
-		SDL_GetWindowPosition(m_window, &m_position.x, &m_position.y);
-		return m_position.x;
+		SDL_GetWindowPosition(m_window, &m_attribute.position.x, &m_attribute.position.y);
+		return m_attribute.position.x;
 	}
 
 	XdevLWindowPosition::type XdevLWindowSDL::getY() {
-		SDL_GetWindowPosition(m_window, &m_position.x, &m_position.y);
-		return m_position.y;
+		SDL_GetWindowPosition(m_window, &m_attribute.position.x, &m_attribute.position.y);
+		return m_attribute.position.y;
 	}
 
 	XdevLWindowSize::type XdevLWindowSDL::getWidth() {
-		SDL_GetWindowSize(m_window, &m_size.width, &m_size.height);
-		return m_size.width;
+		SDL_GetWindowSize(m_window, &m_attribute.size.width, &m_attribute.size.height);
+		return m_attribute.size.width;
 	}
 
 	XdevLWindowSize::type XdevLWindowSDL::getHeight() {
-		SDL_GetWindowSize(m_window, &m_size.width, &m_size.height);
-		return m_size.height;
+		SDL_GetWindowSize(m_window, &m_attribute.size.width, &m_attribute.size.height);
+		return m_attribute.size.height;
 	}
 
 	const XdevLWindowSize& XdevLWindowSDL::getSize() {
-		SDL_GetWindowSize(m_window, &m_size.width, &m_size.height);
-		return m_size;
+		SDL_GetWindowSize(m_window, &m_attribute.size.width, &m_attribute.size.height);
+		return m_attribute.size;
 	}
 
 	const XdevLWindowPosition& XdevLWindowSDL::getPosition() {
-		SDL_GetWindowPosition(m_window, &m_position.x, &m_position.y);
-		return m_position;
+		SDL_GetWindowPosition(m_window, &m_attribute.position.x, &m_attribute.position.y);
+		return m_attribute.position;
 	}
 
 	const XdevLWindowTitle& XdevLWindowSDL::getTitle() {
-		m_title = XdevLWindowTitle(SDL_GetWindowTitle(m_window));
-		return m_title;
+		return getTitle();
 	}
 
 	xdl_bool  XdevLWindowSDL::getFullscreen() {
@@ -650,9 +650,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size) {
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size,
+	        const XdevLWindowTypes& type) {
 
 		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
 		sdlWindow->setTitle(title);

@@ -110,6 +110,8 @@ namespace xdl {
 			// XdevLWindow related methods.
 			//
 
+			virtual xdl_int create() override;
+			virtual xdl_int create(const XdevLWindowAttribute& attribute) override;
 			virtual const XdevLWindowPosition& getPosition() override;
 			virtual const XdevLWindowSize& getSize() override;
 			virtual XdevLWindowPosition::type getX() override;
@@ -146,8 +148,10 @@ namespace xdl {
 			Display* getNativeDisplay();
 			Window getNativeWindow();
 			Window getNativeRootWindow();
+			xdl_int create(const XdevLWindowTitle& title, const XdevLWindowPosition& position, const XdevLWindowSize& size, const XdevLWindowTypes& type);
 
-	protected:
+		protected:
+
 			Display* m_display;
 
 			/// Holds the default root window. Mostly it is the desktop.
@@ -215,8 +219,6 @@ namespace xdl {
 			xdl_int allow_exposures_return;
 			xdl_long m_event_mask;
 		protected:
-			xdl_int create(const XdevLWindowTitle& title, const XdevLWindowPosition& position, const XdevLWindowSize& size);
-			xdl_int create();
 			xdl_int getGetClosestVideoMode();
 			void setFullscreenVideoMode();
 			void restoreFullscreenVideoMode();
@@ -276,7 +278,7 @@ namespace xdl {
 			Atom XdndDrop;
 			Atom XdndFinished;
 			Atom XdndSelection;
-			
+
 			Atom _KDE_NET_WM_WINDOW_TYPE_OVERRIDE;
 
 	};
@@ -290,7 +292,8 @@ namespace xdl {
 			virtual xdl_int createWindow(XdevLWindow** window,
 			                             const XdevLWindowTitle& title,
 			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size
+			                             const XdevLWindowSize& size,
+			                             const XdevLWindowTypes& type
 			                            );
 	};
 
@@ -314,19 +317,19 @@ namespace xdl {
 			XdevLWindowX11Keyboard* m_keyboard;
 			xdl_int m_event_basep;
 			xdl_int m_error_basep;
-			
+
 			Atom WM_PROTOCOLS;
 			Atom WM_DELETE_WINDOW;
 			Atom _NET_WM_PING;
-			
+
 			XConfigureEvent m_prevConfigureEvent;
 	};
-	
-	
+
+
 	class XdevLCursorX11 : public XdevLModuleImpl<XdevLCursor>  {
 		public:
 			virtual ~XdevLCursorX11() {}
-			
+
 			XdevLCursorX11(XdevLModuleCreateParameter* parameter);
 
 			virtual xdl_int init() override;
@@ -337,16 +340,16 @@ namespace xdl {
 			virtual void show() override;
 			virtual void hide() override;
 			virtual void setPosition(xdl_uint x, xdl_uint y) override;
-			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;	
+			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
 			virtual xdl_bool isRelativeMotionEnabled();
-			
+
 			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
-	private:
+		private:
 			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
-	private:
+		private:
 			XdevLWindowX11* m_window;
 			Cursor		m_invisibleCursor;
 			Pixmap		m_invisibleCursorPixmap;
@@ -354,7 +357,7 @@ namespace xdl {
 			XColor		m_dummy;
 			Colormap	m_defaultColorMap;
 			xdl_int		m_screenNumber;
-			
+
 			//
 			// Pointer barrier stuff.
 			//
@@ -363,15 +366,15 @@ namespace xdl {
 			xdl_int		m_fixes_event;
 			xdl_int		m_fixes_error;
 			PointerBarrier m_barriers[4];
-			
+
 			xdl_bool	m_xinput2Supported;
 			xdl_int		m_xinput2_opcode;
 			xdl_int		m_xinput2_event;
 			xdl_int		m_xinput2_error;
-			
+
 			xdl_int m_screenWidth;
 			xdl_int m_screenHeight;
-			
+
 			xdl_bool m_reltaiveModeEnabled;
 	};
 
