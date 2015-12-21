@@ -982,10 +982,6 @@ namespace xdl {
 		XWarpPointer(globalDisplay, m_window, m_window, 0, 0, wa.width, wa.height, x, y);
 	}
 
-	void XdevLWindowX11::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-
-	}
-
 	xdl_bool XdevLWindowX11::isHidden() {
 		Atom actualType;
 		int actualFormat;

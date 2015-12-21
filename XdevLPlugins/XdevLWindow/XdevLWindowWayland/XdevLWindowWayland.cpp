@@ -553,10 +553,6 @@ namespace xdl {
 
 	}
 
-	void XdevLWindowWayland::clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-
-	}
-
 	void XdevLWindowWayland::grabPointer() {
 
 	}

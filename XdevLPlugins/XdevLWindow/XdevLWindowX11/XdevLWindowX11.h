@@ -133,7 +133,6 @@ namespace xdl {
 			virtual void showPointer() override;
 			virtual void hidePointer() override;
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y) override;
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) override;
 			virtual void show() override;
 			virtual void hide() override;
 			virtual xdl_bool isHidden() override;
