@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(XdevLImage)
+project(XdevLImagePluginBMP)
 
-set(XdevLImageLibrary XdevLImage)
+set(XdevLImagePluginBMPLibrary XdevLImagePluginBMP)
 
 set(HEADERS_DIR ${XDEVL_PLUGINS}/XdevLImage)
 set(SRC_DIR ${XDEVL_PLUGINS}/XdevLImage)
@@ -45,11 +45,11 @@ set(HEADER_INTERFACE_FILE ${HEADERS_DIR}/XdevLImage.h)
 
 set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
-	${HEADERS_DIR}/XdevLImageImpl.h
+	${XdevLImagePluginBMP_SOURCE_DIR}/XdevLImagePluginBMP.h
 )
 
 set(SOURCE_FILES
-	${SRC_DIR}/XdevLImageImpl.cpp
+	${XdevLImagePluginBMP_SOURCE_DIR}//XdevLImagePluginBMP.cpp
 )
 
 include_directories(
@@ -79,21 +79,21 @@ elseif(PLATFORM_WINDOWS)
 
 endif()
 
-add_library(${XdevLImageLibrary} SHARED
+add_library(${XdevLImagePluginBMPLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
 
-target_link_libraries(${XdevLImageLibrary} ${LIBS})
+target_link_libraries(${XdevLImagePluginBMPLibrary} ${LIBS})
 
-set_property(TARGET ${XdevLImageLibrary} PROPERTY PREFIX "")
+set_property(TARGET ${XdevLImagePluginBMPLibrary} PROPERTY PREFIX "")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-set_property(TARGET ${XdevLImageLibrary} PROPERTY SUFFIX "-${XDEVLIMAGE_PLUGIN_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+set_property(TARGET ${XdevLImagePluginBMPLibrary} PROPERTY SUFFIX "-${XDEVLIMAGE_PLUGIN_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 else()
-set_property(TARGET ${XdevLImageLibrary} PROPERTY SUFFIX "-${XDEVLIMAGE_PLUGIN_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+set_property(TARGET ${XdevLImagePluginBMPLibrary} PROPERTY SUFFIX "-${XDEVLIMAGE_PLUGIN_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
 
 install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
-install(TARGETS ${XdevLImageLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})
+install(TARGETS ${XdevLImagePluginBMPLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})
 

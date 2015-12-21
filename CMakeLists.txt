@@ -316,7 +316,7 @@ endif()
 
 add_subdirectory(XdevLUtils/XdevLBT)
 add_subdirectory(XdevLUtils/XdevLCodeLiteGenerator)
-add_subdirectory(XdevLPlugins/XdevLImage)
+add_subdirectory(XdevLPlugins/XdevLImage/XdevLImagePluginBMP)
 
 # All packaging stuff
 
