@@ -1,20 +1,20 @@
 /*
-	XdevL eXtended DEVice Library.
+        XdevL eXtended DEVice Library.
 
-	Copyright © 2005-2012 Cengiz Terzibas
+        Copyright © 2005-2012 Cengiz Terzibas
 
-	This library is free software; you can redistribute it and/or modify it under the
-	terms of the GNU Lesser General Public License as published by the Free Software
-	Foundation; either version 2.1 of the License, or (at your option) any later version.
-	This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-	See the GNU Lesser General Public License for more details.
+        This library is free software; you can redistribute it and/or modify it under the
+        terms of the GNU Lesser General Public License as published by the Free Software
+        Foundation; either version 2.1 of the License, or (at your option) any later version.
+        This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+        without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+        See the GNU Lesser General Public License for more details.
 
-	You should have received a copy of the GNU Lesser General Public License along with
-	this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
-	Suite 330, Boston, MA 02111-1307 USA
+        You should have received a copy of the GNU Lesser General Public License along with
+        this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
+        Suite 330, Boston, MA 02111-1307 USA
 
-	I would appreciate if you report all bugs to: cengiz@terzibas.de
+        I would appreciate if you report all bugs to: cengiz@terzibas.de
 */
 
 #ifndef XDEVL_WINDOW_WINDOWS_H
@@ -29,32 +29,28 @@
 
 namespace xdl {
 
-	// Holds the Major version number.
+// Holds the Major version number.
 	const xdl_uint XdevLWindowMajorVersion = XDEVLWINDOWS_MODULE_MAJOR_VERSION;
 
-	// Holds the Minor version number.
+// Holds the Minor version number.
 	const xdl_uint XdevLWindowMinorVersion = XDEVLWINDOWS_MODULE_MINOR_VERSION;
 
-	// Holds the Patch version number.
+// Holds the Patch version number.
 	const xdl_uint XdevLWindowPatchVersion = XDEVLWINDOWS_MODULE_PATCH_VERSION;
 
-
-	// Holds the Major version number.
+// Holds the Major version number.
 	const xdl_uint XdevLWindowEventServerMajorVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_MAJOR_VERSION;
 
-	// Holds the Minor version number.
+// Holds the Minor version number.
 	const xdl_uint XdevLWindowEventServerMinorVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_MINOR_VERSION;
 
-	// Holds the Patch version number.
+// Holds the Patch version number.
 	const xdl_uint XdevLWindowEventServerPatchVersion = XDEVLWINDOWS_EVENT_SERVER_MODULE_PATCH_VERSION;
 
-
-	static const XdevLString windowPluginName {
-		"XdevLWindowWindow"
+	static const XdevLString windowPluginName { "XdevLWindowWindow"
 	};
 
-	static const XdevLString windowDescription {
-		"Support for creating a window using native OS methods."
+	static const XdevLString windowDescription { "Support for creating a window using native OS methods."
 	};
 
 	class XdevLWindowDeviceWin32 : public XdevLWindowImpl, public thread::Thread {
@@ -95,7 +91,6 @@ namespace xdl {
 			virtual void setTitle(const XdevLWindowTitle& title) override;
 			virtual void setFullscreen(xdl_bool state) override;
 			virtual void setPointerPosition(xdl_uint x, xdl_uint y) override;
-			virtual void clipPointerPosition(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) override;
 			virtual void show() override;
 			virtual void hide() override;
 			virtual xdl_bool isHidden() override;
@@ -112,26 +107,26 @@ namespace xdl {
 			//
 
 			HWND getNativeWindow();
-	
+
 		protected:
 			std::string m_winClassId;
+
 		protected:
 			/// win32 instance handle.
-			HINSTANCE		m_instance;
+			HINSTANCE m_instance;
 			/// Holds the win32 window handle.
-			HWND				m_wnd;
+			HWND m_wnd;
 			/// Holds the win32 graphics context.
-			HDC					m_DC;
+			HDC m_DC;
 			/// Holds the window style value.
-			unsigned long	m_windowStyle;
+			unsigned long m_windowStyle;
 			/// Holds the windows extented style value.
-			unsigned long	m_windowStyleEx;
+			unsigned long m_windowStyleEx;
 			DEVMODE m_oldDevMode;
 			DEVMODE m_matchingVideoMode;
 			std::vector<DISPLAY_DEVICE> displayInfoList;
 			xdl_bool m_isHidden;
 	};
-
 
 	class XdevLWindowServerWindows : public XdevLWindowServerImpl {
 		public:
@@ -142,10 +137,9 @@ namespace xdl {
 			virtual xdl_int createWindow(XdevLWindow** window,
 			                             const XdevLWindowTitle& title,
 			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size
-			                            );
+			                             const XdevLWindowSize& size,
+			                             const XdevLWindowTypes& type);
 	};
-
 
 	class XdevLWindowWindowsEventServer : public XdevLWindowEventServerImpl {
 		public:
@@ -160,17 +154,16 @@ namespace xdl {
 			void flush() override;
 
 			/// windows message function callback
-			static LRESULT CALLBACK callbackProxy(HWND hWnd, UINT	uMsg, WPARAM wParam, LPARAM lParam);
+			static LRESULT CALLBACK callbackProxy(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		private:
-//		int pollEvents();
+			//		int pollEvents();
 			/// win32 message handling
-			LRESULT  callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+			LRESULT callbackProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 			HWND m_pointerIsInsideWindow;
-
 	};
 
-	class XdevLCursorWindows : public XdevLModuleImpl<XdevLCursor>  {
+	class XdevLCursorWindows : public XdevLModuleImpl<XdevLCursor> {
 		public:
 			XdevLCursorWindows(XdevLModuleCreateParameter* parameter);
 

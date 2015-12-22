@@ -386,7 +386,7 @@ namespace xdl {
 		// Check if we have all necessary module functions from the dynamic library.
 		if((plugin_descriptor == nullptr) || (create_module == nullptr) || (delete_module == nullptr)) {
 			XDEVL_MODULE_ERROR("Unable to acquire necessary module function from the dynamic library.\n");
-			XDEVL_ASSERT(nullptr, "Plugin has not the right functions defined or another problem exists.");
+			XDEVL_ASSERT(0, "Plugin has not the right functions defined or another problem exists.");
 		}
 
 		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shtudown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
