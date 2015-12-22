@@ -98,6 +98,7 @@ set(XDEVL_HEADER_FILES
 	${HEADERS_DIR}/XdevLUtils.h
 	${HEADERS_DIR}/XdevLXfstring.h
 	${HEADERS_DIR}/XdevLXstring.h
+	${HEADERS_DIR}/XdevLSignalSlot.h
 )
 
 #
