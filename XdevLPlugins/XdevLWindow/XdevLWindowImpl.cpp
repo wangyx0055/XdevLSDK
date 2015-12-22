@@ -286,12 +286,13 @@ namespace xdl {
 		TiXmlDocument xmlDocument;
 		if(getMediator()->getXmlFilename()) {
 			if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
-				std::cerr << "Could not parse xml file: " << getMediator()->getXmlFilename() << std::endl;
-				return ERR_ERROR;
+				XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n" );
+				return ERR_OK;
 			}
 
 			if(readWindowInfo(xmlDocument) != ERR_OK)
-				return ERR_ERROR;
+				XDEVL_MODULE_WARNING("Some issues happend when parsing the XML file.\n" );
+				return ERR_OK;
 		}
 
 		return ERR_OK;
