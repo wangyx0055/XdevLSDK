@@ -5,9 +5,15 @@
 
 namespace xdl {
 
+	enum class XdevLSharedMemoryCreateType {
+		XDEVL_SHM_CREATE_TYPE_CREATE,
+		XDEVL_SHM_CREATE_TYPE_OPEN,
+		XDEVL_SHM_CREATE_TYPE_UNKOWN
+	};
+	
 	enum class XdevLSharedMemoryAccess {
-	  READ_ONLY,
-	  READ_WRITE
+	    READ_ONLY,
+	    READ_WRITE
 	};
 
 	struct XdevLSharedMemoryCreateMode {
@@ -35,7 +41,10 @@ namespace xdl {
 	 */
 	class XdevLSharedMemory {
 		public:
-			XdevLSharedMemory() {}
+			XdevLSharedMemory() :
+				m_creationType(XdevLSharedMemoryCreateType::XDEVL_SHM_CREATE_TYPE_UNKOWN) {
+			}
+
 			~XdevLSharedMemory() {
 				close();
 			}
@@ -51,13 +60,13 @@ namespace xdl {
 			 * @param sharedMemorySize The size in bytes of the shared memory.
 			 */
 			XdevLSharedMemory(XdevLSharedMemoryCreateMode& create, const xdl_char* name, size_t sharedMemorySize) throw() :
-				m_name(name), 
+				m_name(name),
 				m_size(sharedMemorySize) {
 
-					if(this->create(name, sharedMemorySize) != ERR_OK) {
-						exit(-1);
-					}
-
+				if(this->create(name, sharedMemorySize) != ERR_OK) {
+					exit(-1);
+				}
+				m_creationType = XdevLSharedMemoryCreateType::XDEVL_SHM_CREATE_TYPE_CREATE;
 			}
 
 
@@ -68,6 +77,7 @@ namespace xdl {
 				if(this->open(name, sharedMemorySize, XdevLSharedMemoryAccess::READ_ONLY) != ERR_OK) {
 					exit(-1);
 				}
+				m_creationType = XdevLSharedMemoryCreateType::XDEVL_SHM_CREATE_TYPE_OPEN;
 			}
 
 			XdevLSharedMemory(XdevLSharedMemoryOpenMode& open,
@@ -77,6 +87,7 @@ namespace xdl {
 				if(this->open(name, sharedMemorySize, XdevLSharedMemoryAccess::READ_WRITE) != ERR_OK) {
 					exit(-1);
 				}
+				m_creationType = XdevLSharedMemoryCreateType::XDEVL_SHM_CREATE_TYPE_OPEN;
 			}
 
 			xdl_int create(const xdl_char* name, size_t sharedMemorySize) {
@@ -105,10 +116,10 @@ namespace xdl {
 				// Adjusting mapped file size (make room for the whole segment to map)
 				if(ftruncate(m_smfd, sharedMemorySize) < 0) {
 					std::cerr << "XdevLSharedMemory::XdevLSharedMemory: ftruncate failed." << std::endl;
-					return ERR_ERROR;					
+					return ERR_ERROR;
 				}
 
-				m_mapped_region = (xdl_uint8*)mmap(NULL, sharedMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, m_smfd, 0);
+				m_mapped_region = (xdl_uint8*)mmap(nullptr, sharedMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, m_smfd, 0);
 				if(m_mapped_region == MAP_FAILED) {
 					std::cerr << "XdevLSharedMemory::XdevLSharedMemory: mmap failed." << std::endl;
 					return ERR_ERROR;
@@ -133,17 +144,20 @@ namespace xdl {
 
 #if defined (XDEVL_PLATFORM_UNIX)
 				int mode = 0;
+				int mprot = PROT_NONE;
 #endif
 				switch(access_mode) {
 					case XdevLSharedMemoryAccess::READ_ONLY: {
 #if defined (XDEVL_PLATFORM_UNIX)
 						mode = O_RDONLY;
+						mprot = PROT_READ;
 #endif
 					}
 					break;
 					case XdevLSharedMemoryAccess::READ_WRITE: {
 #if defined (XDEVL_PLATFORM_UNIX)
 						mode = O_RDWR;
+						mprot = PROT_READ | PROT_WRITE;
 #endif
 					}
 					break;
@@ -158,7 +172,7 @@ namespace xdl {
 				}
 
 				//Map the whole shared memory in this process
-				m_mapped_region = (xdl_uint8*)mmap(NULL, sharedMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, m_smfd, 0);
+				m_mapped_region = (xdl_uint8*)mmap(nullptr, sharedMemorySize, mprot, MAP_SHARED, m_smfd, 0);
 				if(m_mapped_region == nullptr) {
 					std::cerr << "XdevLSharedMemory::open: mmap failed." << std::endl;
 					return ERR_ERROR;
@@ -182,6 +196,7 @@ namespace xdl {
 				m_reader.close();
 				m_order.close();
 
+				if(m_creationType == XdevLSharedMemoryCreateType::XDEVL_SHM_CREATE_TYPE_CREATE)
 				if(shm_unlink(m_name.c_str()) == -1) {
 					std::cerr << "XdevLSharedMemory::XdevLSharedMemory: shm_unlink failed." << std::endl;
 					return ERR_ERROR;
@@ -202,7 +217,7 @@ namespace xdl {
 			void write_ts(xdl_uint8* array, size_t size) {
 				// Check if the size the user like to write is bigger
 				// then the size of the shared memory.
-				assert(m_mapped_region == nullptr);
+				assert(m_mapped_region != nullptr);
 
 				m_order.wait();
 
@@ -297,23 +312,25 @@ namespace xdl {
 			}
 
 #if XDEVL_PLATFORM_UNIX
-			xdl_int getNativeHandle() const { return m_smfd;}
+			xdl_int getNativeHandle() const {
+				return m_smfd;
+			}
 #endif
-			
+
 		private:
 			// Holds the name of the shared memory.
 			std::string m_name;
 
 			// Holds the size of the shared memory.
-			size_t 			m_size;
+			size_t m_size;
 
 			// Second readers/writers problem variables.
-			XdevLSemaphore 		m_writer;
-			XdevLSemaphore 		m_reader;
-			XdevLSemaphore 		m_order;
-			xdl_uint64				m_readercount;
-			xdl_uint64				m_previous;
-			xdl_uint64				m_current;
+			XdevLSemaphore 	m_writer;
+			XdevLSemaphore 	m_reader;
+			XdevLSemaphore 	m_order;
+			xdl_uint64		m_readercount;
+			xdl_uint64		m_previous;
+			xdl_uint64		m_current;
 
 			// The shared memory.
 #if defined (XDEVL_PLATFORM_UNIX)
@@ -321,7 +338,8 @@ namespace xdl {
 #endif
 
 			// The mapped memory area.
-			xdl_uint8* 				m_mapped_region;
+			xdl_uint8* m_mapped_region;
+			XdevLSharedMemoryCreateType m_creationType;
 	};
 
 }
