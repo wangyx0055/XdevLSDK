@@ -2,23 +2,23 @@
 <CodeLite_Workspace Name="XdevLDemos" Database="./XdevLDemos.tags" SWTLW="Yes">
   <WorkspaceParserMacros/>
   <WorkspaceParserPaths>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevL/include"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLAudio"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLOgre"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLOpenGLContext"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLOpenGL"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLJoystick"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLFTDI"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLFileSystem"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLWindow"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLKeyboard"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLMouse"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLNetwork"/>
-    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLSerial"/>
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLBluetooth"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLSerial"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLNetwork"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLMouse"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLKeyboard"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLWindow"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLFileSystem"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLFTDI"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLJoystick"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLRAI"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLOpenGLContext"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLOgre"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLAudio"/>
+    <Include Path="/home/yaakuro/Project/XdevLSDK/XdevL/include"/>
   </WorkspaceParserPaths>
   <Project Name="devices_demo" Path="devices_demo/devices_demo.project" Active="No"/>
-  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="Yes"/>
+  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
   <Project Name="tcp_client_demo" Path="tcp_client_demo/tcp_client_demo.project" Active="No"/>
@@ -34,11 +34,12 @@
   <Environment>
     <![CDATA[]]>
   </Environment>
-  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
+  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="Yes"/>
   <Project Name="audio_capture_demo" Path="audio_capture_demo/audio_capture_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">
+      <Environment/>
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>
       <Project Name="udp_server_demo" ConfigName="Release_Linux32"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Linux32"/>
@@ -63,6 +64,7 @@
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux32" Selected="no">
+      <Environment/>
       <Project Name="xml_demo" ConfigName="Debug_Linux32"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Linux32"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Linux32"/>
@@ -87,6 +89,7 @@
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux64" Selected="yes">
+      <Environment/>
       <Project Name="xml_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Linux64"/>
@@ -108,6 +111,7 @@
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_Linux64" Selected="yes">
+      <Environment/>
       <Project Name="xml_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Linux64"/>

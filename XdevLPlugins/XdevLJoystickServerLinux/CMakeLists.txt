@@ -1,0 +1,126 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(XdevLoystickServerLinux)
+
+#
+# Set the names for the stuff we are going to create
+#
+
+set(XdevLJoystickServerLinux XdevLJoystickServerLinux)
+
+#
+# Set the Plugin version
+#
+
+set(XDEVLJOYSTICK_SERVER_MAJOR_VERSION 1)
+set(XDEVLJOYSTICK_SERVER_MINOR_VERSION 0)
+set(XDEVLJOYSTICK_SERVER_PATCH_VERSION 0)
+set(XDEVLJOYSTICK_SERVER_VERSION "${XDEVLJOYSTICK_SERVER_MAJOR_VERSION}.${XDEVLJOYSTICK_SERVER_MINOR_VERSION}.${XDEVLJOYSTICK_SERVER_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLJOYSTICK_SERVER_MAJOR_VERSION=${XDEVLJOYSTICK_SERVER_MAJOR_VERSION}
+	-DXDEVLJOYSTICK_SERVER_MINOR_VERSION=${XDEVLJOYSTICK_SERVER_MINOR_VERSION} 
+	-DXDEVLJOYSTICK_SERVER_PATCH_VERSION=${XDEVLJOYSTICK_SERVER_PATCH_VERSION}
+)
+
+#
+# Set the Module version
+#
+
+set(XDEVLJOYSTICK_SERVER_MODULE_MAJOR_VERSION 0)
+set(XDEVLJOYSTICK_SERVER_MODULE_MINOR_VERSION 2)
+set(XDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION 0)
+set(XDEVLJOYSTICK_SERVER_MODULE_VERSION "${XDEVLJOYSTICK_SERVER_MODULE_MAJOR_VERSION}.${XDEVLJOYSTICK_SERVER_MODULE_MINOR_VERSION}.${XDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION}")
+
+add_definitions(
+	-DXDEVLJOYSTICK_SERVER_MODULE_MAJOR_VERSION=${XDEVLJOYSTICK_SERVER_MODULE_MAJOR_VERSION}
+	-DXDEVLJOYSTICK_SERVER_MODULE_MINOR_VERSION=${XDEVLJOYSTICK_SERVER_MODULE_MINOR_VERSION} 
+	-DXDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION=${XDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION}
+)
+
+#
+# Set variable names for the library
+#
+set(HEADERS_DIR ${XdevLoystickServerLinux_SOURCE_DIR})
+set(SRC_DIR ${XdevLoystickServerLinux_SOURCE_DIR})
+
+#
+# Set the output directories
+#
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${XDEVL_PLUGINS}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
+
+#
+# Set header files for the library.
+#
+set(HEADER_FILES
+	${XdevLJoystick_SOURCE_DIR}/XdevLJoystick.h
+	${HEADERS_DIR}/XdevLJoystickServerLinux.h
+)
+
+#
+# Set the source files for the library.
+#
+set(SOURCE_FILES
+	${SRC_DIR}/XdevLJoystickServerLinux.cpp
+)
+
+
+#
+# Add external libraries folder
+#
+link_directories(${XdevL_BINARY_DIR}/lib)
+
+#
+# Create the library
+#
+add_library(${XdevLJoystickServerLinux} SHARED
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
+
+#
+# Add include directories
+
+include_directories(
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}
+)
+
+#
+# Add external ibraries
+#
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	target_link_libraries(
+		${XdevLJoystickServerLinux}
+		XdevLd
+	)
+else()
+	target_link_libraries(
+		${XdevLJoystickServerLinux}
+		XdevL
+	)
+endif()
+
+
+#
+# Change the outputname of the library
+#
+set_property(TARGET ${XdevLJoystickServerLinux} PROPERTY PREFIX "")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set_property(TARGET ${XdevLJoystickServerLinux} PROPERTY SUFFIX "-${XDEVLJOYSTICK_SERVER_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+else()
+	set_property(TARGET ${XdevLJoystickServerLinux} PROPERTY SUFFIX "-${XDEVLJOYSTICK_SERVER_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
+endif()

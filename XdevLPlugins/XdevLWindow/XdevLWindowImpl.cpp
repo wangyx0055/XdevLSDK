@@ -88,8 +88,7 @@ namespace xdl {
 		m_rootTitle(""),
 		m_fullScreen(xdl_false),
 		m_colorDepth(32),
-		m_hideMouse(xdl_false),
-		m_border(xdl_true) {
+		m_hideMouse(xdl_false) {
 
 		// Set background color.
 		m_backgroundColor[0] = 0;
@@ -135,10 +134,6 @@ namespace xdl {
 
 	xdl_uint XdevLWindowImpl::getWindowsCounter() {
 		return windowCounter++;
-	}
-
-	xdl_bool XdevLWindowImpl::getWindowBorder() {
-		return m_border;
 	}
 
 	xdl_uint64 XdevLWindowImpl::getWindowID() {
@@ -218,7 +213,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowImpl::setWindowDecoration(xdl_bool enable) {
-		m_border = enable;
+
 	}
 	
 	XdevLWindowTypes XdevLWindowImpl::getType() {
@@ -260,8 +255,6 @@ namespace xdl {
 							m_attribute.size.height = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "HidePointer")
 							m_hideMouse = xstd::from_string<xdl_bool>(child->GetText());
-						if(child->ValueTStr() == "Border")
-							m_border = xstd::from_string<xdl_bool>(child->GetText());
 						if(child->ValueTStr() == "BackgroundColor") {
 							std::vector<std::string> list;
 							xstd::tokenize(child->GetText(), list);

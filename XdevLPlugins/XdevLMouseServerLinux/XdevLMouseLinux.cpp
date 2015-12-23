@@ -26,6 +26,14 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::XdevLMouseServerPluginPatchVersion
 };
 
+extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	return xdl::ERR_OK;
+}
+
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(xdl::XdevLMouseLinux::m_moduleDescriptor.getName() == parameter->getModuleName()) {

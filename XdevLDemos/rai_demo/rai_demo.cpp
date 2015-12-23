@@ -209,6 +209,28 @@ static const float g_color_buffer_data[] = {
 	1.0f, 1.0f, 1.0f, 1.0f
 };
 
+xdl::xdl_bool running = xdl::xdl_true;
+
+void notify(xdl::XdevLEvent& event) {
+	switch(event.type) {
+		case xdl::XDEVL_CORE_EVENT: {
+			if(event.core.type == xdl::XDEVL_CORE_SHUTDOWN) {
+				running = xdl::xdl_false;
+			}
+		}
+		break;
+		case xdl::XDEVL_WINDOW_EVENT: {
+			switch(event.window.event) {
+				case xdl::XDEVL_WINDOW_MOVED:
+				case xdl::XDEVL_WINDOW_RESIZED: {
+					rai->setViewport(0.0, 0.0, event.window.width, event.window.height);
+				}
+				break;
+			}
+		}
+		break;
+	}
+}
 
 int main(int argc, char* argv[]) {
 
@@ -217,13 +239,15 @@ int main(int argc, char* argv[]) {
 		return xdl::ERR_ERROR;
 	}
 
+	core->registerListenerCallbackFunction(notify);
+
 	// Create a window so that we can draw something.
 	window = xdl::getModule<xdl::IPXdevLWindow>(core, xdl::XdevLID("MyWindow"));
 	if(!window) {
 		xdl::destroyCore(core);
 		return xdl::ERR_ERROR;
 	}
-	
+
 	window->create();
 
 	// Create a window so that we can draw something.
@@ -309,7 +333,6 @@ int main(int argc, char* argv[]) {
 	textLayoutSystem->setEffect(0);
 	textLayoutSystem->useFont(font);
 
-
 	//
 	// Create Buffers
 	//
@@ -390,9 +413,12 @@ int main(int argc, char* argv[]) {
 //	cursor->enableRelativeMotion();
 
 	// Start main loop.
-	while(!esc->getClicked()) {
+	while(running) {
 		core->update();
 
+		if(esc->getClicked()) {
+			break;
+		}
 
 		if(fullscreen->getClicked()) {
 			fullscreenflag = !fullscreenflag;

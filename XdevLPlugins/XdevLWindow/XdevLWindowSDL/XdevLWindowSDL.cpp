@@ -357,7 +357,10 @@ namespace xdl {
 	xdl_int XdevLWindowSDL::create() {
 
 		xdl_uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
-		if(!m_border) {
+		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
@@ -509,7 +512,7 @@ namespace xdl {
 	}
 
 	void XdevLWindowSDL::setType(XdevLWindowTypes type) {
-
+		XDEVL_MODULE_WARNING("SDL2 does not support this function.\n");
 	}
 
 	void XdevLWindowSDL::setX(XdevLWindowPosition::type x) {

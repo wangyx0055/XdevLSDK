@@ -225,7 +225,9 @@ namespace xdl {
 		m_best_fit_height(-1),
 		m_best_fit_rate(-1),
 		m_fullscreenModeActive(xdl_false),
-		m_originalScreenConfig(nullptr) {}
+		m_originalScreenConfig(nullptr) {
+
+	}
 
 	XdevLWindowX11::~XdevLWindowX11() {
 
@@ -296,7 +298,6 @@ namespace xdl {
 
 		Colormap colormap = m_defaultColorMap;
 
-
 		XRRQueryExtension(globalDisplay, &m_event_basep, &m_error_basep);
 
 		if(m_rootTitle.toString().size() > 0) {
@@ -305,27 +306,32 @@ namespace xdl {
 		}
 
 		xdl_int borderwith = 0;
-
+		xdl_int hasNotDecoration = xdl_false;
 		XSetWindowAttributes WindowAttributes;
+		WindowAttributes.override_redirect	= False;
 
-		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) || 
-				(m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) || 
-				(m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) || 
-				(m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
-			// Tell the WM not to controll our window.
-			WindowAttributes.override_redirect	= True;
+		//
+		// What shall we do with the override_redirect flag? Shall we use it for popups, tooltips etc.
+		// If we use it then the Window Manager has no influence on this window which can cause issues.
+		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
+			hasNotDecoration = xdl_true;
+//			WindowAttributes.override_redirect	= True;
 		} else {
-			WindowAttributes.override_redirect	= False;
+//			WindowAttributes.override_redirect	= False;
 		}
-		WindowAttributes.background_pixmap	= None;
-		WindowAttributes.background_pixel 	= color.pixel;
-		WindowAttributes.border_pixel		= 0;
-		WindowAttributes.colormap			= CopyFromParent;
+
+		WindowAttributes.background_pixmap = None;
+		WindowAttributes.background_pixel = color.pixel;
+		WindowAttributes.border_pixel = 0;
+		WindowAttributes.colormap = CopyFromParent;
 
 		m_window = XCreateWindow(globalDisplay,
 		                         m_rootWindow,
 		                         m_attribute.position.x,
-		                         m_screenHeight - m_attribute.position.y,
+		                         m_screenHeight - (m_attribute.size.height + m_attribute.position.y),
 		                         m_attribute.size.width,
 		                         m_attribute.size.height,
 		                         borderwith,
@@ -387,9 +393,10 @@ namespace xdl {
 		const long _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1;
 		XChangeProperty(globalDisplay, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
 
-
-		// Set the border property.
-		setWindowBordered();
+		// Tell the Window Manager to show or hide the decorations.
+		if(hasNotDecoration) {
+			disableDecoration();
+		}
 
 		XFlush(globalDisplay);
 
@@ -398,6 +405,9 @@ namespace xdl {
 		m_id = m_window;
 
 		windowEventServer->registerWindowForEvents(this);
+
+		XMapRaised(globalDisplay, m_window);
+		XSync(globalDisplay, False);
 
 		return ERR_OK;
 	}
@@ -514,12 +524,7 @@ namespace xdl {
 		return 0;
 	}
 
-	void XdevLWindowX11::setFullscreenVideoMode() {
-		// Don't do this if we already in fullscreen mode.
-		if(xdl_false != m_fullscreenModeActive) {
-			return;
-		}
-
+	void XdevLWindowX11::displayFromNormalToFullscreen() {
 		// Disable window manager decoration.
 		disableDecoration();
 
@@ -549,15 +554,9 @@ namespace xdl {
 		XSetScreenSaver(globalDisplay, 0, 0, DontPreferBlanking, DefaultExposures);
 
 		XSync(globalDisplay, False);
-
-		m_fullscreenModeActive = xdl_true;
 	}
 
-	void XdevLWindowX11::restoreFullscreenVideoMode() {
-		// Only to this if we are in fullscreen mode.
-		if(xdl_false == m_fullscreenModeActive) {
-			return;
-		}
+	void XdevLWindowX11::displayFromFullscreenToNormal() {
 
 		// Change screen mode into it's original form.
 		XRRSetScreenConfigAndRate(globalDisplay,
@@ -580,7 +579,59 @@ namespace xdl {
 		enableDecoration();
 
 		XSync(globalDisplay, False);
+	}
 
+	void XdevLWindowX11::setFullscreenVideoMode() {
+		// Don't do this if we already in fullscreen mode.
+		if(xdl_false != m_fullscreenModeActive) {
+			return;
+		}
+
+		displayFromNormalToFullscreen();
+
+		XEvent msg;
+		memset(&msg, 0, sizeof(XEvent));
+		msg.xclient.type = ClientMessage;
+		msg.xclient.message_type = _NET_WM_STATE;
+		msg.xclient.window 			= m_window;
+		msg.xclient.format 			= 32;
+		msg.xclient.data.l[0] 	= _NET_WM_STATE_ADD;
+		msg.xclient.data.l[1] 	= _NET_WM_STATE_FULLSCREEN;
+		msg.xclient.data.l[2] 	= 0;
+		msg.xclient.data.l[3] 	= 1; // Normal application
+
+		if(XSendEvent(globalDisplay, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+
+		}
+		XFlush(globalDisplay);
+
+		m_fullscreenModeActive = xdl_true;
+	}
+
+	void XdevLWindowX11::restoreFullscreenVideoMode() {
+		// Only to this if we are in fullscreen mode.
+		if(xdl_false == m_fullscreenModeActive) {
+			return;
+		}
+
+		XEvent msg;
+		memset(&msg, 0, sizeof(XEvent));
+		msg.xclient.type = ClientMessage;
+		msg.xclient.message_type = _NET_WM_STATE;
+		msg.xclient.window 			= m_window;
+		msg.xclient.format 			= 32;
+		msg.xclient.data.l[0] 	= _NET_WM_STATE_REMOVE;
+		msg.xclient.data.l[1] 	= _NET_WM_STATE_FULLSCREEN;
+		msg.xclient.data.l[2] 	= 0;
+		msg.xclient.data.l[3] 	= 1; // Normal application
+
+		if(XSendEvent(globalDisplay, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+
+		}
+		XFlush(globalDisplay);
+		
+		displayFromFullscreenToNormal();
+		
 		m_fullscreenModeActive = xdl_false;
 	}
 
@@ -829,7 +880,7 @@ namespace xdl {
 	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
-		XdevLWindowImpl::setY(m_screenHeight - y);
+		XdevLWindowImpl::setY(m_screenHeight - (m_attribute.size.height + y));
 		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
@@ -882,7 +933,7 @@ namespace xdl {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		m_attribute.position.x = position.x;
-		m_attribute.position.y = m_screenHeight - position.y;
+		m_attribute.position.y = m_screenHeight - (m_attribute.size.height + position.y);
 		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(globalDisplay, m_window);
 	}
@@ -1019,7 +1070,7 @@ namespace xdl {
 		return flags;
 	}
 
-	void XdevLWindowX11::setWindowBordered() {
+	void XdevLWindowX11::setWindowBordered(xdl_bool state) {
 
 		if(_MOTIF_WM_HINTS != None) {
 			/* Hints used by Motif compliant window managers */
@@ -1030,7 +1081,7 @@ namespace xdl {
 				long input_mode;
 				unsigned long status;
 			} MWMHints = {
-				(1 << 1), 0, static_cast<unsigned long>((m_border == xdl_true) ? 1 : 0), 0, 0
+				(1 << 1), 0, static_cast<unsigned long>((state == xdl_true) ? 1 : 0), 0, 0
 			};
 
 			XChangeProperty(globalDisplay, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32,

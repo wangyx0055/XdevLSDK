@@ -199,7 +199,7 @@ namespace xdl {
 		protected:
 
 			xdl_uint32 getNetWMState();
-			void setWindowBordered();
+			void setWindowBordered(xdl_bool state);
 			xdl_int initializeEWMH();
 		protected:
 			bool m_modeChanged;
@@ -214,7 +214,9 @@ namespace xdl {
 			xdl_int prefer_blanking_return;
 			xdl_int allow_exposures_return;
 			xdl_long m_event_mask;
-		protected:
+	protected:
+			void displayFromNormalToFullscreen();
+			void displayFromFullscreenToNormal();
 			xdl_int getGetClosestVideoMode();
 			void setFullscreenVideoMode();
 			void restoreFullscreenVideoMode();

@@ -101,7 +101,6 @@ namespace xdl {
 			virtual void setPosition(const XdevLWindowPosition& position);
 			virtual void setSize(const XdevLWindowSize& size);
 			virtual void setHidePointer(xdl_bool state);
-			xdl_bool getWindowBorder();
 			static void increaseWindowCounter();
 			static xdl_uint getWindowsCounter();
 			void setParent(XdevLWindow* window);
@@ -133,9 +132,6 @@ namespace xdl {
 
 			// Should the mouse pointer be hided?
 			xdl_bool m_hideMouse;
-
-			// Use a border around the window?
-			xdl_bool m_border;
 
 			// Holds the background color.
 			xdl_uint m_backgroundColor[4];

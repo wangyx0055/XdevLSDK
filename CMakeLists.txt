@@ -116,6 +116,7 @@ option(BUILD_OGRE "Builds the ogre plugin" ON)
 option(BUILD_GL_CONTEXT "Builds the new OpenGL context plugin" ON)
 option(BUILD_WAYLAND "Builds the Wayland plugin" ON)
 option(BUILD_MOUSE_SERVER "Builds the raw mouse server" ON)
+option(BUILD_JOYSTICK_SERVER "Builds the raw joystick server" ON)
 option(BUILD_FILESYSTEM "Builds the Directory module" ON)
 option(BUILD_NATIVE_WINDOWS "Build native window support" ON)
 option(BUILD_DEMOS "Builds all demos" ON)
@@ -283,6 +284,14 @@ if(BUILD_MOUSE_SERVER)
 	endif()
 endif()
 
+# Build the Mouse Server plugins for raw mouse events.
+if(BUILD_JOYSTICK_SERVER)
+	if(PLATFORM_WINDOWS)
+	elseif(PLATFORM_LINUX)
+		add_subdirectory(XdevLPlugins/XdevLJoystickServerLinux)
+	elseif(PLATFORM_MACOSX)
+	endif()
+endif()
 
 # Build the new OpenGL Contect plugin.
 if(BUILD_GL_CONTEXT)
