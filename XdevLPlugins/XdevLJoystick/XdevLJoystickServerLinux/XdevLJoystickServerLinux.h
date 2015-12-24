@@ -59,10 +59,8 @@ namespace xdl {
 	*/
 	class XdevLJoystickServerLinux : public XdevLModuleAutoImpl<XdevLJoystickServer>, public thread::Thread {
 		public:
-			XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter);
+			XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLJoystickServerLinux();
-
-			static XdevLModuleDescriptor m_moduleDescriptor;
 
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
@@ -87,6 +85,7 @@ namespace xdl {
 			xdl_uint8 m_numberOfAxes;
 			xdl_uint8 m_numberOfButtons;
 			thread::Mutex m_mutex;
+			xdl_bool m_running;
 	};
 
 

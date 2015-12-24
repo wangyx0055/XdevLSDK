@@ -16,7 +16,7 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	XDEVLJOYSTICK_SERVER_PATCH_VERSION
 };
 
-xdl::XdevLModuleDescriptor xdl::XdevLJoystickServerLinux::m_moduleDescriptor {
+xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[0],
@@ -38,8 +38,8 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(xdl::XdevLJoystickServerLinux::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLJoystickServerLinux(parameter);
+	if(moduleDescriptor.getName() == parameter->getModuleName()) {
+		xdl::XdevLModule* obj  = new xdl::XdevLJoystickServerLinux(parameter, moduleDescriptor);
 		if(!obj)
 			return xdl::ERR_ERROR;
 		parameter->setModuleInstance(obj);
@@ -144,8 +144,8 @@ namespace xdl {
 		return AXIS_UNKNOWN;
 	}
 
-	XdevLJoystickServerLinux::XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, m_moduleDescriptor),
+	XdevLJoystickServerLinux::XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, descriptor),
 		m_device("/dev/input/js0"),
 		m_fd(-1),
 		m_name(""),
@@ -175,13 +175,21 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickServerLinux::shutdown() {
-		if(close(m_fd) != -1) {
-			m_fd = -1;
-			m_name = XdevLString(""),
-			m_numberOfAxes = 0,
-			m_numberOfButtons = 0;
-			return ERR_OK;
+		if(xdl_true == m_running) {
+			m_mutex.Lock();
+			m_running = xdl_false;
+			m_mutex.Unlock();
+
+
+			if(close(m_fd) != -1) {
+				m_fd = -1;
+				m_name = XdevLString(""),
+				m_numberOfAxes = 0,
+				m_numberOfButtons = 0;
+				return ERR_OK;
+			}
 		}
+
 		return ERR_ERROR;
 	}
 
@@ -192,7 +200,8 @@ namespace xdl {
 
 	xdl_int XdevLJoystickServerLinux::create(const XdevLString& deviceName) {
 
-		m_fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
+//		m_fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
+		m_fd = open(m_device.toString().c_str(), O_RDONLY);
 		if(m_fd == -1) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
@@ -260,9 +269,17 @@ namespace xdl {
 
 	xdl_int XdevLJoystickServerLinux::RunThread(thread::ThreadArgument*) {
 		XDEVL_MODULE_INFO("Starting threading mode.\n");
-		while(true) {
+		m_running = xdl_true;
+		for(;;) {
+			{
+				m_mutex.Lock();
+				xdl_bool tmp = m_running;
+				m_mutex.Unlock();
+				if(tmp == xdl_false) {
+					break;
+				}
+			}
 			pollEvents();
-			sleep(0.001);
 		}
 		XDEVL_MODULE_INFO("Stopping threading mode.\n");
 		return 0;
