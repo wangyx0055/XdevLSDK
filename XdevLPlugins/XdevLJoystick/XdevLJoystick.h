@@ -151,8 +151,18 @@ namespace xdl {
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
 	};
 
+	class XdevLJoystickServer : public XdevLModule {
+		public:
+			virtual ~XdevLJoystickServer() {}
+			virtual xdl_int create() = 0;
+			virtual xdl_int create(const XdevLString& deviceName) = 0;
+	};
+
+
 	typedef XdevLJoystick	IXdevLJoystick;
 	typedef XdevLJoystick*	IPXdevLJoystick;
+	typedef XdevLJoystickServer	IXdevLJoystickServer;
+	typedef XdevLJoystickServer*	IPXdevLJoystickServer;
 
 }
 

@@ -44,11 +44,23 @@ xdl::XdevLPluginDescriptor m_joystickPluginDescriptor {
 	xdl::XdevLJoystickPluginPatchVersion
 };
 
+xdl::XdevLJoystickServer* joystickServer = nullptr;
+
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+
+	if(nullptr == joystickServer) {
+		joystickServer = static_cast<xdl::XdevLJoystickServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("XdevLJoystickServer")));
+		if(nullptr == joystickServer) {
+			return xdl::ERR_ERROR;
+		}
+		joystickServer->create();
+	}
+
 	return xdl::ERR_OK;
 }
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+	
 	return xdl::ERR_OK;
 }
 

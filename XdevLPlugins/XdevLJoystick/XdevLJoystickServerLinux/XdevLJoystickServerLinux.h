@@ -51,14 +51,6 @@ namespace xdl {
 	};
 
 
-	class XdevLJoystickServer : public XdevLModule {
-		public:
-			virtual ~XdevLJoystickServer() {}
-			virtual xdl_int create() = 0;
-			virtual xdl_int create(const XdevLString& deviceName) = 0;
-	};
-
-
 	/**
 		@class XdevLJoystickServerLinux
 		@brief Class to support mouse devices
