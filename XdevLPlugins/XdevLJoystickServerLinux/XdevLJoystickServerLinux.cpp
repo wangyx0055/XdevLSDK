@@ -4,7 +4,8 @@
 #include <XdevLJoystick/XdevLJoystick.h>
 #include "XdevLJoystickServerLinux.h"
 #include <XdevLPlatform.h>
-#include <linux/input.h>
+
+#include <linux/joystick.h>
 
 
 xdl::XdevLPluginDescriptor pluginDescriptor {
@@ -62,23 +63,6 @@ namespace xdl {
 	const XdevLID JoystickButtonPressed("XDEVL_JOYSTICK_BUTTON_PRESSED");
 	const XdevLID JoystickButtonReleased("XDEVL_JOYSTICK_BUTTON_RELEASED");
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
-
-#define JS_EVENT_BUTTON         0x01    /* button pressed/released */
-#define JS_EVENT_AXIS           0x02    /* joystick moved */
-#define JS_EVENT_INIT           0x80    /* initial state of device */
-
-	struct js_event {
-		unsigned int time;      /* event timestamp in milliseconds */
-		xdl::xdl_int16 value;   /* value */
-		xdl::xdl_uint8 type;     /* event type */
-		xdl::xdl_uint8 number;   /* axis/button number */
-	};
-
-	struct wwvi_js_event {
-		int button[11];
-		int stick_x;
-		int stick_y;
-	};
 
 	XdevLButtonId wrapLinuxButtonToXdevLButton(xdl_uint8 button) {
 		switch(button) {
@@ -162,10 +146,11 @@ namespace xdl {
 
 	XdevLJoystickServerLinux::XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter) :
 		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, m_moduleDescriptor),
+		m_device("/dev/input/js0"),
 		m_fd(-1),
-		m_button_left(0),
-		m_button_right(0),
-		m_button_middle(0) {
+		m_name(""),
+		m_numberOfAxes(0),
+		m_numberOfButtons(0) {
 
 	}
 
@@ -175,43 +160,70 @@ namespace xdl {
 
 	xdl_int XdevLJoystickServerLinux::init() {
 
-		// Let's open the first mouse device.
-		char devname [] = "/dev/input/js0";
-		m_fd = open(devname, O_RDONLY | O_NONBLOCK);
-		if(m_fd == -1) {
-			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-			return ERR_ERROR;
+		TiXmlDocument xmlDocument;
+		if(getMediator()->getXmlFilename()) {
+			if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
+				XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n" );
+			}
+
+			if(readJoystickInfo(xmlDocument) != ERR_OK) {
+				XDEVL_MODULE_WARNING("Some issues happend when parsing the XML file.\n" );
+			}
 		}
-
-//		input_id id;
-//		if(ioctl(m_fd, EVIOCGID, &id)) {
-//			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-//			return ERR_ERROR;
-//		}
-//
-//		char name[256] = {0};
-//		if(ioctl(m_fd, EVIOCGNAME(sizeof(name)), name) < 0) {
-//			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-//		}
-//		XDEVL_MODULE_INFO("Device: " << devname << ", Name: " << name << std::endl);
-
-		Start();
 
 		return ERR_OK;
 	}
 
 	xdl_int XdevLJoystickServerLinux::shutdown() {
-		if(close(m_fd) != -1)
+		if(close(m_fd) != -1) {
+			m_fd = -1;
+			m_name = XdevLString(""),
+			m_numberOfAxes = 0,
+			m_numberOfButtons = 0;
 			return ERR_OK;
-
+		}
 		return ERR_ERROR;
 	}
 
 
+	xdl_int XdevLJoystickServerLinux::create() {
+		return create(m_device);
+	}
+
+	xdl_int XdevLJoystickServerLinux::create(const XdevLString& deviceName) {
+
+		m_fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
+		if(m_fd == -1) {
+			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
+			return ERR_ERROR;
+		}
+
+		char name[128];
+		if (ioctl(m_fd, JSIOCGNAME(sizeof(name)), name) < 0) {
+			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
+			return ERR_ERROR;
+		}
+		m_name = XdevLString(name);
+
+		XDEVL_MODULE_INFO("Name             : " << name << "\n");
+
+		if(ioctl(m_fd, JSIOCGAXES, &m_numberOfAxes) < 0) {
+			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
+			return ERR_ERROR;
+		}
+		XDEVL_MODULE_INFO("Number of axes   : " << (xdl_int)m_numberOfAxes << "\n");
+
+		if(ioctl(m_fd, JSIOCGBUTTONS, &m_numberOfButtons) < 0) {
+			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
+			return ERR_ERROR;
+		}
+		XDEVL_MODULE_INFO("Number of buttons: " << (xdl_int)m_numberOfButtons << "\n");
+
+		Start();
+	}
+
 	xdl_int xdl::XdevLJoystickServerLinux::notify(XdevLEvent& event) {
-
 		return XdevLModuleImpl<XdevLJoystickServer>::notify(event);
-
 	}
 
 	xdl_int XdevLJoystickServerLinux::reset() {
@@ -271,5 +283,34 @@ namespace xdl {
 		ev.jaxis.axis		= axisID;
 		ev.jaxis.value	= (xdl_int32)value;
 		getMediator()->fireEvent(ev);
+	}
+
+	xdl_int XdevLJoystickServerLinux::readJoystickInfo(TiXmlDocument& document) {
+		TiXmlHandle docHandle(&document);
+		TiXmlElement* root = docHandle.FirstChild(XdevLCorePropertiesName.c_str()).FirstChildElement("XdevLWindow").ToElement();
+		if(!root) {
+			XDEVL_MODULE_INFO("<XdevLWindow> section not found. Using default values for the device.\n");
+			return ERR_OK;
+		}
+
+		while(root != NULL) {
+
+			// Does the user specified the id of the module?
+			if(root->Attribute("id")) {
+				XdevLID id(root->Attribute("id"));
+
+				// Do only if we have the same ID.
+				// TODO Maybe change comparison into string comparision.
+				if(getID() == id) {
+					TiXmlElement* child = nullptr;
+					for(child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
+						if(root->Attribute("Device"))
+							m_device = XdevLString(root->Attribute("Device"));
+					}
+				}
+			}
+			root = root->NextSiblingElement();
+		}
+		return ERR_OK;
 	}
 }

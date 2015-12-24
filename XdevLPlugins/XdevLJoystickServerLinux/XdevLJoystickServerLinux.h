@@ -54,6 +54,8 @@ namespace xdl {
 	class XdevLJoystickServer : public XdevLModule {
 		public:
 			virtual ~XdevLJoystickServer() {}
+			virtual xdl_int create() = 0;
+			virtual xdl_int create(const XdevLString& deviceName) = 0;
 	};
 
 
@@ -73,6 +75,8 @@ namespace xdl {
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
 
+			virtual xdl_int create();
+			virtual xdl_int create(const XdevLString& deviceName);
 
 
 			virtual xdl_int notify(XdevLEvent& event);
@@ -83,12 +87,14 @@ namespace xdl {
 			xdl_int reset();
 			void sendButtonEvent(xdl_int buttonID, xdl_bool pressed);
 			void sendAxisEvent(xdl_uint8 axisID, xdl::xdl_int16 value);
+			xdl_int readJoystickInfo(TiXmlDocument& document);
 		private:
 			int m_fd;
-			xdl::xdl_int m_button_left;
-			xdl::xdl_int m_button_right;
-			xdl::xdl_int m_button_middle;
-			thread::Mutex					m_mutex;
+			XdevLString m_device;
+			XdevLString m_name;
+			xdl_uint8 m_numberOfAxes;
+			xdl_uint8 m_numberOfButtons;
+			thread::Mutex m_mutex;
 	};
 
 
