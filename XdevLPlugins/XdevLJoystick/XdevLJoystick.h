@@ -120,17 +120,6 @@ namespace xdl {
 	class XdevLJoystick : public XdevLInputSystem, public XdevLModule {
 		public:
 			virtual ~XdevLJoystick() {};
-			/// Attach joystick device to a window.
-			/**
-				It is important that this device is attached to a window otherwise it wont work.
-				After you have created this device you should directly attach it to a window. If
-				your application doesn't use a window (@e XdevLWindowDevice ) you can't use this device. Future development
-				will eliminate this restriction.
-
-				@param window A valid pointer to an XdevLWindow device.
-				@return Returns ERR_OK if the attachment was successful otherwise ERR_ERROR.
-			*/
-			virtual xdl_int attach(XdevLWindow* window) = 0;
 			/// Returns the state of a button.
 			/**
 				@return Returns @e 'true' as long as the specified button is pressed. Otherwise it

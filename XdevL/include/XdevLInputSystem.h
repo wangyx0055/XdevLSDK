@@ -53,8 +53,6 @@ namespace xdl {
 		@author Cengiz Terzibas
 	*/
 	enum XdevLButtonId {
-	    BUTTON_UNKOWN = 0,
-	    KEY_UNKNOWN = 0,
 	    BUTTON_0 = 1,
 	    BUTTON_LEFT = 1,
 	    BUTTON_1 = 2,
@@ -281,7 +279,9 @@ namespace xdl {
 	    KEY_KBDILLUMTOGGLE,
 	    KEY_KBDILLUMDOWN,
 	    KEY_KBDILLUMUP,
-	    KEY_STOP
+	    KEY_STOP,
+	    BUTTON_UNKOWN,
+	    KEY_UNKNOWN = BUTTON_UNKOWN,
 	};
 
 	inline XdevLString xdevLButtonIdToString(XdevLButtonId buttonId ) {
@@ -535,11 +535,12 @@ namespace xdl {
 		@author Cengiz Terzibas
 	*/
 	enum XdevLAxisId {
-	    AXIS_0,
+	    AXIS_0 = 0,
 	    AXIS_X = 0,
-	    AXIS_1,
+	    AXIS_1 = 1,
 	    AXIS_Y = 1,
-	    AXIS_2,
+	    AXIS_2 = 2,
+			AXIS_Z = 2,
 	    AXIS_3,
 	    AXIS_4,
 	    AXIS_5,
@@ -553,7 +554,7 @@ namespace xdl {
 	    AXIS_13,
 	    AXIS_14,
 	    AXIS_15,
-	    AXIS_ID_MAX
+	    AXIS_UNKNOWN
 	};
 
 

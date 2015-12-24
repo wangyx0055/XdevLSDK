@@ -84,8 +84,9 @@ namespace xdl {
 	typedef XdevLPOVImpl XdevLJoystickPOVImpl;
 
 
-
-
+	const XdevLID JoystickButtonPressed("XDEVL_JOYSTICK_BUTTON_PRESSED");
+	const XdevLID JoystickButtonReleased("XDEVL_JOYSTICK_BUTTON_RELEASED");
+	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
 
 
 	template<typename T>
@@ -102,13 +103,11 @@ namespace xdl {
 				m_joy_old_y(0),
 				m_relativeMode(xdl_false),
 				m_vendor(""),
-				m_numAxis(4),		// TODO This value is a hack.
+				m_numAxis(16),		// TODO This value is a hack.
 				m_numButtons(16),	// TODO This value is a hack.
 				m_attached(false),
 				m_threaded(false),
-				m_sleep(0.001),
-				m_windowWidth(0),
-				m_windowHeight(0) {
+				m_sleep(0.001) {
 
 
 				for(xdl_uint a = 0; a != JOYSTICK_MAX_AXES ; ++a) {
@@ -120,8 +119,6 @@ namespace xdl {
 			virtual ~XdevLJoystickBase() {}
 
 		protected:
-            using XdevLModuleImpl<T>::attach;
-
 			xdl_int RunThread(thread::ThreadArgument* p_arg);
 			xdl_int readJoystickXmlInfoPre(TiXmlDocument& document, const xdl_char* moduleName);
 			xdl_int readJoystickXmlInfo(TiXmlDocument& document, const xdl_char* moduleName);
@@ -129,7 +126,6 @@ namespace xdl {
 			xdl_int update();
 			xdl_int init() override;
 			xdl_int shutdown() override;
-			xdl_int attach(XdevLWindow* window, const xdl_char* moduleName);
 			xdl_bool getAttached();
 			void setAttached(xdl_bool state);
 			xdl_int reset();
@@ -156,8 +152,6 @@ namespace xdl {
 			xdl_bool				m_threaded;
 			xdl_double				m_sleep;
 			thread::Mutex			m_mutex;
-			xdl_uint				m_windowWidth;
-			xdl_uint				m_windowHeight;
 			xdl_float								m_center[JOYSTICK_MAX_AXES];
 			std::vector<XdevLJoystickButtonImpl*> 	m_Buttons;
 			std::vector<XdevLJoystickAxisImpl*>		m_Axes;
@@ -173,9 +167,6 @@ namespace xdl {
 	xdl_int  XdevLJoystickBase<T>::registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate) {
 		XdevLAxisId idType = getAxisId(id);
 		m_axisIdDelegates.insert(std::pair<const XdevLAxisId, const XdevLAxisIdDelegateType>(idType, delegate));
-		for(auto d : m_axisIdDelegates) {
-			std::cout << "Register Axis: " << d.first << std::endl;
-		}
 		return ERR_OK;
 	}
 
@@ -205,8 +196,7 @@ namespace xdl {
 			m_Axes.resize(m_numAxis);
 			for(size_t a = 0; a < m_Axes.size(); ++a) {
 				m_Axes[a] = new XdevLJoystickAxisImpl(&m_mutex);
-				// FIXME: This is the middle position of the joystick. Cengiz find another solution for this really ugly hack.
-				m_Axes[a]->setValue(0.5f);
+				m_Axes[a]->setMinMax(-1.0f, 1.0f);
 			}
 		}
 
@@ -238,7 +228,31 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::init() {
+		if(getAttached()) {
+			setAttached(false);
+			Join();
+		}
 
+
+
+		if(this->getMediator()->getXmlFilename()) {
+			TiXmlDocument xmlDocument;
+			if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
+				XDEVL_MODULE_WARNING("Could not parse xml file: " << this->getMediator()->getXmlFilename() << "\n");
+			}
+		}
+
+		XdevLEvent event;
+		event.jdeviceinfo.type = XDEVL_JOYSTICK_REQ_DEVICES_INFO;
+		event.jdeviceinfo.sender = this->getID().getHashCode();
+		event.jdeviceinfo.timestamp = this->getMediator()->getTime();
+		this->getMediator()->fireEvent(event);
+
+		initializeButtonsAndAxisArrays();
+
+		m_POV = new XdevLJoystickPOVImpl(&m_mutex);
+
+		setAttached(true);
 		return ERR_OK;
 	}
 
@@ -277,105 +291,103 @@ namespace xdl {
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::notify(XdevLEvent& event) {
 
-		switch(event.type) {
-			case XDEVL_JOYSTICK_RPLY_DEVICES_INFO: {
-				std::cout <<
-				          "Devices: " << event.jdeviceinfo.number_devices << std::endl <<
-				          "Buttons: " << event.jdeviceinfo.number_buttons << std::endl <<
-				          "Axis: " << event.jdeviceinfo.number_axis << std::endl;
+		if(event.type == XDEVL_JOYSTICK_RPLY_DEVICES_INFO) {
+			std::cout <<
+			          "Devices: " << event.jdeviceinfo.number_devices << std::endl <<
+			          "Buttons: " << event.jdeviceinfo.number_buttons << std::endl <<
+			          "Axis: " << event.jdeviceinfo.number_axis << std::endl;
 
-				// TODO To do this here will lead to corrupt pointers aquired by getButton, getAxis...
-				//  m_numAxis = event.jdeviceinfo.number_axis;
-				//  m_numButtons = event.jdeviceinfo.number_buttons;
-				//  initializeButtonsAndAxisArrays();
+			// TODO To do this here will lead to corrupt pointers aquired by getButton, getAxis...
+			//  m_numAxis = event.jdeviceinfo.number_axis;
+			//  m_numButtons = event.jdeviceinfo.number_buttons;
+			//  initializeButtonsAndAxisArrays();
 
-				m_replyCondVariable.signal();
+			m_replyCondVariable.signal();
+		} else if(event.type == JoystickButtonPressed.getHashCode()) {
+			xdl_int idx = event.jbutton.buttonid;
+			if(idx > m_Buttons.size() - 1) {
+				// Not supported button.
+				return ERR_OK;
 			}
-			break;
-			case XDEVL_JOYSTICK_BUTTON_PRESSED: {
-				xdl_int idx = event.button.button;
-				if(idx > m_Buttons.size() - 1) {
-					// Not supported button.
-					break;
-				}
-				if(!m_joy_button_down) {
-					m_Buttons[idx]->capturePressTime(event.common.timestamp);
-				}
-				m_joy_button_down = xdl_true;
-				m_Buttons[idx]->setState(xdl_true);
-				
-				for(auto& delegate : m_buttonDelegates) {
-					delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
-				}
+			if(!m_joy_button_down) {
+				m_Buttons[idx]->capturePressTime(event.common.timestamp);
 			}
-			break;
-			case XDEVL_JOYSTICK_BUTTON_RELEASED: {
-				xdl_int idx = event.button.button;
-				if(idx > m_Buttons.size() - 1) {
-					// Not supported button.
-					break;
-				}
-				if(m_joy_button_down)
-					m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
+			m_joy_button_down = xdl_true;
+			m_Buttons[idx]->setState(xdl_true);
 
-				m_joy_button_down = xdl_false;
-				m_Buttons[idx]->setState(xdl_false);
-				
-				for(auto& delegate : m_buttonDelegates) {
-					delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
-				}
+			//
+			// Handle delegates that sends a button id's and the state of the button.
+			//
+			for(auto& delegate : m_buttonDelegates) {
+				delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
 			}
-			break;
-			case XDEVL_JOYSTICK_MOTION: {
-				if(event.jaxis.axis == 0) {
-					m_joy_old_x = m_joy_curr_x;
-					m_joy_curr_x = event.jaxis.value;
-					m_Axes[AXIS_0]->setValue(((xdl_float)event.jaxis.value));
-					m_joy_moved = true;
-					for(auto& delegate : m_axisDelegates) {
-						delegate(AXIS_0, m_Axes[AXIS_0]->getValue());
-					}
-				}
 
-				if(event.jaxis.axis == 1) {
-					m_joy_old_y = m_joy_curr_y;
-					m_joy_curr_y = event.jaxis.value;
-					m_Axes[AXIS_1]->setValue(((xdl_float)event.jaxis.value));
-					m_joy_moved = true;
-					for(auto& delegate : m_axisDelegates) {
-						delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
-					}
-				}
-
-				if(event.jaxis.axis == 2) {
-					m_Axes[AXIS_2]->setValue(((xdl_float)event.jaxis.value));
-					m_joy_moved = true;
-					for(auto& delegate : m_axisDelegates) {
-						delegate(AXIS_2, m_Axes[AXIS_2]->getValue());
-					}
-				}
-
-				if(event.jaxis.axis == 3) {
-					m_Axes[AXIS_3]->setValue(((xdl_float)event.jaxis.value));
-					m_joy_moved = true;
-					for(auto& delegate : m_axisDelegates) {
-						delegate(AXIS_3, m_Axes[AXIS_3]->getValue());
-					}
-				}
+			//
+			// Handle delegates that registered only for one specific button id.
+			//
+			auto pp = m_buttonIdDelegates.equal_range((XdevLButtonId)idx);
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_PRESSED);
 			}
-			break;
-			case XDEVL_JOYSTICK_POV: {
-				m_POV->setDirection(event.jpov.direction);
-			}
-			break;
-			default: {
 
-
+		} else if(event.type ==  JoystickButtonReleased.getHashCode()) {
+			xdl_int idx = event.jbutton.buttonid;
+			if(idx > m_Buttons.size() - 1) {
+				// Not supported button.
+				return ERR_OK;
 			}
-			break;
+			if(m_joy_button_down)
+				m_Buttons[idx]->captureReleaseTime(event.common.timestamp);
+
+			m_joy_button_down = xdl_false;
+			m_Buttons[idx]->setState(xdl_false);
+
+			//
+			// Handle delegates that sends a button id's and the state of the button.
+			//
+			for(auto& delegate : m_buttonDelegates) {
+				delegate(covertIdxToXdevLButton(idx), BUTTON_RELEASED);
+			}
+
+			//
+			// Handle delegates that registered only for one specific button id.
+			//
+			auto pp = m_buttonIdDelegates.equal_range((XdevLButtonId)idx);
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(BUTTON_RELEASED);
+			}
+
+		} else if (event.type == JoystickMotion.getHashCode()) {
+			xdl_float value = ((xdl_float)event.jaxis.value)/32768.0f;
+
+			m_joy_old_x = m_joy_curr_x;
+			m_joy_curr_x = value;
+			m_Axes[event.jaxis.axis]->setValue(value);
+			m_joy_moved = true;
+
+			//
+			// Handle delegates that sends a axis id's and the value of the axis.
+			//
+			for(auto& delegate : m_axisDelegates) {
+				delegate((XdevLAxisId)event.jaxis.axis, m_Axes[event.jaxis.axis]->getValue());
+			}
+
+			//
+			// Handle delegates that registered only for one specific axis id.
+			//
+			auto pp = m_axisIdDelegates.equal_range((XdevLAxisId)event.jaxis.axis);
+			for (auto it = pp.first; it != pp.second; ++it) {
+				auto delegate = it->second;
+				delegate(m_Axes[event.jaxis.axis]->getValue());
+			}
+
+		} else if(event.type == XDEVL_JOYSTICK_POV) {
+			m_POV->setDirection(event.jpov.direction);
 		}
 
-		return ERR_OK;
+		return XdevLModuleImpl<T>::notify(event);
 	}
 
 
@@ -397,66 +409,6 @@ namespace xdl {
 			sleep(m_sleep);
 		}
 		return 0;
-	}
-
-	template<typename T>
-	xdl_int XdevLJoystickBase<T>::attach(XdevLWindow* window, const xdl_char* moduleName) {
-		if(!window) {
-			std::cerr << "# -> Could not attach device to window. No vaild XdevLWindowDevice specified.\n";
-			return ERR_ERROR;
-		}
-
-		if(getAttached()) {
-			setAttached(false);
-			Join();
-
-		}
-
-
-
-		if(this->getMediator()->getXmlFilename()) {
-			TiXmlDocument xmlDocument;
-			if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
-				std::cerr << "Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl;
-				return ERR_ERROR;
-			}
-
-			if(readJoystickXmlInfoPre(xmlDocument, moduleName) != ERR_OK)
-				return ERR_ERROR;
-		}
-
-		XdevLEvent event;
-		event.jdeviceinfo.type = XDEVL_JOYSTICK_REQ_DEVICES_INFO;
-		event.jdeviceinfo.sender = this->getID().getHashCode();
-		event.jdeviceinfo.timestamp = this->getMediator()->getTime();
-		this->getMediator()->fireEvent(event);
-//
-//		m_replyCondVariable.wait(m_replyMutex);
-//		std::cout << "**********************" << std::endl;
-
-		const XdevLWindowSize& size = window->getSize();
-
-		m_windowWidth		= size.width;
-		m_windowHeight	= size.height;
-
-		initializeButtonsAndAxisArrays();
-
-		m_POV = new XdevLJoystickPOVImpl(&m_mutex);
-
-		if(this->getMediator()->getXmlFilename()) {
-			TiXmlDocument xmlDocument;
-			if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
-				std::cerr << "Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl;
-				return ERR_ERROR;
-			}
-
-			if(readJoystickXmlInfo(xmlDocument, moduleName) != ERR_OK)
-				return ERR_ERROR;
-		}
-
-		setAttached(true);
-
-		return ERR_OK;
 	}
 
 
@@ -592,16 +544,14 @@ namespace xdl {
 			virtual ~XdevLJoystickImpl() {}
 
 			static XdevLModuleDescriptor m_joystickModuleDesc;
-			
+
+			virtual xdl_int init() override;
+
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
 
-			// --------------------------------------------------------------------------
-			// XdevLKeyboard functions
-			//
-			virtual xdl_int attach(XdevLWindow* window);
 			// --------------------------------------------------------------------------
 			// XdevLEventCatalystFactory functions
 			//

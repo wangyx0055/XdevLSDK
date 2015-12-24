@@ -47,7 +47,7 @@ namespace xdl {
 		"Gives you access to joystick events."
 	};
 	static const std::vector<XdevLModuleName> moduleNames {
-		XdevLModuleName("XdevJoystickServer")
+		XdevLModuleName("XdevLJoystickServer")
 	};
 
 
@@ -76,12 +76,13 @@ namespace xdl {
 
 
 			virtual xdl_int notify(XdevLEvent& event);
-			virtual void* getInternal(const xdl_char* id);
+			virtual void* getInternal(const XdevLInternalName& id);
 			xdl_int RunThread(thread::ThreadArgument* p_arg);
 		private:
-			xdl_int update();
+			xdl_int pollEvents();
 			xdl_int reset();
-			void sendButtonPressEvent(xdl_int buttonID);
+			void sendButtonEvent(xdl_int buttonID, xdl_bool pressed);
+			void sendAxisEvent(xdl_uint8 axisID, xdl::xdl_int16 value);
 		private:
 			int m_fd;
 			xdl::xdl_int m_button_left;

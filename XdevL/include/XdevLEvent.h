@@ -130,6 +130,18 @@ namespace xdl
 	};
 
 	/**
+		@struct XdevLJoystickButtonEvent
+		@brief Event structure which holds joystick button clicks information.
+	*/
+	struct XdevLJoystickButtonEvent {
+		xdl_uint64 type;
+		xdl_uint64 timestamp;
+		xdl_uint64 sender;
+
+		xdl_uint16 buttonid;
+	};
+
+	/**
 		@struct XdevLJoystickMotionEvent
 		@brief Event structure which holds joystick motion information.
 	*/
@@ -138,8 +150,8 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 		
-		xdl_uint8  axis;
-		xdl_uint32 value;
+		xdl_uint16 axis;
+		xdl_int32 value;
 	};
 
 	/**
@@ -153,8 +165,8 @@ namespace xdl
 		
 		xdl_uint64 windowid;
 		xdl_uint8 button;
-		xdl_uint32 x;
-		xdl_uint32 y;
+		xdl_int32 x;
+		xdl_int32 y;
 	};
 	
 	
@@ -205,17 +217,18 @@ namespace xdl
 	*/
 	union XdevLEvent {
 		xdl_uint64 type;
-		XdevLCommonEvent			common;
-		XdevLUserEvent				user;
-		XdevLCoreEvent				core;
-		XdevLModuleEvent			module;
-		XdevLWindowEvent 			window;
-		XdevLKeyEvent				key;
-		XdevLMouseMotionEvent 		motion;
-		XdevLMouseButtonEvent 		button;
-		XdevLJoystickDevicesInfo	jdeviceinfo;
-		XdevLJoystickMotionEvent 	jaxis;
-		XdevLJoystickPOVEvent		jpov;
+		XdevLCommonEvent common;
+		XdevLUserEvent user;
+		XdevLCoreEvent core;
+		XdevLModuleEvent module;
+		XdevLWindowEvent window;
+		XdevLKeyEvent key;
+		XdevLMouseMotionEvent motion;
+		XdevLMouseButtonEvent button;
+		XdevLJoystickDevicesInfo jdeviceinfo;
+		XdevLJoystickButtonEvent jbutton;
+		XdevLJoystickMotionEvent jaxis;
+		XdevLJoystickPOVEvent jpov;
 
 		xdl_uint8	data[56];
 	};

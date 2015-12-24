@@ -246,7 +246,7 @@ namespace xdl {
 			virtual xdl_float getValue() {
 				xdl_float tmp;
 				m_mutex->Lock();
-				tmp = ((m_min*(1.0f-m_value) + m_max*m_value));
+				tmp = (m_value >= 0) ? m_max*m_value : m_min*m_value;
 				m_mutex->Unlock();
 				return tmp;
 			}
@@ -276,7 +276,6 @@ namespace xdl {
 			// Invisible for the user.
 			//
 			void setValue(xdl_float value) {
-//				m_deltaValue = value - m_value;
 				m_valueOld = m_value;
 				m_value = value;
 			}

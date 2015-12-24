@@ -78,6 +78,10 @@ namespace xdl {
 		XdevLJoystickBase<XdevLJoystick>(parameter, m_joystickModuleDesc) {
 	}
 
+	xdl_int XdevLJoystickImpl::init() {
+		return XdevLJoystickBase<XdevLJoystick>::init();
+	}
+
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
 		return XdevLJoystickBase<XdevLJoystick>::registerDelegate(id, delegate);
 	}
@@ -92,10 +96,6 @@ namespace xdl {
 	
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLAxisDelegateType& delegate) {
 		return XdevLJoystickBase<XdevLJoystick>::registerDelegate(delegate);
-	}
-
-	xdl_int XdevLJoystickImpl::attach(XdevLWindow* window) {
-		return XdevLJoystickBase<XdevLJoystick>::attach(window, this->getDescriptor().getName().toString().c_str());
 	}
 
 	xdl_uint XdevLJoystickImpl::getNumButtons() const {
