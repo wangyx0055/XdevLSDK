@@ -5,9 +5,12 @@
 
 	<!-- Plug necessary plugins -->
 		<XdevLPlugins>
-		<XdevLPlugin name="XdevLWindowX11"	version="1.0.0"/>
+		<XdevLPlugin name="XdevLWindowX11"		version="1.0.0" platform="Linux"/>
+		<XdevLPlugin name="XdevLWindowCocoa"		version="1.0.0" platform="Apple"/>
+		<XdevLPlugin name="XdevLWindowWindow"		version="1.0.0" platform="Windows"/>
 		<XdevLPlugin name="XdevLKeyboard"	version="1.0.0"/>
 		<XdevLPlugin name="XdevLMouse"		version="1.0.0"/>
+		<XdevLPlugin name="XdevLJoystickServerLinux"	version="0.1.0" platform="Linux"/>
 		<XdevLPlugin name="XdevLJoystick"	version="1.0.0"/>
 	</XdevLPlugins>
 

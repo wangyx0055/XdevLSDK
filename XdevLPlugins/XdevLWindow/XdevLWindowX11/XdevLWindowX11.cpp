@@ -1478,8 +1478,8 @@ namespace xdl {
 					if(x11cursor->isRelativeMotionEnabled() == xdl_false) {
 						ev.type 				= MouseMotion.getHashCode();
 						ev.motion.x				= event.xmotion.x;
-						ev.motion.y				= event.xmotion.y;
-						ev.motion.windowid		= window->getWindowID();
+						ev.motion.y				= window->getHeight() - event.xmotion.y;
+						ev.motion.windowid = window->getWindowID();
 						getMediator()->fireEvent(ev);
 					}
 				}

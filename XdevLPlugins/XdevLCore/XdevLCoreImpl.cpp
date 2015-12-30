@@ -406,11 +406,10 @@ namespace xdl {
 			XdevLPluginCreateParameter parameter(this);
 
 			if(plugininfo->initPlugin(&parameter) != ERR_OK) {
-				XDEVL_MODULE_WARNING("Pluing initialisation faild. " << ".\n");
+				XDEVL_MODULE_WARNING("Initializing plugin: " << plugin_descriptor()->getName() << " failed.\n");
 				return shutdown();
 			} else {
 				XDEVL_MODULE_SUCCESS("Initializing plugin: " << plugin_descriptor()->getName() << " was succesful.\n");
-
 			}
 		}
 

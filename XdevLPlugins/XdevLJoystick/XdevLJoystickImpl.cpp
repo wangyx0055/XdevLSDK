@@ -53,7 +53,9 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 		if(nullptr == joystickServer) {
 			return xdl::ERR_ERROR;
 		}
-		joystickServer->create();
+		if(joystickServer->create() != xdl::ERR_OK) {
+			return xdl::ERR_ERROR;
+		}
 	}
 
 	return xdl::ERR_OK;

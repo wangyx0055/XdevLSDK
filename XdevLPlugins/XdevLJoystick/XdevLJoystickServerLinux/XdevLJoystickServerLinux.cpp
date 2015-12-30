@@ -63,6 +63,7 @@ namespace xdl {
 	const XdevLID JoystickButtonPressed("XDEVL_JOYSTICK_BUTTON_PRESSED");
 	const XdevLID JoystickButtonReleased("XDEVL_JOYSTICK_BUTTON_RELEASED");
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
+	static xdl_uint16 joystickID = 0;
 
 	XdevLButtonId wrapLinuxButtonToXdevLButton(xdl_uint8 button) {
 		switch(button) {
@@ -146,17 +147,12 @@ namespace xdl {
 
 	XdevLJoystickServerLinux::XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, descriptor),
-		m_device("/dev/input/js0"),
-		m_fd(-1),
-		m_name(""),
-		m_numberOfAxes(0),
-		m_numberOfButtons(0) {
+		m_device("/dev/input/js0") {
 
 	}
 
 	XdevLJoystickServerLinux::~XdevLJoystickServerLinux() {
 	}
-
 
 	xdl_int XdevLJoystickServerLinux::init() {
 
@@ -167,7 +163,7 @@ namespace xdl {
 			}
 
 			if(readJoystickInfo(xmlDocument) != ERR_OK) {
-				XDEVL_MODULE_WARNING("Some issues happend when parsing the XML file.\n" );
+				XDEVL_MODULE_WARNING("Some issues happened when parsing the XML file.\n" );
 			}
 		}
 
@@ -180,14 +176,14 @@ namespace xdl {
 			m_running = xdl_false;
 			m_mutex.Unlock();
 
-
-			if(close(m_fd) != -1) {
-				m_fd = -1;
-				m_name = XdevLString(""),
-				m_numberOfAxes = 0,
-				m_numberOfButtons = 0;
-				return ERR_OK;
+			for(auto& device : m_joystickDevices) {
+				if(close(device->fd) == -1) {
+					XDEVL_MODULE_WARNING("Closing Joystick: " << device->name << " descriptor failed.\n");
+				} else {
+					delete device;
+				}
 			}
+			m_joystickDevices.clear();
 		}
 
 		return ERR_ERROR;
@@ -199,40 +195,44 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickServerLinux::create(const XdevLString& deviceName) {
+		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
+		devInfo->device = deviceName;
 
-//		m_fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
-		m_fd = open(m_device.toString().c_str(), O_RDONLY);
-		if(m_fd == -1) {
+		devInfo->fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
+		if(devInfo->fd == -1) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
 		}
 
 		char name[128];
-		if (ioctl(m_fd, JSIOCGNAME(sizeof(name)), name) < 0) {
+		if (ioctl(devInfo->fd, JSIOCGNAME(sizeof(name)), name) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
 		}
-		m_name = XdevLString(name);
+		devInfo->name = XdevLString(name);
 
 		XDEVL_MODULE_INFO("Name             : " << name << "\n");
 
-		if(ioctl(m_fd, JSIOCGAXES, &m_numberOfAxes) < 0) {
+		if(ioctl(devInfo->fd, JSIOCGAXES, &devInfo->numberOfAxes) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
 		}
-		XDEVL_MODULE_INFO("Number of axes   : " << (xdl_int)m_numberOfAxes << "\n");
+		XDEVL_MODULE_INFO("Number of axes   : " << (xdl_int)devInfo->numberOfAxes << "\n");
 
-		if(ioctl(m_fd, JSIOCGBUTTONS, &m_numberOfButtons) < 0) {
+		if(ioctl(devInfo->fd, JSIOCGBUTTONS, &devInfo->numberOfButtons) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
 		}
-		XDEVL_MODULE_INFO("Number of buttons: " << (xdl_int)m_numberOfButtons << "\n");
+		XDEVL_MODULE_INFO("Number of buttons: " << (xdl_int)devInfo->numberOfButtons << "\n");
 
-		Start();
+		devInfo->joystickid = joystickID;
+		m_joystickDevices.push_back(devInfo);
+
+		return ERR_OK;
 	}
 
 	xdl_int xdl::XdevLJoystickServerLinux::notify(XdevLEvent& event) {
-		return XdevLModuleImpl<XdevLJoystickServer>::notify(event);
+		return XdevLModuleAutoImpl<XdevLJoystickServer>::notify(event);
 	}
 
 	xdl_int XdevLJoystickServerLinux::reset() {
@@ -243,28 +243,35 @@ namespace xdl {
 		return nullptr;
 	}
 
+	xdl_int XdevLJoystickServerLinux::update() {
+		return pollEvents();
+	}
+
 	xdl_int XdevLJoystickServerLinux::pollEvents() {
-		js_event event;
-		int size = read(m_fd, &event, sizeof(js_event));
+		for(auto& device : m_joystickDevices) {
+			js_event event;
+			int size = read(device->fd, &event, sizeof(js_event));
 
-		m_mutex.Lock();
+			m_mutex.Lock();
 
-		switch(event.type) {
-			case JS_EVENT_INIT: {
-				std::cout << "joystick init\n";
-			}
-			break;
-			case JS_EVENT_AXIS: {
-				sendAxisEvent(wrapLinuxAxisToXdevLAxis(event.number), event.value);
-			}
-			break;
-			case JS_EVENT_BUTTON: {
-				sendButtonEvent(wrapLinuxButtonToXdevLButton(event.number), (event.value > 0) ? xdl_true : xdl_false);
-			}
-			break;
+			switch(event.type) {
+				case JS_EVENT_INIT: {
+					XDEVL_MODULE_INFO("JS_EVENT_INIT\n");
+				}
+				break;
+				case JS_EVENT_AXIS: {
+					sendAxisEvent(device->joystickid, wrapLinuxAxisToXdevLAxis(event.number), event.value);
+				}
+				break;
+				case JS_EVENT_BUTTON: {
+					sendButtonEvent(device->joystickid, wrapLinuxButtonToXdevLButton(event.number), (event.value > 0) ? xdl_true : xdl_false);
+				}
+				break;
 
+			}
+			m_mutex.Unlock();
 		}
-		m_mutex.Unlock();
+		return ERR_OK;
 	}
 
 	xdl_int XdevLJoystickServerLinux::RunThread(thread::ThreadArgument*) {
@@ -285,19 +292,21 @@ namespace xdl {
 		return 0;
 	}
 
-	void XdevLJoystickServerLinux::sendButtonEvent(xdl_int buttonID, xdl_bool pressed) {
+	void XdevLJoystickServerLinux::sendButtonEvent(xdl_uint16 joystickid, xdl_int buttonID, xdl_bool pressed) {
 		XdevLEvent ev;
 		ev.common.timestamp	= getMediator()->getTimer().getTime64();
 		ev.type 						= pressed ? JoystickButtonPressed.getHashCode() : JoystickButtonReleased.getHashCode();
+		ev.jbutton.joystickid = joystickid;
 		ev.jbutton.buttonid	= buttonID;
 		getMediator()->fireEvent(ev);
 	}
 
-	void XdevLJoystickServerLinux::sendAxisEvent(xdl_uint8 axisID, xdl::xdl_int16 value) {
+	void XdevLJoystickServerLinux::sendAxisEvent(xdl_uint16 joystickid, xdl_uint8 axisID, xdl::xdl_int16 value) {
 		XdevLEvent ev;
 		ev.common.timestamp	= getMediator()->getTimer().getTime64();
 		ev.type 				= JoystickMotion.getHashCode();
-		ev.jaxis.axis		= axisID;
+		ev.jbutton.joystickid = joystickid;
+		ev.jaxis.axisid		= axisID;
 		ev.jaxis.value	= (xdl_int32)value;
 		getMediator()->fireEvent(ev);
 	}
@@ -317,7 +326,7 @@ namespace xdl {
 				XdevLID id(root->Attribute("id"));
 
 				// Do only if we have the same ID.
-				// TODO Maybe change comparison into string comparision.
+				// TODO Maybe change comparison into string comparison.
 				if(getID() == id) {
 					TiXmlElement* child = nullptr;
 					for(child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
@@ -329,5 +338,29 @@ namespace xdl {
 			root = root->NextSiblingElement();
 		}
 		return ERR_OK;
+	}
+
+	xdl_uint XdevLJoystickServerLinux::getNumJoysticks() {
+		return m_joystickDevices.size();
+	}
+
+	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(xdl_uint16 joystickid) {
+		XdevLJoystickDeviceInfo info;
+
+		//
+		// Only fill out info it the id does not exceed the real number of joysticks
+		// connected.
+		//
+		if(joystickid < m_joystickDevices.size()) {
+			auto it = m_joystickDevices.begin();
+			std::advance(it, joystickid);
+
+			info.name = (*it)->name;
+			info.joystickid = (*it)->joystickid;
+			info.numberOfAxes = (*it)->numberOfAxes;
+			info.numberOfButtons = (*it)->numberOfButtons;
+		}
+
+		return std::move(info);
 	}
 }

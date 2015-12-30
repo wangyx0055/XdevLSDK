@@ -138,6 +138,7 @@ namespace xdl
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
 
+		xdl_uint16 joystickid;
 		xdl_uint16 buttonid;
 	};
 
@@ -149,8 +150,9 @@ namespace xdl
 		xdl_uint64 type;
 		xdl_uint64 timestamp;
 		xdl_uint64 sender;
-		
-		xdl_uint16 axis;
+
+		xdl_uint16 joystickid;
+		xdl_uint16 axisid;
 		xdl_int32 value;
 	};
 

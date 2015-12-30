@@ -146,11 +146,6 @@ int main(int argc, char* argv[]) {
 		return xdl::ERR_ERROR;
 	}
 
-	if(joystick->attach(window)== xdl::ERR_ERROR) {
-		return xdl::ERR_ERROR;
-	}
-
-
 #ifdef USE_DELEGATES
 
 	MyClassThatHandlesInput instanceOfMyClass(keyboard, mouse, joystick);

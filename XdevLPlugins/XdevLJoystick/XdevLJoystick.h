@@ -151,18 +151,73 @@ namespace xdl {
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
 	};
 
+	/**
+		@class XdevLJoystickDeviceInfo
+		@brief Structure that holds joystick information for the joystick server.
+		@author Cengiz Terzibas
+	*/
+	struct XdevLJoystickDeviceInfo {
+		XdevLJoystickDeviceInfo() :
+			name(""),
+			joystickid(0),
+			numberOfAxes(0),
+			numberOfButtons(0) {}
+
+		/// Name of the joystick.
+		XdevLString name;
+
+		/// Identification code for the joystick that is used when send joystick events.
+		xdl_uint16 joystickid;
+
+		/// Number of axes supported by this joystick device.
+		xdl_uint8 numberOfAxes;
+
+		/// Number of buttons supported by this joystick device.
+		xdl_uint8 numberOfButtons;
+	};
+
+	/**
+		@class XdevLJoystickServer
+		@brief Interface that manages joysticks
+		@author Cengiz Terzibas
+	*/
 	class XdevLJoystickServer : public XdevLModule {
 		public:
 			virtual ~XdevLJoystickServer() {}
+
+			/**
+			 * @brief Creates a connections to all joystick devices.
+			 * @return Returns ERR_OK if successful else ERR_ERROR.
+			 * 
+			 * This method will try to open a connections to all connected joystick devices.
+			 * If it fails no joysticks are connected.
+			 */
 			virtual xdl_int create() = 0;
+
+			/// Creates a connections to a specific joystick device.
 			virtual xdl_int create(const XdevLString& deviceName) = 0;
+
+			/// Returns the number of joystick devices.
+			virtual xdl_uint getNumJoysticks() = 0;
+
+			/**
+			 * @brief Returns information of the specified joystick device.
+			 * @param joystickid
+			 * @return If successful it will return a XdevLJoystickDeviceInfo filled with a valid name.
+			 * Otherwise the name field will be empty.
+			 */
+			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid) = 0;
 	};
 
 
 	typedef XdevLJoystick	IXdevLJoystick;
 	typedef XdevLJoystick*	IPXdevLJoystick;
+	typedef XdevLJoystickDeviceInfo	IXdevLJoystickDeviceInfo;
+	typedef XdevLJoystickDeviceInfo*	IPXdevLJoystickDeviceInfo;
 	typedef XdevLJoystickServer	IXdevLJoystickServer;
 	typedef XdevLJoystickServer*	IPXdevLJoystickServer;
+
+
 
 }
 

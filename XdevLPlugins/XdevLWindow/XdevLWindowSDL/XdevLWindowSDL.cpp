@@ -784,7 +784,7 @@ namespace xdl {
 					XdevLEvent ev;
 					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
 					ev.type 				= XDEVL_JOYSTICK_MOTION;
-					ev.jaxis.axis			= event.jaxis.axis;
+					ev.jaxis.axisid			= event.jaxis.axis;
 					ev.jaxis.value			= event.jaxis.value;
 
 					getMediator()->fireEvent(ev);

@@ -187,10 +187,6 @@ namespace xdl {
 					throw;
 				}
 
-				// Attach the joystick to the m_window.
-				if((m_joystick != NULL) && m_joystick->attach(m_window) != xdl::ERR_OK) {
-					throw;
-				}
 			}
 
 			~XdevLApplication() {

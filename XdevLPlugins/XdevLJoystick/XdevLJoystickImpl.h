@@ -364,23 +364,23 @@ namespace xdl {
 
 			m_joy_old_x = m_joy_curr_x;
 			m_joy_curr_x = value;
-			m_Axes[event.jaxis.axis]->setValue(value);
+			m_Axes[event.jaxis.axisid]->setValue(value);
 			m_joy_moved = true;
 
 			//
 			// Handle delegates that sends a axis id's and the value of the axis.
 			//
 			for(auto& delegate : m_axisDelegates) {
-				delegate((XdevLAxisId)event.jaxis.axis, m_Axes[event.jaxis.axis]->getValue());
+				delegate((XdevLAxisId)event.jaxis.axisid, m_Axes[event.jaxis.axisid]->getValue());
 			}
 
 			//
 			// Handle delegates that registered only for one specific axis id.
 			//
-			auto pp = m_axisIdDelegates.equal_range((XdevLAxisId)event.jaxis.axis);
+			auto pp = m_axisIdDelegates.equal_range((XdevLAxisId)event.jaxis.axisid);
 			for (auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
-				delegate(m_Axes[event.jaxis.axis]->getValue());
+				delegate(m_Axes[event.jaxis.axisid]->getValue());
 			}
 
 		} else if(event.type == XDEVL_JOYSTICK_POV) {

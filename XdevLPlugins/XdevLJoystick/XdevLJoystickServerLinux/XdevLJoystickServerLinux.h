@@ -51,6 +51,16 @@ namespace xdl {
 	};
 
 
+	class XdevLJoystickDeviceInfoLinux : public XdevLJoystickDeviceInfo {
+		public:
+			XdevLJoystickDeviceInfoLinux() :
+				fd(-1),
+				device("/dev/input/js0") {}
+
+			xdl_int fd;
+			XdevLString device;
+	};
+
 	/**
 		@class XdevLJoystickServerLinux
 		@brief Class to support mouse devices
@@ -62,12 +72,15 @@ namespace xdl {
 			XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLJoystickServerLinux();
 
-			virtual xdl_int init();
-			virtual xdl_int shutdown();
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual xdl_int update() override;
+
 
 			virtual xdl_int create();
 			virtual xdl_int create(const XdevLString& deviceName);
-
+			virtual xdl_uint getNumJoysticks();
+			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid);
 
 			virtual xdl_int notify(XdevLEvent& event);
 			virtual void* getInternal(const XdevLInternalName& id);
@@ -75,17 +88,14 @@ namespace xdl {
 		private:
 			xdl_int pollEvents();
 			xdl_int reset();
-			void sendButtonEvent(xdl_int buttonID, xdl_bool pressed);
-			void sendAxisEvent(xdl_uint8 axisID, xdl::xdl_int16 value);
+			void sendButtonEvent(xdl_uint16 joystickid, xdl_int buttonID, xdl_bool pressed);
+			void sendAxisEvent(xdl_uint16 joystickid, xdl_uint8 axisID, xdl::xdl_int16 value);
 			xdl_int readJoystickInfo(TiXmlDocument& document);
 		private:
-			int m_fd;
 			XdevLString m_device;
-			XdevLString m_name;
-			xdl_uint8 m_numberOfAxes;
-			xdl_uint8 m_numberOfButtons;
 			thread::Mutex m_mutex;
 			xdl_bool m_running;
+			std::list<XdevLJoystickDeviceInfoLinux*> m_joystickDevices;
 	};
 
 
