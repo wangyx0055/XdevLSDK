@@ -544,8 +544,6 @@ namespace xdl {
 			XdevLJoystickImpl(XdevLModuleCreateParameter* parameter);
 			virtual ~XdevLJoystickImpl() {}
 
-			static XdevLModuleDescriptor m_joystickModuleDesc;
-
 			virtual xdl_int init() override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);

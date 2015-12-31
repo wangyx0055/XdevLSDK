@@ -513,12 +513,13 @@ namespace xdl {
 			// that module already registered. Available modules are in the
 			// m_modulesMap.
 			//
-			pluginInfo = m_modulesMap.find(parameter->getModuleName().toString().c_str())->second;
-
-			if(pluginInfo == nullptr) {
+			auto it = m_modulesMap.find(parameter->getModuleName().toString().c_str());
+			if(it == m_modulesMap.end()) {
 				XDEVL_MODULE_ERROR("Could not find any plugins for the module: " << parameter->getModuleId().getName() << std::endl);
 				return nullptr;
 			}
+
+			pluginInfo = it->second;
 		}
 
 		// Do we have a module with the same id?

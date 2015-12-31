@@ -25,7 +25,7 @@
 #include <iostream>
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLJoystickImpl::m_joystickModuleDesc {
+xdl::XdevLModuleDescriptor joystickModuleDesc {
 	xdl::joystick_vendor,
 	xdl::joystick_author,
 	xdl::joystick_moduleNames[0],
@@ -63,8 +63,22 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 	return xdl::ERR_OK;
 }
 
+extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
+
+	if(joystickModuleDesc.getName()  == moduleDescriptor.getName()) {
+		xdl::XdevLJoystickImpl*obj = new xdl::XdevLJoystickImpl(nullptr);
+		if(!obj) {
+			return nullptr;
+		}
+
+		return obj;
+	}
+
+	return nullptr;
+}
+
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(xdl::XdevLJoystickImpl::m_joystickModuleDesc.getName() == parameter->getModuleName()) {
+	if(joystickModuleDesc.getName() == parameter->getModuleName()) {
 		xdl::XdevLJoystickImpl*obj = new xdl::XdevLJoystickImpl(parameter);
 		if(!obj)
 			return xdl::ERR_ERROR;
@@ -86,7 +100,7 @@ extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 namespace xdl {
 
 	XdevLJoystickImpl::XdevLJoystickImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLJoystickBase<XdevLJoystick>(parameter, m_joystickModuleDesc) {
+		XdevLJoystickBase<XdevLJoystick>(parameter, joystickModuleDesc) {
 	}
 
 	xdl_int XdevLJoystickImpl::init() {
