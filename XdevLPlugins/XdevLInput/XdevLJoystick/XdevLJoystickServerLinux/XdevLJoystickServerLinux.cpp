@@ -425,8 +425,13 @@ namespace xdl {
 	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(xdl_uint16 joystickid) {
 		XdevLJoystickDeviceInfo info;
 
-		std::stringstream tmp("/dev/input/js");
-		tmp << joystickid;
+		std::stringstream tmp;
+		tmp << "/dev/input/js" << joystickid;
+
+		auto it = m_joystickDevices.find(tmp.str());
+		if(it == m_joystickDevices.end()) {
+			return info;
+		}
 
 		//
 		// Only fill out info it the id does not exceed the real number of joysticks

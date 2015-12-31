@@ -1,7 +1,7 @@
 /*
 	XdevL eXtended DEVice Library.
 
-	Copyright © 2005-2014 Cengiz Terzibas
+	Copyright © 2005-2016 Cengiz Terzibas
 
 	This library is free software; you can redistribute it and/or modify it under the
 	terms of the GNU Lesser General Public License as published by the Free Software
@@ -63,7 +63,7 @@ namespace xdl {
 		"Cengiz Terzibas"
 	};
 	static const XdevLString joystick_copyright {
-		"(c) 2005 - 2014 Cengiz Terzibas."
+		"(c) 2005 - 2016 Cengiz Terzibas."
 	};
 	static const XdevLString joystick_pluginName {
 		"XdevLJoystick"
@@ -104,8 +104,6 @@ namespace xdl {
 				m_joy_old_y(0),
 				m_relativeMode(xdl_false),
 				m_vendor(""),
-				m_numAxis(16),		// TODO This value is a hack.
-				m_numButtons(16),	// TODO This value is a hack.
 				m_attached(false),
 				m_threaded(false),
 				m_sleep(0.001) {
@@ -137,7 +135,10 @@ namespace xdl {
 			xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
 			xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
 
-		protected:
+			xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo);
+
+	protected:
+			XdevLJoystickDeviceInfo m_joystickDeviceInfo;
 			XdevLJoystickPOVImpl*	m_POV;
 			xdl_bool				m_joy_button_down;
 			xdl_bool				m_joy_moved;
@@ -146,14 +147,12 @@ namespace xdl {
 			xdl_int					m_joy_old_x;
 			xdl_int					m_joy_old_y;
 			xdl_bool				m_relativeMode;
-			std::string				m_vendor;
-			xdl_uint 				m_numAxis;
-			xdl_uint				m_numButtons;
+			std::string			m_vendor;
 			xdl_bool				m_attached;
 			xdl_bool				m_threaded;
-			xdl_double				m_sleep;
-			thread::Mutex			m_mutex;
-			xdl_float								m_center[JOYSTICK_MAX_AXES];
+			xdl_double			m_sleep;
+			thread::Mutex		m_mutex;
+			xdl_float				m_center[JOYSTICK_MAX_AXES];
 			std::vector<XdevLJoystickButtonImpl*> 	m_Buttons;
 			std::vector<XdevLJoystickAxisImpl*>		m_Axes;
 			thread::Mutex				m_replyMutex;
@@ -191,26 +190,41 @@ namespace xdl {
 
 	template<typename T>
 	void XdevLJoystickBase<T>::initializeButtonsAndAxisArrays() {
-		if(m_numAxis > 0) {
+
+		if(m_joystickDeviceInfo.numberOfAxes > 0) {
+			// Delete previous one.
+			for(auto& axis : m_Axes) {
+				delete axis;
+			}
+
+			// Reset and reserver new array of axis.
 			m_Axes.clear();
-			m_Axes.reserve(m_numAxis);
-			m_Axes.resize(m_numAxis);
+			m_Axes.reserve(m_joystickDeviceInfo.numberOfAxes);
+			m_Axes.resize(m_joystickDeviceInfo.numberOfAxes);
 			for(size_t a = 0; a < m_Axes.size(); ++a) {
 				m_Axes[a] = new XdevLJoystickAxisImpl(&m_mutex);
 				m_Axes[a]->setMinMax(-1.0f, 1.0f);
 			}
 		}
 
-		if(m_numButtons > 0) {
+
+		if(m_joystickDeviceInfo.numberOfButtons > 0) {
+			// Delete previous one.
+			for(auto& button : m_Buttons) {
+				delete button;
+			}
+
+			// Reset and reserver new array of buttons.
 			m_Buttons.clear();
-			m_Buttons.reserve(m_numButtons);
-			m_Buttons.resize(m_numButtons);
-			for(size_t a = 0; a < m_numButtons; ++a) {
+			m_Buttons.reserve(m_joystickDeviceInfo.numberOfButtons);
+			m_Buttons.resize(m_joystickDeviceInfo.numberOfButtons);
+			for(size_t a = 0; a < m_Buttons.size(); ++a) {
 				m_Buttons[a] = new XdevLJoystickButtonImpl(&m_mutex);
 				m_Buttons[a]->setState(false);
 			}
 		}
 	}
+
 	template<typename T>
 	xdl_bool XdevLJoystickBase<T>::getAttached() {
 		xdl_bool tmp;
@@ -228,13 +242,19 @@ namespace xdl {
 	}
 
 	template<typename T>
+	xdl_int XdevLJoystickBase<T>::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
+		m_joystickDeviceInfo = joystickDeviceInfo;
+
+		initializeButtonsAndAxisArrays();
+
+	}
+
+	template<typename T>
 	xdl_int XdevLJoystickBase<T>::init() {
 		if(getAttached()) {
 			setAttached(false);
 			Join();
 		}
-
-
 
 		if(this->getMediator()->getXmlFilename()) {
 			TiXmlDocument xmlDocument;
@@ -545,6 +565,8 @@ namespace xdl {
 			virtual ~XdevLJoystickImpl() {}
 
 			virtual xdl_int init() override;
+			virtual xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) override;
+			virtual XdevLJoystickServer* getJoystickServer() override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);

@@ -25,7 +25,54 @@
 
 namespace xdl {
 
-	class XdevLWindow;
+	/**
+		@class XdevLJoystickDeviceInfo
+		@brief Structure that holds joystick information for the joystick server.
+		@author Cengiz Terzibas
+	*/
+	struct XdevLJoystickDeviceInfo {
+		XdevLJoystickDeviceInfo() :
+			name(""),
+			joystickid(0),
+			numberOfAxes(0),
+			numberOfButtons(0) {}
+
+		/// Name of the joystick.
+		XdevLString name;
+
+		/// Identification code for the joystick that is used when send joystick events.
+		xdl_uint16 joystickid;
+
+		/// Number of axes supported by this joystick device.
+		xdl_uint8 numberOfAxes;
+
+		/// Number of buttons supported by this joystick device.
+		xdl_uint8 numberOfButtons;
+	};
+
+
+
+	/**
+		@class XdevLJoystickServer
+		@brief Interface that manages joysticks
+		@author Cengiz Terzibas
+	*/
+	class XdevLJoystickServer : public XdevLModule {
+		public:
+			virtual ~XdevLJoystickServer() {}
+
+			/// Returns the number of joystick devices.
+			virtual xdl_uint getNumJoysticks() = 0;
+
+			/**
+			 * @brief Returns information of the specified joystick device.
+			 * @param joystickid
+			 * @return If successful it will return a XdevLJoystickDeviceInfo filled with a valid name.
+			 * Otherwise the name field will be empty.
+			 */
+			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid) = 0;
+	};
+
 
 	/**
 		@class XdevLJoystick
@@ -120,6 +167,10 @@ namespace xdl {
 	class XdevLJoystick : public XdevLInputSystem, public XdevLModule {
 		public:
 			virtual ~XdevLJoystick() {};
+
+			/// Create a connection to a specific joystick device.
+			virtual xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) = 0;
+
 			/// Returns the state of a button.
 			/**
 				@return Returns @e 'true' as long as the specified button is pressed. Otherwise it
@@ -149,54 +200,10 @@ namespace xdl {
 				@return Returns the current axis position.
 			*/
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
+
+			/// Returns the joystick server.
+			virtual XdevLJoystickServer* getJoystickServer() = 0;
 	};
-
-	/**
-		@class XdevLJoystickDeviceInfo
-		@brief Structure that holds joystick information for the joystick server.
-		@author Cengiz Terzibas
-	*/
-	struct XdevLJoystickDeviceInfo {
-		XdevLJoystickDeviceInfo() :
-			name(""),
-			joystickid(0),
-			numberOfAxes(0),
-			numberOfButtons(0) {}
-
-		/// Name of the joystick.
-		XdevLString name;
-
-		/// Identification code for the joystick that is used when send joystick events.
-		xdl_uint16 joystickid;
-
-		/// Number of axes supported by this joystick device.
-		xdl_uint8 numberOfAxes;
-
-		/// Number of buttons supported by this joystick device.
-		xdl_uint8 numberOfButtons;
-	};
-
-	/**
-		@class XdevLJoystickServer
-		@brief Interface that manages joysticks
-		@author Cengiz Terzibas
-	*/
-	class XdevLJoystickServer : public XdevLModule {
-		public:
-			virtual ~XdevLJoystickServer() {}
-
-			/// Returns the number of joystick devices.
-			virtual xdl_uint getNumJoysticks() = 0;
-
-			/**
-			 * @brief Returns information of the specified joystick device.
-			 * @param joystickid
-			 * @return If successful it will return a XdevLJoystickDeviceInfo filled with a valid name.
-			 * Otherwise the name field will be empty.
-			 */
-			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid) = 0;
-	};
-
 
 	typedef XdevLJoystick	IXdevLJoystick;
 	typedef XdevLJoystick*	IPXdevLJoystick;

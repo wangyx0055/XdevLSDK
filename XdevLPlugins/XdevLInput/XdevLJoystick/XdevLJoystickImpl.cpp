@@ -1,7 +1,7 @@
 /*
 	XdevL eXtended DEVice Library.
 
-	Copyright © 2005-2012 Cengiz Terzibas
+	Copyright © 2005-2016 Cengiz Terzibas
 
 	This library is free software; you can redistribute it and/or modify it under the
 	terms of the GNU Lesser General Public License as published by the Free Software
@@ -46,6 +46,9 @@ xdl::XdevLPluginDescriptor m_joystickPluginDescriptor {
 
 xdl::XdevLJoystickServer* joystickServer = nullptr;
 
+//
+// Initialize plugin function.
+//
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
 
 	if(nullptr == joystickServer) {
@@ -58,11 +61,17 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 	return xdl::ERR_OK;
 }
 
+//
+// Shutdown plugin.
+//
 extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 	
 	return xdl::ERR_OK;
 }
 
+//
+// Create Module function without XdevLCore.
+//
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
 	if(joystickModuleDesc.getName()  == moduleDescriptor.getName()) {
@@ -77,6 +86,9 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 	return nullptr;
 }
 
+//
+// Create module function using XdevLCore.
+//
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
 	if(joystickModuleDesc.getName() == parameter->getModuleName()) {
 		xdl::XdevLJoystickImpl*obj = new xdl::XdevLJoystickImpl(parameter);
@@ -88,14 +100,21 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 	return xdl::ERR_MODULE_NOT_FOUND;
 }
 
+//
+// Delete module function.
+//
 extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
 	if(obj)
 		delete obj;
 }
 
+//
+// Return plugin descriptor function.
+//
 extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
 	return &m_joystickPluginDescriptor;
 }
+
 
 namespace xdl {
 
@@ -105,6 +124,14 @@ namespace xdl {
 
 	xdl_int XdevLJoystickImpl::init() {
 		return XdevLJoystickBase<XdevLJoystick>::init();
+	}
+
+	xdl_int XdevLJoystickImpl::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
+		return XdevLJoystickBase<XdevLJoystick>::create(joystickDeviceInfo);
+	}
+	
+	XdevLJoystickServer* XdevLJoystickImpl::getJoystickServer() {
+		return joystickServer;
 	}
 
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
