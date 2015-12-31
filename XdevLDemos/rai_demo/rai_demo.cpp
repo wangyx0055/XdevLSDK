@@ -13,7 +13,7 @@
 #include <XdevLWindow/XdevLWindow.h>
 #include <XdevLRAI/XdevLRAI.h>
 
-#include <XdevLMouse/XdevLMouse.h>
+#include <XdevLInput/XdevLMouse/XdevLMouse.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
 #include <iomanip>
 

@@ -152,7 +152,7 @@ endif()
 
 # Build the Mouse plugin.
 if(BUILD_MOUSE)
-	add_subdirectory(XdevLPlugins/XdevLMouse)
+	add_subdirectory(XdevLPlugins/XdevLInput/XdevLMouse)
 endif()
 
 # Build the Joystick plugin.
@@ -279,7 +279,7 @@ endif()
 if(BUILD_MOUSE_SERVER)
 	if(PLATFORM_WINDOWS)
 	elseif(PLATFORM_LINUX)
-		add_subdirectory(XdevLPlugins/XdevLMouse/XdevLMouseServerLinux)
+		add_subdirectory(XdevLPlugins/XdevLInput/XdevLMouse/XdevLMouseServerLinux)
 	elseif(PLATFORM_MACOSX)
 	endif()
 endif()

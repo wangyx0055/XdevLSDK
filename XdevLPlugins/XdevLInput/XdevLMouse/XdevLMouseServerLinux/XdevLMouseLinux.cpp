@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <string>
-#include <XdevLMouse/XdevLMouse.h>
+#include <XdevLInput/XdevLMouse/XdevLMouse.h>
 #include "XdevLMouseLinux.h"
 #include <XdevLPlatform.h>
 #include <linux/input.h>

@@ -1,5 +1,5 @@
 #include <XdevL.h>
-#include <XdevLJoystick/XdevLJoystick.h>
+#include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 
 void callbackButton0(const xdl::XdevLButtonState& id) {
 	std::cout << "BUTTON_0: " << ((id == xdl::BUTTON_PRESSED) ? "pressed" : "released") << std::endl;

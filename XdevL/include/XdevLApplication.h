@@ -22,9 +22,9 @@
 
 #include <XdevL.h>
 #include <XdevLWindow/XdevLWindow.h>
-#include <XdevLMouse/XdevLMouse.h>
+#include <XdevLInput/XdevLMouse/XdevLMouse.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
-#include <XdevLJoystick/XdevLJoystick.h>
+#include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 
 #include <fstream>
 #include <vector>

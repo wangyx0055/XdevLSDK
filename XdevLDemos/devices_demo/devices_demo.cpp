@@ -7,8 +7,8 @@
 #include <XdevL.h>
 #include <XdevLWindow/XdevLWindow.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
-#include <XdevLMouse/XdevLMouse.h>
-#include <XdevLJoystick/XdevLJoystick.h>
+#include <XdevLInput/XdevLMouse/XdevLMouse.h>
+#include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 
 
 //#define USE_DELEGATES
