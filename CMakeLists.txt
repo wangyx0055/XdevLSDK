@@ -157,7 +157,7 @@ endif()
 
 # Build the Joystick plugin.
 if(BUILD_JOYSTICK)
-	add_subdirectory(XdevLPlugins/XdevLJoystick)
+	add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick)
 endif()
 
 # Build the Network plugin.
@@ -288,7 +288,7 @@ endif()
 if(BUILD_JOYSTICK_SERVER)
 	if(PLATFORM_WINDOWS)
 	elseif(PLATFORM_LINUX)
-		add_subdirectory(XdevLPlugins/XdevLJoystick/XdevLJoystickServerLinux)
+		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerLinux)
 	elseif(PLATFORM_MACOSX)
 	endif()
 endif()

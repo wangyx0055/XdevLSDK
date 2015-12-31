@@ -22,7 +22,7 @@
 #include <XdevLInputSystem.h>
 #include <XdevLKeyboard/XdevLKeyboard.h>
 #include <XdevLMouse/XdevLMouse.h>
-#include <XdevLJoystick/XdevLJoystick.h>
+#include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 #include "XdevLWindowSDL.h"
 #include <XdevLXstring.h>
 #include <XdevLUtils.h>

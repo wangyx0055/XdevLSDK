@@ -21,12 +21,13 @@
 #define XDEVL_JOYSTICK_IMPL_H
 
 #include <XdevLPluginImpl.h>
-#include <XdevLJoystick.h>
 #include <XdevLListener.h>
 #include <XdevLThread.h>
 #include <XdevLMutex.h>
 #include <XdevLConditionalVariable.h>
 #include <XdevLInputSystemUtils.h>
+#include <XdevLJoystick.h>
+
 #include <tinyxml.h>
 
 namespace xdl {

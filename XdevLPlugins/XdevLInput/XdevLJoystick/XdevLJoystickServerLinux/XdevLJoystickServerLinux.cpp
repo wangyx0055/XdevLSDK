@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <string>
-#include <XdevLJoystick/XdevLJoystick.h>
+#include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 #include "XdevLJoystickServerLinux.h"
 #include <XdevLPlatform.h>
 #include <XdevLMutex.h>
@@ -534,8 +534,6 @@ namespace xdl {
 					if(nullptr != actionptr) {
 						action = std::string(udev_device_get_action(dev));
 					}
-
-					std::cout << node << std::endl;
 
 					std::size_t pos = node.find("js");
 					if(pos != std::string::npos) {
