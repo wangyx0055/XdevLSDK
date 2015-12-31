@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(XdevLMouseLinux)
+project(XdevLMouseServerLinux)
 
 #
 # Set the names for the stuff we are going to create
@@ -12,8 +12,8 @@ set(XdevLMouseServerLinux XdevLMouseLinux)
 # Set the Plugin version
 #
 
-set(XDEVLMOUSE_SERVER_MAJOR_VERSION 1)
-set(XDEVLMOUSE_SERVER_MINOR_VERSION 0)
+set(XDEVLMOUSE_SERVER_MAJOR_VERSION 0)
+set(XDEVLMOUSE_SERVER_MINOR_VERSION 1)
 set(XDEVLMOUSE_SERVER_PATCH_VERSION 0)
 set(XDEVLMOUSE_SERVER_VERSION "${XDEVLMOUSE_SERVER_MAJOR_VERSION}.${XDEVLMOUSE_SERVER_MINOR_VERSION}.${XDEVLMOUSE_SERVER_PATCH_VERSION}")
 
@@ -28,7 +28,7 @@ add_definitions(
 #
 
 set(XDEVLMOUSE_SERVER_MODULE_MAJOR_VERSION 0)
-set(XDEVLMOUSE_SERVER_MODULE_MINOR_VERSION 2)
+set(XDEVLMOUSE_SERVER_MODULE_MINOR_VERSION 1)
 set(XDEVLMOUSE_SERVER_MODULE_PATCH_VERSION 0)
 set(XDEVLMOUSE_SERVER_MODULE_VERSION "${XDEVLMOUSE_SERVER_MODULE_MAJOR_VERSION}.${XDEVLMOUSE_SERVER_MODULE_MINOR_VERSION}.${XDEVLMOUSE_SERVER_MODULE_PATCH_VERSION}")
 
@@ -41,8 +41,8 @@ add_definitions(
 #
 # Set variable names for the library
 #
-set(HEADERS_DIR .)
-set(SRC_DIR .)
+set(HEADERS_DIR ${XdevLMouseServerLinux_SOURCE_DIR})
+set(SRC_DIR ${XdevLMouseServerLinux_SOURCE_DIR})
 
 #
 # Set the output directories
@@ -64,7 +64,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_PLUGINS}/lib)
 # Set header files for the library.
 #
 set(HEADER_FILES
-	${HEADERS_DIR}/../XdevLMouse/XdevLMouse.h
+	${XdevLMouse_SOURCE_DIR}/XdevLMouse.h
 	${HEADERS_DIR}/XdevLMouseLinux.h
 )
 
