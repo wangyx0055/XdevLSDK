@@ -2,7 +2,7 @@
 #define XDEVL_WINDOW_X11_KEYBOARD_H
 
 #include <XdevL.h>
-#include <XdevLKeyboard/XdevLKeyboard.h>
+#include <XdevLInput/XdevLKeyboard/XdevLKeyboard.h>
 
 #include <X11/Xlib.h>
 

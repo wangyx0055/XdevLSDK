@@ -22,7 +22,7 @@
 
 #include <XdevLPlatform.h>
 #include <XdevLPluginImpl.h>
-#include <XdevLKeyboard/XdevLKeyboard.h>
+#include <XdevLInput/XdevLKeyboard/XdevLKeyboard.h>
 #include <XdevLXstring.h>
 #include <XdevLThread.h>
 #include <XdevLMutex.h>

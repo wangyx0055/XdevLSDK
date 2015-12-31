@@ -14,7 +14,7 @@
 #include <XdevLRAI/XdevLRAI.h>
 
 #include <XdevLInput/XdevLMouse/XdevLMouse.h>
-#include <XdevLKeyboard/XdevLKeyboard.h>
+#include <XdevLInput/XdevLKeyboard/XdevLKeyboard.h>
 #include <iomanip>
 
 #include <tm/tm.h>

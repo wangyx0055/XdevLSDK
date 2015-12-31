@@ -40,8 +40,8 @@ add_definitions(
 #
 # Set variable names for the library
 
-set(HEADERS_DIR .)
-set(SRC_DIR .)
+set(HEADERS_DIR ${XdevLKeyboard_SOURCE_DIR})
+set(SRC_DIR ${XdevLKeyboard_SOURCE_DIR})
 
 #
 # Set the output directories

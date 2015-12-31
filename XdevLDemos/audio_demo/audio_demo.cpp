@@ -7,7 +7,7 @@
 
 #include <XdevL.h>
 #include <XdevLWindow/XdevLWindow.h>
-#include <XdevLKeyboard/XdevLKeyboard.h>
+#include <XdevLInput/XdevLKeyboard/XdevLKeyboard.h>
 #include <XdevLAudio/XdevLAudio.h>
 #include <iostream>
 #include <iomanip> 

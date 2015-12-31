@@ -147,7 +147,7 @@ add_subdirectory(XdevLPlugins/XdevLCore)
 
 # Build the Keybaord plugin.
 if(BUILD_KEYBOARD)
-	add_subdirectory(XdevLPlugins/XdevLKeyboard)
+	add_subdirectory(XdevLPlugins/XdevLInput/XdevLKeyboard)
 endif()
 
 # Build the Mouse plugin.
