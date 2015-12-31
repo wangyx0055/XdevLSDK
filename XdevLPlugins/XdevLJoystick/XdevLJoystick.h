@@ -185,18 +185,6 @@ namespace xdl {
 		public:
 			virtual ~XdevLJoystickServer() {}
 
-			/**
-			 * @brief Creates a connections to all joystick devices.
-			 * @return Returns ERR_OK if successful else ERR_ERROR.
-			 * 
-			 * This method will try to open a connections to all connected joystick devices.
-			 * If it fails no joysticks are connected.
-			 */
-			virtual xdl_int create() = 0;
-
-			/// Creates a connections to a specific joystick device.
-			virtual xdl_int create(const XdevLString& deviceName) = 0;
-
 			/// Returns the number of joystick devices.
 			virtual xdl_uint getNumJoysticks() = 0;
 

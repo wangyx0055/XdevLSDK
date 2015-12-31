@@ -24,12 +24,18 @@
 #include <XdevLUtils.h>
 #include <XdevLThread.h>
 #include <XdevLMutex.h>
-#include <vector>
+#include <map>
+
+
+
+#define XDEVL_USE_UDEV 1
+
+#if XDEVL_USE_UDEV
+#include <libudev.h>
+#endif
+
 
 namespace xdl {
-
-	class XdevLMouse;
-
 
 	static const XdevLString vendor {
 		"www.codeposer.net"
@@ -54,11 +60,9 @@ namespace xdl {
 	class XdevLJoystickDeviceInfoLinux : public XdevLJoystickDeviceInfo {
 		public:
 			XdevLJoystickDeviceInfoLinux() :
-				fd(-1),
-				device("/dev/input/js0") {}
-
+				fd(-1) {}
 			xdl_int fd;
-			XdevLString device;
+			std::string device;
 	};
 
 	/**
@@ -77,27 +81,48 @@ namespace xdl {
 			virtual xdl_int update() override;
 
 
-			virtual xdl_int create();
-			virtual xdl_int create(const XdevLString& deviceName);
 			virtual xdl_uint getNumJoysticks();
 			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid);
 
 			virtual xdl_int notify(XdevLEvent& event);
 			virtual void* getInternal(const XdevLInternalName& id);
 			xdl_int RunThread(thread::ThreadArgument* p_arg);
+
+			xdl_int openUsingId(xdl_uint id);
+			xdl_int openUsingPath(const std::string& path);
+			xdl_int addJoystick(xdl_uint id);
+			xdl_int addJoystick(const std::string& path);
+			void removeJoystick(const std::string& path);
+			XdevLJoystickDeviceInfoLinux* getJoystickInfo(xdl_int fd, const std::string& path);
 		private:
+
+
 			xdl_int pollEvents();
 			xdl_int reset();
 			void sendButtonEvent(xdl_uint16 joystickid, xdl_int buttonID, xdl_bool pressed);
 			void sendAxisEvent(xdl_uint16 joystickid, xdl_uint8 axisID, xdl::xdl_int16 value);
 			xdl_int readJoystickInfo(TiXmlDocument& document);
 		private:
-			XdevLString m_device;
 			thread::Mutex m_mutex;
 			xdl_bool m_running;
-			std::list<XdevLJoystickDeviceInfoLinux*> m_joystickDevices;
+			std::map<std::string, XdevLJoystickDeviceInfoLinux*> m_joystickDevices;
 	};
 
+#if XDEVL_USE_UDEV
+	class XdevLJoystickServerLinuxUDev : public thread::Thread  {
+		public:
+			xdl_int init();
+			xdl_int shutdown();
+			xdl_int RunThread(thread::ThreadArgument* p_arg);
+		private:
+			struct udev *udev;
+			struct udev_enumerate *enumerate;
+			struct udev_list_entry *devices, *dev_list_entry;
+			struct udev_device *dev;
+			struct udev_monitor *mon;
+			xdl_int fd;
+	};
+#endif
 
 }
 

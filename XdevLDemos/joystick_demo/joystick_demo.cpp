@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
 
 	for(;;) {
 		core->update();
+		xdl::sleep(0.001);
 	}
 
 	xdl::destroyCore(core);

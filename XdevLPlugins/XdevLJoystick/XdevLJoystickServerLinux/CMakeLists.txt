@@ -103,12 +103,12 @@ include_directories(
 #
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	target_link_libraries(
-		${XdevLJoystickServerLinux} pthread
+		${XdevLJoystickServerLinux} pthread udev
 		XdevLd
 	)
 else()
 	target_link_libraries(
-		${XdevLJoystickServerLinux} pthread
+		${XdevLJoystickServerLinux} pthread udev
 		XdevL
 	)
 endif()

@@ -4,9 +4,9 @@
 #include <XdevLJoystick/XdevLJoystick.h>
 #include "XdevLJoystickServerLinux.h"
 #include <XdevLPlatform.h>
+#include <XdevLMutex.h>
 
 #include <linux/joystick.h>
-
 
 xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::pluginName,
@@ -27,23 +27,41 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	XDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION
 };
 
+#if XDEVL_USE_UDEV
+static xdl::XdevLJoystickServerLinuxUDev joystickudev;
+#endif
+
+xdl::XdevLJoystickServerLinux* joystickServerLinux = nullptr;
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+#if XDEVL_USE_UDEV
+	return joystickudev.init();
+#else
 	return xdl::ERR_OK;
+#endif
 }
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+#if XDEVL_USE_UDEV
+	return joystickudev.shutdown();
+#else
 	return xdl::ERR_OK;
+#endif
 }
 
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLJoystickServerLinux(parameter, moduleDescriptor);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
+
+	if(nullptr == joystickServerLinux) {
+		if(moduleDescriptor.getName() == parameter->getModuleName()) {
+			joystickServerLinux  = new xdl::XdevLJoystickServerLinux(parameter, moduleDescriptor);
+			if(!joystickServerLinux)
+				return xdl::ERR_ERROR;
+			parameter->setModuleInstance(joystickServerLinux);
+			return xdl::ERR_OK;
+		}
+	} else {
+		return xdl::ERR_MODULE_EXIST_ALREADY;
 	}
 
 	return xdl::ERR_MODULE_NOT_FOUND;
@@ -64,6 +82,7 @@ namespace xdl {
 	const XdevLID JoystickButtonReleased("XDEVL_JOYSTICK_BUTTON_RELEASED");
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
 	static xdl_uint16 joystickID = 0;
+
 
 	XdevLButtonId wrapLinuxButtonToXdevLButton(xdl_uint8 button) {
 		switch(button) {
@@ -146,8 +165,7 @@ namespace xdl {
 	}
 
 	XdevLJoystickServerLinux::XdevLJoystickServerLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
-		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, descriptor),
-		m_device("/dev/input/js0") {
+		XdevLModuleAutoImpl<XdevLJoystickServer>(parameter, descriptor) {
 
 	}
 
@@ -167,6 +185,14 @@ namespace xdl {
 			}
 		}
 
+		//
+		// Add all connected joysticks.
+		// TODO This is a hacky way and should be changed later.
+		//
+		xdl_uint id = 0;
+		while(addJoystick(id) == ERR_OK) {
+			id++;
+		}
 		return ERR_OK;
 	}
 
@@ -177,10 +203,10 @@ namespace xdl {
 			m_mutex.Unlock();
 
 			for(auto& device : m_joystickDevices) {
-				if(close(device->fd) == -1) {
-					XDEVL_MODULE_WARNING("Closing Joystick: " << device->name << " descriptor failed.\n");
+				if(close(device.second->fd) == -1) {
+					XDEVL_MODULE_WARNING("Closing Joystick: " << device.second->name << " descriptor failed.\n");
 				} else {
-					delete device;
+					delete device.second;
 				}
 			}
 			m_joystickDevices.clear();
@@ -190,45 +216,85 @@ namespace xdl {
 	}
 
 
-	xdl_int XdevLJoystickServerLinux::create() {
-		return create(m_device);
+	xdl_int XdevLJoystickServerLinux::openUsingId(xdl_uint id) {
+		xdl_char device[128] {0};
+		std::sprintf(device, "/dev/input/js%i", id);
+		return open(device, O_RDONLY | O_NONBLOCK);
 	}
 
-	xdl_int XdevLJoystickServerLinux::create(const XdevLString& deviceName) {
-		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
-		devInfo->device = deviceName;
 
-		devInfo->fd = open(m_device.toString().c_str(), O_RDONLY | O_NONBLOCK);
-		if(devInfo->fd == -1) {
+	xdl_int XdevLJoystickServerLinux::openUsingPath(const std::string& path) {
+		return open(path.c_str(), O_RDONLY | O_NONBLOCK);
+	}
+
+	xdl_int XdevLJoystickServerLinux::addJoystick(xdl_uint id) {
+		std::stringstream path;
+		path << "/dev/input/js" << id;
+		return addJoystick(path.str());
+	}
+
+	xdl_int XdevLJoystickServerLinux::addJoystick(const std::string& path) {
+
+		thread::XdevLScopeLock lock(m_mutex);
+
+		auto it = m_joystickDevices.find(path);
+		if(it != m_joystickDevices.end()) {
+			return ERR_OK;
+		}
+
+		xdl_int fd = openUsingPath(path);
+		if(fd== -1) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 			return ERR_ERROR;
 		}
 
+		XdevLJoystickDeviceInfoLinux* joystickInfo = getJoystickInfo(fd, path);
+		if(nullptr == joystickInfo) {
+			return ERR_ERROR;
+		} 
+		m_joystickDevices[joystickInfo->device] = joystickInfo;
+		return ERR_OK;
+	}
+
+	XdevLJoystickDeviceInfoLinux* XdevLJoystickServerLinux::getJoystickInfo(xdl_int fd, const std::string& path) {
 		char name[128];
-		if (ioctl(devInfo->fd, JSIOCGNAME(sizeof(name)), name) < 0) {
+		if (ioctl(fd, JSIOCGNAME(sizeof(name)), name) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-			return ERR_ERROR;
+			return nullptr;
 		}
-		devInfo->name = XdevLString(name);
-
 		XDEVL_MODULE_INFO("Name             : " << name << "\n");
 
-		if(ioctl(devInfo->fd, JSIOCGAXES, &devInfo->numberOfAxes) < 0) {
+		xdl_uint numberOfAxes = 0;
+		if(ioctl(fd, JSIOCGAXES, &numberOfAxes) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-			return ERR_ERROR;
+			return nullptr;
 		}
-		XDEVL_MODULE_INFO("Number of axes   : " << (xdl_int)devInfo->numberOfAxes << "\n");
+		XDEVL_MODULE_INFO("Number of axes   : " << numberOfAxes << "\n");
 
-		if(ioctl(devInfo->fd, JSIOCGBUTTONS, &devInfo->numberOfButtons) < 0) {
+		xdl_uint numberOfButtons = 0;
+		if(ioctl(fd, JSIOCGBUTTONS, &numberOfButtons) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-			return ERR_ERROR;
+			return nullptr;
 		}
-		XDEVL_MODULE_INFO("Number of buttons: " << (xdl_int)devInfo->numberOfButtons << "\n");
+		XDEVL_MODULE_INFO("Number of buttons: " << numberOfButtons << "\n");
 
-		devInfo->joystickid = joystickID;
-		m_joystickDevices.push_back(devInfo);
+		size_t pos = path.find_first_of("js");
+		if(pos == std::string::npos) {
+			return nullptr;
+		}
+		std::stringstream ss(path.substr(pos + 2, std::string::npos));
+		xdl_uint joystickid;
+		ss >> joystickid;
 
-		return ERR_OK;
+		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
+		devInfo->joystickid = joystickid;
+		devInfo->fd = fd;
+		devInfo->device = path;
+		devInfo->name = XdevLString(name);
+		devInfo->numberOfAxes = numberOfAxes;
+		devInfo->numberOfButtons = numberOfButtons;
+
+		return devInfo;
 	}
 
 	xdl_int xdl::XdevLJoystickServerLinux::notify(XdevLEvent& event) {
@@ -248,11 +314,14 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickServerLinux::pollEvents() {
+		thread::XdevLScopeLock lock(m_mutex);
+
 		for(auto& device : m_joystickDevices) {
 			js_event event;
-			int size = read(device->fd, &event, sizeof(js_event));
+			ssize_t size = read(device.second->fd, &event, sizeof(js_event));
+			if(-1 == size) {
 
-			m_mutex.Lock();
+			}
 
 			switch(event.type) {
 				case JS_EVENT_INIT: {
@@ -260,16 +329,15 @@ namespace xdl {
 				}
 				break;
 				case JS_EVENT_AXIS: {
-					sendAxisEvent(device->joystickid, wrapLinuxAxisToXdevLAxis(event.number), event.value);
+					sendAxisEvent(device.second->joystickid, wrapLinuxAxisToXdevLAxis(event.number), event.value);
 				}
 				break;
 				case JS_EVENT_BUTTON: {
-					sendButtonEvent(device->joystickid, wrapLinuxButtonToXdevLButton(event.number), (event.value > 0) ? xdl_true : xdl_false);
+					sendButtonEvent(device.second->joystickid, wrapLinuxButtonToXdevLButton(event.number), (event.value > 0) ? xdl_true : xdl_false);
 				}
 				break;
 
 			}
-			m_mutex.Unlock();
 		}
 		return ERR_OK;
 	}
@@ -319,7 +387,7 @@ namespace xdl {
 			return ERR_OK;
 		}
 
-		while(root != NULL) {
+		while(root != nullptr) {
 
 			// Does the user specified the id of the module?
 			if(root->Attribute("id")) {
@@ -330,8 +398,8 @@ namespace xdl {
 				if(getID() == id) {
 					TiXmlElement* child = nullptr;
 					for(child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
-						if(root->Attribute("Device"))
-							m_device = XdevLString(root->Attribute("Device"));
+//						if(root->Attribute("Device"))
+//							m_device = XdevLString(root->Attribute("Device"));
 					}
 				}
 			}
@@ -347,20 +415,145 @@ namespace xdl {
 	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(xdl_uint16 joystickid) {
 		XdevLJoystickDeviceInfo info;
 
+		std::stringstream tmp("/dev/input/js");
+		tmp << joystickid;
+
 		//
 		// Only fill out info it the id does not exceed the real number of joysticks
 		// connected.
 		//
-		if(joystickid < m_joystickDevices.size()) {
-			auto it = m_joystickDevices.begin();
-			std::advance(it, joystickid);
+		auto deviceInfo = m_joystickDevices.at(tmp.str());
 
-			info.name = (*it)->name;
-			info.joystickid = (*it)->joystickid;
-			info.numberOfAxes = (*it)->numberOfAxes;
-			info.numberOfButtons = (*it)->numberOfButtons;
-		}
+		info.name = deviceInfo->name;
+		info.joystickid = deviceInfo->joystickid;
+		info.numberOfAxes = deviceInfo->numberOfAxes;
+		info.numberOfButtons = deviceInfo->numberOfButtons;
 
 		return std::move(info);
 	}
+
+	void XdevLJoystickServerLinux::removeJoystick(const std::string& path) {
+		thread::XdevLScopeLock lock(m_mutex);
+
+		auto it = m_joystickDevices.find(path);
+		if(it != m_joystickDevices.end()) {
+			m_joystickDevices.erase(it);
+		}
+	}
+
+//
+// UDEV stuff to detected plug/unlug of joysticks.
+//
+
+#if XDEVL_USE_UDEV
+	xdl_int XdevLJoystickServerLinuxUDev::init() {
+
+		udev = udev_new();
+		if (!udev) {
+			std::cerr << "Can't create udev" << std::endl;
+			return xdl::ERR_ERROR;
+		}
+
+		//
+		// Add listener for plug/unplug
+		//
+		mon = udev_monitor_new_from_netlink(udev, "udev");
+		udev_monitor_filter_add_match_subsystem_devtype(mon, "input", nullptr);
+		udev_monitor_enable_receiving(mon);
+		fd = udev_monitor_get_fd(mon);
+//
+//		//
+//		// Lets enumerate through all inputs
+//		//
+//		enumerate = udev_enumerate_new(udev);
+//		udev_enumerate_add_match_subsystem(enumerate, "hidraw");
+//		udev_enumerate_scan_devices(enumerate);
+//		devices = udev_enumerate_get_list_entry(enumerate);
+//		udev_list_entry_foreach(dev_list_entry, devices) {
+//			const char *path;
+//			path = udev_list_entry_get_name(dev_list_entry);
+//			dev = udev_device_new_from_syspath(udev, path);
+//			dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+//			if (!dev) {
+//				printf("Unable to find parent usb device.");
+//				return xdl::ERR_OK;
+//			}
+//			printf("  VID/PID: %s %s\n", udev_device_get_sysattr_value(dev,"idVendor"), udev_device_get_sysattr_value(dev, "idProduct"));
+//			printf("  %s\n  %s\n", udev_device_get_sysattr_value(dev,"manufacturer"), udev_device_get_sysattr_value(dev,"product"));
+//			printf("  serial: %s\n", udev_device_get_sysattr_value(dev, "serial"));
+//			printf(" SysName: %s\n", udev_device_get_devnode(dev));
+//		}
+
+		Start();
+
+		return ERR_OK;
+	}
+
+	xdl_int XdevLJoystickServerLinuxUDev::shutdown() {
+		udev_enumerate_unref(enumerate);
+		udev_device_unref(dev);
+		udev_unref(udev);
+		return ERR_OK;
+	}
+
+
+	xdl_int XdevLJoystickServerLinuxUDev::RunThread(thread::ThreadArgument*) {
+		for(;;) {
+			fd_set fds;
+			struct timeval tv;
+			int ret;
+
+			FD_ZERO(&fds);
+			FD_SET(fd, &fds);
+			tv.tv_sec = 0;
+			tv.tv_usec = 0;
+
+			ret = select(fd+1, &fds, nullptr, nullptr, &tv);
+			if (ret > 0 && FD_ISSET(fd, &fds)) {
+				dev = udev_monitor_receive_device(mon);
+				if (dev) {
+
+					std::string node;
+					std::string action;
+					const xdl_char* nodeptr = udev_device_get_devnode(dev);
+					if(nodeptr != nullptr) {
+						node = std::string(udev_device_get_devnode(dev));
+					}
+
+					const xdl_char* actionptr = udev_device_get_action(dev);
+					if(nullptr != actionptr) {
+						action = std::string(udev_device_get_action(dev));
+					}
+
+					std::cout << node << std::endl;
+
+					std::size_t pos = node.find("js");
+					if(pos != std::string::npos) {
+						std::cout << "XdevLJoystickServerLinuxUDev:: Joystick device = " << node.substr(pos + 2, std::string::npos) << " got";
+						if(action == "add") {
+							std::cout << " added.";
+						} else if(action == "remove") {
+							std::cout << " removed.";
+						}
+						std::cout << std::endl;
+						
+						if(nullptr != joystickServerLinux) {
+							if(action == "add") {
+								joystickServerLinux->addJoystick(node);
+							} else if( action == "remove") {
+								joystickServerLinux->removeJoystick(node);
+							}
+						}
+					}
+					udev_device_unref(dev);
+				} else {
+					printf("No Device from receive_device(). An error occured.\n");
+				}
+			}
+			usleep(250*1000);
+		}
+		return 0;
+	}
+#endif
+
 }
