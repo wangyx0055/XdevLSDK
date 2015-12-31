@@ -234,7 +234,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickServerLinux::addJoystick(const std::string& path) {
-
 		thread::XdevLScopeLock lock(m_mutex);
 
 		auto it = m_joystickDevices.find(path);
@@ -253,10 +252,15 @@ namespace xdl {
 			return ERR_ERROR;
 		} 
 		m_joystickDevices[joystickInfo->device] = joystickInfo;
+
 		return ERR_OK;
 	}
 
 	XdevLJoystickDeviceInfoLinux* XdevLJoystickServerLinux::getJoystickInfo(xdl_int fd, const std::string& path) {
+		
+		//
+		// Get information of the joystick device.
+		//
 		char name[128];
 		if (ioctl(fd, JSIOCGNAME(sizeof(name)), name) < 0) {
 			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
@@ -278,6 +282,9 @@ namespace xdl {
 		}
 		XDEVL_MODULE_INFO("Number of buttons: " << numberOfButtons << "\n");
 
+		//
+		// Extract the number as identification code.
+		//
 		size_t pos = path.find_first_of("js");
 		if(pos == std::string::npos) {
 			return nullptr;
@@ -286,6 +293,9 @@ namespace xdl {
 		xdl_uint joystickid;
 		ss >> joystickid;
 
+		//
+		// Create the info structure.
+		//
 		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
 		devInfo->joystickid = joystickid;
 		devInfo->fd = fd;
