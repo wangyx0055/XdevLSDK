@@ -52,10 +52,10 @@ class MyClassThatHandlesInput {
 			//
 			// Uncomment this part to use delegates that handles all input events.
 			//
-			
+
 //			buttonDelegate = xdl::XdevLButtonDelegateType::Create<MyClassThatHandlesInput, &MyClassThatHandlesInput::buttonDelegateHandler>(this);
 //			axisDelegate = xdl::XdevLAxisDelegateType::Create<MyClassThatHandlesInput, &MyClassThatHandlesInput::axisDelegateHandler>(this);
-//			
+//
 //			mouse->registerDelegate(buttonDelegate);
 //			mouse->registerDelegate(axisDelegate);
 //			joystick->registerDelegate(buttonDelegate);
@@ -91,7 +91,7 @@ class MyClassThatHandlesInput {
 		void button_f10_handler(const xdl::XdevLButtonState& state) {
 			std::cout << "F10 was " << (state == xdl::BUTTON_PRESSED ? "pressed" : "released") << std::endl;
 		}
-		
+
 	private:
 		xdl::XdevLButtonDelegateType buttonDelegate;
 		xdl::XdevLAxisDelegateType axisDelegate;
@@ -114,26 +114,37 @@ int main(int argc, char* argv[]) {
 
 	// Create a window because we can use keyboard/mouse only if we have one (hopefully will be fixed in later versions of XdevL).
 	xdl::IPXdevLWindow window = xdl::createModule<xdl::IPXdevLWindow>(core, xdl::XdevLModuleName("XdevLWindow"), xdl::XdevLID("MyWindow"));
-	if(nullptr == window) {
+	if(xdl::isModuleNotValid(window)) {
 		return xdl::ERR_ERROR;
 	}
-	
+
 	window->create();
-	
+
 	// Create the keyboard module to get access to the keyboard device.
 	xdl::IPXdevLKeyboard keyboard = xdl::createModule<xdl::IPXdevLKeyboard>(core, xdl::XdevLModuleName("XdevLKeyboard"), xdl::XdevLID("MyKeyboard"));
-	if(nullptr == keyboard)
+	if(xdl::isModuleNotValid(keyboard))
 		return xdl::ERR_ERROR;
 
 	// Create the mouse module to get access to the mouse device.
 	xdl::IPXdevLMouse mouse = xdl::createModule<xdl::IPXdevLMouse>(core, xdl::XdevLModuleName("XdevLMouse"), xdl::XdevLID("MyMouse"));
-	if(nullptr == mouse)
+	if(xdl::isModuleNotValid(mouse))
 		return xdl::ERR_ERROR;
+
+	xdl::IPXdevLJoystickServer joystickServer = xdl::createModule<xdl::IPXdevLJoystickServer>(core, xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("MyJoystickServer"));
+	if(xdl::isModuleNotValid(joystickServer)) {
+		return xdl::ERR_ERROR;
+	}
 
 	// Create the joystick module to get access to the joystick device.
 	xdl::IPXdevLJoystick joystick = xdl::createModule<xdl::IPXdevLJoystick>(core, xdl::XdevLModuleName("XdevLJoystick"), xdl::XdevLID("MyJoystick"));
-	if(nullptr == joystick)
+	if(xdl::isModuleNotValid(joystick)) {
 		return xdl::ERR_ERROR;
+	}
+
+	if(joystickServer->getNumJoysticks() > 0) {
+		std::cout << "Found Joystick: " << joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT).name << std::endl;
+		joystick->create(joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT));
+	}
 
 	//
 	// Attach all input modules to the window.
@@ -212,7 +223,7 @@ int main(int argc, char* argv[]) {
 	if(keyboard->getButton(xdl::KEY_ESCAPE, &escape) != xdl::ERR_OK) {
 		return xdl::ERR_ERROR;
 	}
-	
+
 	window->show();
 
 	//

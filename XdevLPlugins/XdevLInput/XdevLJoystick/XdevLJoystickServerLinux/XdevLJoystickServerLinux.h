@@ -82,7 +82,7 @@ namespace xdl {
 
 
 			virtual xdl_uint getNumJoysticks();
-			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid);
+			virtual XdevLJoystickDeviceInfo getJoystickInfo(const XdevLJoystickId& joystickid);
 
 			virtual xdl_int notify(XdevLEvent& event);
 			virtual void* getInternal(const XdevLInternalName& id);
@@ -99,8 +99,8 @@ namespace xdl {
 
 			xdl_int pollEvents();
 			xdl_int reset();
-			void sendButtonEvent(xdl_uint16 joystickid, xdl_int buttonID, xdl_bool pressed);
-			void sendAxisEvent(xdl_uint16 joystickid, xdl_uint8 axisID, xdl::xdl_int16 value);
+			void sendButtonEvent(const XdevLJoystickId& joystickid, xdl_int buttonID, xdl_bool pressed);
+			void sendAxisEvent(const XdevLJoystickId& joystickid, xdl_uint8 axisID, xdl::xdl_int16 value);
 			xdl_int readJoystickInfo(TiXmlDocument& document);
 		private:
 			thread::Mutex m_mutex;

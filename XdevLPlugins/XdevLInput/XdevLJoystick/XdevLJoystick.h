@@ -26,6 +26,32 @@
 namespace xdl {
 
 	/**
+		@enum XdevLJoystickId
+		@brief Joystick device IDs
+		@author Cengiz Terzibas
+	*/
+	enum class XdevLJoystickId {
+		JOYSTICK_0 = 0,
+		JOYSTICK_DEFAULT = 0,
+		JOYSTICK_1,
+		JOYSTICK_2,
+		JOYSTICK_3,
+		JOYSTICK_4,
+		JOYSTICK_5,
+		JOYSTICK_6,
+		JOYSTICK_7,
+		JOYSTICK_8,
+		JOYSTICK_9,
+		JOYSTICK_10,
+		JOYSTICK_11,
+		JOYSTICK_12,
+		JOYSTICK_13,
+		JOYSTICK_14,
+		JOYSTICK_15,
+		JOYSTICK_UNKNOWN
+	};
+	
+	/**
 		@class XdevLJoystickDeviceInfo
 		@brief Structure that holds joystick information for the joystick server.
 		@author Cengiz Terzibas
@@ -33,15 +59,31 @@ namespace xdl {
 	struct XdevLJoystickDeviceInfo {
 		XdevLJoystickDeviceInfo() :
 			name(""),
-			joystickid(0),
+			joystickid(XdevLJoystickId::JOYSTICK_DEFAULT),
 			numberOfAxes(0),
 			numberOfButtons(0) {}
+
+		const XdevLString& getName() const {
+			return name;
+		}
+
+		XdevLJoystickId getJoystickId() const {
+			return joystickid;
+		}
+
+		xdl_uint8 getNumberOfAxes() const {
+			return numberOfAxes;
+		}
+
+		xdl_uint8 getNumberOfButtons() const {
+			return numberOfButtons;
+		}
 
 		/// Name of the joystick.
 		XdevLString name;
 
 		/// Identification code for the joystick that is used when send joystick events.
-		xdl_uint16 joystickid;
+		XdevLJoystickId joystickid;
 
 		/// Number of axes supported by this joystick device.
 		xdl_uint8 numberOfAxes;
@@ -70,7 +112,7 @@ namespace xdl {
 			 * @return If successful it will return a XdevLJoystickDeviceInfo filled with a valid name.
 			 * Otherwise the name field will be empty.
 			 */
-			virtual XdevLJoystickDeviceInfo getJoystickInfo(xdl_uint16 joystickid) = 0;
+			virtual XdevLJoystickDeviceInfo getJoystickInfo(const XdevLJoystickId& joystickid) = 0;
 	};
 
 

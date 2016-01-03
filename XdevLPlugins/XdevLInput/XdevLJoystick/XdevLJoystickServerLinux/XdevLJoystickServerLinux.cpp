@@ -83,6 +83,53 @@ namespace xdl {
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
 	static xdl_uint16 joystickID = 0;
 
+	xdl_uint16 wrapJoystickIdToInteger(const XdevLJoystickId& id) {
+		switch(id) {
+			case XdevLJoystickId::JOYSTICK_0: return 0;
+			case XdevLJoystickId::JOYSTICK_1: return 1;
+			case XdevLJoystickId::JOYSTICK_2: return 2;
+			case XdevLJoystickId::JOYSTICK_3: return 3;
+			case XdevLJoystickId::JOYSTICK_4: return 4;
+			case XdevLJoystickId::JOYSTICK_5: return 5;
+			case XdevLJoystickId::JOYSTICK_6: return 6;
+			case XdevLJoystickId::JOYSTICK_7: return 7;
+			case XdevLJoystickId::JOYSTICK_8: return 8;
+			case XdevLJoystickId::JOYSTICK_9: return 9;
+			case XdevLJoystickId::JOYSTICK_10: return 10;
+			case XdevLJoystickId::JOYSTICK_11: return 11;
+			case XdevLJoystickId::JOYSTICK_12: return 12;
+			case XdevLJoystickId::JOYSTICK_13: return 13;
+			case XdevLJoystickId::JOYSTICK_14: return 14;
+			case XdevLJoystickId::JOYSTICK_15: return 15;
+			default:
+			break;
+		}
+		return 0;
+	}
+
+	XdevLJoystickId wrapIntegerToJoystickId(xdl_uint16 id) {
+		switch(id) {
+			case 0: return XdevLJoystickId::JOYSTICK_0;
+			case 1: return XdevLJoystickId::JOYSTICK_1;
+			case 2: return XdevLJoystickId::JOYSTICK_2;
+			case 3: return XdevLJoystickId::JOYSTICK_3;
+			case 4: return XdevLJoystickId::JOYSTICK_4;
+			case 5: return XdevLJoystickId::JOYSTICK_5;
+			case 6: return XdevLJoystickId::JOYSTICK_6;
+			case 7: return XdevLJoystickId::JOYSTICK_7;
+			case 8: return XdevLJoystickId::JOYSTICK_8;
+			case 9: return XdevLJoystickId::JOYSTICK_9;
+			case 10: return XdevLJoystickId::JOYSTICK_10;
+			case 11: return XdevLJoystickId::JOYSTICK_11;
+			case 12: return XdevLJoystickId::JOYSTICK_12;
+			case 13: return XdevLJoystickId::JOYSTICK_13;
+			case 14: return XdevLJoystickId::JOYSTICK_14;
+			case 15: return XdevLJoystickId::JOYSTICK_15;
+			default:
+			break;
+		}
+		return XdevLJoystickId::JOYSTICK_UNKNOWN;
+	}
 
 	XdevLButtonId wrapLinuxButtonToXdevLButton(xdl_uint8 button) {
 		switch(button) {
@@ -297,7 +344,7 @@ namespace xdl {
 		// Create the info structure.
 		//
 		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
-		devInfo->joystickid = joystickid;
+		devInfo->joystickid = wrapIntegerToJoystickId(joystickid);
 		devInfo->fd = fd;
 		devInfo->device = path;
 		devInfo->name = XdevLString(name);
@@ -370,22 +417,22 @@ namespace xdl {
 		return 0;
 	}
 
-	void XdevLJoystickServerLinux::sendButtonEvent(xdl_uint16 joystickid, xdl_int buttonID, xdl_bool pressed) {
+	void XdevLJoystickServerLinux::sendButtonEvent(const XdevLJoystickId& joystickid, xdl_int buttonID, xdl_bool pressed) {
 		XdevLEvent ev;
-		ev.common.timestamp	= getMediator()->getTimer().getTime64();
-		ev.type 						= pressed ? JoystickButtonPressed.getHashCode() : JoystickButtonReleased.getHashCode();
-		ev.jbutton.joystickid = joystickid;
-		ev.jbutton.buttonid	= buttonID;
+		ev.common.timestamp		= getMediator()->getTimer().getTime64();
+		ev.type 							= pressed ? JoystickButtonPressed.getHashCode() : JoystickButtonReleased.getHashCode();
+		ev.jbutton.joystickid	= wrapJoystickIdToInteger(joystickid);
+		ev.jbutton.buttonid		= buttonID;
 		getMediator()->fireEvent(ev);
 	}
 
-	void XdevLJoystickServerLinux::sendAxisEvent(xdl_uint16 joystickid, xdl_uint8 axisID, xdl::xdl_int16 value) {
+	void XdevLJoystickServerLinux::sendAxisEvent(const XdevLJoystickId& joystickid, xdl_uint8 axisID, xdl::xdl_int16 value) {
 		XdevLEvent ev;
 		ev.common.timestamp	= getMediator()->getTimer().getTime64();
-		ev.type 				= JoystickMotion.getHashCode();
-		ev.jbutton.joystickid = joystickid;
-		ev.jaxis.axisid		= axisID;
-		ev.jaxis.value	= (xdl_int32)value;
+		ev.type 							= JoystickMotion.getHashCode();
+		ev.jbutton.joystickid	= wrapJoystickIdToInteger(joystickid);
+		ev.jaxis.axisid				= axisID;
+		ev.jaxis.value				= (xdl_int32)value;
 		getMediator()->fireEvent(ev);
 	}
 
@@ -422,11 +469,11 @@ namespace xdl {
 		return m_joystickDevices.size();
 	}
 
-	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(xdl_uint16 joystickid) {
+	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(const XdevLJoystickId& joystickid) {
 		XdevLJoystickDeviceInfo info;
 
 		std::stringstream tmp;
-		tmp << "/dev/input/js" << joystickid;
+		tmp << "/dev/input/js" << (xdl_int)joystickid;
 
 		auto it = m_joystickDevices.find(tmp.str());
 		if(it == m_joystickDevices.end()) {

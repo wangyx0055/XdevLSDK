@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
 	// And use that info to connect to the joystick device we want.
 	//
-	xdl::XdevLJoystickDeviceInfo info = joystickServer->getJoystickInfo(0);
+	xdl::XdevLJoystickDeviceInfo info = joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
 	joystick->create(info);
 
 	//

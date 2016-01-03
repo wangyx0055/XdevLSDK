@@ -140,7 +140,7 @@ namespace xdl {
 							std::cerr << "NO Joystick found.\n";
 						} else {
 							if(m_joystickServer->getNumJoysticks() > 0) {
-								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(0);
+								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
 								m_joystick->create(joyDevInfo);
 							}
 						}
@@ -188,7 +188,7 @@ namespace xdl {
 							std::cerr << "NO Joystick found.\n";
 						} else {
 							if(m_joystickServer->getNumJoysticks() > 0) {
-								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(0);
+								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(XdevLJoystickId::JOYSTICK_DEFAULT);
 								m_joystick->create(joyDevInfo);
 							}
 						}

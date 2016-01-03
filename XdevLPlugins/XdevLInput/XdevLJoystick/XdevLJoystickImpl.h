@@ -22,7 +22,6 @@
 
 #include <XdevLPluginImpl.h>
 #include <XdevLListener.h>
-#include <XdevLThread.h>
 #include <XdevLMutex.h>
 #include <XdevLConditionalVariable.h>
 #include <XdevLInputSystemUtils.h>
@@ -69,16 +68,11 @@ namespace xdl {
 		"XdevLJoystick"
 	};
 	static const XdevLString joystick_description {
-		"Gives you access to joystick devices elements."
+		"Class that helps you to handle Controller events with ease."
 	};
 	static const std::vector<XdevLModuleName> joystick_moduleNames {
 		XdevLModuleName("XdevLJoystick")
 	};
-
-	const xdl_uint  JOYSTICK_MAX_AXES			= 15;
-	const xdl_uint	JOY_MAX_POV					= 4;
-	const xdl_float JOYSTICK_MINMAX_AXIS_VALUE	= 32768.0f;
-	const xdl_float JOYSTICK_MINMAX_DOUBLE_AXIS_VALUE = JOYSTICK_MINMAX_AXIS_VALUE*2.0f;
 
 	typedef XdevLButtonImpl XdevLJoystickButtonImpl;
 	typedef XdevLAxisImpl XdevLJoystickAxisImpl;
@@ -91,34 +85,22 @@ namespace xdl {
 
 
 	template<typename T>
-	class XdevLJoystickBase : public XdevLModuleImpl<T>, public thread::Thread {
+	class XdevLJoystickBase : public XdevLModuleImpl<T> {
 		public:
 			XdevLJoystickBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 				XdevLModuleImpl<T>(parameter, descriptor),
-				m_POV(nullptr),
 				m_joy_button_down(false),
 				m_joy_moved(false),
 				m_joy_curr_x(0),
 				m_joy_curr_y(0),
 				m_joy_old_x(0),
 				m_joy_old_y(0),
-				m_relativeMode(xdl_false),
-				m_vendor(""),
-				m_attached(false),
-				m_threaded(false),
-				m_sleep(0.001) {
-
-
-				for(xdl_uint a = 0; a != JOYSTICK_MAX_AXES ; ++a) {
-					m_center[a] = 0.0f;
-				}
-
+				m_relativeMode(xdl_false) {
 			}
 
 			virtual ~XdevLJoystickBase() {}
 
 		protected:
-			xdl_int RunThread(thread::ThreadArgument* p_arg);
 			xdl_int readJoystickXmlInfoPre(TiXmlDocument& document, const xdl_char* moduleName);
 			xdl_int readJoystickXmlInfo(TiXmlDocument& document, const xdl_char* moduleName);
 			xdl_int notify(XdevLEvent& event);
@@ -137,9 +119,10 @@ namespace xdl {
 
 			xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo);
 
-	protected:
+		protected:
+
 			XdevLJoystickDeviceInfo m_joystickDeviceInfo;
-			XdevLJoystickPOVImpl*	m_POV;
+
 			xdl_bool				m_joy_button_down;
 			xdl_bool				m_joy_moved;
 			xdl_int					m_joy_curr_x;
@@ -147,20 +130,13 @@ namespace xdl {
 			xdl_int					m_joy_old_x;
 			xdl_int					m_joy_old_y;
 			xdl_bool				m_relativeMode;
-			std::string			m_vendor;
-			xdl_bool				m_attached;
-			xdl_bool				m_threaded;
-			xdl_double			m_sleep;
 			thread::Mutex		m_mutex;
-			xdl_float				m_center[JOYSTICK_MAX_AXES];
-			std::vector<XdevLJoystickButtonImpl*> 	m_Buttons;
-			std::vector<XdevLJoystickAxisImpl*>		m_Axes;
-			thread::Mutex				m_replyMutex;
-			thread::ConditionalVariable	m_replyCondVariable;
-			std::vector<XdevLButtonDelegateType> m_buttonDelegates;
-			std::vector<XdevLAxisDelegateType> m_axisDelegates;
+			std::vector<XdevLJoystickButtonImpl*> m_Buttons;
+			std::vector<XdevLJoystickAxisImpl*> m_Axes;
+			std::vector<XdevLButtonDelegateType>										m_buttonDelegates;
+			std::vector<XdevLAxisDelegateType>											m_axisDelegates;
 			std::multimap<XdevLButtonId, XdevLButtonIdDelegateType> m_buttonIdDelegates;
-			std::multimap<XdevLAxisId, XdevLAxisIdDelegateType> m_axisIdDelegates;
+			std::multimap<XdevLAxisId, XdevLAxisIdDelegateType>			m_axisIdDelegates;
 	};
 
 	template<typename T>
@@ -226,22 +202,6 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_bool XdevLJoystickBase<T>::getAttached() {
-		xdl_bool tmp;
-		m_mutex.Lock();
-		tmp = m_attached;
-		m_mutex.Unlock();
-		return tmp;
-	}
-
-	template<typename T>
-	void XdevLJoystickBase<T>::setAttached(xdl_bool state) {
-		m_mutex.Lock();
-		m_attached = state;
-		m_mutex.Unlock();
-	}
-
-	template<typename T>
 	xdl_int XdevLJoystickBase<T>::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
 		m_joystickDeviceInfo = joystickDeviceInfo;
 
@@ -251,10 +211,6 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::init() {
-		if(getAttached()) {
-			setAttached(false);
-			Join();
-		}
 
 		if(this->getMediator()->getXmlFilename()) {
 			TiXmlDocument xmlDocument;
@@ -271,9 +227,6 @@ namespace xdl {
 
 		initializeButtonsAndAxisArrays();
 
-		m_POV = new XdevLJoystickPOVImpl(&m_mutex);
-
-		setAttached(true);
 		return ERR_OK;
 	}
 
@@ -285,16 +238,10 @@ namespace xdl {
 			delete m_Buttons[a];
 		for(size_t a = 0; a < m_Axes.size(); ++a)
 			delete m_Axes[a];
-		delete m_POV;
 
 		m_Buttons.clear();
 		m_Axes.clear();
 
-		setAttached(false);
-
-		// Wait unit the thread has finished his job.
-		if(m_threaded)
-			Join();
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
@@ -312,19 +259,7 @@ namespace xdl {
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::notify(XdevLEvent& event) {
 
-		if(event.type == XDEVL_JOYSTICK_RPLY_DEVICES_INFO) {
-			std::cout <<
-			          "Devices: " << event.jdeviceinfo.number_devices << std::endl <<
-			          "Buttons: " << event.jdeviceinfo.number_buttons << std::endl <<
-			          "Axis: " << event.jdeviceinfo.number_axis << std::endl;
-
-			// TODO To do this here will lead to corrupt pointers aquired by getButton, getAxis...
-			//  m_numAxis = event.jdeviceinfo.number_axis;
-			//  m_numButtons = event.jdeviceinfo.number_buttons;
-			//  initializeButtonsAndAxisArrays();
-
-			m_replyCondVariable.signal();
-		} else if(event.type == JoystickButtonPressed.getHashCode()) {
+		if(event.type == JoystickButtonPressed.getHashCode()) {
 			xdl_int idx = event.jbutton.buttonid;
 			if(idx > m_Buttons.size() - 1) {
 				// Not supported button.
@@ -404,8 +339,6 @@ namespace xdl {
 				delegate(m_Axes[event.jaxis.axisid]->getValue());
 			}
 
-		} else if(event.type == XDEVL_JOYSTICK_POV) {
-			m_POV->setDirection(event.jpov.direction);
 		}
 
 		return XdevLModuleImpl<T>::notify(event);
@@ -421,17 +354,6 @@ namespace xdl {
 
 		return ERR_OK;
 	}
-
-	template<typename T>
-	xdl_int XdevLJoystickBase<T>::RunThread(thread::ThreadArgument*) {
-		XDEVL_MODULE_INFO("Starting threading mode.\n");
-		while(getAttached()) {
-			update();
-			sleep(m_sleep);
-		}
-		return 0;
-	}
-
 
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::readJoystickXmlInfoPre(TiXmlDocument& document, const xdl_char* moduleName) {
@@ -451,10 +373,6 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
-		if(root->Attribute("vendor")) {
-			m_vendor = root->Attribute("vendor");
-			XDEVL_MODULE_INFO("Request for Joystick Vendor: " << m_vendor << "\n");
-		}
 		return ERR_OK;
 	}
 
@@ -496,16 +414,6 @@ namespace xdl {
 			for(size_t a = 0; a < m_Axes.size(); ++a)
 				m_Axes[a]->setMax(max);
 		}
-
-		// Is there threading request?
-		if(root->Attribute("thread")) {
-			m_threaded = xstd::from_string<xdl_bool>(root->Attribute("thread"));
-		}
-		// Any sleep time information?
-		if(root->Attribute("sleep")) {
-			m_sleep = xstd::from_string<xdl_double>(root->Attribute("sleep"));
-		}
-
 
 		TiXmlElement* child = 0;
 		for(child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {

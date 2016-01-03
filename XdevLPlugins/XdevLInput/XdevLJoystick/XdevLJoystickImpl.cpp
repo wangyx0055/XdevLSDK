@@ -149,7 +149,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickImpl::getButton(const xdl_uint idx, XdevLButton** button) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 
 		if(getNumButtons() == 0) {
 			*button = NULL;
@@ -164,7 +163,7 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickImpl::getAxis(const xdl_uint idx, XdevLAxis** axis) const {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
+
 		if(getNumAxis() == 0) {
 			*axis = NULL;
 			return ERR_ERROR;
@@ -178,77 +177,57 @@ namespace xdl {
 	}
 
 	xdl_int XdevLJoystickImpl::getPOV(const xdl_uint idx, XdevLPOV** pov) const {
-		if(getNumAxis() == 0) {
-			*pov = NULL;
-			return ERR_ERROR;
-		}
-		if((idx >= getNumAxis())) {
-			*pov = NULL;
-			return ERR_ERROR;
-		}
-		*pov = m_POV;
+		*pov = nullptr;
 		return ERR_OK;
 	}
 
 
 	xdl_bool XdevLJoystickImpl::getPressed(const xdl_uint key) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Buttons[key]->getPressed();
 	}
 
 	xdl_bool XdevLJoystickImpl::getClicked(const xdl_uint key) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Buttons[key]->getClicked();
 	}
 
 	void XdevLJoystickImpl::setClickResponseTimeForAll(xdl_double crt) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		for(xdl_uint a = 0; a < m_Buttons.size(); ++a)
 			m_Buttons[a]->setClickResponseTime(crt);
 	}
 
 	void XdevLJoystickImpl::setClickResponseTime(const xdl_uint key, xdl_double crt) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		m_Buttons[key]->setClickResponseTime(crt);
 	}
 
 	xdl_double XdevLJoystickImpl::getClickResponseTime(const xdl_uint key) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Buttons[key]->getClickResponseTime();
 	}
 
 	xdl_float XdevLJoystickImpl::getValue(const xdl_uint axis) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Axes[axis]->getValue();
 	}
 
 	void XdevLJoystickImpl::setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		m_Axes[axis]->setMinMax(min, max);
 	}
 
 	void XdevLJoystickImpl::setAxisRangeMin(const xdl_uint axis, xdl_float min) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		m_Axes[axis]->setMin(min);
 	}
 
 	void XdevLJoystickImpl::seAxisRangeMax(const xdl_uint axis, xdl_float max) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		m_Axes[axis]->setMax(max);
 	}
 
 	void XdevLJoystickImpl::getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max) {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		m_Axes[axis]->getMinMax(min, max);
 	}
 
 	xdl_float XdevLJoystickImpl::getAxisRangeMin(const xdl_uint axis) const {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Axes[axis]->getMin();
 	}
 
 	xdl_float XdevLJoystickImpl::getAxisRangeMax(const xdl_uint axis) const {
-		XDEVL_ASSERT(m_attached, "Joystick device not attached!");
 		return m_Axes[axis]->getMax();
 	}
 
