@@ -43,7 +43,11 @@ int main(int argc, char **argv) {
 	//
 	// We need info which joysticks are available.
 	//
-	xdl::IPXdevLJoystickServer joystickServer = joystick->getJoystickServer();
+	xdl::IPXdevLJoystickServer joystickServer = xdl::createModule<xdl::IPXdevLJoystickServer>(core, xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("MyJoystickServer"));
+	if(nullptr == joystickServer) {
+	xdl::destroyCore(core);
+		return -1;
+	}
 
 	// And use that info to connect to the joystick device we want.
 	//
@@ -67,7 +71,7 @@ int main(int argc, char **argv) {
 
 	// Start the main loop.
 	for(;;) {
-		core->update();
+	core->update();
 		xdl::sleep(0.001);
 	}
 

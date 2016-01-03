@@ -200,9 +200,6 @@ namespace xdl {
 				@return Returns the current axis position.
 			*/
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
-
-			/// Returns the joystick server.
-			virtual XdevLJoystickServer* getJoystickServer() = 0;
 	};
 
 	typedef XdevLJoystick	IXdevLJoystick;

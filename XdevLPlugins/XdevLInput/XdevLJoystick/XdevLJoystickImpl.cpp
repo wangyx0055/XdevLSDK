@@ -44,20 +44,10 @@ xdl::XdevLPluginDescriptor m_joystickPluginDescriptor {
 	xdl::XdevLJoystickPluginPatchVersion
 };
 
-xdl::XdevLJoystickServer* joystickServer = nullptr;
-
 //
 // Initialize plugin function.
 //
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-
-	if(nullptr == joystickServer) {
-		joystickServer = static_cast<xdl::XdevLJoystickServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("XdevLJoystickServer")));
-		if(nullptr == joystickServer) {
-			return xdl::ERR_ERROR;
-		}
-	}
-
 	return xdl::ERR_OK;
 }
 
@@ -128,10 +118,6 @@ namespace xdl {
 
 	xdl_int XdevLJoystickImpl::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
 		return XdevLJoystickBase<XdevLJoystick>::create(joystickDeviceInfo);
-	}
-	
-	XdevLJoystickServer* XdevLJoystickImpl::getJoystickServer() {
-		return joystickServer;
 	}
 
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {

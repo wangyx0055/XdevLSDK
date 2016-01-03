@@ -107,34 +107,43 @@ namespace xdl {
 
 
 					// Get the window instance.
-					m_window = xdl::getModule<xdl::XdevLWindow*>(getCore(), xdl::XdevLID("MyWindow"));
+					m_window = getModule<XdevLWindow*>(getCore(), XdevLID("MyWindow"));
 					if (!m_window) {
 						throw;
 					}
-					
+
 					m_window->create();
 
-					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
+					m_cursor = getModule<XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
 					if (!m_cursor) {
 						throw;
 					}
 
 					// Get the keyboard instance.
-					m_keyboard = xdl::getModule<xdl::XdevLKeyboard*>(getCore(),  xdl::XdevLID("MyKeyboard"));
+					m_keyboard = getModule<XdevLKeyboard*>(getCore(),  XdevLID("MyKeyboard"));
 					if (!m_keyboard) {
 						throw;
 					}
 
 					// Get the mouse instance.
-					m_mouse = xdl::getModule<xdl::XdevLMouse*>(getCore(),  xdl::XdevLID("MyMouse"));
+					m_mouse = getModule<XdevLMouse*>(getCore(),  XdevLID("MyMouse"));
 					if(!m_mouse) {
 						throw;
 					}
 
-					// Get the joystick instance.
-					m_joystick = xdl::getModule<xdl::XdevLJoystick*>(getCore(),  xdl::XdevLID("MyJoystick"));
-					if(!m_joystick) {
-						std::cerr << "NO Joystick found.\n";
+					// Get the instance of the joystick server module.
+					m_joystickServer = getModule<IPXdevLJoystickServer>(getCore(), XdevLID("MyJoystickServer"));
+					if(isModuleValid(m_joystickServer)) {
+						// Get the instance to the m_keyboard module.
+						m_joystick = getModule<XdevLJoystick*>(getCore(), XdevLID("MyJoystick"));
+						if(!m_joystick) {
+							std::cerr << "NO Joystick found.\n";
+						} else {
+							if(m_joystickServer->getNumJoysticks() > 0) {
+								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(0);
+								m_joystick->create(joyDevInfo);
+							}
+						}
 					}
 
 				} else {
@@ -152,38 +161,48 @@ namespace xdl {
 					//
 
 					// Create an instance of the windows module.
-					m_window = xdl::createModule<xdl::XdevLWindow*>(getCore(), XdevLModuleName("XdevLWindowDevice"), XdevLID("MyWindow"));
+					m_window = createModule<XdevLWindow*>(getCore(), XdevLModuleName("XdevLWindowDevice"), XdevLID("MyWindow"));
 					if(!m_window)
 						throw;
 
-					m_cursor = xdl::getModule<xdl::XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
+					m_cursor = getModule<XdevLCursor*>(getCore(), XdevLID("XdevLCursor"));
 					if(!m_cursor)
 						throw;
 
 					// Create an instance of the keyboard module.
-					m_keyboard = xdl::createModule<xdl::XdevLKeyboard*>(getCore(), XdevLModuleName("XdevLKeyboard"), XdevLID("MyKeyboard"));
+					m_keyboard = createModule<XdevLKeyboard*>(getCore(), XdevLModuleName("XdevLKeyboard"), XdevLID("MyKeyboard"));
 					if(!m_keyboard)
 						throw;
 
 					// Create and instance of the mouse module.
-					m_mouse = xdl::createModule<xdl::XdevLMouse*>(getCore(), XdevLModuleName("XdevLMouse"), XdevLID("MyMouse"));
+					m_mouse = createModule<XdevLMouse*>(getCore(), XdevLModuleName("XdevLMouse"), XdevLID("MyMouse"));
 					if(!m_mouse)
 						throw;
 
-					// Get the instance to the m_keyboard module.
-					m_joystick = xdl::createModule<xdl::XdevLJoystick*>(getCore(), XdevLModuleName("XdevLJoystick"), XdevLID("MyJoystick"));
-					if(!m_joystick) {
-						std::cerr << "NO Joystick found.\n";
+					// Get the instance of the joystick server module.
+					m_joystickServer = createModule<IPXdevLJoystickServer>(getCore(), XdevLModuleName("XdevLJoystickServer"), XdevLID("MyJoystickServer"));
+					if(isModuleValid(m_joystickServer)) {
+						// Get the instance to the m_keyboard module.
+						m_joystick = createModule<XdevLJoystick*>(getCore(), XdevLModuleName("XdevLJoystick"), XdevLID("MyJoystick"));
+						if(!m_joystick) {
+							std::cerr << "NO Joystick found.\n";
+						} else {
+							if(m_joystickServer->getNumJoysticks() > 0) {
+								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(0);
+								m_joystick->create(joyDevInfo);
+							}
+						}
 					}
+
 				}
 
 				// Attach the m_keyboard to the m_window.
-				if(m_keyboard->attach(m_window) != xdl::ERR_OK) {
+				if(m_keyboard->attach(m_window) != ERR_OK) {
 					throw;
 				}
 
 				// Attach the mouse to the m_window.
-				if(m_mouse->attach(m_window) != xdl::ERR_OK) {
+				if(m_mouse->attach(m_window) != ERR_OK) {
 					throw;
 				}
 
@@ -235,22 +254,23 @@ namespace xdl {
 				return m_keyboard;
 			}
 
-			xdl::XdevLMouse* getMouse() {
+			XdevLMouse* getMouse() {
 				return m_mouse;
 			}
 
-			xdl::XdevLJoystick* getJoystick() {
+			XdevLJoystick* getJoystick() {
 				return m_joystick;
 			}
 
 		private:
 
-			xdl::XdevLCore* 		m_core;
-			xdl::XdevLWindow* 		m_window;
-			xdl::XdevLCursor*		m_cursor;
-			xdl::XdevLKeyboard* 	m_keyboard;
-			xdl::XdevLMouse*		m_mouse;
-			xdl::XdevLJoystick*		m_joystick;
+			XdevLCore* 		m_core;
+			XdevLWindow* 		m_window;
+			XdevLCursor*		m_cursor;
+			XdevLKeyboard* 	m_keyboard;
+			XdevLMouse*		m_mouse;
+			IPXdevLJoystickServer m_joystickServer;
+			XdevLJoystick*		m_joystick;
 
 			// Holds the redirected stream file pointer.
 			FILE* rdstream;

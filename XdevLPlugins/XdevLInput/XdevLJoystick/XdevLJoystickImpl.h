@@ -566,7 +566,6 @@ namespace xdl {
 
 			virtual xdl_int init() override;
 			virtual xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) override;
-			virtual XdevLJoystickServer* getJoystickServer() override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);
