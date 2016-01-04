@@ -51,8 +51,7 @@ int main(int argc, char **argv) {
 
 	// And use that info to connect to the joystick device we want.
 	//
-	xdl::XdevLJoystickDeviceInfo info = joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
-	joystick->create(info);
+	joystick->create(joystickServer, xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
 
 	//
 	// Now we use delegates that will help us to managed events. When a specific button or axis is used
