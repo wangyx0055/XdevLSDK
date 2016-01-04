@@ -12,9 +12,9 @@
 xdl::XdevLPluginDescriptor blankPluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
-	xdl::XdevLBlankPluginMajorVersion,
-	xdl::XdevLBlankPluginMinorVersion,
-	xdl::XdevLBlankPluginPatchVersion
+	XDEVLBLANK_MAJOR_VERSION,
+	XDEVLBLANK_MINOR_VERSION,
+	XDEVLBLANK_PATCH_VERSION
 };
 
 xdl::XdevLModuleDescriptor blankModuleDescriptor {
@@ -23,9 +23,9 @@ xdl::XdevLModuleDescriptor blankModuleDescriptor {
 	xdl::moduleNames[0],
 	xdl::copyright,
 	xdl::moduleDescription,
-	xdl::XdevLBlankMajorVersion,
-	xdl::XdevLBlankMinorVersion,
-	xdl::XdevLBlankPatchVersion
+	XDEVLBLANK_MODULE_MAJOR_VERSION,
+	XDEVLBLANK_MODULE_MINOR_VERSION,
+	XDEVLBLANK_MODULE_PATCH_VERSION
 };
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {

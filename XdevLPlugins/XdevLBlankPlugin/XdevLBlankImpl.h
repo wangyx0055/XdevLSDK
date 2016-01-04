@@ -26,26 +26,6 @@
 namespace xdl {
 
 
-	// Holds the plugin major version.
-	const xdl_uint XdevLBlankPluginMajorVersion = XDEVLBLANK_MAJOR_VERSION;
-
-	// Holds the plugin minor version.
-	const xdl_uint XdevLBlankPluginMinorVersion = XDEVLBLANK_MINOR_VERSION;
-
-	// Holds the plugin patch version.
-	const xdl_uint XdevLBlankPluginPatchVersion = XDEVLBLANK_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLBlankMajorVersion = XDEVLBLANK_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLBlankMinorVersion = XDEVLBLANK_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLBlankPatchVersion = XDEVLBLANK_MODULE_PATCH_VERSION;
-
-
 	static const XdevLString vendor {
 		"www.codeposer.net"
 	};
@@ -53,7 +33,7 @@ namespace xdl {
 		"Cengiz Terzibas"
 	};
 	static const XdevLString copyright {
-		"(c) 2005 - 2015 Cengiz Terzibas."
+		"(c) 2005 - 2016 Cengiz Terzibas."
 	};
 	static const XdevLString pluginName {
 		"XdevLBlank"

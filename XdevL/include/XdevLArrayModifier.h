@@ -1,7 +1,7 @@
 /*
         XdevL eXtended DEVice Library.
 
-        Copyright © 2005-2012 Cengiz Terzibas
+        Copyright © 2005-2016 Cengiz Terzibas
 
         This library is free software; you can redistribute it and/or modify it under the
         terms of the GNU Lesser General Public License as published by the Free Software
