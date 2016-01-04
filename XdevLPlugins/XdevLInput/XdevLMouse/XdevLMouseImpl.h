@@ -84,10 +84,10 @@ namespace xdl {
 
 
 	template<typename T>
-	class XdevLMouseBase : public XdevLModuleImpl<T>, public thread::Thread {
+	class XdevLMouseBase : public XdevLModuleAutoImpl<T>, public thread::Thread {
 		public:
 			XdevLMouseBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)	:
-				XdevLModuleImpl<T>(parameter, descriptor),
+				XdevLModuleAutoImpl<T>(parameter, descriptor),
 				m_window(NULL),
 				m_windowWidth(640),
 				m_windowHeight(480),
@@ -110,7 +110,6 @@ namespace xdl {
 			}
 
 		protected:
-			using XdevLModuleImpl<T>::attach;
 
 			// Returns the button id as string.
 			XdevLString getButtonIdAsString(const XdevLButtonId& id);
@@ -283,6 +282,8 @@ namespace xdl {
 		m_mouse_moved_old = m_mouse_moved;
 		m_mouse_moved = xdl_false;
 
+		m_Axes[AXIS_0]->setDeltaValue(0.0f);
+		m_Axes[AXIS_1]->setDeltaValue(0.0f);
 
 		m_mutex.Unlock();
 
@@ -410,7 +411,7 @@ namespace xdl {
 
 		}
 
-		return XdevLModuleImpl<T>::notify(event);
+		return XdevLModuleAutoImpl<T>::notify(event);
 	}
 
 	template<typename T>
@@ -565,8 +566,9 @@ namespace xdl {
 
 			static XdevLModuleDescriptor m_moduleDescriptor;
 
-			virtual xdl_int init();
-			virtual xdl_int shutdown();
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual xdl_int update() override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);

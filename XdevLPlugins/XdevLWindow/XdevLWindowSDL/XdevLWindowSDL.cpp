@@ -1038,29 +1038,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowSDLEventServer::notify(XdevLEvent& event) {
-
-		switch(event.type) {
-			case XDEVL_JOYSTICK_REQ_DEVICES_INFO: {
-				XdevLEvent event;
-				event.type = XDEVL_JOYSTICK_RPLY_DEVICES_INFO;
-				event.jdeviceinfo.sender = this->getID().getHashCode();
-				event.jdeviceinfo.timestamp = this->getMediator()->getTimer().getTime64();
-				event.jdeviceinfo.number_devices = joysticks.size();
-
-				xdl_int i = 0;
-				for(auto& joy : joysticks) {
-					event.jdeviceinfo.number_buttons[i] = joy.numberOfJoystickButtons;
-					event.jdeviceinfo.number_axis[i] = joy.numberOfJoystickAxis;
-					i++;
-					if(i == 4) {
-						break;
-					}
-				}
-				getMediator()->fireEvent(event);
-			}
-			break;
-		}
-
 		return 	XdevLModuleAutoImpl::notify(event);;
 	}
 

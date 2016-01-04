@@ -244,12 +244,6 @@ namespace xdl {
 			}
 		}
 
-		XdevLEvent event;
-		event.jdeviceinfo.type = XDEVL_JOYSTICK_REQ_DEVICES_INFO;
-		event.jdeviceinfo.sender = this->getID().getHashCode();
-		event.jdeviceinfo.timestamp = this->getMediator()->getTime();
-		this->getMediator()->fireEvent(event);
-
 		return ERR_OK;
 	}
 
