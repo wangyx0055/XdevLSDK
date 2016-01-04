@@ -25,7 +25,7 @@ namespace xdl {
 	};
 
 	static const XdevLString copyright {
-		"(c) 2005 - 2015 Cengiz Terzibas."
+		"(c) 2005 - 2016 Cengiz Terzibas."
 	};
 
 	static const XdevLString pluginName {
