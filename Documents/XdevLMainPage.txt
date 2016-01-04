@@ -1,4 +1,4 @@
-﻿/**
+/**
 @mainpage XdevL
 
 @section xdevl_intro Introduction
@@ -10,15 +10,26 @@ of XdevL is managing plug-ins and modules in an easy way. At the moment
 play sounds, check keyboard, mouse and joystick events, render 3D graphics with 
 OGRE or raw OpenGL and sending data over the network using UDP sockets.
 
-@section xdevl_features_2 Additional Features
-The static library of XdevL provides some additional features you may want to use.
+@section xdevl_features Features
 
--# High-Resolution timer xdl::XdevLTimer. 
--# Basic threading support thread::Thread and thread::Mutex.
+-# Uses C++11 standard.
+-# Cross Platform (GNU/Linux, MacOSX and Windows supported. Android and IOS are planed.)
+-# Supports plugins and modules which makes the system extreme expandable and flexible.
+-# Shared memory,Semaphore support using XdevLSharedMemory and XdevLSemaphore class.
+-# Basic threading support thread::Thread and thread::Mutex and thread::ConditionalVariable.
 -# Xml file parsing (it's the tinyxml project http://www.grinninglizard.com/tinyxml/)
 -# Extended string/filename parsing.
--# Basic directory support. It's in the tdir namespace. Be aware of using it. At 
-the moment it is in alpha state.
+-# Support for fast delegates. (Another way of callback functions).
+-# Array manipulators.
+-# Support for different types of control devices like, Keyboard, Mouse and Joystick
+-# Cross platform 3D rendering using XdevLRAI. One implementation is using OpenGL 3.3+ and Vulkan is planned.
+-# Audio playback and record using XdevLAudioPlayback and XdevLAudioCapture.
+-# Bluetooth and Serial port support.
+-# Networking TCP/UDP.
+-# File/Folder handling using XdevLFile, XdevLDirectory and XdevLDirectoryWatcher.
+-# OpenGL context using native version as GLX, WGL, CGL and EGL.
+-# Support for font rendering using XdevLFont and XdevLRAI
+-# Image import support for Jpeg, Png, Bmp and TGA files.
 
 @section xdevl_compiler Supported compiler
 At the moment the following compilers are supported:
@@ -26,14 +37,13 @@ At the moment the following compilers are supported:
 - Visual Studio 2005 + SP1
 - Visual Studio 2005 Express + SP1 + PlatformSDK
 - Visual Studio 2008 + SP1
-- GNU G++ > 4.0 but GNU G++ > 4.2 (recommended)
+- Visual Studio 2010
+- Visual Studio 2012
+- Clang 3.3, 3.5, 3.7
+- GNU Compliler >= 4.8.x
 
 @section xdevl_requirements Requirements
-At the moment XdevL doesn't support standard makefiles. You can use project 
-files for the following development environments:
-	
--# CodeLite (Platform independent). You can download it from here: http://codelite.org/LiteEditor/Download
--# Visual Studio 2005 + SP1
+You need CMake at least 2.8. Create whichever build projects you like.
 
 @section xdevl_usage Usage
 The first question of course is, "What is XdevL?" and after understanding that
@@ -47,9 +57,9 @@ and here is the answer:
 	-# You should check out the demos in the XdevLDemos folder to understand how
 			to use XdevL.
 
-@section sourceforge_source SVN source
+@section sourceforge_source Git source
 The main branch of XdevL is heavily under development. I recommend not using the 
-trunk of this project or you will have troubles later compiling your code. Use 
+master of this project or you will have troubles later compiling your code. Use 
 the release version instead.
 
 @author Cengiz Terzibas

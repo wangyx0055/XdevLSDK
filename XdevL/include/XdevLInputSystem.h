@@ -800,7 +800,7 @@ namespace xdl {
 				A click is an event that starts with a button/key press and ends with a release. The time difference
 				between press and release is called click response time.
 				This method can change the default value which is 300ms.
-				@param crt The click response time in seconds.
+				@param clickResponsteTime The click response time in seconds.
 			*/
 			virtual void setClickResponseTimeForAll(xdl_double clickResponsteTime) = 0;
 
@@ -811,9 +811,9 @@ namespace xdl {
 				This method can change the default value which is 300ms.
 
 				@param button The button identifier .
-				@param crt The click response time in seconds.
+				@param clickResponsteTime The click response time in seconds.
 			*/
-			virtual void setClickResponseTime(const xdl_uint button, xdl_double crt) = 0;
+			virtual void setClickResponseTime(const xdl_uint button, xdl_double clickResponsteTime) = 0;
 
 			/// Returns the click response time for a specific button.
 			/**

@@ -1,7 +1,7 @@
 /*
 	XdevL eXtended DEVice Library.
 
-	Copyright © 2005-2015 Cengiz Terzibas
+	Copyright © 2005-2016 Cengiz Terzibas
 
 	This library is free software; you can redistribute it and/or modify it under the
 	terms of the GNU Lesser General Public License as published by the Free Software
@@ -33,23 +33,26 @@ namespace xdl {
 
 		@code
 
-		void func(int value, float anotherValue) {
+		xdl_float func(xdl_int value, xdl_float anotherValue) {
 			// Do something here.
+			xdl_float value = ...
+			...
+			return value.
 		}
 
 		class MyClass {
 			public:
-			void func(int value) {
+			void func(xdl_int value) {
 				// Do something here.
 			}
 		};
 		MyClass MyClassInstance;
 
 		// Create a delegate for a globally defined function.
-		auto d1 = xdl::XdevLDelegate<void, int, float>::Create<&func>();
+		auto d1 = xdl::XdevLDelegate<xdl_float, xdl_int, xdl_float>::Create<&func>();
 
 		// Create a delegate for a class member.
-		auto d2 = xdl::XdvLDelegate<void, int>::Create<MyClass, &MyClass::func>(&MyClassInstance);
+		auto d2 = xdl::XdvLDelegate<void, xdl_int>::Create<MyClass, &MyClass::func>(&MyClassInstance);
 
 
 		// Using the delegates.
@@ -72,8 +75,10 @@ namespace xdl {
 			/**
 				Use this method to create a delegate for a class member function. See @ref usage.
 
-				@param ReturnType The return type of the class member function.
-				@param Parameters Parameters of the class member function.
+				@tparam ReturnType The return type of the member function.
+				@tparam Parameters The argument parameter types of the member function.
+				@param callee The instance of the class for this memember function. This is usually used when using class members. Here you specify the instance
+				of that class.
 				@return The delegate for the class member function.
 			*/
 			template <typename T, ReturnType(T::*TMethod)(Parameters...)>
@@ -85,8 +90,8 @@ namespace xdl {
 			/**
 				Use this method to create a delegate for a globally defined  function .See @ref usage.
 
-				@param ReturnType The return type of the function.
-				@param Parameters Parameters of the function.
+				@tparam ReturnType The return type of the function.
+				@tparam Parameters The argument parameter types of the function.
 				@return The delegate for the globally defined function.
 			*/
 			template <ReturnType(*TMethod)(Parameters...)>
@@ -94,7 +99,14 @@ namespace xdl {
 				return XdevLDelegate(&methodCaller2<TMethod>);
 			}
 
-			///  Executes the delegate.
+			/// Executes the delegate.
+			/**
+				Use this method to execute a delegate.See @ref usage.
+
+				@tparam ReturnType The return type of the member/function specified in the create method.
+				@tparam Parameters The argument parameter types of the member/function.
+				@return The return value of the member/function.
+			*/
 			ReturnType operator()(Parameters... pm) const {
 				assert(this->m_callbackFunction && "No callback function assigned to Delegate.");
 				return this->m_callbackFunction(m_callee, pm...);
@@ -104,7 +116,7 @@ namespace xdl {
 			bool operator==(const XdevLDelegate& other) const {
 				return (m_callee == other.m_callee) && (m_callbackFunction == other.m_callbackFunction);
 			}
-			
+
 			// Returns if the callback function is valid.
 			xdl_bool isValid() const {
 				return (m_callbackFunction != nullptr);
