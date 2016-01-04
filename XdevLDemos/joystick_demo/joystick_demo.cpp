@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 	xdl::createCore(&core, argc, argv);
 
 	//
-	// Plug the neccessary plugins.
+	// Plug the necessary plugins.
 	//
 	xdl::plug(core, xdl::XdevLPluginName("XdevLJoystickServerLinux"), xdl::XdevLVersion(0, 1, 0));
 	xdl::plug(core, xdl::XdevLPluginName("XdevLJoystick"), xdl::XdevLVersion(1, 0, 0));
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 
 	//
 	// Now we use delegates that will help us to managed events. When a specific button or axis is used
-	// the delegate will call a function/memberfunction that we can use to do some stuff.
+	// the delegate will call a function/member function that we can use to do some stuff.
 	//
 	xdl::XdevLButtonIdDelegateType button0Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton0>();
 	xdl::XdevLButtonIdDelegateType button1Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton1>();
