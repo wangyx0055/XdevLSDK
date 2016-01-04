@@ -1,20 +1,24 @@
 /*
-	XdevL eXtended DEVice Library.
+	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Copyright © 2005-2015 Cengiz Terzibas
+	Permission is hereby granted, free of charge, to any person obtaining a copy of 
+	this software and associated documentation files (the "Software"), to deal in the 
+	Software without restriction, including without limitation the rights to use, copy, 
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
+	and to permit persons to whom the Software is furnished to do so, subject to the 
+	following conditions:
 
-	This library is free software; you can redistribute it and/or modify it under the
-	terms of the GNU Lesser General Public License as published by the Free Software
-	Foundation; either version 2.1 of the License, or (at your option) any later version.
-	This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-	See the GNU Lesser General Public License for more details.
+	The above copyright notice and this permission notice shall be included in all copies 
+	or substantial portions of the Software.
 
-	You should have received a copy of the GNU Lesser General Public License along with
-	this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
-	Suite 330, Boston, MA 02111-1307 USA
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	DEALINGS IN THE SOFTWARE.
 
-	I would appreciate if you report all bugs to: cengiz@terzibas.de
+	cengiz@terzibas.de
 */
 
 #ifndef XDEVL_ERROR_H
@@ -31,65 +35,71 @@ namespace xdl {
 	*/
 	enum XdevLErrorCodes {
 
-	  /// No problem occurred.
-	  ERR_OK = 0,
+	    /// No problem occurred.
+	    ERR_OK = 0,
 
-	  /// Some unspecific error occurred.
-	  ERR_ERROR,
+	    /// Some unspecific error occurred.
+	    ERR_ERROR,
 
-	  /// Plugin not found.
-	  ERR_PLUGIN_NOT_FOUND,
+	    /// Plugin not found.
+	    ERR_PLUGIN_NOT_FOUND,
 
-	  /// Plugin exist already.
-	  ERR_PLUGIN_EXIST_ALREADY,
+	    /// Plugin exist already.
+	    ERR_PLUGIN_EXIST_ALREADY,
 
-	  /// No valid module found.
-	  ERR_MODULE_NOT_FOUND,
+	    /// No valid module found.
+	    ERR_MODULE_NOT_FOUND,
 
-	  /// Module exist already.
-	  ERR_MODULE_EXIST_ALREADY,
+	    /// Module exist already.
+	    ERR_MODULE_EXIST_ALREADY,
 
-	  /// Something unspecific, but fatal.
-	  ERR_FATAL,
+	    /// Something unspecific, but fatal.
+	    ERR_FATAL,
 
-	  /// Device is busy but the core may work correctly.
-	  ERR_DEVICE_BUSY,
+	    /// Device is busy but the core may work correctly.
+	    ERR_DEVICE_BUSY,
 
-	  /// The device does not work at all.
-	  ERR_DEVICE_NOT_WORKING,
+	    /// The device does not work at all.
+	    ERR_DEVICE_NOT_WORKING,
 
-	  /// No memory available.
-	  ERR_OUT_OF_MEMORY,
+	    /// No memory available.
+	    ERR_OUT_OF_MEMORY,
 
-	  /// Input/Output operation failed.
-	  ERR_IO,
+	    /// Input/Output operation failed.
+	    ERR_IO,
 
-	  /// The user has forgotten to specify the main xml filename.
-	  ERR_MAIN_XML_FILE_NOT_SPECIFIED,
+	    /// The user has forgotten to specify the main xml filename.
+	    ERR_MAIN_XML_FILE_NOT_SPECIFIED,
 
-	  /// The main xml file could not be found.
-	  ERR_MAIN_XML_FILE_NOT_FOUND,
+	    /// The main xml file could not be found.
+	    ERR_MAIN_XML_FILE_NOT_FOUND,
 
-	  /// The main xml has a wrong format.
-	  ERR_WRONG_MAIN_XML_FORMAT,
+	    /// The main xml has a wrong format.
+	    ERR_WRONG_MAIN_XML_FORMAT,
 
-	  /// The core plugin could not be found.
-	  ERR_CORE_PLUGIN_NOT_FOUND,
+	    /// The core plugin could not be found.
+	    ERR_CORE_PLUGIN_NOT_FOUND,
 
-	  /// The core plugin could not be loaded.
-	  ERR_CORE_PLUGIN_LOADING_FAILED,
+	    /// The core plugin could not be loaded.
+	    ERR_CORE_PLUGIN_LOADING_FAILED,
 
-	  /// Critical plugin error. The address of a function could not be returned.
-	  ERR_GET_FUNCTION_ADDRESS_FAILED,
+	    /// Critical plugin error. The address of a function could not be returned.
+	    ERR_GET_FUNCTION_ADDRESS_FAILED,
 
-	  /// The core system could not be created.
-	  ERR_CORE_CREATION_FAILED,
+	    /// The core system could not be created.
+	    ERR_CORE_CREATION_FAILED,
 
-	  /// The core system could not be initialized.
-	  ERR_CORE_INITIALIZATION_FAILED,
+	    /// The core system could not be initialized.
+	    ERR_CORE_INITIALIZATION_FAILED,
 
-	  /// Unknown error.
-	  ERR_UNKNOWN
+		/// A buffer overflow happened.
+		ERR_BUFFER_OVERFLOW,
+
+		/// A buffer underflow happend.
+		ERR_BUFFER_UNDERFLOW,
+
+	    /// Unknown error.
+	    ERR_UNKNOWN
 
 	};
 
@@ -109,17 +119,17 @@ namespace xdl {
 			const XdevLString& getDescription() const {
 				return m_description;
 			}
-			
+
 			/// Returns the filename of the error.
 			const XdevLString& getFilename() const {
 				return m_description;
 			}
-			
+
 			/// Returns the error code.
 			XdevLErrorCodes getErrorCode() const {
 				return m_errorCode;
 			}
-			
+
 			/// Returns the line number in the file.
 			xdl_int getLine() const {
 				return m_line;
@@ -137,7 +147,7 @@ namespace xdl {
 			xdl_int					m_line;
 	};
 
-	#define XDEVL_ERROR(CODE, DESC) xdl::XdevLError(CODE, DESC, xdl::XdevLString(__FILE__), __LINE__)
+#define XDEVL_ERROR(CODE, DESC) xdl::XdevLError(CODE, DESC, xdl::XdevLString(__FILE__), __LINE__)
 }
 
 #endif
