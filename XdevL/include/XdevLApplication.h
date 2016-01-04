@@ -140,8 +140,7 @@ namespace xdl {
 							std::cerr << "NO Joystick found.\n";
 						} else {
 							if(m_joystickServer->getNumJoysticks() > 0) {
-								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
-								m_joystick->create(joyDevInfo);
+								m_joystick->create(m_joystickServer, xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
 							}
 						}
 					}
@@ -188,12 +187,10 @@ namespace xdl {
 							std::cerr << "NO Joystick found.\n";
 						} else {
 							if(m_joystickServer->getNumJoysticks() > 0) {
-								XdevLJoystickDeviceInfo joyDevInfo = m_joystickServer->getJoystickInfo(XdevLJoystickId::JOYSTICK_DEFAULT);
-								m_joystick->create(joyDevInfo);
+								m_joystick->create(m_joystickServer, xdl::XdevLJoystickId::JOYSTICK_DEFAULT);
 							}
 						}
 					}
-
 				}
 
 				// Attach the m_keyboard to the m_window.
