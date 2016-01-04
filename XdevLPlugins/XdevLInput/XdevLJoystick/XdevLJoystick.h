@@ -56,6 +56,28 @@ namespace xdl {
 	};
 	
 	/**
+		@enum XdevLGameControllerId
+		@brief Game Controller Id's
+		@author Cengiz Terzibas
+	*/
+	enum class XdevLGameControllerId {
+		CONTROLLER_X,
+		CONTROLLER_Y,
+		CONTROLLER_A,
+		CONTROLLER_B,
+		CONTROLLER_START,
+		CONTROLLER_BACK,
+		CONTROLLER_DPAD_UP,
+		CONTROLLER_DPAD_DOWN,
+		CONTROLLER_DPAD_LEFT,
+		CONTROLLER_DPAD_RIGHT,
+		CONTROLLER_LEFT_SHOULDER,
+		CONTROLLER_RIGHT_SHOULDER,
+		CONTROLLER_LEFT_STICK,
+		CONTROLLER_RIGHT_STICK
+	};
+	
+	/**
 		@class XdevLJoystickDeviceInfo
 		@brief Structure that holds joystick information for the joystick server.
 		@author Cengiz Terzibas

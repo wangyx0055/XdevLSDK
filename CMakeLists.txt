@@ -79,6 +79,7 @@ elseif(APPLE)
   endif()
 endif()
 
+message(STATUS ${CMAKE_SYSTEM_NAME})
 
 if(COMPILER_GCC OR COMPILER_CLANG)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -286,10 +287,11 @@ endif()
 
 # Build the Mouse Server plugins for raw mouse events.
 if(BUILD_JOYSTICK_SERVER)
-	if(PLATFORM_WINDOWS)
-	elseif(PLATFORM_LINUX)
+	if(WIN32)
+	elseif(APPLE)
+		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerMac)
+	elseif(UNIX)
 		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerLinux)
-	elseif(PLATFORM_MACOSX)
 	endif()
 endif()
 
