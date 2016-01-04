@@ -67,15 +67,21 @@ int main(int argc, char **argv) {
 	xdl::XdevLAxisIdDelegateType axis0Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis0>();
 	xdl::XdevLAxisIdDelegateType axis1Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis1>();
 
-	mouse->registerDelegate(xdl::XdevLString("BUTTON_0"), button0Delegate);
-	mouse->registerDelegate(xdl::XdevLString("BUTTON_1"), button1Delegate);
-	mouse->registerDelegate(xdl::XdevLString("BUTTON_2"), button2Delegate);
-	mouse->registerDelegate(xdl::XdevLString("AXIS_0"), axis0Delegate);
-	mouse->registerDelegate(xdl::XdevLString("AXIS_1"), axis1Delegate);
+//	mouse->registerDelegate(xdl::XdevLString("BUTTON_0"), button0Delegate);
+//	mouse->registerDelegate(xdl::XdevLString("BUTTON_1"), button1Delegate);
+//	mouse->registerDelegate(xdl::XdevLString("BUTTON_2"), button2Delegate);
+//	mouse->registerDelegate(xdl::XdevLString("AXIS_0"), axis0Delegate);
+//	mouse->registerDelegate(xdl::XdevLString("AXIS_1"), axis1Delegate);
 
+	xdl::xdl_float prev_axis_0 = mouse->getDeltaValue(xdl::AXIS_0);
+	xdl::xdl_float prev_axis_1 = mouse->getDeltaValue(xdl::AXIS_1);
+	
 	// Start the main loop.
 	for(;;) {
 		core->update();
+		if(prev_axis_0 != mouse->getDeltaValue(xdl::AXIS_0) || prev_axis_1 != mouse->getDeltaValue(xdl::AXIS_1)) {
+			std::cout << mouse->getDeltaValue(xdl::AXIS_0) << " : " << mouse->getDeltaValue(xdl::AXIS_1) << std::endl;
+		}
 		xdl::sleep(0.001);
 	}
 

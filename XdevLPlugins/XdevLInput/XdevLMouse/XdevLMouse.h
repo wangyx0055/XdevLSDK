@@ -298,6 +298,8 @@ namespace xdl {
 			*/
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
 
+			/// Returns the relative axis movement.
+			virtual xdl_float getDeltaValue(const xdl_uint axis) = 0;
 
 			/// Sets the relative mode.
 			/**

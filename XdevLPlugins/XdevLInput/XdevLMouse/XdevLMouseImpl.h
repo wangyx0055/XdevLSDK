@@ -604,6 +604,7 @@ namespace xdl {
 			virtual xdl_double getClickResponseTime(const xdl_uint key) ;
 
 			virtual xdl_float getValue(const xdl_uint button);
+			virtual xdl_float getDeltaValue(const xdl_uint axis);
 
 			virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max);
 			virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min);

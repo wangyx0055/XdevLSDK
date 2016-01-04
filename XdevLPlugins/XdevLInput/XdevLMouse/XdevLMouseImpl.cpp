@@ -204,6 +204,11 @@ namespace xdl {
 		return m_Axes[axis]->getValue();
 	}
 
+	xdl_float XdevLMouseImpl::getDeltaValue(const xdl_uint axis) {
+		XDEVL_ASSERT(m_attached, "Mouse Device not attached");
+		return m_Axes[axis]->getDeltaValue();
+	}
+
 	void XdevLMouseImpl::setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max) {
 		XDEVL_ASSERT(m_attached, "Mouse Device not attached");
 		m_Axes[axis]->setMinMax(min, max);
