@@ -1480,10 +1480,10 @@ namespace xdl {
 				//
 				case MotionNotify: {
 					if(x11cursor->isRelativeMotionEnabled() == xdl_false) {
-						ev.type 				= MouseMotion.getHashCode();
-						ev.motion.x				= event.xmotion.x;
-						ev.motion.y				= window->getHeight() - event.xmotion.y;
-						ev.motion.windowid = window->getWindowID();
+						ev.type 						= MouseMotion.getHashCode();
+						ev.motion.x					= (2.0 / window->getWidth()*event.xmotion.x - 1.0f) * 32768.0f;
+						ev.motion.y					= (2.0 / window->getHeight() *(window->getHeight() - event.xmotion.y) - 1.0f) * 32768.0f;
+						ev.motion.windowid 	= window->getWindowID();
 						getMediator()->fireEvent(ev);
 					}
 				}

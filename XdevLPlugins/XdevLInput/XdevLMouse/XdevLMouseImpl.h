@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -75,7 +75,7 @@ namespace xdl {
 	};
 
 
-	const xdl_uint MOUSE_MAX_AXES = 3;
+	const xdl_uint MOUSE_MAX_AXES = 2;
 	const xdl_uint MOUSE_MAX_BUTTONS = 16;
 
 	static const XdevLID ButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
@@ -389,24 +389,37 @@ namespace xdl {
 					y = m_windowHeight;
 				}
 
-				if(m_Axes.size() > 0) {
-					m_Axes[AXIS_0]->setValue(((xdl_float)(m_mouse_curr_x) / (xdl_float)m_windowWidth));
-					m_Axes[AXIS_1]->setValue(((xdl_float)(m_mouse_curr_y) / (xdl_float)m_windowHeight));
+				if(m_Axes.size() > 1) {
+					m_Axes[AXIS_0]->setValue(m_mouse_curr_x/32768.0f);
 					m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
+
+					m_Axes[AXIS_1]->setValue(m_mouse_curr_y/32768.0f);
 					m_Axes[AXIS_1]->setDeltaValue((xdl_float)(m_mouse_curr_y - m_mouse_old_y));
 
+					//
+					// Handle delegates that sends a axis id's and the value of the axis.
+					//
 					for(auto& delegate : m_axisDelegates) {
 						delegate(AXIS_0, m_Axes[AXIS_0]->getValue());
 						delegate(AXIS_1, m_Axes[AXIS_1]->getValue());
 					}
+
+					//
+					// Handle delegates that registered only for one specific axis id.
+					//
+					auto pp1 = m_axisIdDelegates.equal_range(AXIS_0);
+					for(auto it = pp1.first; it != pp1.second; ++it) {
+						auto delegate = it->second;
+						delegate(m_Axes[AXIS_0]->getValue());
+					}
+
+					auto pp2 = m_axisIdDelegates.equal_range(AXIS_1);
+					for(auto it = pp2.first; it != pp2.second; ++it) {
+						auto delegate = it->second;
+						delegate(m_Axes[AXIS_1]->getValue());
+					}
+
 				}
-				
-//				printf("abs. (%f %f), rel. (%f %f)\n", m_Axes[AXIS_0]->getValue(), 
-//														m_Axes[AXIS_1]->getValue(), 
-//														m_Axes[AXIS_0]->getDeltaValue(), 
-//														m_Axes[AXIS_0]->getDeltaValue());
-
-
 			}
 
 		}
@@ -591,6 +604,7 @@ namespace xdl {
 			virtual xdl_double getClickResponseTime(const xdl_uint key) ;
 
 			virtual xdl_float getValue(const xdl_uint button);
+			virtual xdl_float getDeltaValue(const xdl_uint axis);
 
 			virtual void setAxisRangeMinMax(const xdl_uint axis, xdl_float min, xdl_float max);
 			virtual void setAxisRangeMin(const xdl_uint axis, xdl_float min);

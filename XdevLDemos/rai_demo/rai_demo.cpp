@@ -427,8 +427,7 @@ int main(int argc, char* argv[]) {
 
 		if(left_mouse_button->getPressed()) {
 			rx += static_cast<float>(y_axis->getDeltaValue()) * 0.01;
-			ry += static_cast<float>(x_axis->getDeltaValue())* 0.01;
-//			std::cout << rx << " : " << ry << std::endl;
+			ry += static_cast<float>(x_axis->getDeltaValue()) * 0.01;
 		}
 
 		rai->setActiveDepthTest(xdl::xdl_true);

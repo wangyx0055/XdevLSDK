@@ -250,8 +250,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		void handleGraphics(xdl::xdl_double dT) {
 
 			if(m_left_mouse_button->getPressed()) {
-				rx += static_cast<float>(y_axis->getDeltaValue());
-				ry += static_cast<float>(x_axis->getDeltaValue());
+				rx += static_cast<float>(y_axis->getDeltaValue()) * 0.01;
+				ry += static_cast<float>(x_axis->getDeltaValue()) * 0.01;
 			}
 
 			//
