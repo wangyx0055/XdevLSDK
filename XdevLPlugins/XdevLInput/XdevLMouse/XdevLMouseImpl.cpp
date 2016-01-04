@@ -113,6 +113,10 @@ namespace xdl {
 		return XdevLMouseBase<XdevLMouse>::shutdown();
 	}
 
+	xdl_int XdevLMouseImpl::update() {
+		return XdevLMouseBase<XdevLMouse>::update();
+	}
+
 
 	xdl_int XdevLMouseImpl::attach(XdevLWindow* window) {
 		std::string moduleName = this->getDescriptor().getName().toString();
