@@ -106,9 +106,15 @@ namespace xdl {
 				return ERR_OK;
 			}
 
+			/// Returns the current fill size of the buffer.
 			size_t get_fill_size() {
 				return fsize;
 			}
+
+			/// Returns the size of the buffer.
+			size_t get_size() {
+				return _size;
+			} 
 
 		private:
 
