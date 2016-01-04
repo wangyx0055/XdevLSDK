@@ -125,7 +125,7 @@ namespace xdl {
 	}
 	
 	xdl_int XdevLJoystickImpl::useJoystick(const XdevLJoystickId& joystickId) {
-		return ERR_OK;
+		return XdevLJoystickBase<XdevLJoystick>::useJoystick(joystickId);
 	}
 
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
