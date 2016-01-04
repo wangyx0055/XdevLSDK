@@ -17,8 +17,8 @@
 		<Fullscreen> 0 </Fullscreen>
 		<X> 0 </X>
 		<Y> 0 </Y>
-		<Width>800 </Width>
-		<Height> 600 </Height>
+		<Width>640 </Width>
+		<Height> 480 </Height>
 		<HidePointer>0</HidePointer>
 	</XdevLWindow>
 
