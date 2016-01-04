@@ -469,15 +469,14 @@ namespace xdl {
 		return m_joystickDevices.size();
 	}
 
-	XdevLJoystickDeviceInfo XdevLJoystickServerLinux::getJoystickInfo(const XdevLJoystickId& joystickid) {
-		XdevLJoystickDeviceInfo info;
+	xdl_int XdevLJoystickServerLinux::getJoystickInfo(const XdevLJoystickId& joystickid, XdevLJoystickDeviceInfo& joystickDeviceInfo) {
 
 		std::stringstream tmp;
 		tmp << "/dev/input/js" << (xdl_int)joystickid;
 
 		auto it = m_joystickDevices.find(tmp.str());
 		if(it == m_joystickDevices.end()) {
-			return info;
+			return ERR_ERROR;
 		}
 
 		//
@@ -486,12 +485,13 @@ namespace xdl {
 		//
 		auto deviceInfo = m_joystickDevices.at(tmp.str());
 
+		XdevLJoystickDeviceInfo info;
 		info.name = deviceInfo->name;
 		info.joystickid = deviceInfo->joystickid;
 		info.numberOfAxes = deviceInfo->numberOfAxes;
 		info.numberOfButtons = deviceInfo->numberOfButtons;
-
-		return std::move(info);
+		joystickDeviceInfo = info;
+		return ERR_OK;
 	}
 
 	void XdevLJoystickServerLinux::removeJoystick(const std::string& path) {

@@ -116,8 +116,12 @@ namespace xdl {
 		return XdevLJoystickBase<XdevLJoystick>::init();
 	}
 
-	xdl_int XdevLJoystickImpl::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
-		return XdevLJoystickBase<XdevLJoystick>::create(joystickDeviceInfo);
+	xdl_int XdevLJoystickImpl::create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId) {
+		return XdevLJoystickBase<XdevLJoystick>::create(joystickServer, joystickId);
+	}
+	
+	xdl_int XdevLJoystickImpl::useJoystick(const XdevLJoystickId& joystickId) {
+		return ERR_OK;
 	}
 
 	xdl_int XdevLJoystickImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {

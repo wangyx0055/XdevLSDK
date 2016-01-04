@@ -89,6 +89,7 @@ namespace xdl {
 		public:
 			XdevLJoystickBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 				XdevLModuleImpl<T>(parameter, descriptor),
+				m_joystickServer(nullptr),
 				m_joy_button_down(false),
 				m_joy_moved(false),
 				m_joy_curr_x(0),
@@ -117,10 +118,11 @@ namespace xdl {
 			xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
 			xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
 
-			xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo);
+			xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId);
+			xdl_int useJoystick(const XdevLJoystickId& joystickId);
 
 		protected:
-
+			XdevLJoystickServer* m_joystickServer;
 			XdevLJoystickDeviceInfo m_joystickDeviceInfo;
 
 			xdl_bool				m_joy_button_down;
@@ -202,12 +204,31 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLJoystickBase<T>::create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) {
-		m_joystickDeviceInfo = joystickDeviceInfo;
+	xdl_int XdevLJoystickBase<T>::create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId) {
+
+		if(nullptr == joystickServer) {
+			return ERR_ERROR;
+		}
+
+		m_joystickServer = joystickServer;
+
+		return useJoystick(joystickId);
+
+	}
+
+	template<typename T>
+	xdl_int XdevLJoystickBase<T>::useJoystick(const XdevLJoystickId& joystickId) {
+		XDEVL_ASSERT(m_joystickServer, "Joystick not created. Use the create method first.");
+
+		if(m_joystickServer->getJoystickInfo(joystickId, m_joystickDeviceInfo) == ERR_ERROR) {
+			return ERR_ERROR;
+		}
 
 		initializeButtonsAndAxisArrays();
 
+		return ERR_OK;
 	}
+
 
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::init() {
@@ -224,8 +245,6 @@ namespace xdl {
 		event.jdeviceinfo.sender = this->getID().getHashCode();
 		event.jdeviceinfo.timestamp = this->getMediator()->getTime();
 		this->getMediator()->fireEvent(event);
-
-		initializeButtonsAndAxisArrays();
 
 		return ERR_OK;
 	}
@@ -282,7 +301,7 @@ namespace xdl {
 			// Handle delegates that registered only for one specific button id.
 			//
 			auto pp = m_buttonIdDelegates.equal_range((XdevLButtonId)idx);
-			for (auto it = pp.first; it != pp.second; ++it) {
+			for(auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
 				delegate(BUTTON_PRESSED);
 			}
@@ -310,12 +329,12 @@ namespace xdl {
 			// Handle delegates that registered only for one specific button id.
 			//
 			auto pp = m_buttonIdDelegates.equal_range((XdevLButtonId)idx);
-			for (auto it = pp.first; it != pp.second; ++it) {
+			for(auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
 				delegate(BUTTON_RELEASED);
 			}
 
-		} else if (event.type == JoystickMotion.getHashCode()) {
+		} else if(event.type == JoystickMotion.getHashCode()) {
 			xdl_float value = ((xdl_float)event.jaxis.value)/32768.0f;
 
 			m_joy_old_x = m_joy_curr_x;
@@ -334,7 +353,7 @@ namespace xdl {
 			// Handle delegates that registered only for one specific axis id.
 			//
 			auto pp = m_axisIdDelegates.equal_range((XdevLAxisId)event.jaxis.axisid);
-			for (auto it = pp.first; it != pp.second; ++it) {
+			for(auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
 				delegate(m_Axes[event.jaxis.axisid]->getValue());
 			}
@@ -473,7 +492,8 @@ namespace xdl {
 			virtual ~XdevLJoystickImpl() {}
 
 			virtual xdl_int init() override;
-			virtual xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) override;
+			virtual xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) override;
+			virtual xdl_int useJoystick(const XdevLJoystickId& joystickId) override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLAxisIdDelegateType& delegate);

@@ -82,7 +82,7 @@ namespace xdl {
 
 
 			virtual xdl_uint getNumJoysticks();
-			virtual XdevLJoystickDeviceInfo getJoystickInfo(const XdevLJoystickId& joystickid);
+			virtual xdl_int getJoystickInfo(const XdevLJoystickId& joystickid, XdevLJoystickDeviceInfo& joystickDeviceInfo);
 
 			virtual xdl_int notify(XdevLEvent& event);
 			virtual void* getInternal(const XdevLInternalName& id);

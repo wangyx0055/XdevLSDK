@@ -112,7 +112,7 @@ namespace xdl {
 			 * @return If successful it will return a XdevLJoystickDeviceInfo filled with a valid name.
 			 * Otherwise the name field will be empty.
 			 */
-			virtual XdevLJoystickDeviceInfo getJoystickInfo(const XdevLJoystickId& joystickid) = 0;
+			virtual xdl_int getJoystickInfo(const XdevLJoystickId& joystickid, XdevLJoystickDeviceInfo& joystickDeviceInfo) = 0;
 	};
 
 
@@ -211,7 +211,10 @@ namespace xdl {
 			virtual ~XdevLJoystick() {};
 
 			/// Create a connection to a specific joystick device.
-			virtual xdl_int create(const XdevLJoystickDeviceInfo& joystickDeviceInfo) = 0;
+			virtual xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) = 0;
+
+			/// Change joystick device.
+			virtual xdl_int useJoystick(const XdevLJoystickId& joystickId) = 0;
 
 			/// Returns the state of a button.
 			/**
