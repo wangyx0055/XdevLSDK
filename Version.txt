@@ -1,3 +1,0 @@
-Version 0.5
-  - Replace all strings and xdl_char by XdevLString
-  
