@@ -104,12 +104,12 @@ include_directories(
 #
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	target_link_libraries(
-		${XdevLJoystickServerMacLibrary}
+		${XdevLJoystickServerMacLibrary} "-framework IOKit" "-framework CoreFoundation"
 		XdevLd
 	)
 else()
 	target_link_libraries(
-		${XdevLJoystickServerMacLibrary}
+		${XdevLJoystickServerMacLibrary} "-framework IOKit" "-framework CoreFoundation"
 		XdevL
 	)
 endif()

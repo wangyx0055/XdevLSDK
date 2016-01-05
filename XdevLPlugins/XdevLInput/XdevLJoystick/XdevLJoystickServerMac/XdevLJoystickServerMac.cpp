@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -95,48 +95,80 @@ namespace xdl {
 
 	xdl_uint16 wrapJoystickIdToInteger(const XdevLJoystickId& id) {
 		switch(id) {
-			case XdevLJoystickId::JOYSTICK_0: return 0;
-			case XdevLJoystickId::JOYSTICK_1: return 1;
-			case XdevLJoystickId::JOYSTICK_2: return 2;
-			case XdevLJoystickId::JOYSTICK_3: return 3;
-			case XdevLJoystickId::JOYSTICK_4: return 4;
-			case XdevLJoystickId::JOYSTICK_5: return 5;
-			case XdevLJoystickId::JOYSTICK_6: return 6;
-			case XdevLJoystickId::JOYSTICK_7: return 7;
-			case XdevLJoystickId::JOYSTICK_8: return 8;
-			case XdevLJoystickId::JOYSTICK_9: return 9;
-			case XdevLJoystickId::JOYSTICK_10: return 10;
-			case XdevLJoystickId::JOYSTICK_11: return 11;
-			case XdevLJoystickId::JOYSTICK_12: return 12;
-			case XdevLJoystickId::JOYSTICK_13: return 13;
-			case XdevLJoystickId::JOYSTICK_14: return 14;
-			case XdevLJoystickId::JOYSTICK_15: return 15;
+			case XdevLJoystickId::JOYSTICK_0:
+				return 0;
+			case XdevLJoystickId::JOYSTICK_1:
+				return 1;
+			case XdevLJoystickId::JOYSTICK_2:
+				return 2;
+			case XdevLJoystickId::JOYSTICK_3:
+				return 3;
+			case XdevLJoystickId::JOYSTICK_4:
+				return 4;
+			case XdevLJoystickId::JOYSTICK_5:
+				return 5;
+			case XdevLJoystickId::JOYSTICK_6:
+				return 6;
+			case XdevLJoystickId::JOYSTICK_7:
+				return 7;
+			case XdevLJoystickId::JOYSTICK_8:
+				return 8;
+			case XdevLJoystickId::JOYSTICK_9:
+				return 9;
+			case XdevLJoystickId::JOYSTICK_10:
+				return 10;
+			case XdevLJoystickId::JOYSTICK_11:
+				return 11;
+			case XdevLJoystickId::JOYSTICK_12:
+				return 12;
+			case XdevLJoystickId::JOYSTICK_13:
+				return 13;
+			case XdevLJoystickId::JOYSTICK_14:
+				return 14;
+			case XdevLJoystickId::JOYSTICK_15:
+				return 15;
 			default:
-			break;
+				break;
 		}
 		return 0;
 	}
 
 	XdevLJoystickId wrapIntegerToJoystickId(xdl_uint16 id) {
 		switch(id) {
-			case 0: return XdevLJoystickId::JOYSTICK_0;
-			case 1: return XdevLJoystickId::JOYSTICK_1;
-			case 2: return XdevLJoystickId::JOYSTICK_2;
-			case 3: return XdevLJoystickId::JOYSTICK_3;
-			case 4: return XdevLJoystickId::JOYSTICK_4;
-			case 5: return XdevLJoystickId::JOYSTICK_5;
-			case 6: return XdevLJoystickId::JOYSTICK_6;
-			case 7: return XdevLJoystickId::JOYSTICK_7;
-			case 8: return XdevLJoystickId::JOYSTICK_8;
-			case 9: return XdevLJoystickId::JOYSTICK_9;
-			case 10: return XdevLJoystickId::JOYSTICK_10;
-			case 11: return XdevLJoystickId::JOYSTICK_11;
-			case 12: return XdevLJoystickId::JOYSTICK_12;
-			case 13: return XdevLJoystickId::JOYSTICK_13;
-			case 14: return XdevLJoystickId::JOYSTICK_14;
-			case 15: return XdevLJoystickId::JOYSTICK_15;
+			case 0:
+				return XdevLJoystickId::JOYSTICK_0;
+			case 1:
+				return XdevLJoystickId::JOYSTICK_1;
+			case 2:
+				return XdevLJoystickId::JOYSTICK_2;
+			case 3:
+				return XdevLJoystickId::JOYSTICK_3;
+			case 4:
+				return XdevLJoystickId::JOYSTICK_4;
+			case 5:
+				return XdevLJoystickId::JOYSTICK_5;
+			case 6:
+				return XdevLJoystickId::JOYSTICK_6;
+			case 7:
+				return XdevLJoystickId::JOYSTICK_7;
+			case 8:
+				return XdevLJoystickId::JOYSTICK_8;
+			case 9:
+				return XdevLJoystickId::JOYSTICK_9;
+			case 10:
+				return XdevLJoystickId::JOYSTICK_10;
+			case 11:
+				return XdevLJoystickId::JOYSTICK_11;
+			case 12:
+				return XdevLJoystickId::JOYSTICK_12;
+			case 13:
+				return XdevLJoystickId::JOYSTICK_13;
+			case 14:
+				return XdevLJoystickId::JOYSTICK_14;
+			case 15:
+				return XdevLJoystickId::JOYSTICK_15;
 			default:
-			break;
+				break;
 		}
 		return XdevLJoystickId::JOYSTICK_UNKNOWN;
 	}
@@ -234,11 +266,11 @@ namespace xdl {
 		TiXmlDocument xmlDocument;
 		if(getMediator()->getXmlFilename()) {
 			if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
-				XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n" );
+				XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n");
 			}
 
 			if(readJoystickInfo(xmlDocument) != ERR_OK) {
-				XDEVL_MODULE_WARNING("Some issues happened when parsing the XML file.\n" );
+				XDEVL_MODULE_WARNING("Some issues happened when parsing the XML file.\n");
 			}
 		}
 
@@ -293,32 +325,51 @@ namespace xdl {
 		XdevLJoystickDeviceInfoMac* joystickInfo = getJoystickInfo(fd, path);
 		if(nullptr == joystickInfo) {
 			return ERR_ERROR;
-		} 
-		m_joystickDevices[joystickInfo->device] = joystickInfo;
+		}
+//		m_joystickDevices[joystickInfo->joystickid] = joystickInfo;
 
 		return ERR_OK;
 	}
 
 	XdevLJoystickDeviceInfoMac* XdevLJoystickServerMac::getJoystickInfo(xdl_int fd, const std::string& path) {
-		
+
 		//
 		// Get information of the joystick device.
 		//
 		char name[128];
-//		if (ioctl(fd, JSIOCGNAME(sizeof(name)), name) < 0) {
-//			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
-//			return nullptr;
-//		}
+		CFMutableDictionaryRef dictionary = IOServiceMatching(kIOUSBDeviceClassName);;
+
+		SInt32 vendorId = 0;
+		CFDictionaryAddValue(dictionary, CFSTR(kUSBVendorID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vendorId));
+
+		SInt32 productId = 0;
+		CFDictionaryAddValue(dictionary, CFSTR(kUSBProductID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &productId));
+
+		io_iterator_t iterator = 0;
+		IOServiceGetMatchingServices(kIOMasterPortDefault, dictionary, &iterator);
+
+		io_service_t usbRef = 0;
+		while( (usbRef = IOIteratorNext(iterator))) {
+			if(usbRef == 0) {
+				XDEVL_MODULE_ERROR("Device not found.\n");
+				return nullptr;
+			}
+
+		}
+
+		IOObjectRelease(iterator);
+
+
 //		XDEVL_MODULE_INFO("Name             : " << name << "\n");
 //
-//		xdl_uint numberOfAxes = 0;
+		xdl_uint numberOfAxes = 0;
 //		if(ioctl(fd, JSIOCGAXES, &numberOfAxes) < 0) {
 //			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 //			return nullptr;
 //		}
 //		XDEVL_MODULE_INFO("Number of axes   : " << numberOfAxes << "\n");
 //
-//		xdl_uint numberOfButtons = 0;
+		xdl_uint numberOfButtons = 0;
 //		if(ioctl(fd, JSIOCGBUTTONS, &numberOfButtons) < 0) {
 //			XDEVL_MODULE_INFO("Error occured: " << strerror(errno) << std::endl);
 //			return nullptr;
@@ -339,10 +390,8 @@ namespace xdl {
 		//
 		// Create the info structure.
 		//
-		XdevLJoystickDeviceInfoLinux* devInfo = new XdevLJoystickDeviceInfoLinux();
+		XdevLJoystickDeviceInfoMac* devInfo = new XdevLJoystickDeviceInfoMac();
 		devInfo->joystickid = wrapIntegerToJoystickId(joystickid);
-		devInfo->fd = fd;
-		devInfo->device = path;
 		devInfo->name = XdevLString(name);
 		devInfo->numberOfAxes = numberOfAxes;
 		devInfo->numberOfButtons = numberOfButtons;
@@ -490,7 +539,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void XdevLJoystickServerLinux::removeJoystick(const std::string& path) {
+	void XdevLJoystickServerMac::removeJoystick(const std::string& path) {
 		thread::XdevLScopeLock lock(m_mutex);
 
 		auto it = m_joystickDevices.find(path);
