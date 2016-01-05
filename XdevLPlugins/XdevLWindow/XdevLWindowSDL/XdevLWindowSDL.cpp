@@ -761,7 +761,7 @@ namespace xdl {
 					ev.type 						= MouseMotion.getHashCode();
 					ev.motion.windowid	= window->getWindowID();
 					ev.motion.x					= (2.0 / window->getWidth()*event.motion.x - 1.0f) * 32768.0f;
-					ev.motion.y					= (2.0 / window->getHeight() *(window->getHeight() - event.motion.y) - 1.0f) * 32768.0f;
+					ev.motion.y					= -(2.0 / window->getHeight() * event.motion.y - 1.0f) * 32768.0f;
 					ev.motion.xrel			= event.motion.xrel;
 					ev.motion.yrel			= event.motion.yrel;
 
