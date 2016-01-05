@@ -24,6 +24,10 @@
 #include <XdevL.h>
 #include <XdevLInput/XdevLJoystick/XdevLJoystick.h>
 
+#include <csignal>
+
+xdl::IPXdevLCore core = nullptr;
+
 void callbackButton0(const xdl::XdevLButtonState& id) {
 	std::cout << "BUTTON_0: " << ((id == xdl::BUTTON_PRESSED) ? "pressed" : "released") << std::endl;
 }
@@ -40,13 +44,34 @@ void callbackAxis1(const xdl::xdl_float& value) {
 	std::cout << "AXIS_1: " << value << std::endl;
 }
 
+void exitHandle(int signal) {
+
+	// Destroy the Core.
+	xdl::destroyCore(core);
+
+	exit(0);
+}
+
 int main(int argc, char **argv) {
+
+	// Let's register the CTRL + c signal handler.
+	if(signal(SIGINT, exitHandle) == SIG_ERR) {
+		std::cerr <<  "Failed to set SIGINT handler." << std::endl;
+		return -1;
+	}
+
+	// Register termination handler.
+	if(signal(SIGTERM, exitHandle) == SIG_ERR) {
+		std::cerr <<  "Failed to set SIGTERM handler." << std::endl;
+		return -1;
+	}
 
 	//
 	// Create the core
 	//
-	xdl::IPXdevLCore core = nullptr;
-	xdl::createCore(&core, argc, argv);
+	if(xdl::createCore(&core, argc, argv) != xdl::ERR_OK) {
+		return -1;
+	}
 
 	//
 	// Plug the necessary plugins.
@@ -96,10 +121,17 @@ int main(int argc, char **argv) {
 
 	// Start the main loop.
 	for(;;) {
+
+		// We need to call the update of the core manually.
 		core->update();
+
+		// Let's not use too much CPU power.
 		xdl::sleep(0.001);
 	}
 
+	// We, this might be never called in this demo but I like to show
+	// that the core has to be destroyed at the end. In this example
+	// we quite using CTRL + C or terminating see above. :D.
 	xdl::destroyCore(core);
 
 	return 0;

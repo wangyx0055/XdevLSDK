@@ -135,6 +135,9 @@ int main(int argc, char **argv) {
 		xdl::sleep(0.001);
 	}
 
+	// We, this might be never called in this demo but I like to show
+	// that the core has to be destroyed at the end. In this example
+	// we quite using CTRL + C or terminating see above. :D.
 	xdl::destroyCore(core);
 
 	return 0;

@@ -281,7 +281,7 @@ namespace xdl {
 			m_joystickDevices.clear();
 		}
 
-		return ERR_ERROR;
+		return ERR_OK;
 	}
 
 
