@@ -128,4 +128,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Release_Linux64"/>
 </CodeLite_Project>

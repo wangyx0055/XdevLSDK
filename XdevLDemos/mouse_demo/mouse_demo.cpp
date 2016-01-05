@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 	// Create the core
 	//
 	xdl::IPXdevLCore core = nullptr;
-	xdl::createCore(&core, argc, argv, xdl::XdevLFileName("devices_demo.xml"));
+	xdl::createCore(&core, argc, argv, xdl::XdevLFileName("mouse_demo.xml"));
 
 
 	//

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CodeLite_Project Name="devices_demo">
+<CodeLite_Project Name="mouse_demo">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00090001N0013Debug_Linux320000000000000001N0013Debug_Linux640000000000000001N0014Debug_MacOSX640000000000000001N0011Debug_Win320000000000000001N0011Debug_Win640000000000000001N0015Release_Linux320000000000000001N0015Release_Linux640000000000000001N0013Release_Win320000000000000001N0013Release_Win64000000000000]]>
@@ -83,10 +83,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="devices_demo.cpp"/>
+    <File Name="mouse_demo.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="resource">
-    <File Name="../bin/devices_demo.xml"/>
+    <File Name="../bin/mouse_demo.xml"/>
   </VirtualDirectory>
   <Dependencies Name="Release"/>
   <Dependencies Name="Debug"/>

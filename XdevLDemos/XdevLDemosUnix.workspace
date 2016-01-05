@@ -17,7 +17,6 @@
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLAudio"/>
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevL/include"/>
   </WorkspaceParserPaths>
-  <Project Name="devices_demo" Path="devices_demo/devices_demo.project" Active="No"/>
   <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
@@ -30,7 +29,7 @@
   <Project Name="serial_demo" Path="serial_demo/serial_demo.project" Active="No"/>
   <Project Name="events_demo" Path="events_demo/events_demo.project" Active="No"/>
   <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="No"/>
-  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="Yes"/>
+  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="No"/>
   <Environment>
     <![CDATA[]]>
   </Environment>
@@ -38,9 +37,9 @@
   <Project Name="audio_capture_demo" Path="audio_capture_demo/audio_capture_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
   <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="No"/>
+  <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">
-      <Environment/>
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>
       <Project Name="udp_server_demo" ConfigName="Release_Linux32"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Linux32"/>
@@ -50,7 +49,6 @@
       <Project Name="tcp_client_demo" ConfigName="Release_Linux32"/>
       <Project Name="serial_demo" ConfigName="Release_Linux32"/>
       <Project Name="ogre_demo" ConfigName="Release_Linux32"/>
-      <Project Name="devices_demo" ConfigName="Release_Linux32"/>
       <Project Name="bluetooth_demo" ConfigName="Release_Linux32"/>
       <Project Name="audio_demo" ConfigName="Release_Linux32"/>
       <Project Name="glsl" ConfigName="Release_Linux32"/>
@@ -64,9 +62,9 @@
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
       <Project Name="joystick_demo" ConfigName="Debug"/>
+      <Project Name="mouse_demo" ConfigName="Release_Linux32"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux32" Selected="no">
-      <Environment/>
       <Project Name="xml_demo" ConfigName="Debug_Linux32"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Linux32"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Linux32"/>
@@ -76,7 +74,6 @@
       <Project Name="tcp_client_demo" ConfigName="Debug_Linux32"/>
       <Project Name="serial_demo" ConfigName="Debug_Linux32"/>
       <Project Name="ogre_demo" ConfigName="Debug_Linux32"/>
-      <Project Name="devices_demo" ConfigName="Debug_Linux32"/>
       <Project Name="bluetooth_demo" ConfigName="Debug_Linux32"/>
       <Project Name="audio_demo" ConfigName="Debug_Linux32"/>
       <Project Name="glsl" ConfigName="Debug_Linux32"/>
@@ -90,9 +87,9 @@
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
       <Project Name="joystick_demo" ConfigName="Debug"/>
+      <Project Name="mouse_demo" ConfigName="Debug_Linux32"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_Linux64" Selected="yes">
-      <Environment/>
       <Project Name="xml_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Linux64"/>
@@ -107,13 +104,12 @@
       <Project Name="glsl_demo" ConfigName="Debug_Linux64"/>
       <Project Name="filesystem_demo" ConfigName="Debug_Linux64"/>
       <Project Name="events_demo" ConfigName="Debug_Linux64"/>
-      <Project Name="devices_demo" ConfigName="Debug_Linux64"/>
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
       <Project Name="audio_demo" ConfigName="Debug_Linux64"/>
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
+      <Project Name="mouse_demo" ConfigName="Debug_Linux64"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_Linux64" Selected="no">
-      <Environment/>
+    <WorkspaceConfiguration Name="Release_Linux64" Selected="yes">
       <Project Name="xml_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Linux64"/>
@@ -128,10 +124,10 @@
       <Project Name="glsl_demo" ConfigName="Release_Linux64"/>
       <Project Name="filesystem_demo" ConfigName="Release_Linux64"/>
       <Project Name="events_demo" ConfigName="Release_Linux64"/>
-      <Project Name="devices_demo" ConfigName="Release_Linux64"/>
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
       <Project Name="audio_demo" ConfigName="Release_Linux64"/>
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
+      <Project Name="mouse_demo" ConfigName="Release_Linux64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
