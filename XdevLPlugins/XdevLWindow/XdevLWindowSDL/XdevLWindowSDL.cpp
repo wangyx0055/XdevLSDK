@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -641,10 +641,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size,
-	        const XdevLWindowTypes& type) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size,
+	    const XdevLWindowTypes& type) {
 
 		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
 		sdlWindow->setTitle(title);
@@ -703,32 +703,26 @@ namespace xdl {
 				continue;
 			}
 
+			XdevLEvent ev;
+			ev.common.timestamp	= getMediator()->getTimer().getTime64();
+
 			switch(event.type) {
 				case SDL_KEYDOWN: {
 
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.type 			= ButtonPressed.getHashCode();
-					ev.key.timestamp	= getMediator()->getTimer().getTime64();
-
-
+					ev.type 					= ButtonPressed.getHashCode();
 					ev.key.windowid		= window->getWindowID();
 					ev.key.repeat 		= event.key.repeat;
 					ev.key.keycode		= KeySymToXdevLKeyCode[event.key.keysym.sym];
-					ev.key.mod 			= event.key.keysym.mod;
+					ev.key.mod 				= event.key.keysym.mod;
 
 					getMediator()->fireEvent(ev);
-
-					std::cout << ev.key.keycode << std::endl;
 				}
 				break;
 				case SDL_KEYUP: {
 
 					// Register button up event in the Core.
-					XdevLEvent ev;
 					ev.type 			= ButtonReleased.getHashCode();
-					ev.common.timestamp	= getMediator()->getTimer().getTime64();
-
 					ev.key.windowid		= window->getWindowID();
 					ev.key.repeat 		= event.key.repeat;
 					ev.key.keycode		= KeySymToXdevLKeyCode[event.key.keysym.sym];
@@ -740,14 +734,11 @@ namespace xdl {
 				break;
 				case SDL_MOUSEBUTTONDOWN: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= MouseButtonPressed.getHashCode();
-
-					ev.button.windowid		= window->getWindowID();
+					ev.type 						= MouseButtonPressed.getHashCode();
+					ev.button.windowid	= window->getWindowID();
 					ev.button.button		= event.button.button;
-					ev.button.x				= event.button.x;
-					ev.button.y				= event.button.y;
+					ev.button.x					= event.button.x;
+					ev.button.y					= event.button.y;
 
 					getMediator()->fireEvent(ev);
 
@@ -755,14 +746,11 @@ namespace xdl {
 				break;
 				case SDL_MOUSEBUTTONUP: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= MouseButtonReleased.getHashCode();
-
-					ev.button.windowid		= window->getWindowID();
+					ev.type 						= MouseButtonReleased.getHashCode();
+					ev.button.windowid	= window->getWindowID();
 					ev.button.button		= event.button.button;
-					ev.button.x				= event.button.x;
-					ev.button.y				= event.button.y;
+					ev.button.x					= event.button.x;
+					ev.button.y					= event.button.y;
 
 					getMediator()->fireEvent(ev);
 
@@ -770,13 +758,10 @@ namespace xdl {
 				break;
 				case SDL_MOUSEMOTION: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= MouseMotion.getHashCode();
-
-					ev.motion.windowid		= window->getWindowID();
-					ev.motion.x				= event.motion.x;
-					ev.motion.y				= event.motion.y;
+					ev.type 						= MouseMotion.getHashCode();
+					ev.motion.windowid	= window->getWindowID();
+					ev.motion.x					= (2.0 / window->getWidth()*event.motion.x - 1.0f) * 32768.0f;
+					ev.motion.y					= (2.0 / window->getHeight() *(window->getHeight() - event.motion.y) - 1.0f) * 32768.0f;
 					ev.motion.xrel			= event.motion.xrel;
 					ev.motion.yrel			= event.motion.yrel;
 
@@ -785,11 +770,9 @@ namespace xdl {
 				break;
 				case SDL_JOYAXISMOTION: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
 					ev.type 				= XDEVL_JOYSTICK_MOTION;
-					ev.jaxis.axisid			= event.jaxis.axis;
-					ev.jaxis.value			= event.jaxis.value;
+					ev.jaxis.axisid	= event.jaxis.axis;
+					ev.jaxis.value	= event.jaxis.value;
 
 					getMediator()->fireEvent(ev);
 
@@ -797,10 +780,8 @@ namespace xdl {
 				break;
 				case SDL_JOYBUTTONDOWN: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_BUTTON_PRESSED;
-					ev.button.button		= event.jbutton.button;
+					ev.type 					= XDEVL_JOYSTICK_BUTTON_PRESSED;
+					ev.button.button	= event.jbutton.button;
 
 					getMediator()->fireEvent(ev);
 
@@ -808,10 +789,8 @@ namespace xdl {
 				break;
 				case SDL_JOYBUTTONUP: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
-					ev.type 				= XDEVL_JOYSTICK_BUTTON_RELEASED;
-					ev.button.button		= event.jbutton.button;
+					ev.type 					= XDEVL_JOYSTICK_BUTTON_RELEASED;
+					ev.button.button	= event.jbutton.button;
 
 					getMediator()->fireEvent(ev);
 
@@ -819,8 +798,6 @@ namespace xdl {
 				break;
 				case SDL_JOYHATMOTION: {
 					// Register button up event in the Core.
-					XdevLEvent ev;
-					ev.common.timestamp 	= getMediator()->getTimer().getTime64();
 					ev.type 				= XDEVL_JOYSTICK_POV;
 
 					switch(event.jhat.value) {
@@ -863,10 +840,8 @@ namespace xdl {
 				case SDL_WINDOWEVENT: {
 					switch(event.window.event) {
 						case SDL_WINDOWEVENT_SHOWN: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_SHOWN;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_SHOWN;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -874,10 +849,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_HIDDEN: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_HIDDEN;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_HIDDEN;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -885,10 +858,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_EXPOSED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_EXPOSED;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_EXPOSED;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -896,12 +867,10 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_MOVED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MOVED;
-							ev.window.x			= event.window.data1;
-							ev.window.y			= event.window.data2;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_MOVED;
+							ev.window.x					= event.window.data1;
+							ev.window.y					= event.window.data2;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -909,12 +878,10 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_RESIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_RESIZED;
-							ev.window.width		= event.window.data1;
-							ev.window.height	= event.window.data2;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_RESIZED;
+							ev.window.width			= event.window.data1;
+							ev.window.height		= event.window.data2;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -922,10 +889,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_MINIMIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MINIMIZED;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_MINIMIZED;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -933,10 +898,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_MAXIMIZED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_MAXIMIZED;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_MAXIMIZED;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -944,10 +907,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_RESTORED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_RESTORED;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_RESTORED;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -955,12 +916,10 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_ENTER: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_ENTER;
-							ev.window.data1		= event.window.data1;
-							ev.window.data2		= event.window.data2;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_ENTER;
+							ev.window.data1			= event.window.data1;
+							ev.window.data2			= event.window.data2;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -968,12 +927,10 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_LEAVE: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_LEAVE;
-							ev.window.data1		= event.window.data1;
-							ev.window.data2		= event.window.data2;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_LEAVE;
+							ev.window.data1			= event.window.data1;
+							ev.window.data2			= event.window.data2;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -981,10 +938,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_FOCUS_GAINED: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_GAINED;
 							ev.window.windowid	= window->getWindowID();
 
 							focusGained(window);
@@ -994,10 +949,8 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_FOCUS_LOST: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_INPUT_FOCUS_LOST;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_INPUT_FOCUS_LOST;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
@@ -1005,17 +958,15 @@ namespace xdl {
 						}
 						break;
 						case SDL_WINDOWEVENT_CLOSE: {
-							XdevLEvent ev;
-							ev.common.timestamp = getMediator()->getTimer().getTime64();
-							ev.type				= XDEVL_WINDOW_EVENT;
-							ev.window.event 	= XDEVL_WINDOW_CLOSE;
+							ev.type							= XDEVL_WINDOW_EVENT;
+							ev.window.event 		= XDEVL_WINDOW_CLOSE;
 							ev.window.windowid	= window->getWindowID();
 
 							getMediator()->fireEvent(ev);
 
 							// Make a core event.
 							ev.type				= XDEVL_CORE_EVENT;
-							ev.core.event 		= XDEVL_CORE_SHUTDOWN;
+							ev.core.event = XDEVL_CORE_SHUTDOWN;
 
 							getMediator()->fireEvent(ev);
 
