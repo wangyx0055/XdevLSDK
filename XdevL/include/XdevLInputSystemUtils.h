@@ -250,7 +250,7 @@ namespace xdl {
 			virtual xdl_float getValue() {
 				xdl_float tmp;
 				m_mutex->Lock();
-				tmp = (m_value >= 0) ? m_max*m_value : -m_min*m_value;
+				tmp = m_min + (m_max - m_min)*(m_value + 1) * 0.5f;
 				m_mutex->Unlock();
 				return tmp;
 			}
