@@ -84,7 +84,7 @@ namespace xdl {
 
 
 	template<typename T>
-	class XdevLMouseBase : public XdevLModuleAutoImpl<T>, public thread::Thread {
+	class XdevLMouseBase : public XdevLModuleAutoImpl<T> {
 		public:
 			XdevLMouseBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)	:
 				XdevLModuleAutoImpl<T>(parameter, descriptor),
@@ -118,9 +118,6 @@ namespace xdl {
 			xdl_int readMouseInfo(TiXmlDocument& document, const xdl_char* modulename);
 
 			xdl_int update();
-
-			xdl_int RunThread(thread::ThreadArgument* p_arg);
-
 			xdl_int attach(XdevLWindow* window, const xdl_char* modulename);
 
 			xdl_int notify(XdevLEvent& event) override;
@@ -247,10 +244,6 @@ namespace xdl {
 
 		setAttached(xdl_false);
 
-		// Wait unit the thread has finished his job.
-		if(m_threaded)
-			Join();
-
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
@@ -262,16 +255,6 @@ namespace xdl {
 		for(size_t a = 0; a < m_Axes.size(); ++a)
 			m_Axes[a]->setValue(0.0f);
 		return ERR_OK;
-	}
-
-	template<typename T>
-	xdl_int XdevLMouseBase<T>::RunThread(thread::ThreadArgument*) {
-		XDEVL_MODULE_INFO("Starting threading mode.\n");
-		while(getAttached()) {
-			update();
-			sleep(m_sleep);
-		}
-		return 0;
 	}
 
 	template<typename T>
@@ -391,9 +374,9 @@ namespace xdl {
 
 				if(m_Axes.size() > 1) {
 					m_Axes[AXIS_0]->setValue(m_mouse_curr_x/32768.0f);
-					m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
-
 					m_Axes[AXIS_1]->setValue(m_mouse_curr_y/32768.0f);
+
+					m_Axes[AXIS_0]->setDeltaValue((xdl_float)(m_mouse_curr_x - m_mouse_old_x));
 					m_Axes[AXIS_1]->setDeltaValue((xdl_float)(m_mouse_curr_y - m_mouse_old_y));
 
 					//
@@ -435,16 +418,10 @@ namespace xdl {
 		}
 		m_window = window;
 
-		if(getAttached()) {
-			setAttached(false);
-			Join();
-		}
-
 		const XdevLWindowSize& size = window->getSize();
 
 		m_windowWidth	= size.width;
 		m_windowHeight	= size.height;
-
 
 		if(this->getMediator()->getXmlFilename()) {
 			TiXmlDocument xmlDocument;
