@@ -8,7 +8,7 @@
 #include <XdevLPluginImpl.h>
 
 #if XDEVL_PLATFORM_UNIX
-#include <GLES2/gl2.h>
+//#include <GLES2/gl2.h>
 #endif
 
 #include <EGL/egl.h>

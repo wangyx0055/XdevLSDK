@@ -75,7 +75,7 @@ endif()
 if(PLATFORM_MACOSX)
 	set(LIBS ${LIBS} dl)
 elseif(PLATFORM_LINUX)
-	set(LIBS ${LIBS} dl GLESv2 EGL)
+	set(LIBS ${LIBS} dl ${EGL_LIBRARY})
 elseif(PLATFORM_WINDOWS)
 
 endif()
