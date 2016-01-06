@@ -55,6 +55,7 @@ set(SOURCE_FILES
 include_directories(
 	${XDEVL_HOME}/include
 	${XDEVL_PLUGINS}
+	${ALSA_INCLUDE_DIR}
 )
 
 link_directories(
@@ -66,17 +67,9 @@ if(PLATFORM_MACOSX)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS XdevLd)
+	set(LIBS XdevLd ${ALSA_LIBRARY})
 else()
-	set(LIBS XdevL)
-endif()
-
-if(PLATFORM_MACOSX)
-	set(LIBS ${LIBS} dl)
-elseif(PLATFORM_LINUX)
-	set(LIBS ${LIBS} dl asound)
-elseif(PLATFORM_WINDOWS)
-
+	set(LIBS XdevL ${ALSA_LIBRARY})
 endif()
 
 add_library(${XdevLAudioAlsaLibrary} SHARED
