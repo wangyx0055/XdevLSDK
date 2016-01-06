@@ -158,7 +158,18 @@ endif()
 
 # Build the Joystick plugin.
 if(BUILD_JOYSTICK)
-	add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick)
+	if(WIN32)
+	elseif(APPLE)
+		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerMac)
+	elseif(UNIX)
+		find_package(UDev)
+		if(UDEV_FOUND)
+			add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerLinux)
+			add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick)
+		else()
+			message(STATUS "XdevLJoystickServerLinux and XdevLJoystick will not be build.")
+		endif()
+	endif()
 endif()
 
 # Build the Network plugin.
@@ -285,16 +296,6 @@ if(BUILD_MOUSE_SERVER)
 	elseif(PLATFORM_LINUX)
 		add_subdirectory(XdevLPlugins/XdevLInput/XdevLMouse/XdevLMouseServerLinux)
 	elseif(PLATFORM_MACOSX)
-	endif()
-endif()
-
-# Build the Mouse Server plugins for raw mouse events.
-if(BUILD_JOYSTICK_SERVER)
-	if(WIN32)
-	elseif(APPLE)
-		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerMac)
-	elseif(UNIX)
-		add_subdirectory(XdevLPlugins/XdevLInput/XdevLJoystick/XdevLJoystickServerLinux)
 	endif()
 endif()
 
