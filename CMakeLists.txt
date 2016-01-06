@@ -249,6 +249,15 @@ if(BUILD_NATIVE_WINDOWS)
 		else()
 			message(WARNING "XdevLWindowX11 will not be build.")
 		endif()
+
+		if(BUILD_WAYLAND)
+			find_package(Wayland)
+			if(Wayland_FOUND)
+				add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWayland)
+			else()
+				message(STATUS "XdevLWindowWayland will not be build.")
+			endif()
+		endif()
 	endif()
 endif()
 
@@ -268,17 +277,6 @@ endif()
 if(BUILD_FTDI)
 	add_subdirectory(XdevLPlugins/XdevLFTDI)
 endif()
-
-# Build the Wayland Window plugin.
-if(BUILD_WAYLAND)
-#	find_package(Wayland)
-#	if(Wayland_FOUND)
-		add_subdirectory(XdevLPlugins/XdevLWindow/XdevLWindowWayland)
-#	else()
-#		message(STATUS "XdevLWindowWayland will not be build.")
-#	endif()
-endif()
-
 
 
 # Build the Mouse Server plugins for raw mouse events.
