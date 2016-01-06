@@ -30,10 +30,10 @@
 namespace xdl {
 
 	/**
-		@enum XdevLErrorCodes
+		@enum XdevLReturnCode
 		@brief Error codes that can occur in the core system.
 	*/
-	enum XdevLErrorCodes {
+	enum XdevLReturnCode {
 
 	    /// No problem occurred.
 	    ERR_OK = 0,
@@ -104,12 +104,12 @@ namespace xdl {
 	};
 
 	/**
-		@class XdevLError
+		@class XdevLReturn
 		@brief A XdevL error object that describes an error.
 	*/
-	class XdevLError {
+	class XdevLReturn {
 		public:
-			XdevLError(XdevLErrorCodes code, const XdevLString& desc, const XdevLString& filename, xdl_int line = 0) :
+			XdevLReturn(XdevLReturnCode code, const XdevLString& desc, const XdevLString& filename, xdl_int line = 0) :
 				m_errorCode(code),
 				m_description(desc),
 				m_filename(filename),
@@ -126,7 +126,7 @@ namespace xdl {
 			}
 
 			/// Returns the error code.
-			XdevLErrorCodes getErrorCode() const {
+			XdevLReturnCode getErrorCode() const {
 				return m_errorCode;
 			}
 
@@ -135,19 +135,19 @@ namespace xdl {
 				return m_line;
 			}
 
-			friend std::ostream& operator << (std::ostream& os, const XdevLError& err) {
+			friend std::ostream& operator << (std::ostream& os, const XdevLReturn& err) {
 				os << "[ Error Code: " << err.m_errorCode << ": " << err.m_filename << ":" << err.m_line << ": " << err.m_description << " ]";
 				return os;
 			}
 
 		private:
-			XdevLErrorCodes	m_errorCode;
+			XdevLReturnCode	m_errorCode;
 			XdevLString			m_description;
 			XdevLString			m_filename;
 			xdl_int					m_line;
 	};
 
-#define XDEVL_ERROR(CODE, DESC) xdl::XdevLError(CODE, DESC, xdl::XdevLString(__FILE__), __LINE__)
+#define XDEVL_ERROR(CODE, DESC) xdl::XdevLReturn(CODE, DESC, xdl::XdevLString(__FILE__), __LINE__)
 }
 
 #endif

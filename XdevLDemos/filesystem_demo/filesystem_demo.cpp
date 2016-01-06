@@ -29,7 +29,7 @@
 xdl::IPXdevLCore core = nullptr;
 xdl::IPXdevLDirectoryWatcher dirWatcher = nullptr;
 
-xdl::XdevLString directoryToWatch("/home/yaakuro/Projects/XdevLSDK/XdevLDemos/bin/");
+xdl::XdevLString directoryToWatch(".");
 
 void watchDirectory(const xdl::XdevLDirectoryWatcher::ItemTypes& types, const xdl::XdevLDirectoryWatcher::EventTypes& event, const xdl::XdevLString& name) {
 	xdl::XdevLString tmp("EventType: ");

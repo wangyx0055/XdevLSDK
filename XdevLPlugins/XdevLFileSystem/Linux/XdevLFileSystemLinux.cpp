@@ -147,9 +147,9 @@ namespace xdl {
 	xdl_int XdevLDirectoryWatcherLinux::addDirectoryToWatch(const XdevLString& folder) {
 //	std::lock_guard<std::mutex> lock(m_mutex);
 
-		int wd = inotify_add_watch(m_fd, folder.toString().c_str(), IN_CREATE | IN_ALL_EVENTS);
+		int wd = inotify_add_watch(m_fd, folder.toString().c_str(), IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_MODIFY );
 		if(wd == -1) {
-			XDEVL_MODULE_INFO("Adding directory: " << folder.toString() << " to watch failed.\n");
+			XDEVL_MODULE_INFO("Adding directory: " << folder.toString() << " to watch failed.: " << strerror(errno) << std::endl);
 			return -1;
 		}
 		m_dfdList.push_back(wd);
@@ -211,7 +211,7 @@ namespace xdl {
 					eventType = EventTypes::DW_CLOSE;
 				} else if(event->mask & IN_DELETE_SELF) {
 					XDEVL_MODULE_INFO("IN_DELETE_SELF not handled.\n");
-				} else if(event->mask & IN_DELETE) {
+				} else if( (event->mask & IN_DELETE) or (event->mask & IN_MOVE)) {
 					eventType = EventTypes::DW_DELETE;
 				}
 
