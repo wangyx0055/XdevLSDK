@@ -197,11 +197,23 @@ namespace xdl {
 				/* check for changes */
 				if(event->mask & IN_OPEN) {
 					eventType = EventTypes::DW_OPEN;
-				} else if(event->mask & IN_CREATE) {
+				}
+				//
+				// A file or folder got created.
+				//
+				else if(event->mask & IN_CREATE) {
 					eventType = EventTypes::DW_CREATE;
-				} else if(event->mask & IN_MODIFY) {
+				} 
+				//
+				// A file or folder got modified.
+				//
+				else if(event->mask & IN_MODIFY) {
 					eventType = EventTypes::DW_MODIFY;
-				} else if(event->mask & IN_ATTRIB) {
+				} 
+				//
+				// The flowing ones are not really implemented.
+				//
+				else if(event->mask & IN_ATTRIB) {
 					XDEVL_MODULE_INFO("IN_ATTRIB not handled.\n");
 				} else if(event->mask & IN_ACCESS) {
 					eventType = EventTypes::DW_ACCESS;
@@ -211,10 +223,33 @@ namespace xdl {
 					eventType = EventTypes::DW_CLOSE;
 				} else if(event->mask & IN_DELETE_SELF) {
 					XDEVL_MODULE_INFO("IN_DELETE_SELF not handled.\n");
-				} else if( (event->mask & IN_DELETE) or (event->mask & IN_MOVE)) {
+				} 
+				//
+				// A file or folder got removed.
+				// We handle it as delete.
+				//
+				else if(event->mask & IN_MOVED_FROM) {
+					eventType = EventTypes::DW_DELETE;
+				} 
+				//
+				// A file or folder got renamed.
+				// We handle this as create because renaming
+				// involves IN_MOVED_FROM then IN_MOVED_TO.
+				//
+				else if(event->mask & IN_MOVED_TO) {
+					eventType = EventTypes::DW_CREATE;
+				} 
+				//
+				// A file or folder got really deleted.
+				//
+				else if(event->mask & IN_DELETE) {
 					eventType = EventTypes::DW_DELETE;
 				}
 
+				//
+				// Now check which event type occurred and use the delegate
+				// to inform everyone.
+				//
 				if(eventType != EventTypes::DW_UNKNOWN) {
 					for(auto& delegate : m_delegates) {
 						delegate(types, eventType, XdevLString(event->name));
