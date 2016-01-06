@@ -1,0 +1,23 @@
+# - Find the EGL include file and library
+#
+
+SET(EGL_INC_SEARCH_PATH
+	/opt/vc/include
+)
+
+SET(EGL_LIB_SEARCH_PATH
+	/opt/vc/lib
+)
+
+
+FIND_PATH(EGL_INCLUDE_DIR NAMES EGL/egl.h PATHS ${EGL_INC_SEARCH_PATH})
+FIND_LIBRARY(EGL_LIBRARY NAMES egl EGL libEGL PATH ${EGL_LIB_SEARCH_PATH})
+
+IF (EGL_INCLUDE_DIR AND EGL_LIBRARY)
+    SET(EGL_FOUND TRUE)
+ENDIF (EGL_INCLUDE_DIR AND EGL_LIBRARY)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(EGL DEFAULT_MSG EGL_LIBRARY EGL_INCLUDE_DIR)
+
+mark_as_advanced(EGL_INCLUDE_DIR EGL_LIBRARY)

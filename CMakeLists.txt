@@ -301,7 +301,8 @@ endif()
 
 # Build the new OpenGL Contect plugin.
 if(BUILD_GL_CONTEXT)
-	if(BUILD_EGL)
+	find_package(EGL)
+	if(EGL_FOUND)
 		add_subdirectory(XdevLPlugins/XdevLOpenGLContext/XdevLOpenGLContextEGL)
 	endif()
 		
