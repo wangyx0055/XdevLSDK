@@ -23,8 +23,6 @@
 
 #include <XdevL.h>
 #include <XdevLApplication.h>
-
-#include <XdevLRAI/GL/glew.h>
 #include <XdevLRAI/XdevLRAI.h>
 
 #include <cmath>
@@ -33,7 +31,7 @@
 class XDEVL_VERTEX_COLOR;
 
 
-static const GLfloat g_vertex_buffer_data[] = {
+static const xdl::xdl_float g_vertex_buffer_data[] = {
 	-1.0f,-1.0f,-1.0f,
 	-1.0f,-1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
@@ -83,7 +81,7 @@ static const GLfloat g_vertex_buffer_data[] = {
 	1.0f,-1.0f, 1.0f
 };
 
-static const GLfloat g_normal_buffer_data[] = {
+static const xdl::xdl_float g_normal_buffer_data[] = {
 	-1.0f, 0.0f,0.0f,
 	-1.0f, 0.0f, 0.0f,
 	-1.0f, 0.0f, 0.0f,
@@ -133,7 +131,7 @@ static const GLfloat g_normal_buffer_data[] = {
 	0.0f, 0.0f, 1.0f
 };
 
-static const GLfloat g_color_buffer_data[] = {
+static const xdl::xdl_float g_color_buffer_data[] = {
 	0.583f,  0.771f,  0.014f, 1.0f,
 	0.609f,  0.115f,  0.436f, 1.0f,
 	0.327f,  0.483f,  0.844f, 1.0f,
@@ -330,8 +328,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			// Render that squad into the first half of the viewport.
 			//
 
-			glDisable(GL_DEPTH_TEST);
-			glViewport(getWindow()->getWidth()/2.0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
+			m_rai->setActiveDepthTest(xdl::xdl_false);
+			m_rai->setViewport(getWindow()->getWidth()/2.0, 0, getWindow()->getWidth()/2.0, getWindow()->getHeight());
 			tmath::mat4 fbProjection;
 			tmath::ortho(0.0f,
 			             (float)getWindow()->getWidth(),
