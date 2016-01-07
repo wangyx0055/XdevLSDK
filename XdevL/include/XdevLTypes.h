@@ -83,7 +83,6 @@ namespace xdl {
 	typedef uint16_t 			xdl_uint16;
 	typedef uint32_t			xdl_uint32;
 	typedef uint64_t			xdl_uint64;
-
 #endif
 
 	typedef bool			xdl_bool;

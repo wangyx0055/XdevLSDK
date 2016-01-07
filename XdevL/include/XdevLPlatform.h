@@ -60,6 +60,23 @@
 	#error XDEVL_UNKNOWN_PLATFORM
 #endif
 
+//
+// Add deprecated macro
+//
+#ifdef __GNUC__
+	#if __GNUC__ > 4 || (__GNUC__ == 4) && (__GNUC_MINOR__ > 9 || (__GNUC_MINOR__ == 9 && __GNUC_PATCHLEVEL__ > 0))
+		#define XDEVL_DEPRECATED [[deprecated]]
+	#else
+		#define XDEVL_DEPRECATED __attribute__((deprecated))
+	#endif
+
+#elif defined(_MSC_VER)
+	#define XDEVL_DEPRECATED __declspec(deprecated)
+#else
+	#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+	#define XDEVL_DEPRECATED
+#endif
+
 
 #ifndef __func__
 #if __STDC_VERSION__ < 199901L
