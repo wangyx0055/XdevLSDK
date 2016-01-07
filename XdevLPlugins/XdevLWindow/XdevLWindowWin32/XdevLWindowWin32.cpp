@@ -1043,8 +1043,8 @@ namespace xdl {
 					ev.type = MouseMotion.getHashCode();
 
 					ev.motion.windowid = window->getWindowID();
-					ev.motion.x = LOWORD(lParam);
-					ev.motion.y = HIWORD(lParam);
+					ev.motion.x = (2.0 / window->getWidth()*LOWORD(lParam) - 1.0f) * 32768;
+					ev.motion.y = -(2.0 / window->getHeight() * HIWORD(lParam) - 1.0f) * 32768;
 					ev.motion.xrel = 0;
 					ev.motion.yrel = 0;
 
