@@ -19,6 +19,15 @@
 
 #include "XdevLFileSystemWindows.h"
 
+xdl::XdevLPluginDescriptor pluginDescriptor {
+	xdl::XdevLFileSystemPluginName,
+	xdl::XdevLFileSystemModuleName,
+	xdl::XdevLFileSystemPluginMajorVersion,
+	xdl::XdevLFileSystemPluginMinorVersion,
+	xdl::XdevLFileSystemPluginPatchVersion
+};
+
+
 xdl::XdevLModuleDescriptor moduleDirectoryWatcherDescriptor {
 	xdl::XdevLFileSystemVendor,
     xdl::XdevLFileSystemAuthor,
@@ -146,6 +155,15 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 	}
 
 	return xdl::ERR_OK;
+}
+
+extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
+	return &pluginDescriptor;
+}
+
+extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
+	if(obj)
+		delete obj;
 }
 
 namespace xdl {
