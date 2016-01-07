@@ -605,14 +605,6 @@ namespace xdl {
 		SDL_WarpMouseInWindow(m_window, x,y);
 	}
 
-	void XdevLWindowSDL::grabPointer() {
-
-	}
-
-	void XdevLWindowSDL::ungrabPointer() {
-
-	}
-
 	void XdevLWindowSDL::setInputFocus() {
 
 	}

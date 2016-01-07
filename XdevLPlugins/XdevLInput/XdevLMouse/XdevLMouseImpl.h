@@ -347,7 +347,6 @@ namespace xdl {
 				m_mouse_moved = true;
 
 				if(m_window && m_relativeMode) {
-					m_window->grabPointer();
 
 					if( (x <= 0) || (x >= m_windowWidth - 1) || (y <= 0) || (y >= m_windowHeight - 1))   {
 						m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);

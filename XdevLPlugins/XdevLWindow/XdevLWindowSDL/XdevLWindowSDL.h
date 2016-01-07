@@ -125,8 +125,6 @@ namespace xdl {
 			virtual void hide() override;
 			virtual xdl_bool isHidden() override;
 			virtual void raise() override;
-			virtual void grabPointer() override;
-			virtual void ungrabPointer() override;
 			virtual void setInputFocus() override;
 			virtual xdl_bool hasFocus() override;
 			virtual void setParent(XdevLWindow* window) override;

@@ -1096,20 +1096,6 @@ namespace xdl {
 		}
 	}
 
-	void XdevLWindowX11::grabPointer() {
-//		for(;;) {
-//			xdl_int result = XGrabPointer(globalDisplay, m_window, True, 0, GrabModeAsync, GrabModeAsync, m_window, None, CurrentTime);
-//			if(result == GrabSuccess) {
-//				break;
-//			}
-//		}
-//		XFlush(globalDisplay);
-	}
-
-	void XdevLWindowX11::ungrabPointer() {
-//		XUngrabPointer(globalDisplay, CurrentTime);
-	}
-
 	void XdevLWindowX11::setInputFocus() {
 
 		XWindowAttributes attribute;

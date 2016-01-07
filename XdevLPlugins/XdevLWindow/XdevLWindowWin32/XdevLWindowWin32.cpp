@@ -641,14 +641,6 @@ namespace xdl {
 		}
 	}
 
-	void XdevLWindowDeviceWin32::grabPointer() {
-		SetCapture(m_wnd);
-	}
-
-	void XdevLWindowDeviceWin32::ungrabPointer() {
-		ReleaseCapture();
-	}
-
 	void XdevLWindowDeviceWin32::setInputFocus() {
 		::SetFocus(m_wnd);
 	}

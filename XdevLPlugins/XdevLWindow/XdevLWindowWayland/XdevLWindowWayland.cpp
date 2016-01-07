@@ -553,14 +553,6 @@ namespace xdl {
 
 	}
 
-	void XdevLWindowWayland::grabPointer() {
-
-	}
-
-	void XdevLWindowWayland::ungrabPointer() {
-
-	}
-
 	void XdevLWindowWayland::setInputFocus() {
 
 	}
