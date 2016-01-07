@@ -23,6 +23,15 @@
   "buildType": "",
   "arguments": [],
   "parentProject": ""
+ }, {
+  "name": "Debug_Win64",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
  }]]]>
     </Plugin>
   </Plugins>
@@ -32,6 +41,16 @@
     <File Name="filesystem_demo.cpp"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -81,7 +100,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -124,7 +143,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -165,7 +184,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -205,7 +224,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -245,7 +264,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -285,7 +304,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -325,7 +344,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -365,7 +384,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -405,7 +424,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -445,7 +464,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -453,14 +472,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
-  <Dependencies Name="Debug_MacOSX64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
-  <Dependencies Name="Release_MacOSX64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>

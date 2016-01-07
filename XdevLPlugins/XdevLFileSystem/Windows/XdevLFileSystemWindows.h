@@ -35,7 +35,7 @@
 
 namespace xdl {
 
-	
+
 	// Holds the plugins major version number.
 	const xdl_uint XdevLFileSystemPluginMajorVersion = XDEVL_FILESYSTEM_MAJOR_VERSION;
 
@@ -78,7 +78,7 @@ namespace xdl {
 	// Holds the Patch version number.
 	const xdl_uint XdevLDirectoryWatcherPatchVersion = XDEVL_FILESYSTEM_MODULE_DIRECTORYWATCHER_PATCH_VERSION;
 
-	
+
 	static const XdevLString XdevLFileSystemVendor {
 		"www.codeposer.net"
 	};
@@ -105,10 +105,10 @@ namespace xdl {
 		XdevLModuleName("XdevLDirectory"),
 		XdevLModuleName("XdevLDirectoryWatcher")
 	};
-	
-	
-	
-	
+
+	class XdevLFileWindows;
+	class XdevLDirectoryWatcherWindows;
+
 	class XdevLFileWindows : public XdevLModuleImpl<XdevLFile> {
 		public:
 			XdevLFileWindows(XdevLModuleCreateParameter* parameter);
@@ -117,32 +117,32 @@ namespace xdl {
 			}
 
 			virtual xdl_int open(const XdevLOpenForReadOnly& readOnly, const XdevLFileName& filename) {
-				
+
 				m_filename = filename;
 				return 0;
 			}
 
 			virtual xdl_int open(const XdevLOpenForWriteOnly& writeOnly, const XdevLFileName& filename) {
-				
+
 				m_filename = filename;
 				return 0;
 			}
 
 			virtual xdl_int open(const XdevLOpenForReadWrite& readWrite, const XdevLFileName& filename) {
-				
+
 				m_filename = filename;
 				return 0;
 			}
 
 			virtual xdl_int open(const XdevLOpenForAppend& append, const XdevLFileName& filename) {
-				
+
 				m_filename = filename;
 				return 0;
 			}
 
 			/// Close the file.
 			virtual xdl_int close() {
-				
+
 				m_filename = "";
 				return 0;
 			}
@@ -325,7 +325,7 @@ namespace xdl {
 			virtual xdl_int rename(const XdevLString& oldname, const XdevLString& newname);
 			virtual XdevLString getWorkingDirectory();
 			virtual xdl_bool find(const XdevLString& name, XdevLDirectoryEntity& entity);
-			
+
 			virtual std::vector<XdevLString> getAllFiles(const XdevLString& directoryName, xdl_bool recursive, const XdevLString& pattern = XdevLString(""));
 			virtual std::vector<XdevLString> getAllDirectories(const XdevLString& directoryName, xdl_bool recursive);
 			virtual std::vector<XdevLString> getAllDirectoriesContainsFile(const XdevLString& directoryName, xdl_bool recursive, const XdevLString& pattern = XdevLString(""));
@@ -335,12 +335,25 @@ namespace xdl {
 			void getDirectoryList(std::vector<XdevLString>& folderList, const XdevLString& currentDirectoryName, xdl_bool recursive);
 			void getFileList(std::vector<XdevLString>& fileList, const XdevLString& currentDirectoryName, xdl_bool recursive, const XdevLString& pattern);
 			void getDirectoryContainsFileList(std::vector<XdevLString>& directoryList, const XdevLString& currentDirectoryName, xdl_bool recursive, const XdevLString& pattern);
+		private:
+			HANDLE m_handle;
+			std::vector<XdevLDirectoryEntity> m_directoryItems;
+			std::vector<XdevLDirectoryEntity>::iterator m_directoryItemsIterator;
 	};
-	
-	
-	
-	
-	
+
+
+	class XdevLDirectoryWatcherWindowsItem {
+		public:
+			HANDLE m_handle;
+			OVERLAPPED m_overlapped;
+			DWORD m_notifyFilter;
+			xdl_bool m_recursive;
+			xdl_bool m_stopNow;
+			XdevLDirectoryWatcherWindows* m_directoryWatcher;
+			BYTE m_buffer[32 * 1024];
+			XdevLString m_directorName;
+	};
+
 	class XdevLDirectoryWatcherWindows : public XdevLModuleImpl<XdevLDirectoryWatcher> {
 		public:
 			XdevLDirectoryWatcherWindows(XdevLModuleCreateParameter* parameter);
@@ -355,12 +368,18 @@ namespace xdl {
 			virtual int registerDelegate(const XdevLDirectoryWatcherDelegateType& delegate);
 			virtual int unregisterDelegate(const XdevLDirectoryWatcherDelegateType& delegate);
 
-		private:
+		public:
 
 			void threadHandle();
+			static void CALLBACK ChangeNotification(::DWORD Error, ::DWORD NumBytes, LPOVERLAPPED InOverlapped);
+			void handleChange(XdevLDirectoryWatcherWindowsItem* watchteritem, const XdevLString& filename, unsigned long action);
+
+			XdevLDirectoryWatcherWindowsItem* createWatch(LPCTSTR szDirectory, bool recursive, DWORD mNotifyFilter);
+			void destroyWatch(XdevLDirectoryWatcherWindowsItem* watcherItem);
+			bool refreshWatch(XdevLDirectoryWatcherWindowsItem* watcherItem, xdl_bool clear = xdl_false);
 
 		private:
-
+			std::vector<XdevLDirectoryWatcherWindowsItem*> m_watcherItems;
 			std::thread m_watcherThread;
 			std::mutex m_mutex;
 			std::atomic<xdl_bool> m_runThread;
