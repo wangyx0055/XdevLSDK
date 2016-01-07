@@ -132,6 +132,16 @@
   </VirtualDirectory>
   <Dependencies Name="Debug_MacOSX_64"/>
   <Dependencies Name="Release_MacOSX_64"/>
+  <Dependencies Name="Debug_Linux32"/>
+  <Dependencies Name="Debug_Linux64"/>
+  <Dependencies Name="Debug_MacOSX64"/>
+  <Dependencies Name="Debug_Win32"/>
+  <Dependencies Name="Debug_Win64"/>
+  <Dependencies Name="Release_Linux32"/>
+  <Dependencies Name="Release_Linux64"/>
+  <Dependencies Name="Release_MacOSX64"/>
+  <Dependencies Name="Release_Win32"/>
+  <Dependencies Name="Release_Win64"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -283,7 +293,6 @@
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
         <LibraryPath Value="$(XDEVL_PLUGINS)/lib"/>
         <Library Value="XdevLd"/>
-        <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../bin/$(ProjectName)d" IntermediateDirectory="$(ConfigurationName)" Command="$(ProjectName)d" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -489,11 +498,10 @@
       <Linker Options="-O2" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
         <Library Value="XdevL"/>
-        <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../bin/$(ProjectName)" IntermediateDirectory="$(ConfigurationName)" Command="$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="Default" DbgSetName="Default">
+      <Environment EnvVarSetName="Default" DbgSetName="">
         <![CDATA[]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
@@ -529,7 +537,6 @@
       <Linker Options="-O2" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
         <Library Value="XdevL"/>
-        <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../bin/$(ProjectName)" IntermediateDirectory="$(ConfigurationName)" Command="$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -565,14 +572,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug_Linux32"/>
-  <Dependencies Name="Debug_Linux64"/>
-  <Dependencies Name="Debug_MacOSX64"/>
-  <Dependencies Name="Debug_Win32"/>
-  <Dependencies Name="Debug_Win64"/>
-  <Dependencies Name="Release_Linux32"/>
-  <Dependencies Name="Release_Linux64"/>
-  <Dependencies Name="Release_MacOSX64"/>
-  <Dependencies Name="Release_Win32"/>
-  <Dependencies Name="Release_Win64"/>
 </CodeLite_Project>
