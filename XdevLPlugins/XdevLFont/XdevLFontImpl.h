@@ -84,10 +84,6 @@ namespace xdl {
 				m_textureList.push_back(fontTexture);
 			}
 
-			IPXdevLTexture getFontTexture(const XdevLGlyphMetric& gp) {
-				return m_textureList[gp.texture_id];
-			}
-
 			void setNewLineSize(xdl_float newLineSize) {
 				m_newLine = newLineSize;
 			}

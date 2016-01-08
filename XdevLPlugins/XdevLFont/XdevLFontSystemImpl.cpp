@@ -62,19 +62,9 @@ namespace xdl {
 	}
 	
 	xdl_int XdevLFontSystemImpl::shutdown() {
-		for(auto& font : m_fonts) {
-			delete font;
-		}
 		return ERR_OK;
 	}
-	
-	void XdevLFontSystemImpl::destroy(IPXdevLFont font) {
-		auto tmp = std::find(m_fonts.begin(), m_fonts.end(), font);
-		if(tmp != m_fonts.end()) {
-			m_fonts.erase(tmp);
-			delete *tmp;
-		}
-	}
+
 
 	void XdevLFontSystemImpl::setCreateTextureCallback(XdevLFontSystem::createTextureFromFileCallbackFunction function) {
 		assert(function && " XdevLFontImpl::setCreateTextureCallback: Parameter not valid.");
@@ -84,7 +74,7 @@ namespace xdl {
 	IPXdevLFont XdevLFontSystemImpl::createFromFontFile(const XdevLFileName& fontInfoFilename) {
 		assert(m_rai && " XdevLFontImpl::createFromFontFile: XdevLFontSystem not initialized.");
 
-		XdevLFontImpl* font = new XdevLFontImpl();
+		auto font = new XdevLFontImpl();
 
 		std::vector<std::string> fileNames;
 		xdl_int numberOfTextures = 1;
@@ -127,8 +117,7 @@ namespace xdl {
 					xdl_int error = lodepng::decode(image, width, height, filename.c_str());
 					if(error) {
 						std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
-						delete font;
-						return nullptr;
+						return std::shared_ptr<XdevLFontImpl>();
 					}
 
 					// This flipping is neccessary because the library flips the picture up side down.
@@ -164,11 +153,10 @@ namespace xdl {
 
 			calculateGlyphInformation(font, infile);
 
-			m_fonts.push_back(font);
-			return font;
+			return std::shared_ptr<XdevLFontImpl>(font);
 		}
 
-		return nullptr;
+		return std::shared_ptr<XdevLFontImpl>();
 
 	}
 
@@ -176,7 +164,7 @@ namespace xdl {
 	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const XdevLFileName& fontInfoFilename, IPXdevLTexture texture) {
 		assert(m_rai && " XdevLFontImpl::createFontFromTexture: XdevLFontSystem not initialized.");
 
-		XdevLFontImpl* font = new XdevLFontImpl();
+		auto font = std::shared_ptr<XdevLFontImpl>(new XdevLFontImpl());
 
 		IPXdevLTexture tx = texture;
 		font->addFontTexture(texture);
@@ -276,7 +264,7 @@ namespace xdl {
 			return font;
 		}
 
-		return nullptr;
+		return std::shared_ptr<XdevLFontImpl>();
 	}
 
 	XdevLGlyphMetric& XdevLFontSystemImpl::readLine(std::ifstream& os, XdevLGlyphMetric& gp) {
@@ -312,7 +300,7 @@ namespace xdl {
 			// Get the info for the glyph.
 			//
 
-			IPXdevLTexture tx = font->getFontTexture(gp);
+			IPXdevLTexture tx = font->getTexture(gp.texture_id);
 
 			//
 			// Add an offset of x,y pixel offset to the x,y coordinates.

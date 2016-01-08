@@ -337,7 +337,7 @@ int main(int argc, char* argv[]) {
 
 	fontSystem->init(window->getWidth(), window->getHeight(), rai);
 
-	xdl::XdevLFont* font = fontSystem->createFromFontFile(xdl::XdevLFileName("fonts/default_info.txt"));
+	auto font = fontSystem->createFromFontFile(xdl::XdevLFileName("fonts/default_info.txt"));
 	if(nullptr == font) {
 		xdl::destroyCore(core);
 		return xdl::ERR_ERROR;

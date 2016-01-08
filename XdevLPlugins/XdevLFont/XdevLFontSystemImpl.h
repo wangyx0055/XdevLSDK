@@ -50,7 +50,7 @@ namespace xdl {
 			virtual void setCreateTextureCallback(XdevLFontSystem::createTextureFromFileCallbackFunction function) override;
 			virtual xdl_uint getScreenWidth() const;
 			virtual xdl_uint getScreenHeight() const;
-			virtual void destroy(IPXdevLFont font);
+
 		private:
 			XdevLGlyphMetric& readLine(std::ifstream& os, XdevLGlyphMetric& gp);
 			void calculateGlyphInformation(XdevLFontImpl* font, std::ifstream& os);

@@ -24,6 +24,7 @@
 #define XDEVL_FONT_H
 
 #include <XdevLRAI/XdevLTexture.h>
+#include <memory>
 
 namespace xdl {
 
@@ -140,7 +141,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLFont IXdevLFont;
-	typedef XdevLFont* IPXdevLFont;
+	typedef std::shared_ptr<XdevLFont> IPXdevLFont;
 
 }
 
