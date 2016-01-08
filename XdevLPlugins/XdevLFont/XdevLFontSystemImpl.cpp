@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -60,7 +60,7 @@ namespace xdl {
 		m_rai->getDescriptor().registerDependency(this);
 		return ERR_OK;
 	}
-	
+
 	xdl_int XdevLFontSystemImpl::shutdown() {
 		return ERR_OK;
 	}
@@ -73,8 +73,6 @@ namespace xdl {
 
 	IPXdevLFont XdevLFontSystemImpl::createFromFontFile(const XdevLFileName& fontInfoFilename) {
 		assert(m_rai && " XdevLFontImpl::createFromFontFile: XdevLFontSystem not initialized.");
-
-		auto font = new XdevLFontImpl();
 
 		std::vector<std::string> fileNames;
 		xdl_int numberOfTextures = 1;
@@ -90,6 +88,8 @@ namespace xdl {
 			std::getline(infile, tmp);
 			ss << tmp;
 			ss >> fontSize;
+
+			auto font = new XdevLFontImpl();
 			font->setFontSize(fontSize);
 
 			ss.str("");
@@ -156,7 +156,7 @@ namespace xdl {
 			return std::shared_ptr<XdevLFontImpl>(font);
 		}
 
-		return std::shared_ptr<XdevLFontImpl>();
+		return nullptr;
 
 	}
 
@@ -164,6 +164,10 @@ namespace xdl {
 	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const XdevLFileName& fontInfoFilename, IPXdevLTexture texture) {
 		assert(m_rai && " XdevLFontImpl::createFontFromTexture: XdevLFontSystem not initialized.");
 
+		std::ifstream infile(fontInfoFilename);
+		if(!infile.is_open()) {
+			return nullptr;
+		}
 		auto font = std::shared_ptr<XdevLFontImpl>(new XdevLFontImpl());
 
 		IPXdevLTexture tx = texture;
@@ -184,87 +188,84 @@ namespace xdl {
 		xdl_uint numberOfTextures = 1;
 		xdl_uint fontSize = 0;
 
-		std::ifstream infile(fontInfoFilename);
-		if(infile.is_open()) {
-			std::string tmp;
-			std::getline(infile, tmp);
-			std::getline(infile, tmp);
 
-			std::getline(infile, tmp);
-			std::stringstream ss(tmp);
-			ss >> numberOfTextures;
-			ss.str("");
-			ss.clear();
+		std::string tmp;
+		std::getline(infile, tmp);
+		std::getline(infile, tmp);
 
-			// Get font size.
-			std::getline(infile, tmp);
-			ss << tmp;
-			ss >> fontSize;
+		std::getline(infile, tmp);
+		std::stringstream ss(tmp);
+		ss >> numberOfTextures;
+		ss.str("");
+		ss.clear();
 
-			font->setFontSize(fontSize);
+		// Get font size.
+		std::getline(infile, tmp);
+		ss << tmp;
+		ss >> fontSize;
 
-			xdl_float numCols 	= (xdl_float)tx->getWidth()/(xdl_float)fontSize;
+		font->setFontSize(fontSize);
 
-			// TODO Using maps to handle id of the glyphs? At the moment it is just a hack.
-			while(!infile.eof()) {
+		xdl_float numCols 	= (xdl_float)tx->getWidth()/(xdl_float)fontSize;
 
-				XdevLGlyphMetric gp;
-				readLine(infile, gp);
+		// TODO Using maps to handle id of the glyphs? At the moment it is just a hack.
+		while(!infile.eof()) {
 
-				//
-				// TODO This part to find the position of the glyph in the texture is some sort of hack.
-				// Make it so that all of the information is the the fontInfo.txt file.
-				//
-				xdl_uint idx = gp.character_code - 32;
+			XdevLGlyphMetric gp;
+			readLine(infile, gp);
 
-				xdl_float pos_x = idx % (xdl_int)numCols;
-				xdl_float pos_y = idx / (xdl_int)numCols;
+			//
+			// TODO This part to find the position of the glyph in the texture is some sort of hack.
+			// Make it so that all of the information is the the fontInfo.txt file.
+			//
+			xdl_uint idx = gp.character_code - 32;
 
-				xdl_float ds = 1.0/(xdl_float)tx->getWidth()*gp.width;
-				xdl_float dt = 1.0/(xdl_float)tx->getWidth()*gp.height;
+			xdl_float pos_x = idx % (xdl_int)numCols;
+			xdl_float pos_y = idx / (xdl_int)numCols;
 
-				xdl_float s = 1.0/numCols*pos_x ;
-				xdl_float t = 1.0 - 1.0/numCols*pos_y - (1.0/(xdl_float)tx->getHeight())*((fontSize - gp.height - gp.top));
+			xdl_float ds = 1.0/(xdl_float)tx->getWidth()*gp.width;
+			xdl_float dt = 1.0/(xdl_float)tx->getWidth()*gp.height;
 
-				//
-				// Add an offset of x,y pixel offset to the s,t coordinates.
-				//
-				xdl_float offset_x = 0.0/(xdl_float)tx->getWidth();
-				xdl_float offset_y = 0.0/(xdl_float)tx->getHeight();
+			xdl_float s = 1.0/numCols*pos_x ;
+			xdl_float t = 1.0 - 1.0/numCols*pos_y - (1.0/(xdl_float)tx->getHeight())*((fontSize - gp.height - gp.top));
+
+			//
+			// Add an offset of x,y pixel offset to the s,t coordinates.
+			//
+			xdl_float offset_x = 0.0/(xdl_float)tx->getWidth();
+			xdl_float offset_y = 0.0/(xdl_float)tx->getHeight();
 
 
-				gp.vertices[0].x = gp.brearing_x;
-				gp.vertices[0].y = (gp.height - gp.brearing_y);
-				gp.vertices[0].s = s - offset_x;
-				gp.vertices[0].t = t - dt - offset_y;
+			gp.vertices[0].x = gp.brearing_x;
+			gp.vertices[0].y = (gp.height - gp.brearing_y);
+			gp.vertices[0].s = s - offset_x;
+			gp.vertices[0].t = t - dt - offset_y;
 
-				gp.vertices[1].x = gp.brearing_x;
-				gp.vertices[1].y = gp.brearing_y;
-				gp.vertices[1].s = s - offset_x;
-				gp.vertices[1].t = t + offset_y;
+			gp.vertices[1].x = gp.brearing_x;
+			gp.vertices[1].y = gp.brearing_y;
+			gp.vertices[1].s = s - offset_x;
+			gp.vertices[1].t = t + offset_y;
 
-				gp.vertices[2].x = gp.brearing_x + gp.width;
-				gp.vertices[2].y = gp.brearing_y;
-				gp.vertices[2].s = s + ds + offset_x;
-				gp.vertices[2].t = t + offset_y;
+			gp.vertices[2].x = gp.brearing_x + gp.width;
+			gp.vertices[2].y = gp.brearing_y;
+			gp.vertices[2].s = s + ds + offset_x;
+			gp.vertices[2].t = t + offset_y;
 
-				gp.vertices[3].x = gp.brearing_x + gp.width;
-				gp.vertices[3].y = (gp.height - gp.brearing_y);
-				gp.vertices[3].s = s + ds + offset_x;
-				gp.vertices[3].t = t - dt - offset_y;
+			gp.vertices[3].x = gp.brearing_x + gp.width;
+			gp.vertices[3].y = (gp.height - gp.brearing_y);
+			gp.vertices[3].s = s + ds + offset_x;
+			gp.vertices[3].t = t - dt - offset_y;
 
-				//
-				// Find maximum value for the new line.
-				//
-				font->setNewLineSize(std::max(font->getNewLineSize(), gp.height));
+			//
+			// Find maximum value for the new line.
+			//
+			font->setNewLineSize(std::max(font->getNewLineSize(), gp.height));
 
-				font->addGlyph(gp);
+			font->addGlyph(gp);
 
-			}
-			return font;
 		}
+		return font;
 
-		return std::shared_ptr<XdevLFontImpl>();
 	}
 
 	XdevLGlyphMetric& XdevLFontSystemImpl::readLine(std::ifstream& os, XdevLGlyphMetric& gp) {
