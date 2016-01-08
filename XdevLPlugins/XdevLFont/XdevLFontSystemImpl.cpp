@@ -68,7 +68,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 	
-	void XdevLFontSystemImpl::destroy(XdevLFont* font) {
+	void XdevLFontSystemImpl::destroy(IPXdevLFont font) {
 		auto tmp = std::find(m_fonts.begin(), m_fonts.end(), font);
 		if(tmp != m_fonts.end()) {
 			m_fonts.erase(tmp);
@@ -81,7 +81,7 @@ namespace xdl {
 		createTextureFromFile = function;
 	}
 
-	XdevLFont* XdevLFontSystemImpl::createFromFontFile(const xdl_char* fontInfoFilename) {
+	IPXdevLFont XdevLFontSystemImpl::createFromFontFile(const xdl_char* fontInfoFilename) {
 		assert(m_rai && " XdevLFontImpl::createFromFontFile: XdevLFontSystem not initialized.");
 
 		XdevLFontImpl* font = new XdevLFontImpl();
@@ -173,7 +173,7 @@ namespace xdl {
 	}
 
 
-	XdevLFont* XdevLFontSystemImpl::createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) {
+	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) {
 		assert(m_rai && " XdevLFontImpl::createFontFromTexture: XdevLFontSystem not initialized.");
 
 		XdevLFontImpl* font = new XdevLFontImpl();

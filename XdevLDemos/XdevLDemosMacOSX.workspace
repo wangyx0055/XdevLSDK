@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="XdevLDemos" Database="./XdevLDemos.tags">
-  <Project Name="devices_demo" Path="devices_demo/devices_demo.project" Active="No"/>
   <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>

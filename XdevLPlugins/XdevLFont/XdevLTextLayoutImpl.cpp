@@ -333,7 +333,7 @@ void main(void) {                                                               
 		return ERR_OK;
 	}
 
-	void XdevLTextLayoutImpl::useFont(XdevLFont* font) {
+	void XdevLTextLayoutImpl::useFont(IPXdevLFont font) {
 		assert(font && "XdevLTextLayoutImpl::render: Font value invalid (nullptr).");
 
 		m_font = font;

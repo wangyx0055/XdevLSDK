@@ -45,12 +45,12 @@ namespace xdl {
 
 			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) override;
 			virtual xdl_int shutdown() override;
-			virtual XdevLFont* createFromFontFile(const xdl_char* fontInfoFilename) override;
-			virtual XdevLFont* createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) override;
+			virtual IPXdevLFont createFromFontFile(const xdl_char* fontInfoFilename) override;
+			virtual IPXdevLFont createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) override;
 			virtual void setCreateTextureCallback(XdevLFontSystem::createTextureFromFileCallbackFunction function) override;
 			virtual xdl_uint getScreenWidth() const;
 			virtual xdl_uint getScreenHeight() const;
-			virtual void destroy(XdevLFont* font);
+			virtual void destroy(IPXdevLFont font);
 		private:
 			XdevLGlyphMetric& readLine(std::ifstream& os, XdevLGlyphMetric& gp);
 			void calculateGlyphInformation(XdevLFontImpl* font, std::ifstream& os);
@@ -59,7 +59,7 @@ namespace xdl {
 			xdl_uint screenHeight;
 			XdevLRAI* m_rai;
 			XdevLFontSystem::createTextureFromFileCallbackFunction createTextureFromFile;
-			std::list<XdevLFont*> m_fonts;
+			std::list<IPXdevLFont> m_fonts;
 	};
 
 }

@@ -105,7 +105,7 @@ namespace xdl {
 
 			virtual xdl_uint getNumberOfTextures() const;
 
-			virtual XdevLTexture* getTexture(xdl_uint idx);
+			virtual IPXdevLTexture getTexture(xdl_uint idx);
 
 		public:
 

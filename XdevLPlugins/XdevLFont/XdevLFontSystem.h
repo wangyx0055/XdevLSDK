@@ -56,10 +56,10 @@ namespace xdl {
 			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) = 0;
 
 			/// Create a font from the font file.
-			virtual XdevLFont* createFromFontFile(const xdl_char* fontInfoFilename) = 0;
+			virtual IPXdevLFont createFromFontFile(const xdl_char* fontInfoFilename) = 0;
 
 			/// Create font from texture.
-			virtual XdevLFont* createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) = 0;
+			virtual IPXdevLFont createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) = 0;
 
 			/// Sets the function which imports a image and creates a texture.
 			virtual void setCreateTextureCallback(createTextureFromFileCallbackFunction function) = 0;
@@ -71,7 +71,7 @@ namespace xdl {
 			virtual xdl_uint getScreenHeight() const = 0;
 			
 			/// Destroy font
-			virtual void destroy(XdevLFont* font) = 0;
+			virtual void destroy(IPXdevLFont font) = 0;
 	};
 
 	typedef XdevLFontSystem		IXdevLFontSystem;

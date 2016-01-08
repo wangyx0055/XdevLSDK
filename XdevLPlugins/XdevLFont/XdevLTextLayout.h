@@ -62,7 +62,7 @@ namespace xdl {
 			virtual xdl_int init(XdevLWindow* window, XdevLRAI* rai) = 0;
 
 			/// Sets the current font to use for rendering text.
-			virtual void useFont(XdevLFont* font) = 0;
+			virtual void useFont(IPXdevLFont font) = 0;
 
 			/// Print text without optimization.
 			virtual void printText(const std::wstring& text, xdl_float x, xdl_float y) = 0;

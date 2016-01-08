@@ -135,9 +135,12 @@ namespace xdl {
 			virtual xdl_uint getNumberOfTextures() const = 0;
 
 			/// Returns a specific texture used for this font.
-			virtual XdevLTexture* getTexture(xdl_uint idx) = 0;
+			virtual IPXdevLTexture getTexture(xdl_uint idx) = 0;
 
 	};
+	
+	typedef XdevLFont IXdevLFont;
+	typedef XdevLFont* IPXdevLFont;
 
 }
 

@@ -53,7 +53,7 @@ namespace xdl {
 
 			virtual xdl_int shutdown() override;
 
-			virtual void useFont(XdevLFont* font) override;
+			virtual void useFont(IPXdevLFont font) override;
 
 			virtual void printText(const std::wstring& text, xdl_float x, xdl_float y) override;
 
@@ -91,7 +91,7 @@ namespace xdl {
 			xdl_uint				m_screenHeight;
 			XdevLWindow*			m_window;
 			XdevLRAI*				m_rai;
-			XdevLFont*				m_font;
+			IPXdevLFont				m_font;
 			XdevLShaderProgram* 	m_shaderProgram;
 			XdevLVertexShader*		m_vertexShader;
 			XdevLFragmentShader*	m_fragmentShader;

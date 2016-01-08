@@ -297,6 +297,9 @@ namespace xdl {
 			/// Returns the height of the texture.
 			virtual xdl_uint getHeight() = 0;
 	};
+	
+	typedef XdevLTexture IXdevLTexture;
+	typedef XdevLTexture* IPXdevLTexture;
 }
 
 
