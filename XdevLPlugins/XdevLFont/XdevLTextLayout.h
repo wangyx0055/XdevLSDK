@@ -24,6 +24,7 @@
 #ifndef XDEVL_TEXT_LAYOUT_H
 #define XDEVL_TEXT_LAYOUT_H
 
+#include <XdevLWindow/XdevLWindow.h>
 #include <XdevLFont/XdevLFont.h>
 #include <string>
 
@@ -59,7 +60,7 @@ namespace xdl {
 			virtual ~XdevLTextLayout() {}
 
 			/// Initialize the layout engine.
-			virtual xdl_int init(XdevLWindow* window, XdevLRAI* rai) = 0;
+			virtual xdl_int init(IPXdevLWindow window, IPXdevLRAI rai) = 0;
 
 			/// Sets the current font to use for rendering text.
 			virtual void useFont(IPXdevLFont font) = 0;

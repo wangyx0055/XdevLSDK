@@ -49,7 +49,7 @@ namespace xdl {
 
 			virtual ~XdevLTextLayoutImpl() {}
 
-			virtual xdl_int init(XdevLWindow* window, XdevLRAI* rai) override;
+			virtual xdl_int init(IPXdevLWindow window, IPXdevLRAI rai) override;
 
 			virtual xdl_int shutdown() override;
 
@@ -89,20 +89,20 @@ namespace xdl {
 		private:
 			xdl_uint				m_screenWidth;
 			xdl_uint				m_screenHeight;
-			XdevLWindow*			m_window;
-			XdevLRAI*				m_rai;
-			IPXdevLFont				m_font;
-			XdevLShaderProgram* 	m_shaderProgram;
-			XdevLVertexShader*		m_vertexShader;
-			XdevLFragmentShader*	m_fragmentShader;
+			IPXdevLWindow		m_window;
+			IPXdevLRAI			m_rai;
+			IPXdevLFont			m_font;
+			IPXdevLShaderProgram 	m_shaderProgram;
+			IPXdevLVertexShader		m_vertexShader;
+			IPXdevLFragmentShader	m_fragmentShader;
 
-			IPXdevLTexture 			m_texture;
-			XdevLVertexArray*		m_vertexArray;
-			XdevLVertexDeclaration* m_vd;
-			XdevLVertexBuffer* 		m_vertexBuffer;
+			IPXdevLTexture 						m_texture;
+			IPXdevLVertexArray				m_vertexArray;
+			IPXdevLVertexDeclaration	m_vd;
+			IPXdevLVertexBuffer 			m_vertexBuffer;
 
-			XdevLVertexArray*		m_staticVertexArray;
-			XdevLVertexBuffer* 		m_staticVertexBuffer;
+			IPXdevLVertexArray	m_staticVertexArray;
+			IPXdevLVertexBuffer m_staticVertexBuffer;
 
 			xdl_int					m_projMatrix;
 			xdl_int					m_texture0;

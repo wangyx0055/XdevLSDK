@@ -55,7 +55,7 @@ namespace xdl {
 		return screenHeight;
 	}
 
-	xdl_int XdevLFontSystemImpl::init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) {
+	xdl_int XdevLFontSystemImpl::init(xdl_uint screenWidth, xdl_uint screenHeight, IPXdevLRAI rai) {
 		m_rai = rai;
 		m_rai->getDescriptor().registerDependency(this);
 		return ERR_OK;
@@ -81,7 +81,7 @@ namespace xdl {
 		createTextureFromFile = function;
 	}
 
-	IPXdevLFont XdevLFontSystemImpl::createFromFontFile(const xdl_char* fontInfoFilename) {
+	IPXdevLFont XdevLFontSystemImpl::createFromFontFile(const XdevLFileName& fontInfoFilename) {
 		assert(m_rai && " XdevLFontImpl::createFromFontFile: XdevLFontSystem not initialized.");
 
 		XdevLFontImpl* font = new XdevLFontImpl();
@@ -90,7 +90,7 @@ namespace xdl {
 		xdl_int numberOfTextures = 1;
 		xdl_uint fontSize = 0;
 
-		std::ifstream infile(fontInfoFilename);
+		std::ifstream infile(fontInfoFilename.toString().c_str());
 		if(infile.is_open()) {
 			std::string tmp;
 			std::getline(infile, tmp);
@@ -118,7 +118,7 @@ namespace xdl {
 				// Did the user specify a external functions to create a texture out of an image file?
 				if(createTextureFromFile) {
 					// Yes, they use that to create the texture.
-					texture = createTextureFromFile(filename.c_str());
+					texture = createTextureFromFile(XdevLFileName(filename));
 				} else {
 					// No, let's use the lodepng project import PNG files.
 					std::vector<xdl_uint8> image;
@@ -173,7 +173,7 @@ namespace xdl {
 	}
 
 
-	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const xdl_char* fontInfoFilename, IPXdevLTexture texture) {
+	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const XdevLFileName& fontInfoFilename, IPXdevLTexture texture) {
 		assert(m_rai && " XdevLFontImpl::createFontFromTexture: XdevLFontSystem not initialized.");
 
 		XdevLFontImpl* font = new XdevLFontImpl();

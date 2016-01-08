@@ -276,7 +276,7 @@ void main(void) {                                                               
 		m_shadowOffset[1] = yOffset;
 	}
 
-	xdl_int XdevLTextLayoutImpl::init(XdevLWindow* window, XdevLRAI* rai) {
+	xdl_int XdevLTextLayoutImpl::init(IPXdevLWindow window, IPXdevLRAI rai) {
 		m_rai = rai;
 		m_rai->getDescriptor().registerDependency(this);
 		m_window = window;

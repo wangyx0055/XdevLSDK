@@ -43,10 +43,10 @@ namespace xdl {
 
 			virtual ~XdevLFontSystemImpl();
 
-			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) override;
+			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, IPXdevLRAI rai) override;
 			virtual xdl_int shutdown() override;
-			virtual IPXdevLFont createFromFontFile(const xdl_char* fontInfoFilename) override;
-			virtual IPXdevLFont createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) override;
+			virtual IPXdevLFont createFromFontFile(const XdevLFileName& fontInfoFilename) override;
+			virtual IPXdevLFont createFontFromTexture(const XdevLFileName& fontInfoFilename, IPXdevLTexture texture) override;
 			virtual void setCreateTextureCallback(XdevLFontSystem::createTextureFromFileCallbackFunction function) override;
 			virtual xdl_uint getScreenWidth() const;
 			virtual xdl_uint getScreenHeight() const;
@@ -57,7 +57,7 @@ namespace xdl {
 		private:
 			xdl_uint screenWidth;
 			xdl_uint screenHeight;
-			XdevLRAI* m_rai;
+			IPXdevLRAI m_rai;
 			XdevLFontSystem::createTextureFromFileCallbackFunction createTextureFromFile;
 			std::list<IPXdevLFont> m_fonts;
 	};

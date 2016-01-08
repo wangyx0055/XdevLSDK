@@ -34,9 +34,9 @@
 xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
-	xdl::XdevLFontPluginMajorVersion,
-	xdl::XdevLFontPluginMinorVersion,
-	xdl::XdevLFontPluginPatchVersion
+	XDEVLFONT_MAJOR_VERSION,
+	XDEVLFONT_MINOR_VERSION,
+	XDEVLFONT_PATCH_VERSION
 };
 
 xdl::XdevLModuleDescriptor fontSystemModuleDesc {
@@ -45,9 +45,9 @@ xdl::XdevLModuleDescriptor fontSystemModuleDesc {
 	xdl::moduleNames[0],
 	xdl::copyright,
 	xdl::description,
-	xdl::XdevLFontSystemMajorVersion,
-	xdl::XdevLFontSystemMinorVersion,
-	xdl::XdevLFontSystemPatchVersion
+	XDEVLFONTSYSTEM_MODULE_MAJOR_VERSION,
+	XDEVLFONTSYSTEM_MODULE_MINOR_VERSION,
+	XDEVLFONTSYSTEM_MODULE_PATCH_VERSION
 };
 
 
@@ -57,9 +57,9 @@ xdl::XdevLModuleDescriptor textLayoutModuleDesc {
 	xdl::moduleNames[1],
 	xdl::copyright,
 	xdl::description,
-	xdl::XdevLTextLayoutMajorVersion,
-	xdl::XdevLTextLayoutMinorVersion,
-	xdl::XdevLTextLayoutPatchVersion
+	XDEVLTEXTLAYOUT_MODULE_MAJOR_VERSION,
+	XDEVLTEXTLAYOUT_MODULE_MINOR_VERSION,
+	XDEVLTEXTLAYOUT_MODULE_PATCH_VERSION
 };
 
 extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {

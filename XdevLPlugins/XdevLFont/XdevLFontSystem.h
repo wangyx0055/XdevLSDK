@@ -48,18 +48,18 @@ namespace xdl {
 	class XdevLFontSystem : public XdevLModule {
 		public:
 			/// The function pointer that creates a texture out of an image.
-			typedef IPXdevLTexture (*createTextureFromFileCallbackFunction)(const xdl_char* imageFileName);
+			typedef IPXdevLTexture (*createTextureFromFileCallbackFunction)(const XdevLFileName& imageFileName);
 
 			virtual ~XdevLFontSystem() {};
 
 			/// Initialize the font system.
-			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, XdevLRAI* rai) = 0;
+			virtual xdl_int init(xdl_uint screenWidth, xdl_uint screenHeight, IPXdevLRAI rai) = 0;
 
 			/// Create a font from the font file.
-			virtual IPXdevLFont createFromFontFile(const xdl_char* fontInfoFilename) = 0;
+			virtual IPXdevLFont createFromFontFile(const XdevLFileName& fontInfoFilename) = 0;
 
 			/// Create font from texture.
-			virtual IPXdevLFont createFontFromTexture(const xdl_char* fontInfoFilename, IPXdevLTexture texture) = 0;
+			virtual IPXdevLFont createFontFromTexture(const XdevLFileName& fontInfoFilename, IPXdevLTexture texture) = 0;
 
 			/// Sets the function which imports a image and creates a texture.
 			virtual void setCreateTextureCallback(createTextureFromFileCallbackFunction function) = 0;

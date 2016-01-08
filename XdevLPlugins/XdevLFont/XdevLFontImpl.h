@@ -33,51 +33,22 @@
 
 namespace xdl {
 
-	// Holds the major version number of the plugin.
-	const xdl_uint XdevLFontPluginMajorVersion = XDEVLFONT_MAJOR_VERSION;
-
-	// Holds the Minor version number of the plugin.
-	const xdl_uint XdevLFontPluginMinorVersion = XDEVLFONT_MINOR_VERSION;
-
-	// Holds the Patch version number of the plugin.
-	const xdl_uint XdevLFontPluginPatchVersion = XDEVLFONT_PATCH_VERSION;
-
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLFontSystemMajorVersion = XDEVLFONTSYSTEM_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLFontSystemMinorVersion = XDEVLFONTSYSTEM_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLFontSystemPatchVersion = XDEVLFONTSYSTEM_MODULE_PATCH_VERSION;
-
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLTextLayoutMajorVersion = XDEVLTEXTLAYOUT_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLTextLayoutMinorVersion = XDEVLTEXTLAYOUT_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLTextLayoutPatchVersion = XDEVLTEXTLAYOUT_MODULE_PATCH_VERSION;
-	
-
-
 	static const XdevLString vendor {
 		"www.codeposer.net"
 	};
+
 	static const XdevLString author {
 		"Cengiz Terzibas"
 	};
+
 	static const XdevLString copyright {
 		"(c) 2005 - 2015 Cengiz Terzibas."
 	};
+
 	static const XdevLString pluginName {
 		"XdevLFont"
 	};
+
 	static const XdevLString description {
 		"This plugin helps rendering fonts."
 	};
