@@ -109,7 +109,7 @@ int main (int argc, char *argv[]) {
 	std::ifstream file_read("audio.raw", std::ios::binary);
 	file_read.seekg (0, std::ios::beg);
 
-	xdl::xdl_uint8* tmp2 = new xdl::xdl_uint8[alsa_playback->getBufferSize()];
+	auto tmp2 = new xdl::xdl_uint8[alsa_playback->getBufferSize()];
 
 	for(;;) {
 		file_read.read((char*)tmp2, alsa_capture->getBufferSize());

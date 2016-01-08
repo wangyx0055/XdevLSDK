@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 	//
 	// Get the joystick module instance.
 	//
-	xdl::IPXdevLJoystick joystick = xdl::createModule<xdl::IPXdevLJoystick>(core, xdl::XdevLModuleName("XdevLJoystick"), xdl::XdevLID("MyJoystick"));
+	auto joystick = xdl::createModule<xdl::IPXdevLJoystick>(core, xdl::XdevLModuleName("XdevLJoystick"), xdl::XdevLID("MyJoystick"));
 	if(xdl::isModuleNotValid(joystick)) {
 		xdl::destroyCore(core);
 		return -1;
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	//
 	// We need info which joysticks are available.
 	//
-	xdl::IPXdevLJoystickServer joystickServer = xdl::createModule<xdl::IPXdevLJoystickServer>(core, xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("MyJoystickServer"));
+	auto joystickServer = xdl::createModule<xdl::IPXdevLJoystickServer>(core, xdl::XdevLModuleName("XdevLJoystickServer"), xdl::XdevLID("MyJoystickServer"));
 	if(nullptr == joystickServer) {
 		xdl::destroyCore(core);
 		return -1;
@@ -108,11 +108,11 @@ int main(int argc, char **argv) {
 	// Now we use delegates that will help us to managed events. When a specific button or axis is used
 	// the delegate will call a function/member function that we can use to do some stuff.
 	//
-	xdl::XdevLButtonIdDelegateType button0Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton0>();
-	xdl::XdevLButtonIdDelegateType button1Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton1>();
+	auto button0Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton0>();
+	auto button1Delegate = xdl::XdevLButtonIdDelegateType::Create<&callbackButton1>();
 
-	xdl::XdevLAxisIdDelegateType axis0Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis0>();
-	xdl::XdevLAxisIdDelegateType axis1Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis1>();
+	auto axis0Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis0>();
+	auto axis1Delegate = xdl::XdevLAxisIdDelegateType::Create<&callbackAxis1>();
 
 	joystick->registerDelegate(xdl::XdevLString("BUTTON_0"), button0Delegate);
 	joystick->registerDelegate(xdl::XdevLString("BUTTON_1"), button1Delegate);
