@@ -9,6 +9,7 @@ Only that plugin needs to be compiled.
 * Extreme Modular. The system can be extended using new plugins.
 * Uses modern C++11/(14) features.
 * You can use it to build your own game engine.
+* Tons of (well let's say a lot :D) plugins to help you out. See below.
 
 # Here some features
 * Uses C++11/(14) standard.
