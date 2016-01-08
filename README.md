@@ -3,22 +3,29 @@ XdevL is a powerful cross-platform C++ Object and Plug-In Oriented programming f
 Games or device oriented applications. The whole system can be extended using/developing additional Plugins which
 makes it extreme flexible.
 
-Here some features:
+# Why would you use it?
+* Lot less re-compiling and re-linking.A bugfix of a plugin will not force you to recompile your project.
+Only that plugin needs to be compiled.
+* Extreme Modular. The system can be extended using new plugins.
+* Uses modern C++11/14 features.
+* You can use it to build your own game engine.
 
-* Switch to C++11
-* XdevLOpenGLContext plugin that helps to create a OpenGL context. GLX, CGL, WGL and EGL are supported.
-* XdevLFileSystem plugin that helps you to handling files and folders. A directory watcher is added that helps you to track if files or folders gets created/deleted or modified.
-* XdevLRAI is attempt to make a cross platform/3D api rendering interface. At the moment it supports OpenGL based renderer. Vulkan API will be the next which will be implemented and DX9/10/11/12 can be done in future releases.
-* XdevLFont that uses XdevLRAI to render text in your 3D graphics projects.
-* XdevLWindow supports now native windows using X11, Wayland, Cocoa, Win32 and SDL2. SDL2 is used on platforms which are not supported yet in the XdevL framework. Android, IOS and HTML5 are planned.
-* XdevLSharedMemory, XdevLSemaphore and XdevLRingBuffer
-* XdevLDelegates for fast delegates. Is another way of handling callback programming.
-* XdevLAudioPlayback and XdevLAudioCapture to play and record natively. With those new interfaces it is/will be possible to write your own synthesizer and record from the mic. Future ideas are to have plugins that can be linked to add effects during playback or recording.
-* XdevLBluetooth for data transfer over bluetooth support.
-* XdevLSerial for data transfer over serial port.
-* XdevLFTDI for FTDI Usb serial port devics.
-* XdevLArrayModifier to modify arrays without worrying about making casting erros.
-* XdevLImage/XdevLImagePlugin Image import support .bmp files. Soon it will support .png, .jpg and .tga files.
-* XdevLNetwork to handle TCP/UDP sockets. Supports either to send raw data or to send arrays that holds a structure description to make your code more cross platform. 
-* XdevLKeyboard, XdevLMouse and XdevLJoystick to get easy access to your keyboard, mouse and joysticks.
-* XdevLOgre that create a basic OGRE instance. With this and the whole XdevL plugins you are ready to write your own game engine.
+# Here some features
+* Uses C++11 standard.
+* Cross Platform (GNU/Linux, MacOSX and Windows supported. Android and IOS are planed.)
+* Supports plugins and modules which makes the system extreme expandable and flexible.
+* Shared memory,Semaphore support using XdevLSharedMemory and XdevLSemaphore class.
+* Basic threading support thread::Thread and thread::Mutex and thread::ConditionalVariable.
+* Xml file parsing (it's the tinyxml project http://www.grinninglizard.com/tinyxml/)
+* Extended string/filename parsing.
+* Support for fast delegates. (Another way of callback functions).
+* Array manipulators.
+* Support for different types of control devices like, Keyboard, Mouse and Joystick
+* Cross platform 3D rendering using XdevLRAI. One implementation is using OpenGL 3.3+ and Vulkan is planned.
+* Audio playback and record using XdevLAudioPlayback and XdevLAudioCapture.
+* Bluetooth and Serial port support.
+* Networking TCP/UDP.
+* File/Folder handling using XdevLFile, XdevLDirectory and XdevLDirectoryWatcher.
+* OpenGL context using native version as GLX, WGL, CGL and EGL.
+* Support for font rendering using XdevLFont and XdevLRAI
+* Image import support for Jpeg, Png, Bmp and TGA files.
