@@ -120,7 +120,7 @@ namespace xdl {
 		return XdevLJoystickBase<XdevLJoystick>::init();
 	}
 
-	xdl_int XdevLJoystickImpl::create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId) {
+	xdl_int XdevLJoystickImpl::create(IPXdevLJoystickServer joystickServer, const XdevLJoystickId& joystickId) {
 		return XdevLJoystickBase<XdevLJoystick>::create(joystickServer, joystickId);
 	}
 	

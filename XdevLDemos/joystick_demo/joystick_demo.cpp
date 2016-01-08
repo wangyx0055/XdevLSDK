@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	//
 	// Plug the necessary plugins.
 	//
-	xdl::plug(core, xdl::XdevLPluginName("XdevLJoystickServerMac"), xdl::XdevLVersion(0, 1, 0));
+	xdl::plug(core, xdl::XdevLPluginName("XdevLJoystickServerLinux"), xdl::XdevLVersion(0, 1, 0));
 	xdl::plug(core, xdl::XdevLPluginName("XdevLJoystick"), xdl::XdevLVersion(1, 0, 0));
 
 	//

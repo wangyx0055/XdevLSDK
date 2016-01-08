@@ -29,6 +29,19 @@
 
 namespace xdl {
 
+	class XdevLJoystick;
+	class XdevLJoystickDeviceInfo;
+	class XdevLJoystickServer;
+
+	typedef XdevLJoystick	IXdevLJoystick;
+	typedef XdevLJoystick*	IPXdevLJoystick;
+
+	typedef XdevLJoystickDeviceInfo	IXdevLJoystickDeviceInfo;
+	typedef XdevLJoystickDeviceInfo*	IPXdevLJoystickDeviceInfo;
+
+	typedef XdevLJoystickServer	IXdevLJoystickServer;
+	typedef XdevLJoystickServer*	IPXdevLJoystickServer;
+
 	/**
 		@enum XdevLJoystickId
 		@brief Joystick device IDs
@@ -237,7 +250,7 @@ namespace xdl {
 			virtual ~XdevLJoystick() {};
 
 			/// Create a connection to a specific joystick device.
-			virtual xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) = 0;
+			virtual xdl_int create(IPXdevLJoystickServer joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) = 0;
 
 			/// Change joystick device.
 			virtual xdl_int useJoystick(const XdevLJoystickId& joystickId) = 0;
@@ -272,15 +285,6 @@ namespace xdl {
 			*/
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
 	};
-
-	typedef XdevLJoystick	IXdevLJoystick;
-	typedef XdevLJoystick*	IPXdevLJoystick;
-	typedef XdevLJoystickDeviceInfo	IXdevLJoystickDeviceInfo;
-	typedef XdevLJoystickDeviceInfo*	IPXdevLJoystickDeviceInfo;
-	typedef XdevLJoystickServer	IXdevLJoystickServer;
-	typedef XdevLJoystickServer*	IPXdevLJoystickServer;
-
-
 
 }
 

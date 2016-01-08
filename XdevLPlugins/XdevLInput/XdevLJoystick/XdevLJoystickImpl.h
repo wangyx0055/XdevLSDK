@@ -126,7 +126,7 @@ namespace xdl {
 			xdl_int useJoystick(const XdevLJoystickId& joystickId);
 
 		protected:
-			XdevLJoystickServer* m_joystickServer;
+			IPXdevLJoystickServer m_joystickServer;
 			XdevLJoystickDeviceInfo m_joystickDeviceInfo;
 
 			xdl_bool				m_joy_button_down;
