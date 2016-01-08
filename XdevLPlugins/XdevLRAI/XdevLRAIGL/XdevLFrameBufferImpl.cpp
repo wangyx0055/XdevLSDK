@@ -91,7 +91,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, XdevLTexture* texture) {
+	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, IPXdevLTexture texture) {
 
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
@@ -154,7 +154,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 	
-	xdl_int XdevLFrameBufferImpl::addDepthTarget(XdevLTexture* texture) {
+	xdl_int XdevLFrameBufferImpl::addDepthTarget(IPXdevLTexture texture) {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
 		glBindTexture(GL_TEXTURE_2D, texture->id());
@@ -276,11 +276,11 @@ namespace xdl {
 		return m_id;
 	}
 
-	XdevLTexture* XdevLFrameBufferImpl::getTexture(xdl_uint idx) {
+	IPXdevLTexture XdevLFrameBufferImpl::getTexture(xdl_uint idx) {
 		return m_colorTargetTextures[idx];
 	}
 
-	XdevLTexture* XdevLFrameBufferImpl::getDepthTexture() {
+	IPXdevLTexture XdevLFrameBufferImpl::getDepthTexture() {
 		return &m_depthTexture;
 	}
 

@@ -218,31 +218,31 @@ namespace xdl {
 			// Destroying methods.
 			//
 			/// Destroy a Vertex Declaration.
-			virtual xdl_int destroy(XdevLVertexDeclaration* vertexDeclaration) = 0;
+			virtual xdl_int destroy(IPXdevLVertexDeclaration vertexDeclaration) = 0;
 
 			/// Destroy a Shader Program.
-			virtual xdl_int destroy(XdevLShaderProgram* shaderProgram) = 0;
+			virtual xdl_int destroy(IPXdevLShaderProgram shaderProgram) = 0;
 
 			/// Destroy a Shader.
-			virtual xdl_int destroy(XdevLShader* shader) = 0;
+			virtual xdl_int destroy(IPXdevLShader shader) = 0;
 
 			/// Destroy a Vertex Array.
-			virtual xdl_int destroy(XdevLVertexArray* vertexArray) = 0;
+			virtual xdl_int destroy(IPXdevLVertexArray vertexArray) = 0;
 
 			/// Destroy a Vertex Buffer.
-			virtual xdl_int destroy(XdevLVertexBuffer* vertexBuffer) = 0;
+			virtual xdl_int destroy(IPXdevLVertexBuffer vertexBuffer) = 0;
 
 			/// Destroy a Index Buffer.
-			virtual xdl_int destroy(XdevLIndexBuffer* indexBuffer) = 0;
+			virtual xdl_int destroy(IPXdevLIndexBuffer indexBuffer) = 0;
 
 			/// Destroy a Frame Buffer.
-			virtual xdl_int destroy(XdevLFrameBuffer* frameBuffer) = 0;
+			virtual xdl_int destroy(IPXdevLFrameBuffer frameBuffer) = 0;
 
 			/// Destroy a Texture.
-			virtual xdl_int destroy(XdevLTexture* texture) = 0;
+			virtual xdl_int destroy(IPXdevLTexture texture) = 0;
 
 			/// Destroy a Cube Texture.
-			virtual xdl_int destroy(XdevLTextureCube* textureCube) = 0;
+			virtual xdl_int destroy(IPXdevLTextureCube textureCube) = 0;
 
 	};
 

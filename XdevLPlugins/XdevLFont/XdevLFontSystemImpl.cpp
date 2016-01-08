@@ -109,7 +109,7 @@ namespace xdl {
 			ss << tmp;
 			ss >> numberOfTextures;
 
-			XdevLTexture* texture = nullptr;
+			IPXdevLTexture texture = nullptr;
 
 			for(auto id = 0; id < numberOfTextures; id++) {
 				std::string filename;
@@ -173,12 +173,12 @@ namespace xdl {
 	}
 
 
-	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const xdl_char* fontInfoFilename, XdevLTexture* texture) {
+	IPXdevLFont XdevLFontSystemImpl::createFontFromTexture(const xdl_char* fontInfoFilename, IPXdevLTexture texture) {
 		assert(m_rai && " XdevLFontImpl::createFontFromTexture: XdevLFontSystem not initialized.");
 
 		XdevLFontImpl* font = new XdevLFontImpl();
 
-		XdevLTexture* tx = texture;
+		IPXdevLTexture tx = texture;
 		font->addFontTexture(texture);
 
 		tx->lock();
@@ -312,7 +312,7 @@ namespace xdl {
 			// Get the info for the glyph.
 			//
 
-			XdevLTexture* tx = font->getFontTexture(gp);
+			IPXdevLTexture tx = font->getFontTexture(gp);
 
 			//
 			// Add an offset of x,y pixel offset to the x,y coordinates.

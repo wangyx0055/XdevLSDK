@@ -113,7 +113,7 @@ namespace xdl {
 			virtual xdl_int createGeometryShader(XdevLGeometryShader** geometry_shader);
 			virtual xdl_int createShaderProgram(XdevLShaderProgram** program);
 
-			virtual xdl_int createTexture(XdevLTexture** texture);
+			virtual xdl_int createTexture(IPXdevLTexture* texture);
 			virtual xdl_int createTextureCube(XdevLTextureCube** textureCube);
 			virtual xdl_int createTexture3D(XdevLTexture3D** texture3D);
 
@@ -142,7 +142,7 @@ namespace xdl {
 			virtual xdl_int destroy(XdevLVertexBuffer* vertexBuffer);
 			virtual xdl_int destroy(XdevLIndexBuffer* indexBuffer);
 			virtual xdl_int destroy(XdevLFrameBuffer* frameBuffer);
-			virtual xdl_int destroy(XdevLTexture* texture);
+			virtual xdl_int destroy(IPXdevLTexture texture);
 			virtual xdl_int destroy(XdevLTextureCube* textureCube);
 
 			void shaderLog(xdl_uint shaderID);

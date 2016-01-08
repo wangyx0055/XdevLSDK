@@ -90,7 +90,7 @@ namespace xdl {
 
 	class XdevLFontImpl : public XdevLFont {
 		public:
-			typedef std::vector<XdevLTexture*> XdevLTextureArray;
+			typedef std::vector<IPXdevLTexture> XdevLTextureArray;
 			typedef std::map<xdl_uint32, XdevLGlyphMetric> XdevLGlyphMetricMap;
 
 			XdevLFontImpl();
@@ -109,11 +109,11 @@ namespace xdl {
 
 		public:
 
-			void addFontTexture(XdevLTexture* fontTexture) {
+			void addFontTexture(IPXdevLTexture fontTexture) {
 				m_textureList.push_back(fontTexture);
 			}
 
-			XdevLTexture* getFontTexture(const XdevLGlyphMetric& gp) {
+			IPXdevLTexture getFontTexture(const XdevLGlyphMetric& gp) {
 				return m_textureList[gp.texture_id];
 			}
 

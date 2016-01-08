@@ -38,10 +38,10 @@ namespace xdl {
 		virtual xdl_int init(	xdl_uint width,
 													xdl_uint height);
 		virtual xdl_int addColorTarget(xdl_uint target_index, XdevLFrameBufferColorFormat internal_format);
-		virtual xdl_int addColorTarget(xdl_uint target_index, XdevLTexture* texture);
-		virtual xdl_int addColorTarget(xdl_uint target_index, XdevLTextureCube* textureCube);
+		virtual xdl_int addColorTarget(xdl_uint target_index, IPXdevLTexture texture);
+		virtual xdl_int addColorTarget(xdl_uint target_index, IPXdevLTextureCube textureCube);
 		virtual xdl_int addDepthTarget(XdevLFrameBufferDepthFormat internal_format);
-		virtual xdl_int addDepthTarget(XdevLTexture* texture);		
+		virtual xdl_int addDepthTarget(IPXdevLTexture texture);
 		virtual xdl_int addDepthStencilTarget(XdevLFrameBufferDepthStencilFormat internal_format);
 		virtual xdl_int activate();		
 		virtual xdl_int deactivate();
@@ -56,8 +56,8 @@ namespace xdl {
 		virtual xdl_uint getHeight();
 		virtual xdl_uint getNumColorTextures();
 		virtual xdl_uint id();
-		virtual XdevLTexture* getTexture(xdl_uint idx);
-		virtual XdevLTexture* getDepthTexture();
+		virtual IPXdevLTexture getTexture(xdl_uint idx);
+		virtual IPXdevLTexture getDepthTexture();
 
 		xdl_uint m_id;
 		xdl_uint m_size;

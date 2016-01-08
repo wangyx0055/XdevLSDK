@@ -397,7 +397,7 @@ namespace xdl {
 	}
 
 
-	xdl_int XdevLOpenGLImpl::createTexture(XdevLTexture** texture) {
+	xdl_int XdevLOpenGLImpl::createTexture(IPXdevLTexture* texture) {
 		XdevLTextureImpl* tmp = new XdevLTextureImpl();
 		*texture = tmp;
 		return ERR_OK;
@@ -623,7 +623,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLTexture* texture) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLTexture texture) {
 		delete texture;
 		return ERR_OK;
 	}

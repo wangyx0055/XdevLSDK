@@ -148,12 +148,12 @@ namespace xdl {
 
 			/// Add a color target to the framebuffer.
 			virtual xdl_int addColorTarget(xdl_uint target_index, XdevLFrameBufferColorFormat internal_format) = 0;
-			virtual xdl_int addColorTarget(xdl_uint target_index, XdevLTexture* texture) = 0;
-			virtual xdl_int addColorTarget(xdl_uint target_index, XdevLTextureCube* textureCube) = 0;
+			virtual xdl_int addColorTarget(xdl_uint target_index, IPXdevLTexture texture) = 0;
+			virtual xdl_int addColorTarget(xdl_uint target_index, IPXdevLTextureCube textureCube) = 0;
 
 			/// Add a depth target to the framebuffer.
 			virtual xdl_int addDepthTarget(XdevLFrameBufferDepthFormat internal_format) = 0;
-			virtual xdl_int addDepthTarget(XdevLTexture* texture) = 0;
+			virtual xdl_int addDepthTarget(IPXdevLTexture texture) = 0;
 
 			/// Add a depth stencil target to the framebuffer.
 			virtual xdl_int addDepthStencilTarget(XdevLFrameBufferDepthStencilFormat internal_format) = 0;
@@ -195,10 +195,10 @@ namespace xdl {
 			/**
 				The default returned texture is 0.
 			*/
-			virtual XdevLTexture* getTexture(xdl_uint idx = 0) = 0;
+			virtual IPXdevLTexture getTexture(xdl_uint idx = 0) = 0;
 
 			/// Returns the depth texture.
-			virtual XdevLTexture* getDepthTexture() = 0;
+			virtual IPXdevLTexture getDepthTexture() = 0;
 
 			/// Returns the number of color targets used.
 			virtual xdl_uint getNumColorTextures() = 0;

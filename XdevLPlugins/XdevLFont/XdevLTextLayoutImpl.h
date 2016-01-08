@@ -96,7 +96,7 @@ namespace xdl {
 			XdevLVertexShader*		m_vertexShader;
 			XdevLFragmentShader*	m_fragmentShader;
 
-			XdevLTexture* 			m_texture;
+			IPXdevLTexture 			m_texture;
 			XdevLVertexArray*		m_vertexArray;
 			XdevLVertexDeclaration* m_vd;
 			XdevLVertexBuffer* 		m_vertexBuffer;

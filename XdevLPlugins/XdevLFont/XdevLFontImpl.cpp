@@ -161,7 +161,7 @@ namespace xdl {
 		return m_newLine;
 	}
 
-	XdevLTexture* XdevLFontImpl::getTexture(xdl_uint idx) {
+	IPXdevLTexture XdevLFontImpl::getTexture(xdl_uint idx) {
 		assert((idx < m_textureList.size()) && "XdevLFontImpl::getTexture: Specified index out of range.");
 		return m_textureList[idx];
 	}
