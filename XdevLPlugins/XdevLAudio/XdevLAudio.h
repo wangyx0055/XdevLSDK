@@ -135,7 +135,7 @@ namespace xdl {
 				XdevLAudioBuffer object.
 				- @b ERR_ERROR If it fails to create a buffer. The pointer (*buffer) will be set to NULL.
 			*/
-			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) = 0;
+			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, IPXdevLAudioBuffer* buffer) = 0;
 
 			/// Creates an audio source.
 			/**
@@ -146,7 +146,7 @@ namespace xdl {
 				XdevLAudioSource object.
 				- @b ERR_ERROR If it fails to create a source. The pointer (*src) will be set to NULL.
 			*/
-			virtual xdl_int createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) = 0;
+			virtual xdl_int createAudioSource(IPXdevLAudioSource* src, XdevLAudioBuffer* buffer) = 0;
 
 			/// Sets the gain of the listener.
 			virtual void setGain(xdl_float gain) = 0;

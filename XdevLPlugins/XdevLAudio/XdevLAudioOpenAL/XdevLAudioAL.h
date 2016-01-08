@@ -79,9 +79,9 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 
 			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
-			virtual xdl_int createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) override;
-			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) override;
-			virtual xdl_int createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) override;
+			virtual xdl_int createAudioBufferFromFile(const XdevLFileName& filename, IPXdevLAudioBuffer* buffer) override;
+			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, IPXdevLAudioBuffer* buffer) override;
+			virtual xdl_int createAudioSource(IPXdevLAudioSource* src, IPXdevLAudioBuffer buffer) override;
 			virtual void setGain(xdl_float gain) override;
 			virtual xdl_int makeCurrent() override;
 			virtual xdl_int releaseCurrent() override;

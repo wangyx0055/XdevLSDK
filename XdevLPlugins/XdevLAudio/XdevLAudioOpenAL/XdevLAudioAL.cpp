@@ -267,7 +267,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) {
+	xdl_int XdevLAudioPlaybackAL::createAudioBufferFromFile(const XdevLFileName& filename, IPXdevLAudioBuffer* buffer) {
 		ALuint id = 0;
 
 		XdevLAudioBufferFormat audioFormat = AUDIO_BUFFER_FORMAT_UNKNOWN;
@@ -383,7 +383,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) {
+	xdl_int XdevLAudioPlaybackAL::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, IPXdevLAudioBuffer* buffer) {
 
 		ALenum fmat = wrapAudioBufferFormat(format, channels);
 
@@ -397,7 +397,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) {
+	xdl_int XdevLAudioPlaybackAL::createAudioSource(IPXdevLAudioSource* src, IPXdevLAudioBuffer buffer) {
 
 		XdevLAudioSourceAL* audioSource = new XdevLAudioSourceAL();
 		if(!audioSource) {
