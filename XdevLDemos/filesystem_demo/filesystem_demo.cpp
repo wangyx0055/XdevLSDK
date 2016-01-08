@@ -76,8 +76,6 @@ void watchDirectory(const xdl::XdevLDirectoryWatcher::ItemTypes& types, const xd
 
 int main(int argc, char** argv) {
 
-	std::cout << XDEVL_ERROR(xdl::ERR_OK, xdl::XdevLString("Nothing special")) << std::endl;
-
 	// Create the core system.
 	if(xdl::createCore(&core) != xdl::ERR_OK) {
 		return xdl::ERR_ERROR;

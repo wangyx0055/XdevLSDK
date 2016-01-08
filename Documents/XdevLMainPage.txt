@@ -10,6 +10,12 @@ of XdevL is managing plug-ins and modules in an easy way. At the moment
 play sounds, check keyboard, mouse and joystick events, render 3D graphics with 
 OGRE or raw OpenGL and sending data over the network using UDP sockets.
 
+@section xdevl_reason Reason to use
+-# Lot less re-compiling and re-linking.A bugfix of a plugin will not force you to recompile your project.
+Only that plugin needs to be compiled.
+-# Extreme Modular. The system can be extended using new plugins.
+-# Uses modern C++11/14 features.
+
 @section xdevl_features Features
 
 -# Uses C++11 standard.
