@@ -122,7 +122,7 @@ namespace xdl {
 			xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
 			xdl_int registerDelegate(const XdevLAxisDelegateType& delegate);
 
-			xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId);
+			xdl_int create(IPXdevLJoystickServer joystickServer, const XdevLJoystickId& joystickId);
 			xdl_int useJoystick(const XdevLJoystickId& joystickId);
 
 		protected:
@@ -208,7 +208,7 @@ namespace xdl {
 	}
 
 	template<typename T>
-	xdl_int XdevLJoystickBase<T>::create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId) {
+	xdl_int XdevLJoystickBase<T>::create(IPXdevLJoystickServer joystickServer, const XdevLJoystickId& joystickId) {
 
 		if(nullptr == joystickServer) {
 			return ERR_ERROR;
@@ -490,7 +490,7 @@ namespace xdl {
 			virtual ~XdevLJoystickImpl() {}
 
 			virtual xdl_int init() override;
-			virtual xdl_int create(XdevLJoystickServer* joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) override;
+			virtual xdl_int create(IPXdevLJoystickServer joystickServer, const XdevLJoystickId& joystickId = XdevLJoystickId::JOYSTICK_DEFAULT) override;
 			virtual xdl_int useJoystick(const XdevLJoystickId& joystickId) override;
 
 			virtual xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
