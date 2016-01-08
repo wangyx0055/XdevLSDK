@@ -88,6 +88,9 @@ namespace xdl {
 			/// Returns the depth of the texture.
 			virtual xdl_uint getDepth() = 0;
 	};
+	
+	typedef XdevLTexture3D IXdevLTexture3D;
+	typedef XdevLTexture3D* IPXdevLTexture3D;
 }
 
 

@@ -88,6 +88,19 @@ namespace xdl {
 		public:
 			virtual ~XdevLGeometryShader() {}
 	};
+	
+	typedef XdevLShader IXdevLShader;
+	typedef XdevLShader* IPXdevLShader;
+	
+	typedef XdevLVertexShader IXdevLVertexShader;
+	typedef XdevLVertexShader* IPXdevLVertexShader;
+	
+	typedef XdevLFragmentShader IXdevLFragmentShader;
+	typedef XdevLFragmentShader* IPXdevLFragmentShader;
+	
+	typedef XdevLGeometryShader IXdevLGeometryShader;
+	typedef XdevLGeometryShader* IPXdevLGeometryShader;
+	
 }
 
 #endif

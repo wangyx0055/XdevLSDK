@@ -65,6 +65,9 @@ namespace xdl {
 			/// Returns the identification of the Cube Map texture.
 			virtual xdl_uint id() = 0;
 	};
+	
+	typedef XdevLTextureCube IXdevLTextureCube;
+	typedef XdevLTextureCube* IPXdevLTextureCube;
 
 }
 

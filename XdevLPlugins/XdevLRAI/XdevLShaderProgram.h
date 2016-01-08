@@ -90,6 +90,9 @@ namespace xdl {
 			virtual xdl_uint id() = 0;
 	};
 
+	typedef XdevLShaderProgram IXdevLShaderProgram;
+	typedef XdevLShaderProgram* IPXdevLShaderProgram;
+
 }
 
 

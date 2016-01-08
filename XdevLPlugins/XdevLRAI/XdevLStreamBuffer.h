@@ -98,6 +98,9 @@ namespace xdl {
 			/// Returns the size of the buffer in bytes.
 			virtual xdl_uint 								getSize() = 0;
 	};
+	
+	typedef XdevLStreamBuffer IXdevLStreamBuffer;
+	typedef XdevLStreamBuffer* IPXdevLStreamBuffer;
 
 }
 

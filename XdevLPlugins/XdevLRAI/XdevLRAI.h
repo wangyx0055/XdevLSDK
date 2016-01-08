@@ -139,40 +139,40 @@ namespace xdl {
 			//
 
 			/// Create a Vertex Declaration
-			virtual xdl_int createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration) = 0;
+			virtual xdl_int createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration) = 0;
 
 			/// Create a Vertex Shader.
-			virtual xdl_int createVertexShader(XdevLVertexShader** vertex_shader) = 0;
+			virtual xdl_int createVertexShader(IPXdevLVertexShader* vertex_shader) = 0;
 
 			/// Create a Fragment shader.
-			virtual xdl_int createFragmentShader(XdevLFragmentShader** fragment_shader) = 0;
+			virtual xdl_int createFragmentShader(IPXdevLFragmentShader* fragment_shader) = 0;
 
 			/// Create a Geometry shader.
-			virtual xdl_int createGeometryShader(XdevLGeometryShader** geometry_shader) = 0;
+			virtual xdl_int createGeometryShader(IPXdevLGeometryShader* geometry_shader) = 0;
 
 			/// Create a Shader Program.
-			virtual xdl_int createShaderProgram(XdevLShaderProgram** program) = 0;
+			virtual xdl_int createShaderProgram(IPXdevLShaderProgram* program) = 0;
 
 			/// Create a Texture.
-			virtual xdl_int createTexture(XdevLTexture** texture) = 0;
+			virtual xdl_int createTexture(IPXdevLTexture* texture) = 0;
 
 			/// Create a Cube Texture.
-			virtual xdl_int createTextureCube(XdevLTextureCube** textureCube) = 0;
+			virtual xdl_int createTextureCube(IPXdevLTextureCube* textureCube) = 0;
 
 			/// Create a 3D Texture.
-			virtual xdl_int createTexture3D(XdevLTexture3D** texture3D) = 0;
+			virtual xdl_int createTexture3D(IPXdevLTexture3D* texture3D) = 0;
 
 			/// Create a Frame Buffer.
-			virtual xdl_int createFrameBuffer(XdevLFrameBuffer** fbo) = 0;
+			virtual xdl_int createFrameBuffer(IPXdevLFrameBuffer* fbo) = 0;
 
 			/// Create a Vertex Buffer.
-			virtual xdl_int createVertexBuffer(XdevLVertexBuffer** vertexBuffer) = 0;
+			virtual xdl_int createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer) = 0;
 
 			/// Create a Index Buffer.
-			virtual xdl_int createIndexBuffer(XdevLIndexBuffer** indexBuffer) = 0;
+			virtual xdl_int createIndexBuffer(IPXdevLIndexBuffer* indexBuffer) = 0;
 
 			/// Create a Vertex Array.
-			virtual xdl_int createVertexArray(XdevLVertexArray** vertexArray) = 0;
+			virtual xdl_int createVertexArray(IPXdevLVertexArray* vertexArray) = 0;
 
 
 			//
@@ -180,13 +180,13 @@ namespace xdl {
 			//
 
 			/// Sets the active framebuffer object.
-			virtual xdl_int setActiveFrameBuffer(XdevLFrameBuffer* frambuffer) = 0;
+			virtual xdl_int setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer) = 0;
 
 			/// Sets the active Vertex Array Object.
-			virtual xdl_int setActiveVertexArray(XdevLVertexArray* vertexArray) = 0;
+			virtual xdl_int setActiveVertexArray(IPXdevLVertexArray vertexArray) = 0;
 
 			/// Sets the active Shader Program.
-			virtual xdl_int setActiveShaderProgram(XdevLShaderProgram* shaderProgram) = 0;
+			virtual xdl_int setActiveShaderProgram(IPXdevLShaderProgram shaderProgram) = 0;
 
 			//
 			// Drawing methods.

@@ -207,6 +207,8 @@ namespace xdl {
 			virtual xdl_uint id() = 0;
 	};
 
+	typedef XdevLFrameBuffer IXdevLFrameBuffer;
+	typedef XdevLFrameBuffer* IPXdevLFrameBuffer;
 }
 
 #endif

@@ -101,6 +101,9 @@ namespace xdl {
 			}
 			std::vector<XdevLVertexDeclarationItem*> m_list;
 	};
+	
+	typedef XdevLVertexDeclaration IXdevLVertexDeclaration;
+	typedef XdevLVertexDeclaration* IPXdevLVertexDeclaration;
 
 }
 

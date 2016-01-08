@@ -43,6 +43,9 @@ namespace xdl {
 			virtual XdevLBufferElementTypes	getElementType() = 0;
 
 	};
+	
+	typedef XdevLIndexBuffer IXdevLIndexBuffer;
+	typedef XdevLIndexBuffer* IPXdevLIndexBuffer;
 
 }
 

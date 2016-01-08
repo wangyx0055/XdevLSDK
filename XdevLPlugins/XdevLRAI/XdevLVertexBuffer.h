@@ -35,6 +35,9 @@ namespace xdl {
 		public:
 			virtual ~XdevLVertexBuffer() {}
 	};
+	
+	typedef XdevLVertexBuffer IXdevLVertexBuffer;
+	typedef XdevLVertexBuffer* IPXdevLVertexBuffer;
 
 }
 

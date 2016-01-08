@@ -91,6 +91,9 @@ namespace xdl {
 			/// Returns the identification code.
 			virtual xdl_uint id() = 0;
 	};
+	
+	typedef XdevLVertexArray IXdevLVertexArray;
+	typedef XdevLVertexArray* IPXdevLVertexArray;
 
 }
 
