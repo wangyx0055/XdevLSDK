@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
 	// Try to use XdevLFileSystem plugin to create a folder. If not don't use it
 	xdl::XdevLPluginDescriptor pluginDescriptor(xdl::XdevLPluginName("XdevLFileSystem"), xdl::XdevLVersion(0, 1, 0));
 	xdl::XdevLModuleDescriptor moduleDescriptor(xdl::XdevLModuleName("XdevLDirectory"), xdl::XdevLVersion(0, 1, 0));
-	xdl::XdevLDirectory* directory =  xdl::createModule<xdl::XdevLDirectory*>(pluginDescriptor, moduleDescriptor);
+	xdl::IPXdevLDirectory directory =  xdl::createModule<xdl::IPXdevLDirectory>(pluginDescriptor, moduleDescriptor);
 	if(directory) {
 		directory->make(xdl::XdevLString(createPluginName));
 		directory->changeTo(xdl::XdevLString(createPluginName));
