@@ -4,17 +4,17 @@ Games or device oriented applications. The whole system can be extended using/de
 makes it extreme flexible.
 
 # Why would you use it?
-* Lot less re-compiling and re-linking.A bugfix of a plugin will not force you to recompile your project.
+* Lot less re-compiling and re-linking of your program.A bugfix of a plugin will not force you to recompile your project.
 Only that plugin needs to be compiled.
 * Extreme Modular. The system can be extended using new plugins.
-* Uses modern C++11/14 features.
+* Uses modern C++11/(14) features.
 * You can use it to build your own game engine.
 
 # Here some features
-* Uses C++11 standard.
+* Uses C++11/(14) standard.
 * Cross Platform (GNU/Linux, MacOSX and Windows supported. Android and IOS are planed.)
 * Supports plugins and modules which makes the system extreme expandable and flexible.
-* Shared memory,Semaphore support using XdevLSharedMemory and XdevLSemaphore class.
+* Shared memory,Semaphore support
 * Basic threading support thread::Thread and thread::Mutex and thread::ConditionalVariable.
 * Xml file parsing (it's the tinyxml project http://www.grinninglizard.com/tinyxml/)
 * Extended string/filename parsing.
