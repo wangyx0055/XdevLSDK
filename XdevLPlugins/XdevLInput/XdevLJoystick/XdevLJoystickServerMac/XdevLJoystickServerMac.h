@@ -110,6 +110,8 @@ namespace xdl {
 			thread::Mutex m_mutex;
 			xdl_bool m_running;
 			std::map<std::string, XdevLJoystickDeviceInfoMac*> m_joystickDevices;
+			
+			IOHIDManagerRef hidManager;
 	};
 }
 

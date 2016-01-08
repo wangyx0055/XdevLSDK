@@ -93,6 +93,14 @@ namespace xdl {
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
 	static xdl_uint16 joystickID = 0;
 
+	static void removalCallback(void* target, IOReturn result, void* refcon, void* sender) {
+		//removeJoystick((XdevLJoystickDeviceInfoMac*) refcon);
+	}
+
+	static void JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDeviceRef ioHIDDeviceObject) {
+
+	}
+
 	xdl_uint16 wrapJoystickIdToInteger(const XdevLJoystickId& id) {
 		switch(id) {
 			case XdevLJoystickId::JOYSTICK_0:
@@ -274,6 +282,161 @@ namespace xdl {
 			}
 		}
 
+
+		IOReturn result = kIOReturnSuccess;
+
+		// Create the global management system for communicating with HID devices.
+		hidManager = IOHIDManagerCreate(kCFAllocatorDefault,kIOHIDOptionsTypeNone);
+
+		// Open both current and future devices that are enumerated.
+		result = IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeNone);
+		if(kIOReturnSuccess != result) {
+			return ERR_ERROR;
+		}
+
+
+		UInt32 usage = kHIDUsage_GD_Joystick;
+		CFNumberRef usageNumRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage);
+
+		UInt32 page = kHIDPage_GenericDesktop;
+		CFNumberRef pageNumRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &page);
+
+		CFDictionaryRef retval = nullptr;
+		const void *keys[2] = { (void *) CFSTR(kIOHIDDeviceUsagePageKey), (void *) CFSTR(kIOHIDDeviceUsageKey) };
+		const void *vals[2] = { (void *) pageNumRef, (void *) usageNumRef };
+
+		if(pageNumRef && usageNumRef) {
+			retval = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+		}
+
+		if(pageNumRef) {
+			CFRelease(pageNumRef);
+		}
+		if(usageNumRef) {
+			CFRelease(usageNumRef);
+		}
+
+		// Enumerate all devices.
+		IOHIDManagerSetDeviceMatching(hidManager, retval);
+		IOHIDManagerRegisterDeviceMatchingCallback(hidManager, JoystickDeviceWasAddedCallback, nullptr);
+
+
+		return ERR_OK;
+
+
+		//
+		// Get information of the joystick device.
+		//
+		CFMutableDictionaryRef dictionary = IOServiceMatching(kIOUSBDeviceClassName);;
+
+		SInt32 vendorId = 0;
+		CFDictionaryAddValue(dictionary, CFSTR(kUSBVendorID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vendorId));
+
+		SInt32 productId = 0;
+		CFDictionaryAddValue(dictionary, CFSTR(kUSBProductID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &productId));
+
+		io_iterator_t iterator = 0;
+		result = IOServiceGetMatchingServices(kIOMasterPortDefault, dictionary, &iterator);
+		if(result != kIOReturnSuccess) {
+			return ERR_OK;
+		}
+
+		if(0 == iterator) {
+			XDEVL_MODULE_ERROR("No joysticks are connected.\n");
+			return ERR_OK;
+		}
+
+		io_service_t usbRef = 0;
+		while((usbRef = IOIteratorNext(iterator))) {
+			CFMutableDictionaryRef propsRef = nullptr;
+
+			result = IORegistryEntryCreateCFProperties(usbRef, &propsRef, kCFAllocatorDefault, kNilOptions);
+			if(result != kIOReturnSuccess) {
+				continue;
+			}
+
+			CFTypeRef valueRef = nullptr;
+			long int usagePage, usage;
+
+			valueRef = CFDictionaryGetValue(propsRef, CFSTR(kIOHIDPrimaryUsagePageKey));
+			if(valueRef) {
+				CFNumberGetValue((CFNumberRef)valueRef, kCFNumberLongType, &usagePage);
+				if(usagePage != kHIDPage_GenericDesktop) {
+					CFRelease(propsRef);
+					continue;
+				}
+			}
+
+
+			valueRef = CFDictionaryGetValue(propsRef, CFSTR(kIOHIDPrimaryUsageKey));
+			if(valueRef) {
+				CFNumberGetValue((CFNumberRef)valueRef, kCFNumberLongType, &usage);
+
+				if((usage != kHIDUsage_GD_Joystick &&
+				    usage != kHIDUsage_GD_GamePad &&
+				    usage != kHIDUsage_GD_MultiAxisController)) {
+					CFRelease(propsRef);
+					continue;
+				}
+			}
+
+			IOCFPlugInInterface** pluginInterface = nullptr;
+			SInt32 score = 0;
+			result = IOCreatePlugInInterfaceForService(usbRef, kIOHIDDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &pluginInterface, &score);
+			if(kIOReturnSuccess != result) {
+				CFRelease(propsRef);
+				return ERR_OK;
+			}
+
+			XdevLJoystickDeviceInfoMac* joystick = new XdevLJoystickDeviceInfoMac();
+
+			HRESULT plugInResult = S_OK;
+			plugInResult = (*pluginInterface)->QueryInterface(pluginInterface, CFUUIDGetUUIDBytes(kIOHIDDeviceInterfaceID), (LPVOID*)joystick->interface);
+			if(plugInResult != S_OK) {
+				CFRelease(propsRef);
+				delete joystick;
+				return ERR_OK;
+			}
+			(*pluginInterface)->Release(pluginInterface);
+
+
+			(*joystick->interface)->open(joystick->interface, 0);
+			(*joystick->interface)->setRemovalCallback(joystick->interface, removalCallback, joystick, joystick);
+
+			// Get product string
+			xdl_char name[128];
+			valueRef = CFDictionaryGetValue(propsRef, CFSTR(kIOHIDProductKey));
+			if(valueRef) {
+				CFStringGetCString((CFStringRef)valueRef, name, (CFIndex)sizeof(name), kCFStringEncodingUTF8);
+			}
+			joystick->name = XdevLString(name);
+
+			joystick->axisElements = CFArrayCreateMutable(nullptr, 0, nullptr);
+			joystick->buttonElements = CFArrayCreateMutable(nullptr, 0, nullptr);
+			joystick->hatElements = CFArrayCreateMutable(nullptr, 0, nullptr);
+
+			valueRef = CFDictionaryGetValue(propsRef, CFSTR(kIOHIDElementKey));
+			if(CFGetTypeID(valueRef) == CFArrayGetTypeID()) {
+				CFRange range = { 0, CFArrayGetCount((CFArrayRef)valueRef) };
+				//	CFArrayApplyFunction(valueRef, range, getElementsCFArrayHandler, (void*) joystick);
+			}
+
+			CFRelease(propsRef);
+
+			joystick->numberOfButtons = CFArrayGetCount(joystick->buttonElements);
+			joystick->numberOfAxes = CFArrayGetCount(joystick->axisElements);
+
+
+			if(usbRef == 0) {
+				XDEVL_MODULE_ERROR("Device not found.\n");
+				return ERR_OK;
+			}
+
+		}
+
+		IOObjectRelease(iterator);
+
+
 		//
 		// Add all connected joysticks.
 		// TODO This is a hacky way and should be changed later.
@@ -333,31 +496,7 @@ namespace xdl {
 
 	XdevLJoystickDeviceInfoMac* XdevLJoystickServerMac::getJoystickInfo(xdl_int fd, const std::string& path) {
 
-		//
-		// Get information of the joystick device.
-		//
-		char name[128];
-		CFMutableDictionaryRef dictionary = IOServiceMatching(kIOUSBDeviceClassName);;
 
-		SInt32 vendorId = 0;
-		CFDictionaryAddValue(dictionary, CFSTR(kUSBVendorID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vendorId));
-
-		SInt32 productId = 0;
-		CFDictionaryAddValue(dictionary, CFSTR(kUSBProductID), CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &productId));
-
-		io_iterator_t iterator = 0;
-		IOServiceGetMatchingServices(kIOMasterPortDefault, dictionary, &iterator);
-
-		io_service_t usbRef = 0;
-		while( (usbRef = IOIteratorNext(iterator))) {
-			if(usbRef == 0) {
-				XDEVL_MODULE_ERROR("Device not found.\n");
-				return nullptr;
-			}
-
-		}
-
-		IOObjectRelease(iterator);
 
 
 //		XDEVL_MODULE_INFO("Name             : " << name << "\n");
@@ -387,16 +526,16 @@ namespace xdl {
 		xdl_uint joystickid;
 		ss >> joystickid;
 
-		//
-		// Create the info structure.
-		//
-		XdevLJoystickDeviceInfoMac* devInfo = new XdevLJoystickDeviceInfoMac();
-		devInfo->joystickid = wrapIntegerToJoystickId(joystickid);
-		devInfo->name = XdevLString(name);
-		devInfo->numberOfAxes = numberOfAxes;
-		devInfo->numberOfButtons = numberOfButtons;
+//		//
+//		// Create the info structure.
+//		//
+//		XdevLJoystickDeviceInfoMac* devInfo = new XdevLJoystickDeviceInfoMac();
+//		devInfo->joystickid = wrapIntegerToJoystickId(joystickid);
+//		devInfo->name = XdevLString(name);
+//		devInfo->numberOfAxes = numberOfAxes;
+//		devInfo->numberOfButtons = numberOfButtons;
 
-		return devInfo;
+		return nullptr;
 	}
 
 	xdl_int xdl::XdevLJoystickServerMac::notify(XdevLEvent& event) {
