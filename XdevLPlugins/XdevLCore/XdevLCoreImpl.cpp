@@ -166,7 +166,7 @@ namespace xdl {
 		std::list<XdevLModule*> tmp;
 		for(auto moduleIterator : m_modules) {
 
-			XdevLModule* module = moduleIterator.second->getModuleCreateParameter()->getModuleInstance();
+			auto module = moduleIterator.second->getModuleCreateParameter()->getModuleInstance();
 			auto& dependency = module->getDescriptor().getDependencies();
 
 			for(auto& dependencyModule : dependency) {
@@ -192,7 +192,7 @@ namespace xdl {
 		//
 		// Now remove all other modules left.
 		//
-		moduleMap::const_iterator moduleIterator = m_modules.begin();
+		auto moduleIterator = m_modules.begin();
 		while(moduleIterator != m_modules.end()) {
 			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
 			auto& dependency = module->getDescriptor().getDependencies();
@@ -207,7 +207,7 @@ namespace xdl {
 
 		// Go through all plugins and delete them from the system.
 		XDEVL_MODULE_INFO("Removing all plugins.\n");
-		pluginMap::const_iterator pluginIterator = m_plugins.begin();
+		auto pluginIterator = m_plugins.begin();
 		while(pluginIterator != m_plugins.end()) {
 			_unplug(pluginIterator->first);
 			pluginIterator = m_plugins.erase(pluginIterator);
@@ -534,7 +534,7 @@ namespace xdl {
 		}
 
 		// Do we have a module with the same id?
-		moduleMap::iterator moduleIterator = m_modules.find(parameter->getModuleId().getName());
+		auto moduleIterator = m_modules.find(parameter->getModuleId().getName());
 		if(m_modules.end() != moduleIterator) {
 			XDEVL_MODULE_ERROR("Creating module failed. Module id: '" << parameter->getModuleId().getName() << "' exists. Please use another id.\n");
 			exit(-1);
@@ -556,7 +556,7 @@ namespace xdl {
 		}
 
 		// Get some information about the module and print that out.
-		XdevLVersion moduleVersion = parameter->getModuleInstance()->getDescriptor().getVersion();
+		auto moduleVersion = parameter->getModuleInstance()->getDescriptor().getVersion();
 		XDEVL_MODULE_SUCCESS("Module: '" << parameter->getModuleName() << " "
 		                     << moduleVersion.geMajor() 	<< "."
 		                     << moduleVersion.getMinor()	<< "."
@@ -855,7 +855,6 @@ namespace xdl {
 
 
 	xdl_int XdevLCoreImpl::registerListener(XdevLListener* listener) {
-		assert(listener && "XdevLCoreImpl::registerListener(listener = nullptr)");
 
 		auto i = m_listener.find(listener->getID().getHashCode());
 		if(i!=m_listener.end()) {

@@ -39,7 +39,9 @@ namespace xdl {
 
 	typedef XdevLModule* IPXdevLModule;
 
-//#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER));
+//#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER))
+//#define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER, DESCRIPTOR))
+
 	#define XDEVL_USE_MODULE(CLASS_NAME, MODULE) (MODULE)
 	#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) new CLASS_NAME(PARAMETER)
 	#define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) new CLASS_NAME(PARAMETER, DESCRIPTOR)
@@ -178,7 +180,7 @@ namespace xdl {
 
 			xdl_uint32			m_states;
 
-			std::vector<XdevLModule*> m_dependency;
+			std::vector<IPXdevLModule> m_dependency;
 	};
 
 
@@ -257,12 +259,12 @@ namespace xdl {
 				of a module this function will provide it.
 				@param obj A valid module instance.
 			*/
-			virtual void setModuleInstance(XdevLModule* obj) {
+			virtual void setModuleInstance(IPXdevLModule obj) {
 				m_moduleInstance = obj;
 			}
 
 			/// Returns the module instance.
-			virtual XdevLModule* getModuleInstance() {
+			virtual IPXdevLModule getModuleInstance() {
 				return m_moduleInstance;
 			}
 
@@ -307,13 +309,13 @@ namespace xdl {
 			}
 
 		private:
-			XdevLID 								m_id;
-			XdevLModule* 						m_moduleInstance;
-			XdevLLog*								m_logger;
-			XdevLCoreMediator*	 		m_mediator;
-			XdevLModuleName					m_moduleName;
-			XdevLPluginName					m_pluginsName;
-			XdevLUserData* 					m_userData;
+			XdevLID 						m_id;
+			IPXdevLModule 			m_moduleInstance;
+			XdevLLog*						m_logger;
+			XdevLCoreMediator*	m_mediator;
+			XdevLModuleName			m_moduleName;
+			XdevLPluginName			m_pluginsName;
+			XdevLUserData* 			m_userData;
 
 	};
 
