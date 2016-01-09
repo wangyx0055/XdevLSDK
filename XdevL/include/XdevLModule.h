@@ -225,22 +225,13 @@ namespace xdl {
 	*/
 	class XdevLModuleCreateParameter {
 		public:
-			XdevLModuleCreateParameter() :
+			XdevLModuleCreateParameter(XdevLCoreMediator* mediator) :
 				m_moduleInstance(nullptr),
 				m_logger(nullptr),
-				m_mediator(nullptr),
+				m_mediator(mediator),
 				m_userData(nullptr) {}
 
 			virtual ~XdevLModuleCreateParameter() {}
-
-			/// Sets the mediator of the core system.
-			/**
-				The current XdevLCore module will set this to provide a valid mediator interface for the module.
-				@param med A valid pointer to the mediator.
-			*/
-			virtual void setMediator(XdevLCoreMediator* med) {
-				m_mediator = med;
-			}
 
 			/// Returns the mediator of the core system.
 			/**
@@ -323,27 +314,6 @@ namespace xdl {
 			XdevLModuleName					m_moduleName;
 			XdevLPluginName					m_pluginsName;
 			XdevLUserData* 					m_userData;
-
-	};
-
-	/**
-		@class XdevLModuleDeleteParameter
-		@brief Interface class to communicate with plugins. This interface is used during deletion
-		proccess of modules.
-		@author Cengiz Terzibas
-
-		If you instruct XdevLCore to delete a module or device he communicates via this
-		interface with the plugins that holds module information's. This class isn't important
-		for normal users. If you are a plugin developer you should read the @b XdevLSDKManual which
-		is in the @b XdevLSDK/XdevL/doc folder.
-	*/
-	class XdevLModuleDeleteParameter {
-		public:
-
-			virtual ~XdevLModuleDeleteParameter() {}
-
-			/// Returns the module instance.
-			virtual XdevLModule* getModuleInstance() = 0;
 
 	};
 

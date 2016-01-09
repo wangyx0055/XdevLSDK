@@ -485,7 +485,7 @@ namespace xdl {
 	    const XdevLPluginName& pluginName,
 	    XdevLUserData* userParameter) {
 
-		auto parameter = new XdevLModuleCreateParameter();
+		auto parameter = new XdevLModuleCreateParameter(this);
 
 		// Sets the plugins name.
 		parameter->setPluginName(pluginName);
@@ -493,8 +493,6 @@ namespace xdl {
 		parameter->setModuleName(moduleName);
 		// The requested id
 		parameter->setModuleId(id);
-		// Of course the core mediator
-		parameter->setMediator(this);
 		// User parameter
 		parameter->setUserParameter(userParameter);
 
