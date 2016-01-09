@@ -19,54 +19,41 @@ class vertexArray;
 class wrappPrimitiveType;
 
 
-xdl::XdevLModuleDescriptor openGLModuleDesc {xdl::vendor,
-    xdl::author,
-    xdl::moduleNames[0],
-    xdl::copyright,
-    xdl::description,
-    xdl::XdevLRAIGLMajorVersion,
-    xdl::XdevLRAIGLMinorVersion,
-    xdl::XdevLRAIGLPatchVersion
-                                            };
+xdl::XdevLModuleDescriptor openGLModuleDesc {
+	xdl::vendor,
+	xdl::author,
+	xdl::moduleNames[0],
+	xdl::copyright,
+	xdl::description,
+	xdl::XdevLRAIGLMajorVersion,
+	xdl::XdevLRAIGLMinorVersion,
+	xdl::XdevLRAIGLPatchVersion
+};
 
-xdl::XdevLPluginDescriptor m_openglDescriptor {	xdl::pluginName,
-    xdl::moduleNames,
-    xdl::XdevLRAIGLPluginMajorVersion,
-    xdl::XdevLRAIGLPluginMinorVersion,
-    xdl::XdevLRAIGLPluginPatchVersion
-                                              };
+xdl::XdevLPluginDescriptor m_openglDescriptor {
+	xdl::pluginName,
+	xdl::moduleNames,
+	xdl::XdevLRAIGLPluginMajorVersion,
+	xdl::XdevLRAIGLPluginMinorVersion,
+	xdl::XdevLRAIGLPluginPatchVersion
+};
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(m_openglDescriptor);
 
-extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	// Create the "OpenGL" module.
-	if(openGLModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLOpenGLImpl(parameter);
+XDEVL_PLUGIN_CREATE_MODULE {
+	if(openGLModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		if(!obj)
-			return xdl::ERR_ERROR;
-
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLImpl, XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 		return xdl::ERR_OK;
 	}
 
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &m_openglDescriptor;
 }
 
 namespace xdl {
@@ -524,9 +511,9 @@ namespace xdl {
 
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	    xdl_uint numberOfElements,
-	    XdevLVertexBuffer* vertexBuffer,
-	    XdevLVertexDeclaration* vertexDeclaration) {
+	        xdl_uint numberOfElements,
+	        XdevLVertexBuffer* vertexBuffer,
+	        XdevLVertexDeclaration* vertexDeclaration) {
 
 		glBindVertexArray(m_activeVertexArray->id());
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
@@ -556,10 +543,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	    xdl_uint numberOfElements,
-	    XdevLVertexBuffer* vertexBuffer,
-	    XdevLVertexDeclaration* vertexDeclaration,
-	    XdevLIndexBuffer* indexBuffer) {
+	        xdl_uint numberOfElements,
+	        XdevLVertexBuffer* vertexBuffer,
+	        XdevLVertexDeclaration* vertexDeclaration,
+	        XdevLIndexBuffer* indexBuffer) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
@@ -670,7 +657,7 @@ namespace xdl {
 		glShaderSource = (PFNGLSHADERSOURCEPROC)m_gl_context->getProcAddress("glShaderSource");
 
 		glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)m_gl_context->getProcAddress("glDrawArraysEXT");
-		
+
 		return ERR_OK;
 	}
 }

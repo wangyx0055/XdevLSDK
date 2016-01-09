@@ -33,7 +33,7 @@
 #include <wayland-egl.h>
 #endif
 
-xdl::XdevLPluginDescriptor pluginDescriptor {
+xdl::XdevLPluginDescriptor eglPluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
 	XDEVLOPENGLCONTEXTEGL_PLUGIN_MAJOR_VERSION,
@@ -52,33 +52,21 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	XDEVLOPENGLCONTEXTEGL_MODULE_PATCH_VERSION
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(eglPluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_CREATE_MODULE {
+	if(moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLOpenGLContextEGL(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextEGL,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);	
+
 		return xdl::ERR_OK;
 	}
 
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
 }
 
 namespace xdl {

@@ -45,7 +45,7 @@ namespace xdl {
 
 	class XdevLTextLayoutImpl : public XdevLModuleImpl<XdevLTextLayout> {
 		public:
-			XdevLTextLayoutImpl(XdevLModuleCreateParameter* parameter, xdl::XdevLModuleDescriptor& moduleDescriptor);
+			XdevLTextLayoutImpl(XdevLModuleCreateParameter* parameter,  const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLTextLayoutImpl() {}
 

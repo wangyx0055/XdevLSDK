@@ -18,7 +18,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextCocoa::moduleDescriptor {
 };
 
 
-xdl::XdevLPluginDescriptor pluginDescriptor {
+xdl::XdevLPluginDescriptor cglPluginDescriptor {
 	xdl::cocoa_context_pluginName,
 	xdl::cocoa_context_moduleNames,
 	XDEVLOPENGL_CONTEXT_CGL_MODULE_MAJOR_VERSION,
@@ -26,37 +26,22 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	XDEVLOPENGL_CONTEXT_CGL_MODULE_PATCH_VERSION
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(cglPluginDescriptor);
 
 extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* parameter) {
 
 	if(xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLOpenGLContextCocoa* obj  = new xdl::XdevLOpenGLContextCocoa(parameter);
 
-		if(!obj)
-			return xdl::ERR_ERROR;
-
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextCocoa,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
 
 		return xdl::ERR_OK;
 	}
 
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
 }
 
 namespace xdl {
@@ -212,14 +197,14 @@ namespace xdl {
 		if(m_attributes.stereo > 0) {
 			attribs.push_back(kCGLPFAStereo);
 		}
-		
-		
+
+
 		attribs.push_back((CGLPixelFormatAttribute) 0);
 
 		CGLChoosePixelFormat(attribs.data(), &pix, &npix);
 		CGLCreateContext(pix, NULL, &m_context);
 		CGLSetCurrentContext(m_context);
-		m_openGLContext = [[NXdevLOpenGLContext alloc] initWithCGLContextObj:m_context];
+m_openGLContext = [[NXdevLOpenGLContext alloc] initWithCGLContextObj:m_context];
 		if(m_openGLContext == nil) {
 			XDEVL_MODULE_ERROR("initWithCGLContextObj failed\n");
 		}
@@ -227,8 +212,8 @@ namespace xdl {
 
 		//
 		// Make OpenGL context current.
-		// 
-		[m_openGLContext setView:wnd];
+		//
+[m_openGLContext setView:wnd];
 		[m_openGLContext makeCurrentContext];
 
 
@@ -246,7 +231,7 @@ namespace xdl {
 
 		pool = [[NSAutoreleasePool alloc] init];
 
-		[m_openGLContext setView:wnd];
+[m_openGLContext setView:wnd];
 		[m_openGLContext makeCurrentContext];
 
 		[pool release];
@@ -275,7 +260,8 @@ namespace xdl {
 
 }
 
-@implementation NXdevLOpenGLContext : NSOpenGLContext
+@implementation NXdevLOpenGLContext :
+NSOpenGLContext
 
 - (id)initWithFormat:
 (NSOpenGLPixelFormat *)format

@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -51,7 +51,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLOgreImpl::m_moduleDescriptor {
 	xdl::XdevLOgrePatchVersion
 };
 
-xdl::XdevLPluginDescriptor pluginDescriptor {
+xdl::XdevLPluginDescriptor ogrePluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
 	xdl::XdevLOgrePluginMajorVersion,
@@ -59,36 +59,22 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::XdevLOgrePluginPatchVersion
 };
 
-//xdl::XdevLOgreSpriteModuleDescriptor xdl::XdevLOgreSpritesImpl::m_ogreSpriteModuleDesc;
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(ogrePluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 	// Create the "Ogre" module
-	if(xdl::XdevLOgreImpl::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLOgreImpl(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
+	if(xdl::XdevLOgreImpl::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOgreImpl,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
+
 		return xdl::ERR_OK;
 	}
-	/*
-	if(xdl::XdevLOgreSpritesImpl::m_ogreSpriteModuleDesc.getName() == parameter->getModuleName()){
-		xdl::XdevLModule* obj  = new xdl::XdevLOgreSpritesImpl(parameter);
-		if (!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
-	}
-	 * */
+
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
 }
 
 namespace xdl {
@@ -139,23 +125,23 @@ namespace xdl {
 		Window  win = (Window)(window->getInternal(XdevLInternalName("X11_WINDOW")));
 		xdl_uint screen_number = 0;
 		StartInfo["parentWindowHandle"] =	Ogre::StringConverter::toString((long)display) + " :"  +
-											Ogre::StringConverter::toString((xdl_int)screen_number) + " :" +
-											Ogre::StringConverter::toString((long)win);
+		                                    Ogre::StringConverter::toString((xdl_int)screen_number) + " :" +
+		                                    Ogre::StringConverter::toString((long)win);
 #elif defined(XDEVL_PLATFORM_APPLE)
-	StartInfo["parentWindowHandle"] =  	Ogre::StringConverter::toString(window->getInternal(XdevLInternalName("MACOSX_WINDOW")));
-	                                   
+		StartInfo["parentWindowHandle"] =  	Ogre::StringConverter::toString(window->getInternal(XdevLInternalName("MACOSX_WINDOW")));
+
 #else
 #error "Not supported paltform."
 #endif
-		
+
 		// If color depth specified assign it.
 		if(-1 != m_ColorDepth) {
 			StartInfo.insert(Ogre::NameValuePairList::value_type("colourDepth", Ogre::StringConverter::toString(m_ColorDepth)));
 		}
-		
+
 		// Assign vertical sync.
 		StartInfo.insert(Ogre::NameValuePairList::value_type("vsync", Ogre::StringConverter::toString(m_VSync)));
-		
+
 		// Assign anti-aliasing
 		if(-1 != m_Antialiasing) {
 			StartInfo.insert(Ogre::NameValuePairList::value_type("FSAA", Ogre::StringConverter::toString(m_Antialiasing)));

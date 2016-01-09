@@ -52,22 +52,19 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 
 xdl::XdevLJoystickServerMac* joystickServerMac = nullptr;
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 
 	if(nullptr == joystickServerMac) {
-		if(moduleDescriptor.getName() == parameter->getModuleName()) {
-			joystickServerMac  = new xdl::XdevLJoystickServerMac(parameter, moduleDescriptor);
-			if(!joystickServerMac)
-				return xdl::ERR_ERROR;
-			parameter->setModuleInstance(joystickServerMac);
+		if(moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+			xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLJoystickServerMac,  XDEVL_MODULE_PARAMETER, moduleDescriptor);
+			XDEVL_MODULE_SET_MODULE_INSTACE(module);
+
 			return xdl::ERR_OK;
 		}
 	} else {
@@ -76,15 +73,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 	return xdl::ERR_MODULE_NOT_FOUND;
 }
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
-}
-
 
 namespace xdl {
 
@@ -373,8 +361,8 @@ namespace xdl {
 				CFNumberGetValue((CFNumberRef)valueRef, kCFNumberLongType, &usage);
 
 				if((usage != kHIDUsage_GD_Joystick &&
-				    usage != kHIDUsage_GD_GamePad &&
-				    usage != kHIDUsage_GD_MultiAxisController)) {
+				        usage != kHIDUsage_GD_GamePad &&
+				        usage != kHIDUsage_GD_MultiAxisController)) {
 					CFRelease(propsRef);
 					continue;
 				}

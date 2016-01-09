@@ -63,33 +63,26 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 	return nullptr;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 
-	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
+	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLDirectoryUnix,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
 
 		return xdl::ERR_OK;
-	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
 
-		parameter->setModuleInstance(obj);
+	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLFileUnix,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
 
 		return xdl::ERR_OK;
-	} else if(xdl::XdevLDirectoryWatcherLinux::m_moduleDescriptorDirectoryWatcher.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherLinux(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
 
-		parameter->setModuleInstance(obj);
+	} else if(xdl::XdevLDirectoryWatcherLinux::m_moduleDescriptorDirectoryWatcher.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLDirectoryWatcherLinux,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
 
 		return xdl::ERR_OK;
 	}

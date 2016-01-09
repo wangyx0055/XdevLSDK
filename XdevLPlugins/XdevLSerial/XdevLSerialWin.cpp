@@ -4,39 +4,40 @@
 #include <XdevLXstring.h>
 #include <sstream>
 
-xdl::XdevLModuleDescriptor xdl::XdevLSerialWin::m_serialModuleDescriptor{ vendor,
-																				author,
-																				moduleNames[0],
-																				copyright,
-																				description,
-																				XdevLSerialMajorVersion,
-																				XdevLSerialMinorVersion,
-																				XdevLSerialPatchVersion };
+xdl::XdevLModuleDescriptor xdl::XdevLSerialWin::m_serialModuleDescriptor {
+	vendor,
+	author,
+	moduleNames[0],
+	copyright,
+	description,
+	XdevLSerialMajorVersion,
+	XdevLSerialMinorVersion,
+	XdevLSerialPatchVersion
+};
 
-xdl::XdevLPluginDescriptor pluginDescriptor{	xdl::pluginName,
-												xdl::moduleNames,
-												xdl::XdevLSerialPluginMajorVersion,
-												xdl::XdevLSerialPluginMinorVersion,
-												xdl::XdevLSerialPluginPatchVersion };
+xdl::XdevLPluginDescriptor serialPluginDescriptor {
+	xdl::pluginName,
+	xdl::moduleNames,
+	xdl::XdevLSerialPluginMajorVersion,
+	xdl::XdevLSerialPluginMinorVersion,
+	xdl::XdevLSerialPluginPatchVersion
+};
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if (xdl::XdevLSerialWin::m_serialModuleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLSerialWin(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor);
+
+XDEVL_PLUGIN_CREATE_MODULE {
+	if (xdl::XdevLSerialWin::m_serialModuleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLSerialWin,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
+
 		return xdl::ERR_OK;
 	}
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
 }
 
 namespace xdl {
@@ -118,15 +119,15 @@ namespace xdl {
 		if(GetCommTimeouts(m_handle, &tout) == 0) {
 			LPVOID lpMsgBuf;
 			FormatMessage(
-			  FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			  FORMAT_MESSAGE_FROM_SYSTEM |
-			  FORMAT_MESSAGE_IGNORE_INSERTS,
-			  NULL,
-			  GetLastError(),
-			  0, // Default language
-			  (LPTSTR) &lpMsgBuf,
-			  0,
-			  NULL
+			    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			    FORMAT_MESSAGE_FROM_SYSTEM |
+			    FORMAT_MESSAGE_IGNORE_INSERTS,
+			    NULL,
+			    GetLastError(),
+			    0, // Default language
+			    (LPTSTR) &lpMsgBuf,
+			    0,
+			    NULL
 			);
 			XDEVL_MODULE_ERROR("GetCommTimeouts failed: " << (xdl_char*)lpMsgBuf << "\n");
 			// Free the buffer.
@@ -150,15 +151,15 @@ namespace xdl {
 		if(SetCommTimeouts(m_handle, &tout) == 0) {
 			LPVOID lpMsgBuf;
 			FormatMessage(
-			  FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			  FORMAT_MESSAGE_FROM_SYSTEM |
-			  FORMAT_MESSAGE_IGNORE_INSERTS,
-			  NULL,
-			  GetLastError(),
-			  0, // Default language
-			  (LPTSTR) &lpMsgBuf,
-			  0,
-			  NULL
+			    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			    FORMAT_MESSAGE_FROM_SYSTEM |
+			    FORMAT_MESSAGE_IGNORE_INSERTS,
+			    NULL,
+			    GetLastError(),
+			    0, // Default language
+			    (LPTSTR) &lpMsgBuf,
+			    0,
+			    NULL
 			);
 			XDEVL_MODULE_ERROR("GetCommTimeouts failed: " << (xdl_char*)lpMsgBuf << "\n");
 			// Free the buffer.
@@ -355,11 +356,11 @@ namespace xdl {
 		}
 		return number_bytes;
 	}
-	
+
 	xdl_int  XdevLSerialWin::flush() {
 		return ERR_ERROR;
 	}
-	
+
 	xdl_int XdevLSerialWin::waiting() {
 		xdl_int bytes_avail = 0;
 		// TODO Implement how many bytes are waiting at the comport.
@@ -374,15 +375,15 @@ namespace xdl {
 	void XdevLSerialWin::printErrorMessage() {
 		LPVOID lpMsgBuf;
 		FormatMessage(
-		  FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		  FORMAT_MESSAGE_FROM_SYSTEM |
-		  FORMAT_MESSAGE_IGNORE_INSERTS,
-		  NULL,
-		  GetLastError(),
-		  0, // Default language
-		  (LPTSTR) &lpMsgBuf,
-		  0,
-		  NULL
+		    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		    FORMAT_MESSAGE_FROM_SYSTEM |
+		    FORMAT_MESSAGE_IGNORE_INSERTS,
+		    NULL,
+		    GetLastError(),
+		    0, // Default language
+		    (LPTSTR) &lpMsgBuf,
+		    0,
+		    NULL
 		);
 		XDEVL_MODULE_ERROR((char*)lpMsgBuf << "\n");
 		// Free the buffer.

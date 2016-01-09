@@ -72,54 +72,64 @@ xdl::XdevLModuleDescriptor windowCursorModuleDesc {
 static xdl::XdevLCursorWindows* cursorWindows = nullptr;
 static xdl::xdl_uint64 windowID = 0;
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(windowWindowPluginDescriptor);
+
+XDEVL_PLUGIN_CREATE_MODULE {
 
 	//
 	// Create XdevLWindow instance.
 	//
-	if (windowModuleDesc.getName() == parameter->getModuleName()) {
+	if (windowModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
 		// Initialize once default instances
-		if (xdl::initDefaultWindowInstances(parameter) != xdl::ERR_OK) {
+		if (xdl::initDefaultWindowInstances(XDEVL_MODULE_PARAMETER) != xdl::ERR_OK) {
 			return xdl::ERR_ERROR;
 		}
 
-		xdl::XdevLWindowDeviceWin32* window = new xdl::XdevLWindowDeviceWin32(parameter);
-		parameter->setModuleInstance(window);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowDeviceWin32,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+
 	}
 
 	//
 	// Create XdevLWindowServer instance.
 	//
-	else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+	else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
 		// Initialize once default instances
 		if (xdl::initDefaultWindowInstances(parameter) != xdl::ERR_OK) {
 			return xdl::ERR_ERROR;
 		}
 
-		xdl::XdevLWindowServerWindows* windowServer = new xdl::XdevLWindowServerWindows(parameter);
-		parameter->setModuleInstance(windowServer);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowServerWindows,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+
 	}
 
 	//
 	// Create XdevLWindowEventServer instance.
 	//
-	else if (windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+	else if (windowEventServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::windowEventServer = new xdl::XdevLWindowWindowsEventServer(parameter);
-		parameter->setModuleInstance(xdl::windowEventServer);
-		xdl::XdevLWindowEventServerParameter = parameter;
+		xdl::windowEventServer  = XDEVL_NEW_MODULE(xdl::XdevLWindowWindowsEventServer,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = xdl::windowEventServer ;
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+		xdl::XdevLWindowEventServerParameter = XDEVL_MODULE_PARAMETER;
+
 	}
 
 	//
 	// Create XdevLCursor instance.
 	//
-	else if (windowCursorModuleDesc.getName() == parameter->getModuleName()) {
+	else if (windowCursorModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		cursorWindows = new xdl::XdevLCursorWindows(parameter);
+		cursorWindows= XDEVL_NEW_MODULE(xdl::XdevLCursorWindows,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = cursorWindows;
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 		xdl::cursor = cursorWindows;
-		parameter->setModuleInstance(xdl::cursor);
 
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
@@ -127,16 +137,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 	return xdl::ERR_OK;
 }
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if (obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
-	return &windowWindowPluginDescriptor;
-}
-
 
 namespace xdl {
 
@@ -159,17 +159,17 @@ namespace xdl {
 			case VK_RETURN:
 				return KEY_ENTER;
 			case VK_SHIFT: {
-					WPARAM tmp = MapVirtualKey(((lParam & 0x00ff0000) >> 16), MAPVK_VSC_TO_VK_EX);
-					return ((tmp == 0) ? KEY_LSHIFT : KEY_RSHIFT);
-				}
+				WPARAM tmp = MapVirtualKey(((lParam & 0x00ff0000) >> 16), MAPVK_VSC_TO_VK_EX);
+				return ((tmp == 0) ? KEY_LSHIFT : KEY_RSHIFT);
+			}
 			case VK_CONTROL: {
-					WPARAM tmp = (lParam & 0x1000000);
-					return ((tmp == 0) ? KEY_LCTRL : KEY_RCTRL);
-				}
+				WPARAM tmp = (lParam & 0x1000000);
+				return ((tmp == 0) ? KEY_LCTRL : KEY_RCTRL);
+			}
 			case VK_MENU: {
-					WPARAM tmp = (lParam & 0x1000000);
-					return ((tmp == 0) ? KEY_LALT : KEY_RALT);
-				}
+				WPARAM tmp = (lParam & 0x1000000);
+				return ((tmp == 0) ? KEY_LALT : KEY_RALT);
+			}
 			case VK_PAUSE:
 				return KEY_PAUSE;
 			case VK_CAPITAL:
@@ -469,9 +469,9 @@ namespace xdl {
 		XdevLWindowTypes type = getType();
 
 		if ((type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
-		    (type == XDEVL_WINDOW_TYPE_POPUP) ||
-		    (type == XDEVL_WINDOW_TYPE_SPLASH) ||
-		    (type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
+		        (type == XDEVL_WINDOW_TYPE_POPUP) ||
+		        (type == XDEVL_WINDOW_TYPE_SPLASH) ||
+		        (type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
 
 			// The window is an overlapped window.
 			m_windowStyleEx = WS_EX_WINDOWEDGE;
@@ -693,39 +693,39 @@ namespace xdl {
 		xdl_int32 value = 0;
 		switch (type) {
 			case XDEVL_WINDOW_TYPE_NORMAL: {
-					m_windowStyle = WS_SYSMENU |		// Has a system menu.
-					                WS_BORDER |			// Has thin line border.
-					                WS_CAPTION |		// Has a title bar.
-					                WS_MAXIMIZEBOX |	// Has a maximize button.
-					                WS_MINIMIZEBOX |	// Has a minimize button.
-					                WS_SIZEBOX;			// Has a resize box (bottom right corner).
+				m_windowStyle = WS_SYSMENU |		// Has a system menu.
+				                WS_BORDER |			// Has thin line border.
+				                WS_CAPTION |		// Has a title bar.
+				                WS_MAXIMIZEBOX |	// Has a maximize button.
+				                WS_MINIMIZEBOX |	// Has a minimize button.
+				                WS_SIZEBOX;			// Has a resize box (bottom right corner).
 
-					m_windowStyleEx = WS_EX_APPWINDOW;
-					SetWindowLong(m_wnd, GWL_STYLE, m_windowStyle);
-					SetWindowLong(m_wnd, GWL_EXSTYLE, m_windowStyleEx);
-				}
-				break;
+				m_windowStyleEx = WS_EX_APPWINDOW;
+				SetWindowLong(m_wnd, GWL_STYLE, m_windowStyle);
+				SetWindowLong(m_wnd, GWL_EXSTYLE, m_windowStyleEx);
+			}
+			break;
 			case XDEVL_WINDOW_TYPE_POPUP:
 			case XDEVL_WINDOW_TYPE_DROPDOWN_MENU:
 			case XDEVL_WINDOW_TYPE_SPLASH:
 			case XDEVL_WINDOW_TYPE_TOOLTIP: {
-					m_windowStyle = WS_POPUP |
-					                WS_CLIPCHILDREN |
-					                WS_CLIPSIBLINGS;
+				m_windowStyle = WS_POPUP |
+				                WS_CLIPCHILDREN |
+				                WS_CLIPSIBLINGS;
 
-					m_windowStyleEx =	WS_EX_WINDOWEDGE |
-					                  WS_EX_TOOLWINDOW; // Do not show in taskbar.
+				m_windowStyleEx =	WS_EX_WINDOWEDGE |
+				                    WS_EX_TOOLWINDOW; // Do not show in taskbar.
 
 
-					SetWindowLong(m_wnd, GWL_STYLE, m_windowStyle);
-					SetWindowLong(m_wnd, GWL_EXSTYLE, m_windowStyleEx);
+				SetWindowLong(m_wnd, GWL_STYLE, m_windowStyle);
+				SetWindowLong(m_wnd, GWL_EXSTYLE, m_windowStyleEx);
 
-				}
-				break;
+			}
+			break;
 			case XDEVL_WINDOW_TYPE_UNKNOWN:
 			default: {
 
-				} break;
+			} break;
 		}
 	}
 
@@ -807,10 +807,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerWindows::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size,
-			const XdevLWindowTypes& type) {
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size,
+	        const XdevLWindowTypes& type) {
 
 		*window = new XdevLWindowDeviceWin32(nullptr);
 
@@ -890,128 +890,128 @@ namespace xdl {
 		switch (uMsg) {
 			case WM_CLOSE: {
 
-					ev.type = XDEVL_WINDOW_EVENT;
-					ev.window.event = XDEVL_WINDOW_CLOSE;
-					ev.window.windowid = window->getWindowID();
+				ev.type = XDEVL_WINDOW_EVENT;
+				ev.window.event = XDEVL_WINDOW_CLOSE;
+				ev.window.windowid = window->getWindowID();
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-					// Make a core event.
-					ev.type = XDEVL_CORE_EVENT;
-					ev.core.event = XDEVL_CORE_SHUTDOWN;
+				// Make a core event.
+				ev.type = XDEVL_CORE_EVENT;
+				ev.core.event = XDEVL_CORE_SHUTDOWN;
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-				}
-				break;
+			}
+			break;
 			case WM_SHOWWINDOW: {
-					switch (lParam) {
-						case SW_PARENTCLOSING:
-							XDEVL_MODULE_INFO("SW_PARENTCLOSING\n");
-							break;
-						case SW_PARENTOPENING:
-							ev.type = XDEVL_WINDOW_EVENT;
-							ev.type = XDEVL_WINDOW_EVENT;
-							ev.window.event = XDEVL_WINDOW_SHOWN;
-							ev.window.windowid = window->getWindowID();
+				switch (lParam) {
+					case SW_PARENTCLOSING:
+						XDEVL_MODULE_INFO("SW_PARENTCLOSING\n");
+						break;
+					case SW_PARENTOPENING:
+						ev.type = XDEVL_WINDOW_EVENT;
+						ev.type = XDEVL_WINDOW_EVENT;
+						ev.window.event = XDEVL_WINDOW_SHOWN;
+						ev.window.windowid = window->getWindowID();
 
-							getMediator()->fireEvent(ev);
-							XDEVL_MODULE_INFO("SW_PARENTOPENING\n");
-							break;
-						default:
-							break;
-					}
+						getMediator()->fireEvent(ev);
+						XDEVL_MODULE_INFO("SW_PARENTOPENING\n");
+						break;
+					default:
+						break;
 				}
-				break;
+			}
+			break;
 			case WM_SYSKEYUP:
 			case WM_KEYUP: {
 
-					XdevLKeyMode keyMode = KEY_MOD_NONE;
-					ev.type = ButtonReleased.getHashCode();
-					ev.key.windowid = window->getWindowID();
-					ev.key.repeat = (lParam & 0x40000000) != 0;
-					//xdl_uint32 vk = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
-					ev.key.keycode = WindowsVirtualKeyToXdevLKeyCode(wParam, lParam);
-					ev.key.mod = keyMode;
+				XdevLKeyMode keyMode = KEY_MOD_NONE;
+				ev.type = ButtonReleased.getHashCode();
+				ev.key.windowid = window->getWindowID();
+				ev.key.repeat = (lParam & 0x40000000) != 0;
+				//xdl_uint32 vk = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
+				ev.key.keycode = WindowsVirtualKeyToXdevLKeyCode(wParam, lParam);
+				ev.key.mod = keyMode;
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-				}
-				break;
+			}
+			break;
 			case WM_SYSKEYDOWN:
 			case WM_KEYDOWN: {
 
-					XdevLKeyMode keyMode = KEY_MOD_NONE;
-					ev.type = ButtonPressed.getHashCode();
-					ev.key.windowid = window->getWindowID();
-					ev.key.repeat = (lParam & 0x40000000) != 0;
-					//xdl_uint32 vk = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
-					ev.key.keycode = WindowsVirtualKeyToXdevLKeyCode(wParam, lParam);
-					ev.key.mod = keyMode;
+				XdevLKeyMode keyMode = KEY_MOD_NONE;
+				ev.type = ButtonPressed.getHashCode();
+				ev.key.windowid = window->getWindowID();
+				ev.key.repeat = (lParam & 0x40000000) != 0;
+				//xdl_uint32 vk = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
+				ev.key.keycode = WindowsVirtualKeyToXdevLKeyCode(wParam, lParam);
+				ev.key.mod = keyMode;
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-				}
-				break;
+			}
+			break;
 			case WM_CREATE:
 				break;
 			case WM_SETFOCUS: {
 
-					if (wParam != 0) {
-						HWND wnd = (HWND)wParam;
-						XdevLWindow* window = windowEventServer->getWindow((xdl_uint64)GetWindowLong(wnd, GWL_ID));
-						if (window != nullptr) {
-							ev.type = XDEVL_WINDOW_EVENT;
-							ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_LOST;
-							ev.window.windowid = window->getWindowID();
+				if (wParam != 0) {
+					HWND wnd = (HWND)wParam;
+					XdevLWindow* window = windowEventServer->getWindow((xdl_uint64)GetWindowLong(wnd, GWL_ID));
+					if (window != nullptr) {
+						ev.type = XDEVL_WINDOW_EVENT;
+						ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_LOST;
+						ev.window.windowid = window->getWindowID();
 
-							focusGained(window);
+						focusGained(window);
 
-							getMediator()->fireEvent(ev);
-						} else {
-							XDEVL_MODULE_ERROR("Odd error happend.\n");
-						}
+						getMediator()->fireEvent(ev);
+					} else {
+						XDEVL_MODULE_ERROR("Odd error happend.\n");
 					}
+				}
 
-					ev.type = XDEVL_WINDOW_EVENT;
+				ev.type = XDEVL_WINDOW_EVENT;
+				ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+				ev.window.windowid = window->getWindowID();
+
+				focusGained(window);
+
+				getMediator()->fireEvent(ev);
+			}
+			break;
+			case WM_ACTIVATE: {
+				if (wParam == WA_CLICKACTIVE) {
+					/*ev.type = XDEVL_WINDOW_EVENT;
 					ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_GAINED;
 					ev.window.windowid = window->getWindowID();
 
 					focusGained(window);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
-			case WM_ACTIVATE: {
-					if (wParam == WA_CLICKACTIVE) {
-						/*ev.type = XDEVL_WINDOW_EVENT;
-						ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_GAINED;
+					getMediator()->fireEvent(ev);*/
+				} else if (wParam == WA_INACTIVE) {
+					/*	ev.type = XDEVL_WINDOW_EVENT;
+						ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_LOST;
 						ev.window.windowid = window->getWindowID();
 
 						focusGained(window);
 
 						getMediator()->fireEvent(ev);*/
-					} else if (wParam == WA_INACTIVE) {
-						/*	ev.type = XDEVL_WINDOW_EVENT;
-							ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_LOST;
-							ev.window.windowid = window->getWindowID();
-
-							focusGained(window);
-
-							getMediator()->fireEvent(ev);*/
-					}
-				} break;
+				}
+			} break;
 			case WM_SIZE: {
-					//		window->setSize(XdevLWindowSize(LOWORD(lParam), HIWORD(lParam)));
-				} break;
+				//		window->setSize(XdevLWindowSize(LOWORD(lParam), HIWORD(lParam)));
+			} break;
 			case WM_MOVE: {
-					//		window->setPosition(XdevLWindowPosition(LOWORD(lParam), HIWORD(lParam)));
-				} break;
+				//		window->setPosition(XdevLWindowPosition(LOWORD(lParam), HIWORD(lParam)));
+			} break;
 			case WM_ENTERSIZEMOVE: {
 
-				}
+			}
 			case WM_EXITSIZEMOVE: {
-				}
+			}
 			case WM_SIZING:
 				break;
 			case WM_MOUSEHOVER:
@@ -1028,109 +1028,109 @@ namespace xdl {
 				}
 				break;
 			case WM_MOUSELEAVE: {
-					m_pointerIsInsideWindow = nullptr;
+				m_pointerIsInsideWindow = nullptr;
 
-					ev.type = XDEVL_WINDOW_EVENT;
-					ev.window.event = XDEVL_WINDOW_LEAVE;
-					ev.window.data1 = LOWORD(lParam);
-					ev.window.data2 = HIWORD(lParam);
-					ev.window.windowid = window->getWindowID();
+				ev.type = XDEVL_WINDOW_EVENT;
+				ev.window.event = XDEVL_WINDOW_LEAVE;
+				ev.window.data1 = LOWORD(lParam);
+				ev.window.data2 = HIWORD(lParam);
+				ev.window.windowid = window->getWindowID();
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 			case WM_MOUSEMOVE: {
-					ev.type = MouseMotion.getHashCode();
+				ev.type = MouseMotion.getHashCode();
 
-					ev.motion.windowid = window->getWindowID();
-					ev.motion.x = (2.0 / window->getWidth()*LOWORD(lParam) - 1.0f) * 32768;
-					ev.motion.y = -(2.0 / window->getHeight() * HIWORD(lParam) - 1.0f) * 32768;
-					ev.motion.xrel = 0;
-					ev.motion.yrel = 0;
+				ev.motion.windowid = window->getWindowID();
+				ev.motion.x = (2.0 / window->getWidth()*LOWORD(lParam) - 1.0f) * 32768;
+				ev.motion.y = -(2.0 / window->getHeight() * HIWORD(lParam) - 1.0f) * 32768;
+				ev.motion.xrel = 0;
+				ev.motion.yrel = 0;
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-					// TODO How about fullscreen window? Do we have to do this? But what if a client is withing the parent and
-					// needs this events too.
-					// TODO This causes to crash at shutdown and I don't know why.
+				// TODO How about fullscreen window? Do we have to do this? But what if a client is withing the parent and
+				// needs this events too.
+				// TODO This causes to crash at shutdown and I don't know why.
 
-					//TRACKMOUSEEVENT tme;
-					//tme.cbSize = sizeof(TRACKMOUSEEVENT);
-					//tme.dwFlags = TME_HOVER | TME_LEAVE; //Type of events to track & trigger.
-					//tme.dwHoverTime = 1; //How long the mouse has to be in the window to trigger a hover event.
-					//tme.hwndTrack = hWnd;
-					//TrackMouseEvent(&tme);
+				//TRACKMOUSEEVENT tme;
+				//tme.cbSize = sizeof(TRACKMOUSEEVENT);
+				//tme.dwFlags = TME_HOVER | TME_LEAVE; //Type of events to track & trigger.
+				//tme.dwHoverTime = 1; //How long the mouse has to be in the window to trigger a hover event.
+				//tme.hwndTrack = hWnd;
+				//TrackMouseEvent(&tme);
 
-				}
-				break;
+			}
+			break;
 			case WM_LBUTTONDOWN: {
-					ev.type = MouseButtonPressed.getHashCode();
+				ev.type = MouseButtonPressed.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_LEFT;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_LEFT;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
+				getMediator()->fireEvent(ev);
 
-				}
-				break;
+			}
+			break;
 			case WM_LBUTTONUP: {
-					ev.type = MouseButtonReleased.getHashCode();
+				ev.type = MouseButtonReleased.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_LEFT;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_LEFT;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 
 			case WM_RBUTTONDOWN: {
-					ev.type = MouseButtonPressed.getHashCode();
+				ev.type = MouseButtonPressed.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_RIGHT;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_RIGHT;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 			case WM_RBUTTONUP: {
-					ev.type = MouseButtonReleased.getHashCode();
+				ev.type = MouseButtonReleased.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_RIGHT;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_RIGHT;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 			case WM_MBUTTONDOWN: {
-					ev.type = MouseButtonPressed.getHashCode();
+				ev.type = MouseButtonPressed.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_MIDDLE;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_MIDDLE;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 			case WM_MBUTTONUP: {
-					ev.type = MouseButtonReleased.getHashCode();
+				ev.type = MouseButtonReleased.getHashCode();
 
-					ev.button.windowid = window->getWindowID();
-					ev.button.button = BUTTON_MIDDLE;
-					ev.button.x = LOWORD(lParam);
-					ev.button.y = HIWORD(lParam);
+				ev.button.windowid = window->getWindowID();
+				ev.button.button = BUTTON_MIDDLE;
+				ev.button.x = LOWORD(lParam);
+				ev.button.y = HIWORD(lParam);
 
-					getMediator()->fireEvent(ev);
-				}
-				break;
+				getMediator()->fireEvent(ev);
+			}
+			break;
 			default:
 				break;
 		}

@@ -29,39 +29,23 @@ xdl::XdevLPluginDescriptor wglPluginDescriptor {
 	xdl::XdevLOpenGLContextWGLPluginPatchVersion
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(wglPluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 	// Create the "OpenGL" module.
-	if (xdl:: XdevLOpenGLWGL::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLOpenGLWGL(parameter);
+	if (xdl:: XdevLOpenGLWGL::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		if (!obj)
-			return xdl::ERR_ERROR;
-
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLWGL,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
 
 		return xdl::ERR_OK;
 	}
 
 	return xdl::ERR_MODULE_NOT_FOUND;
 }
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if (obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
-	return &wglPluginDescriptor;
-}
-
 
 namespace xdl {
 

@@ -24,7 +24,6 @@
 #include "XdevLTextLayoutImpl.h"
 #include <XdevLFont/XdevLFontImpl.h>
 
-
 namespace xdl {
 
 	std::string vertex_shader_330(
@@ -157,8 +156,8 @@ void main(void) {                                                               
 		return mat;
 	}
 
-	XdevLTextLayoutImpl::XdevLTextLayoutImpl(XdevLModuleCreateParameter* parameter,  xdl::XdevLModuleDescriptor& moduleDescriptor) :
-		XdevLModuleImpl<XdevLTextLayout>(parameter, moduleDescriptor),
+	XdevLTextLayoutImpl::XdevLTextLayoutImpl(XdevLModuleCreateParameter* parameter,  const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLTextLayout>(parameter,  descriptor),
 		m_screenWidth(0),
 		m_screenHeight(0),
 		m_window(nullptr),

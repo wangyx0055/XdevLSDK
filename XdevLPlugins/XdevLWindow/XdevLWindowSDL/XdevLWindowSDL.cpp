@@ -93,7 +93,7 @@ struct XdevLJoysticks {
 static std::vector<XdevLJoysticks> joysticks;
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+XDEVL_PLUGIN_INIT {
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 
@@ -117,17 +117,17 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 	// If there is not event server first create one.
 	if(xdl::windowEventServer == nullptr) {
 		// If there is no even server active, create and activate it.
-		xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
+		xdl::windowEventServer = static_cast<xdl::XdevLWindowSDLEventServer*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer"), xdl::XdevLPluginName("XdevLWindowSDL")));
 	}
 
 	if(xdl::cursor == nullptr) {
-		xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+		xdl::cursor = static_cast<xdl::XdevLCursor*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
 	}
 
 	return xdl::ERR_OK;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+XDEVL_PLUGIN_SHUTDOWN {
 
 	// If the last window was destroy make sure to destroy the event server too.
 	if(xdl::windowEventServer != nullptr) {
@@ -147,43 +147,48 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 }
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 
 
 	//
 	// Create XdevLWindow instance.
 	//
-	if(windowSDLModuleDesc.getName() == parameter->getModuleName()) {
+	if(windowSDLModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::XdevLWindowSDL* window = new xdl::XdevLWindowSDL(parameter);
-		parameter->setModuleInstance(window);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowSDL,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+
 	}
 
 	//
 	// Create XdevLWindowServer instance.
 	//
-	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::XdevLWindowServerSDL* windowServer = new xdl::XdevLWindowServerSDL(parameter);
-		parameter->setModuleInstance(windowServer);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowServerSDL,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+
 	}
 
 	//
 	// Create XdevLEventServer instance.
 	//
-	else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::windowEventServer = new xdl::XdevLWindowSDLEventServer(parameter);
-		parameter->setModuleInstance(xdl::windowEventServer);
-		xdl::XdevLWindowEventServerParameter = parameter;
+	else if(windowEventServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::windowEventServer = XDEVL_NEW_MODULE(xdl::XdevLWindowSDLEventServer,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = xdl::windowEventServer ;
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
+		xdl::XdevLWindowEventServerParameter = XDEVL_MODULE_PARAMETER;
+
 	}
 
 	//
 	// Create XdevLCursor instance.
 	//
-	else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
+	else if(cursorModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::XdevLCursorSDL* cursor = new xdl::XdevLCursorSDL(parameter);
-		parameter->setModuleInstance(cursor);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLCursorSDL,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
@@ -362,9 +367,9 @@ namespace xdl {
 
 		xdl_uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
 		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
-		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
-		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
-		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
+		        (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
+		        (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
+		        (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
@@ -633,10 +638,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size,
-	    const XdevLWindowTypes& type) {
+	        const XdevLWindowTitle& title,
+	        const XdevLWindowPosition& position,
+	        const XdevLWindowSize& size,
+	        const XdevLWindowTypes& type) {
 
 		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
 		sdlWindow->setTitle(title);
@@ -1031,12 +1036,12 @@ namespace xdl {
 	}
 
 	xdl_int XdevLCursorSDL::clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) {
-		XDEVL_ASSERT(nullptr, "Not supported by SDL2");
+		XDEVL_ASSERT(0, "Not supported by SDL2");
 		return ERR_ERROR;
 	}
 
 	void XdevLCursorSDL::releaseClip() {
-		XDEVL_ASSERT(nullptr, "Not supported by SDL2");
+		XDEVL_ASSERT(0, "Not supported by SDL2");
 	}
 
 	xdl_int XdevLCursorSDL::enableRelativeMotion() {

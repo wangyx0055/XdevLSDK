@@ -49,7 +49,20 @@ namespace xdl {
 	typedef xdl_int(*XdevLPluginInitFunction)(XdevLPluginCreateParameter* parameter);
 	typedef xdl_int(*XdevLPluginShutdownFunction)();
 
+	#define XDEVL_MODULE_PARAMETER_NAME XDEVL_MODULE_PARAMETER->getModuleName()
+	#define XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR XDEVL_PLUGIN_CREATE_PARAMETER->getMediator()
+	#define XDEVL_PLUGIN_CREATE_MODULE extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* XDEVL_MODULE_PARAMETER)
 
+	#define XDEVL_MODULE_SET_MODULE_INSTACE(INSTANCE) XDEVL_MODULE_PARAMETER->setModuleInstance(INSTANCE)
+
+	#define XDEVL_PLUGIN_INIT extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* XDEVL_PLUGIN_CREATE_PARAMETER)
+	#define XDEVL_PLUGIN_SHUTDOWN extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin()
+	
+	#define XDEVL_PLUGIN_INIT_DEFAULT extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* XDEVL_PLUGIN_CREATE_PARAMETER) { return xdl::ERR_OK;}
+	#define XDEVL_PLUGIN_SHUTDOWN_DEFAULT extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() { return xdl::ERR_OK;}
+	#define XDEVL_PLUGIN_DELETE_MODULE_DEFAULT extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) { if(obj) delete obj; }
+	#define XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(PLUGIN_DESCRIPTOR) extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor(){ return &PLUGIN_DESCRIPTOR; }
+		
 	class XdevLPluginCreateParameter {
 		public:
 			XdevLPluginCreateParameter(XdevLCoreMediator* mediator) : m_mediator(mediator) {

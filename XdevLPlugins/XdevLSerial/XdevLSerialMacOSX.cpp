@@ -22,7 +22,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLSerialMacOSX::m_moduleDescriptor {
 	xdl::XdevLSerialPatchVersion
 };
 
-xdl::XdevLPluginDescriptor m_serialPluginDescriptor {
+xdl::XdevLPluginDescriptor serialPluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
 	xdl::XdevLSerialPluginMajorVersion,
@@ -30,23 +30,20 @@ xdl::XdevLPluginDescriptor m_serialPluginDescriptor {
 	xdl::XdevLSerialPluginPatchVersion
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(xdl::XdevLSerialMacOSX::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLSerialMacOSX(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor);
+
+XDEVL_PLUGIN_CREATE_MODULE {
+	if(xdl::XdevLSerialMacOSX::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLSerialMacOSX,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);
+
 		return xdl::ERR_OK;
 	}
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &m_serialPluginDescriptor;
 }
 
 namespace xdl {
@@ -146,20 +143,20 @@ namespace xdl {
 
 	xdl::xdl_int XdevLSerialMacOSX::_open() {
 
-			XDEVL_MODULE_INFO("Opening connection to the Serial Port device." << std::endl);
+		XDEVL_MODULE_INFO("Opening connection to the Serial Port device." << std::endl);
 
-			// Open the device.
-			m_flag = O_RDWR | O_NOCTTY;
-			m_fd = ::open(m_deviceName.toString().c_str(), m_flag);
-			if(m_fd == -1) {
-				XDEVL_MODULE_ERROR("Connect to: '" << m_deviceName << "' failed: " << strerror(errno) << std::endl);
-				return ERR_ERROR;
-			} else {
-				XDEVL_MODULE_SUCCESS("Connecting to: '" << m_deviceName << "' established." << std::endl);
-			}
+		// Open the device.
+		m_flag = O_RDWR | O_NOCTTY;
+		m_fd = ::open(m_deviceName.toString().c_str(), m_flag);
+		if(m_fd == -1) {
+			XDEVL_MODULE_ERROR("Connect to: '" << m_deviceName << "' failed: " << strerror(errno) << std::endl);
+			return ERR_ERROR;
+		} else {
+			XDEVL_MODULE_SUCCESS("Connecting to: '" << m_deviceName << "' established." << std::endl);
+		}
 
 
-			return setStates(m_baudrate, m_byteSize, m_parity, m_stopBits, m_flowControl, m_timeout);
+		return setStates(m_baudrate, m_byteSize, m_parity, m_stopBits, m_flowControl, m_timeout);
 	}
 
 

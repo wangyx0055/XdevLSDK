@@ -93,7 +93,7 @@ static Display* globalDisplay = nullptr;
 static Colormap defaultColorMap;
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+XDEVL_PLUGIN_INIT {
 
 	// Start X server with thread support.
 	XInitThreads();
@@ -114,20 +114,19 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 		// If there is not event server first create one.
 		if(xdl::windowEventServer == nullptr) {
 			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
+			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
 		}
 
 		if(xdl::cursor == nullptr) {
-			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
+			xdl::cursor = static_cast<xdl::XdevLCursor*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
 		}
 
 	}
 	return xdl::ERR_OK;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+XDEVL_PLUGIN_SHUTDOWN {
 
-	// And now close the window.
 	if(globalDisplay) {
 		XCloseDisplay(globalDisplay);
 		globalDisplay = nullptr;
@@ -137,44 +136,47 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 }
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter)  {
+XDEVL_PLUGIN_CREATE_MODULE  {
 
 	//
 	// Create XdevLWindow instance.
 	//
-	if(windowX11ModuleDesc.getName() == parameter->getModuleName()) {
+	if(windowX11ModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME ) {
 
-		xdl::XdevLWindowX11* window = new xdl::XdevLWindowX11(parameter);
-		parameter->setModuleInstance(window);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowX11,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 	}
 
 	//
 	// Create XdevLWindowServer instance.
 	//
-	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == parameter->getModuleName()) {
+	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::XdevLWindowServerX11* windowServer = new xdl::XdevLWindowServerX11(parameter);
-		parameter->setModuleInstance(windowServer);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowServerX11, XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 	}
 
 	//
 	// Create XdevLEventServer instance.
 	//
-	else if(windowEventServerModuleDesc.getName() == parameter->getModuleName()) {
+	else if(windowEventServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 		if(xdl::windowEventServer == nullptr) {
-			xdl::windowEventServer = new xdl::XdevLWindowX11EventServer(parameter);
-			xdl::XdevLWindowEventServerParameter = parameter;
+			xdl::windowEventServer = XDEVL_NEW_MODULE(xdl::XdevLWindowX11EventServer, XDEVL_MODULE_PARAMETER);
+			xdl::XdevLWindowEventServerParameter = XDEVL_MODULE_PARAMETER;
 		}
-		parameter->setModuleInstance(xdl::windowEventServer);
+		xdl::IPXdevLModule module = XDEVL_USE_MODULE(xdl::XdevLWindowX11EventServer, xdl::windowEventServer);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 	}
 
 	//
 	// Create XdevLCursor instance.
 	//
-	else if(cursorModuleDesc.getName() == parameter->getModuleName()) {
-		x11cursor =  new xdl::XdevLCursorX11(parameter);
+	else if(cursorModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+		x11cursor =  XDEVL_NEW_MODULE(xdl::XdevLCursorX11,  XDEVL_MODULE_PARAMETER);
 		xdl::cursor = x11cursor;
-		parameter->setModuleInstance(xdl::cursor);
+		
+		xdl::IPXdevLModule module = XDEVL_USE_MODULE(xdl::XdevLCursorX11, x11cursor);
+		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 	} else {
 		return xdl::ERR_MODULE_NOT_FOUND;
@@ -183,15 +185,8 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 	return xdl::ERR_OK;
 }
 
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor()  {
-	return &windowX11PluginDescriptor;
-}
-
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(windowX11PluginDescriptor);
 
 namespace xdl {
 

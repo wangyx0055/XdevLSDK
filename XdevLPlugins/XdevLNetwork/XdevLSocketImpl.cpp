@@ -62,13 +62,18 @@ xdl::XdevLModuleDescriptor xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc {
 	xdl::XdevLTCPSocketPatchVersion
 };
 
-xdl::XdevLPluginDescriptor m_socketPluginDescriptor {
+xdl::XdevLPluginDescriptor networkPluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
 	xdl::XdevLSocketPluginMajorVersion,
 	xdl::XdevLSocketPluginMinorVersion,
 	xdl::XdevLSocketPluginPatchVersion
 };
+
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(networkPluginDescriptor);
 
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
@@ -98,43 +103,30 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 	return nullptr;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::XdevLUDPSocketImpl* obj = new xdl::XdevLUDPSocketImpl(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
+XDEVL_PLUGIN_CREATE_MODULE {
+	if(xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLUDPSocketImpl,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
+
 		return xdl::ERR_OK;
 	}
-	if(xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::XdevLTCPSocketImpl* obj = new xdl::XdevLTCPSocketImpl(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
+	if(xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLTCPSocketImpl,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
+
 		return xdl::ERR_OK;
 	}
-	if(xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc.getName() == parameter->getModuleName()) {
-		xdl::XdevLUDPSocket2Impl* obj = new xdl::XdevLUDPSocket2Impl(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
+	if(xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		parameter->setModuleInstance(obj);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLUDPSocket2Impl,  XDEVL_MODULE_PARAMETER);
+		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
+
 		return xdl::ERR_OK;
 	}
-
 
 	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &m_socketPluginDescriptor;
 }
 
 namespace xdl {

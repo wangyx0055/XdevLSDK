@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -49,13 +49,17 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	XDEVLJOYSTICK_SERVER_MODULE_PATCH_VERSION
 };
 
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+
+
 #if XDEVL_USE_UDEV
 static xdl::XdevLJoystickServerLinuxUDev joystickudev;
 #endif
 
 xdl::XdevLJoystickServerLinux* joystickServerLinux = nullptr;
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
+XDEVL_PLUGIN_INIT {
 #if XDEVL_USE_UDEV
 	return joystickudev.init();
 #else
@@ -63,7 +67,7 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParamete
 #endif
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
+XDEVL_PLUGIN_SHUTDOWN {
 #if XDEVL_USE_UDEV
 	return joystickudev.shutdown();
 #else
@@ -72,14 +76,14 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
 }
 
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 
 	if(nullptr == joystickServerLinux) {
-		if(moduleDescriptor.getName() == parameter->getModuleName()) {
-			joystickServerLinux  = new xdl::XdevLJoystickServerLinux(parameter, moduleDescriptor);
-			if(!joystickServerLinux)
-				return xdl::ERR_ERROR;
-			parameter->setModuleInstance(joystickServerLinux);
+		if(moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+
+			xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLJoystickServerLinux,  XDEVL_MODULE_PARAMETER, moduleDescriptor);
+			XDEVL_MODULE_SET_MODULE_INSTACE(module);
+
 			return xdl::ERR_OK;
 		}
 	} else {
@@ -88,15 +92,6 @@ extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* pa
 
 	return xdl::ERR_MODULE_NOT_FOUND;
 }
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
-}
-
 
 namespace xdl {
 
@@ -107,48 +102,80 @@ namespace xdl {
 
 	xdl_uint16 wrapJoystickIdToInteger(const XdevLJoystickId& id) {
 		switch(id) {
-			case XdevLJoystickId::JOYSTICK_0: return 0;
-			case XdevLJoystickId::JOYSTICK_1: return 1;
-			case XdevLJoystickId::JOYSTICK_2: return 2;
-			case XdevLJoystickId::JOYSTICK_3: return 3;
-			case XdevLJoystickId::JOYSTICK_4: return 4;
-			case XdevLJoystickId::JOYSTICK_5: return 5;
-			case XdevLJoystickId::JOYSTICK_6: return 6;
-			case XdevLJoystickId::JOYSTICK_7: return 7;
-			case XdevLJoystickId::JOYSTICK_8: return 8;
-			case XdevLJoystickId::JOYSTICK_9: return 9;
-			case XdevLJoystickId::JOYSTICK_10: return 10;
-			case XdevLJoystickId::JOYSTICK_11: return 11;
-			case XdevLJoystickId::JOYSTICK_12: return 12;
-			case XdevLJoystickId::JOYSTICK_13: return 13;
-			case XdevLJoystickId::JOYSTICK_14: return 14;
-			case XdevLJoystickId::JOYSTICK_15: return 15;
+			case XdevLJoystickId::JOYSTICK_0:
+				return 0;
+			case XdevLJoystickId::JOYSTICK_1:
+				return 1;
+			case XdevLJoystickId::JOYSTICK_2:
+				return 2;
+			case XdevLJoystickId::JOYSTICK_3:
+				return 3;
+			case XdevLJoystickId::JOYSTICK_4:
+				return 4;
+			case XdevLJoystickId::JOYSTICK_5:
+				return 5;
+			case XdevLJoystickId::JOYSTICK_6:
+				return 6;
+			case XdevLJoystickId::JOYSTICK_7:
+				return 7;
+			case XdevLJoystickId::JOYSTICK_8:
+				return 8;
+			case XdevLJoystickId::JOYSTICK_9:
+				return 9;
+			case XdevLJoystickId::JOYSTICK_10:
+				return 10;
+			case XdevLJoystickId::JOYSTICK_11:
+				return 11;
+			case XdevLJoystickId::JOYSTICK_12:
+				return 12;
+			case XdevLJoystickId::JOYSTICK_13:
+				return 13;
+			case XdevLJoystickId::JOYSTICK_14:
+				return 14;
+			case XdevLJoystickId::JOYSTICK_15:
+				return 15;
 			default:
-			break;
+				break;
 		}
 		return 0;
 	}
 
 	XdevLJoystickId wrapIntegerToJoystickId(xdl_uint16 id) {
 		switch(id) {
-			case 0: return XdevLJoystickId::JOYSTICK_0;
-			case 1: return XdevLJoystickId::JOYSTICK_1;
-			case 2: return XdevLJoystickId::JOYSTICK_2;
-			case 3: return XdevLJoystickId::JOYSTICK_3;
-			case 4: return XdevLJoystickId::JOYSTICK_4;
-			case 5: return XdevLJoystickId::JOYSTICK_5;
-			case 6: return XdevLJoystickId::JOYSTICK_6;
-			case 7: return XdevLJoystickId::JOYSTICK_7;
-			case 8: return XdevLJoystickId::JOYSTICK_8;
-			case 9: return XdevLJoystickId::JOYSTICK_9;
-			case 10: return XdevLJoystickId::JOYSTICK_10;
-			case 11: return XdevLJoystickId::JOYSTICK_11;
-			case 12: return XdevLJoystickId::JOYSTICK_12;
-			case 13: return XdevLJoystickId::JOYSTICK_13;
-			case 14: return XdevLJoystickId::JOYSTICK_14;
-			case 15: return XdevLJoystickId::JOYSTICK_15;
+			case 0:
+				return XdevLJoystickId::JOYSTICK_0;
+			case 1:
+				return XdevLJoystickId::JOYSTICK_1;
+			case 2:
+				return XdevLJoystickId::JOYSTICK_2;
+			case 3:
+				return XdevLJoystickId::JOYSTICK_3;
+			case 4:
+				return XdevLJoystickId::JOYSTICK_4;
+			case 5:
+				return XdevLJoystickId::JOYSTICK_5;
+			case 6:
+				return XdevLJoystickId::JOYSTICK_6;
+			case 7:
+				return XdevLJoystickId::JOYSTICK_7;
+			case 8:
+				return XdevLJoystickId::JOYSTICK_8;
+			case 9:
+				return XdevLJoystickId::JOYSTICK_9;
+			case 10:
+				return XdevLJoystickId::JOYSTICK_10;
+			case 11:
+				return XdevLJoystickId::JOYSTICK_11;
+			case 12:
+				return XdevLJoystickId::JOYSTICK_12;
+			case 13:
+				return XdevLJoystickId::JOYSTICK_13;
+			case 14:
+				return XdevLJoystickId::JOYSTICK_14;
+			case 15:
+				return XdevLJoystickId::JOYSTICK_15;
 			default:
-			break;
+				break;
 		}
 		return XdevLJoystickId::JOYSTICK_UNKNOWN;
 	}
@@ -319,14 +346,14 @@ namespace xdl {
 		XdevLJoystickDeviceInfoLinux* joystickInfo = getJoystickInfo(fd, path);
 		if(nullptr == joystickInfo) {
 			return ERR_ERROR;
-		} 
+		}
 		m_joystickDevices[joystickInfo->device] = joystickInfo;
 
 		return ERR_OK;
 	}
 
 	XdevLJoystickDeviceInfoLinux* XdevLJoystickServerLinux::getJoystickInfo(xdl_int fd, const std::string& path) {
-		
+
 		//
 		// Get information of the joystick device.
 		//
@@ -618,7 +645,7 @@ namespace xdl {
 							std::cout << " removed.";
 						}
 						std::cout << std::endl;
-						
+
 						if(nullptr != joystickServerLinux) {
 							if(action == "add") {
 								joystickServerLinux->addJoystick(node);

@@ -39,7 +39,7 @@ namespace xdl {
 	class XdevLFontSystemImpl : public XdevLModuleImpl<XdevLFontSystem> {
 		public:
 
-			XdevLFontSystemImpl(XdevLModuleCreateParameter* parameter, xdl::XdevLModuleDescriptor& moduleDescriptor);
+			XdevLFontSystemImpl(XdevLModuleCreateParameter* parameter,  const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLFontSystemImpl();
 

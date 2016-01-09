@@ -33,11 +33,10 @@
 #include <cmath>
 #include <cassert>
 
-
 namespace xdl {
 
-	XdevLFontSystemImpl::XdevLFontSystemImpl(XdevLModuleCreateParameter* parameter, xdl::XdevLModuleDescriptor& moduleDescriptor) :
-		XdevLModuleImpl<XdevLFontSystem>(parameter, moduleDescriptor),
+	XdevLFontSystemImpl::XdevLFontSystemImpl(XdevLModuleCreateParameter* parameter,  const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLFontSystem>(parameter,  descriptor),
 		screenWidth(0),
 		screenHeight(0),
 		m_rai(nullptr),
