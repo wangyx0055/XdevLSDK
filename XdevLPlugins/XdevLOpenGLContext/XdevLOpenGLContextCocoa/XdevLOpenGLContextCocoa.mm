@@ -31,9 +31,9 @@ XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(cglPluginDescriptor);
 
-extern "C" XDEVL_EXPORT int _create(xdl::XdevLModuleCreateParameter* parameter) {
+XDEVL_PLUGIN_CREATE_MODULE {
 
-	if(xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == parameter->getModuleName()) {
+	if(xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
 		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextCocoa,  XDEVL_MODULE_PARAMETER);
 		XDEVL_MODULE_SET_MODULE_INSTACE(module);
