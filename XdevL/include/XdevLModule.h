@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -37,6 +37,12 @@ namespace xdl {
 	class XdevLCommandLineParser;
 	class XdevLLog;
 
+	typedef XdevLModule* IPXdevLModule;
+
+#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER));
+//	#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) new CLASS_NAME(PARAMETER);
+
+
 	/**
 		@enum XdevLModuleEvents
 		@brief Supported Module messages.
@@ -50,8 +56,8 @@ namespace xdl {
 	};
 
 	enum XdevLModuleStates {
-		XDEVL_MODULE_STATE_NONE = 1,
-		XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY = 2
+	  XDEVL_MODULE_STATE_NONE = 1,
+	  XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY = 2
 	};
 
 	/**
@@ -92,7 +98,7 @@ namespace xdl {
 			                      xdl_uint major,
 			                      xdl_uint minor,
 			                      xdl_uint patch,
-														xdl_uint32 states) :
+			                      xdl_uint32 states) :
 				m_vendor(vendor),
 				m_author(author),
 				m_moduleName(moduleName),
@@ -134,17 +140,17 @@ namespace xdl {
 			virtual const XdevLVersion& getVersion() const {
 				return m_version;
 			}
-			
+
 			/// Return the state of the module.
 			virtual xdl_bool getState(XdevLModuleStates state) const {
 				return (m_states & state);
 			}
-			
+
 			/// Add module that depends on this module.
 			virtual void registerDependency(XdevLModule* module) {
 				m_dependency.push_back(module);
 			}
-			
+
 			/// Return the list of dependency modules.
 			const std::vector<XdevLModule*>& getDependencies() const {
 				return m_dependency;
@@ -168,9 +174,9 @@ namespace xdl {
 
 			// Holds the version of the module.
 			XdevLVersion 		m_version;
-			
+
 			xdl_uint32			m_states;
-			
+
 			std::vector<XdevLModule*> m_dependency;
 	};
 
