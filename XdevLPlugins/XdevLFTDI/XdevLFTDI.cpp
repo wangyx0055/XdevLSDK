@@ -7,9 +7,9 @@
 xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
-	xdl::XdevLFTDIPluginMajorVersion,
-	xdl::XdevLFTDIPluginMinorVersion,
-	xdl::XdevLFTDIPluginPatchVersion
+	XDEVLFTDI_MAJOR_VERSION,
+	XDEVLFTDI_MINOR_VERSION,
+	XDEVLFTDI_PATCH_VERSION
 };
 
 xdl::XdevLModuleDescriptor moduleDescriptor {
@@ -18,9 +18,9 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::moduleNames[0],
 	xdl::copyright,
 	xdl::description,
-	xdl::XdevLFTDIMajorVersion,
-	xdl::XdevLFTDIMinorVersion,
-	xdl::XdevLFTDIPatchVersion
+	XDEVLFTDI_MODULE_MAJOR_VERSION,
+	XDEVLFTDI_MODULE_MINOR_VERSION,
+	XDEVLFTDI_MODULE_PATCH_VERSION
 };
 
 
