@@ -17,7 +17,7 @@
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLAudio"/>
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevL/include"/>
   </WorkspaceParserPaths>
-  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
+  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="Yes"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
   <Project Name="tcp_client_demo" Path="tcp_client_demo/tcp_client_demo.project" Active="No"/>
@@ -36,7 +36,7 @@
   <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
   <Project Name="audio_capture_demo" Path="audio_capture_demo/audio_capture_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
-  <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="Yes"/>
+  <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="No"/>
   <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">

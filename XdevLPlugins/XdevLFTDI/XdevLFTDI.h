@@ -96,7 +96,7 @@ namespace xdl {
 	*/
 	class XdevLFTDI : public XdevLSerialImpl, public XdevLModuleImpl<XdevLSerial>  {
 		public:
-			XdevLFTDI(XdevLModuleCreateParameter* parameter);
+			XdevLFTDI(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLFTDI();
 
 			virtual xdl_int init() override;

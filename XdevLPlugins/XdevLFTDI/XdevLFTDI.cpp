@@ -4,6 +4,13 @@
 #include <sstream>
 #include <XdevLXstring.h>
 
+xdl::XdevLPluginDescriptor pluginDescriptor {
+	xdl::pluginName,
+	xdl::moduleNames,
+	xdl::XdevLFTDIPluginMajorVersion,
+	xdl::XdevLFTDIPluginMinorVersion,
+	xdl::XdevLFTDIPluginPatchVersion
+};
 
 xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::vendor,
@@ -16,13 +23,6 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::XdevLFTDIPatchVersion
 };
 
-xdl::XdevLPluginDescriptor pluginDescriptor {
-	xdl::pluginName,
-	xdl::moduleNames,
-	xdl::XdevLFTDIPluginMajorVersion,
-	xdl::XdevLFTDIPluginMinorVersion,
-	xdl::XdevLFTDIPluginPatchVersion
-};
 
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
@@ -30,14 +30,8 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLFTDI,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLFTDI, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
@@ -106,8 +100,8 @@ namespace xdl {
 		return FT_FLOW_NONE;
 	}
 
-	XdevLFTDI::XdevLFTDI(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLSerial>(parameter, moduleDescriptor),
+	XdevLFTDI::XdevLFTDI(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLSerial>(parameter, descriptor),
 		m_usbInSize(2048),
 		m_usbOutSize(2048),
 		m_latencyTimer(16) {
