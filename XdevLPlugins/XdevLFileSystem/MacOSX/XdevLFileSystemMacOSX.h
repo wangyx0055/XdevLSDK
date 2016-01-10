@@ -43,14 +43,11 @@ namespace xdl {
 
 	class XdevLDirectoryWatcherMacOSX : public XdevLModuleImpl<XdevLDirectoryWatcher> {
 		public:
-			XdevLDirectoryWatcherMacOSX(XdevLModuleCreateParameter* parameter)
-				: XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, m_moduleDescriptorDirectoryWatcher)
+			XdevLDirectoryWatcherMacOSX(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)
+				: XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor)
 				, m_stream(nullptr) {};
 
 			virtual ~XdevLDirectoryWatcherMacOSX() {};
-
-			static XdevLModuleDescriptor m_moduleDescriptorDirectoryWatcher;
-
 
 			virtual xdl_int init();
 			virtual xdl_int shutdown();

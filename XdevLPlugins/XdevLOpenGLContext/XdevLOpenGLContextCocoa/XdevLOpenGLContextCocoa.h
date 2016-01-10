@@ -26,27 +26,8 @@
 
 namespace xdl {
 
-	static const XdevLString cocoa_context_vendor { 
-		"www.codeposer.net"
-	};
 
-	static const XdevLString cocoa_context_author { 
-		"Cengiz Terzibas"
-	};
-
-	static const XdevLString cocoa_context_copyright {
-		"(c) 2005 - 2014 Cengiz Terzibas."
-	};
-
-	static const XdevLString cocoa_context_description {
-		"Module to create a Cocoa OpenGL context."
-	};
-
-	static const XdevLString cocoa_context_pluginName {
-		"XdevLOpenGLContextCGL"
-	};
-
-	static const std::vector<XdevLModuleName> cocoa_context_moduleNames {
+	static const std::vector<XdevLModuleName> moduleNames {
 		XdevLModuleName("XdevLOpenGLContext")
 	};
 

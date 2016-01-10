@@ -73,14 +73,14 @@ XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
 	if(moduleDirectoryDescriptor.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr, moduleDescriptor);
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr, moduleDirectoryDescriptor);
 		if(!obj)
 			return nullptr;
 
 		return obj;
 
 	} else if(moduleFileDescriptor.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr, moduleDescriptor);
+		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr, moduleFileDescriptor);
 		if(!obj) {
 			return nullptr;
 		}
@@ -88,7 +88,7 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 		return obj;
 
 	} else if(moduleDirectoryWatcherDescriptor.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherLinux(nullptr, moduleDescriptor);
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherLinux(nullptr, moduleDirectoryWatcherDescriptor);
 		if(!obj) {
 			return nullptr;
 		}

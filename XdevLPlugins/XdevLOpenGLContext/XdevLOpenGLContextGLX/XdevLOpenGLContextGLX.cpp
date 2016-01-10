@@ -41,17 +41,17 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::moduleNames[0],
 	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
 	xdl::XdevLString("Module to create a GLX OpenGL context."),
-	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
-	XDEVLOPENGLCONTEXT_MINOR_VERSION,
-	XDEVLOPENGLCONTEXT_PATCH_VERSION
-};
-
-xdl::XdevLPluginDescriptor glxPluginDescriptor {
-	xdl::XdevLString("XdevLOpenGLContextGLX"),
-	xdl::moduleNames,
 	XDEVLOPENGLCONTEXT_MODULE_MAJOR_VERSION,
 	XDEVLOPENGLCONTEXT_MODULE_MINOR_VERSION,
 	XDEVLOPENGLCONTEXT_MODULE_PATCH_VERSION
+};
+
+xdl::XdevLPluginDescriptor glxPluginDescriptor {
+	xdl::XdevLString("XdevLOpenGLContextCGL"),
+	xdl::moduleNames,
+	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT

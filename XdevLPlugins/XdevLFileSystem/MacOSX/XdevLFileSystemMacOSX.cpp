@@ -19,8 +19,37 @@
 
 #include "XdevLFileSystemMacOSX.h"
 
+xdl::XdevLPluginDescriptor pluginDescriptor {
+	xdl::XdevLFileSystemPluginName,
+	xdl::XdevLFileSystemModuleName,
+	xdl::XdevLFileSystemPluginMajorVersion,
+	xdl::XdevLFileSystemPluginMinorVersion,
+	xdl::XdevLFileSystemPluginPatchVersion
+};
 
-xdl::XdevLModuleDescriptor xdl::XdevLDirectoryWatcherMacOSX::m_moduleDescriptorDirectoryWatcher {
+xdl::XdevLModuleDescriptor moduleFileDescriptor {
+	xdl::XdevLFileSystemVendor,
+	xdl::XdevLFileSystemAuthor,
+	xdl::XdevLFileSystemModuleName[0],
+	xdl::XdevLFileSystemCopyright,
+	xdl::XdevLDescriptionForFileSystem,
+	xdl::XdevLFileSystemMajorVersion,
+	xdl::XdevLFileSystemMinorVersion,
+	xdl::XdevLFileSystemPatchVersion
+};
+
+xdl::XdevLModuleDescriptor moduleDirectoryDescriptor {
+	xdl::XdevLFileSystemVendor,
+	xdl::XdevLFileSystemAuthor,
+	xdl::XdevLFileSystemModuleName[1],
+	xdl::XdevLFileSystemCopyright,
+	xdl::XdevLDescriptionForDirectory,
+	xdl::XdevLDirectoryMajorVersion,
+	xdl::XdevLDirectoryMinorVersion,
+	xdl::XdevLDirectoryPatchVersion
+};
+
+xdl::XdevLModuleDescriptor moduleDirectoryWatcherDescriptor {
 	xdl::XdevLFileSystemVendor,
 	xdl::XdevLFileSystemAuthor,
 	xdl::XdevLFileSystemModuleName[2],
@@ -31,25 +60,30 @@ xdl::XdevLModuleDescriptor xdl::XdevLDirectoryWatcherMacOSX::m_moduleDescriptorD
 	xdl::XdevLDirectoryWatcherPatchVersion
 };
 
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
-	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr);
+	if(moduleDirectoryDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr, moduleDirectoryDescriptor);
 		if(!obj)
 			return nullptr;
 		
 		return obj;
 
-	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr);
+	} else if(moduleFileDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr, moduleFileDescriptor);
 		if(!obj) {
 			return nullptr;
 		}
 
 		return obj;
 
-	} else if(xdl::XdevLDirectoryWatcherMacOSX::m_moduleDescriptorDirectoryWatcher.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherMacOSX(nullptr);
+	} else if(moduleDirectoryWatcherDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherMacOSX(nullptr, moduleDirectoryWatcherDescriptor);
 		if(!obj) {
 			return nullptr;
 		}
@@ -60,38 +94,11 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 	return nullptr;
 }
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-
-	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
-
-		parameter->setModuleInstance(obj);
-
-		return xdl::ERR_OK;
-	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
-
-		parameter->setModuleInstance(obj);
-
-		return xdl::ERR_OK;
-	} else if(xdl::XdevLDirectoryWatcherMacOSX::m_moduleDescriptorDirectoryWatcher.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherMacOSX(parameter);
-		if(nullptr == obj) {
-			return xdl::ERR_ERROR;
-		}
-
-		parameter->setModuleInstance(obj);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLFileUnix, moduleFileDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLDirectoryUnix, moduleDirectoryDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLDirectoryWatcherMacOSX, moduleDirectoryWatcherDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {

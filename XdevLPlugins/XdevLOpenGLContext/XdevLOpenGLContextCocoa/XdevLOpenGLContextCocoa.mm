@@ -7,23 +7,22 @@
 
 
 xdl::XdevLModuleDescriptor moduleDescriptor {
-	xdl::cocoa_context_vendor,
-	xdl::cocoa_context_author,
-	xdl::cocoa_context_moduleNames[0],
-	xdl::cocoa_context_copyright,
-	cocoa_context_description,
-	XDEVLOPENGL_CONTEXT_CGL_MAJOR_VERSION,
-	XDEVLOPENGL_CONTEXT_CGL_MINOR_VERSION,
-	XDEVLOPENGL_CONTEXT_CGL_PATCH_VERSION
-};
-
-
-xdl::XdevLPluginDescriptor cglPluginDescriptor {
-	xdl::cocoa_context_pluginName,
-	xdl::cocoa_context_moduleNames,
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
+	xdl::moduleNames[0],
+	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
+	xdl::XdevLString("Module to create a GLX OpenGL context."),
 	XDEVLOPENGL_CONTEXT_CGL_MODULE_MAJOR_VERSION,
 	XDEVLOPENGL_CONTEXT_CGL_MODULE_MINOR_VERSION,
 	XDEVLOPENGL_CONTEXT_CGL_MODULE_PATCH_VERSION
+};
+
+xdl::XdevLPluginDescriptor cglPluginDescriptor {
+	xdl::XdevLString("XdevLOpenGLContextGLX"),
+	xdl::moduleNames,
+	XDEVLOPENGL_CONTEXT_CGL_MAJOR_VERSION,
+	XDEVLOPENGL_CONTEXT_CGL_MINOR_VERSION,
+	XDEVLOPENGL_CONTEXT_CGL_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
