@@ -53,7 +53,7 @@ namespace xdl {
 
 	class XdevLBlankModuleImpl : public XdevLModuleImpl<XdevLBlankModule> {
 		public:
-			XdevLBlankModuleImpl(XdevLModuleCreateParameter* parameter);
+			XdevLBlankModuleImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLBlankModuleImpl();
 
 

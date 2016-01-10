@@ -76,7 +76,7 @@ namespace xdl {
 	*/
 	class XdevLOpenGLImpl : public XdevLModuleImpl<XdevLRAI> {
 		public:
-			XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter);
+			XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLOpenGLImpl();
 
 

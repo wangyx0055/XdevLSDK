@@ -551,9 +551,7 @@ namespace xdl {
 	*/
 	class XdevLMouseImpl : public XdevLMouseBase<XdevLMouse> {
 		public:
-			XdevLMouseImpl(XdevLModuleCreateParameter* parameter);
-
-			static XdevLModuleDescriptor m_moduleDescriptor;
+			XdevLMouseImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;

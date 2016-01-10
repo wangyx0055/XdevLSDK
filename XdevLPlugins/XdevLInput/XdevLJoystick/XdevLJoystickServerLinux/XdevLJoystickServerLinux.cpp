@@ -75,22 +75,9 @@ XDEVL_PLUGIN_SHUTDOWN {
 #endif
 }
 
-
 XDEVL_PLUGIN_CREATE_MODULE {
-
-	if(nullptr == joystickServerLinux) {
-		if(moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-			xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLJoystickServerLinux,  XDEVL_MODULE_PARAMETER, moduleDescriptor);
-			XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-			return xdl::ERR_OK;
-		}
-	} else {
-		return xdl::ERR_MODULE_EXIST_ALREADY;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLJoystickServerLinux, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {

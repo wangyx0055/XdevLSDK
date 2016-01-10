@@ -43,15 +43,9 @@ namespace xdl {
 
 	class XdevLDirectoryWatcherLinux : public XdevLModuleImpl<XdevLDirectoryWatcher> {
 		public:
-			XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter)
-				:
-				XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, m_moduleDescriptorDirectoryWatcher),
-				m_threadStarted(xdl_false),
-				m_fd(-1) {};
+			XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLDirectoryWatcherLinux() {};
-
-			static XdevLModuleDescriptor m_moduleDescriptorDirectoryWatcher;
 
 			virtual xdl_int init();
 			virtual xdl_int shutdown();

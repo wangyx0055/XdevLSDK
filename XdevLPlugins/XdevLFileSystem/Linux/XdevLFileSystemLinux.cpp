@@ -23,36 +23,72 @@
 
 #include "XdevLFileSystemLinux.h"
 
-xdl::XdevLModuleDescriptor xdl::XdevLDirectoryWatcherLinux::m_moduleDescriptorDirectoryWatcher {
-	XdevLFileSystemVendor,
-	XdevLFileSystemAuthor,
-	XdevLFileSystemModuleName[2],
-	XdevLFileSystemCopyright,
-	XdevLDescriptionForFileSystem,
-	XdevLDirectoryWatcherMajorVersion,
-	XdevLDirectoryWatcherMinorVersion,
-	XdevLDirectoryWatcherPatchVersion
+
+xdl::XdevLPluginDescriptor pluginDescriptor {
+	xdl::XdevLFileSystemPluginName,
+	xdl::XdevLFileSystemModuleName,
+	xdl::XdevLFileSystemPluginMajorVersion,
+	xdl::XdevLFileSystemPluginMinorVersion,
+	xdl::XdevLFileSystemPluginPatchVersion
 };
+
+xdl::XdevLModuleDescriptor moduleFileDescriptor {
+	xdl::XdevLFileSystemVendor,
+	xdl::XdevLFileSystemAuthor,
+	xdl::XdevLFileSystemModuleName[0],
+	xdl::XdevLFileSystemCopyright,
+	xdl::XdevLDescriptionForFileSystem,
+	xdl::XdevLFileSystemMajorVersion,
+	xdl::XdevLFileSystemMinorVersion,
+	xdl::XdevLFileSystemPatchVersion
+};
+
+xdl::XdevLModuleDescriptor moduleDirectoryDescriptor {
+	xdl::XdevLFileSystemVendor,
+	xdl::XdevLFileSystemAuthor,
+	xdl::XdevLFileSystemModuleName[1],
+	xdl::XdevLFileSystemCopyright,
+	xdl::XdevLDescriptionForDirectory,
+	xdl::XdevLDirectoryMajorVersion,
+	xdl::XdevLDirectoryMinorVersion,
+	xdl::XdevLDirectoryPatchVersion
+};
+
+xdl::XdevLModuleDescriptor moduleDirectoryWatcherDescriptor {
+	xdl::XdevLFileSystemVendor,
+	xdl::XdevLFileSystemAuthor,
+	xdl::XdevLFileSystemModuleName[2],
+	xdl::XdevLFileSystemCopyright,
+	xdl::XdevLDescriptionForFileSystem,
+	xdl::XdevLDirectoryWatcherMajorVersion,
+	xdl::XdevLDirectoryWatcherMinorVersion,
+	xdl::XdevLDirectoryWatcherPatchVersion
+};
+
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
-	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr);
+	if(moduleDirectoryDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr, moduleDescriptor);
 		if(!obj)
 			return nullptr;
 
 		return obj;
 
-	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr);
+	} else if(moduleFileDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLFileUnix(nullptr, moduleDescriptor);
 		if(!obj) {
 			return nullptr;
 		}
 
 		return obj;
 
-	} else if(xdl::XdevLDirectoryWatcherLinux::m_moduleDescriptorDirectoryWatcher.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherLinux(nullptr);
+	} else if(moduleDirectoryWatcherDescriptor.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLModule* obj = new xdl::XdevLDirectoryWatcherLinux(nullptr, moduleDescriptor);
 		if(!obj) {
 			return nullptr;
 		}
@@ -64,33 +100,20 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 }
 
 XDEVL_PLUGIN_CREATE_MODULE {
-
-	if(xdl::XdevLDirectoryUnix::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLDirectoryUnix,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-
-	} else if(xdl::XdevLFileUnix::m_moduleDescriptor2.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLFileUnix,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-
-	} else if(xdl::XdevLDirectoryWatcherLinux::m_moduleDescriptorDirectoryWatcher.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLDirectoryWatcherLinux,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLFileUnix, moduleFileDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLDirectoryUnix, moduleDirectoryDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLDirectoryWatcherLinux, moduleDirectoryWatcherDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
+
 namespace xdl {
+
+	XdevLDirectoryWatcherLinux::XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)
+		:
+		XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor),
+		m_threadStarted(xdl_false),
+		m_fd(-1) {};
 
 	xdl_int XdevLDirectoryWatcherLinux::init() {
 		// Initialize notification system.
@@ -196,13 +219,13 @@ namespace xdl {
 				//
 				else if(event->mask & IN_CREATE) {
 					eventType = EventTypes::DW_CREATE;
-				} 
+				}
 				//
 				// A file or folder got modified.
 				//
 				else if(event->mask & IN_MODIFY) {
 					eventType = EventTypes::DW_MODIFY;
-				} 
+				}
 				//
 				// The flowing ones are not really implemented.
 				//
@@ -216,14 +239,14 @@ namespace xdl {
 					eventType = EventTypes::DW_CLOSE;
 				} else if(event->mask & IN_DELETE_SELF) {
 					XDEVL_MODULE_INFO("IN_DELETE_SELF not handled.\n");
-				} 
+				}
 				//
 				// A file or folder got removed.
 				// We handle it as delete.
 				//
 				else if(event->mask & IN_MOVED_FROM) {
 					eventType = EventTypes::DW_DELETE;
-				} 
+				}
 				//
 				// A file or folder got renamed.
 				// We handle this as create because renaming
@@ -231,7 +254,7 @@ namespace xdl {
 				//
 				else if(event->mask & IN_MOVED_TO) {
 					eventType = EventTypes::DW_CREATE;
-				} 
+				}
 				//
 				// A file or folder got really deleted.
 				//

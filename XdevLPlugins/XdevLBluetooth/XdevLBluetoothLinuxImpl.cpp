@@ -26,46 +26,40 @@
 #include <XdevLPlatform.h>
 #include <cstring>
 
-
-xdl::XdevLModuleDescriptor xdl::XdevLBluetoothLinuxImpl::m_bluetoothModuleDescriptor {
-	vendor,
-	author,
-	moduleNames[0],
-	copyright,
-	description,
-	XdevLBluetoothMajorVersion,
-	XdevLBluetoothMinorVersion,
-	XdevLBluetoothPatchVersion
+xdl::XdevLPluginDescriptor bluetoothPluginDescriptor {
+	xdl::XdevLString("XdevLBluetooth"),
+	xdl::moduleNames,
+	XDEVLBLUETOOTH_MAJOR_VERSION,
+	XDEVLBLUETOOTH_MINOR_VERSION,
+	XDEVLBLUETOOTH_PATCH_VERSION
 };
 
-xdl::XdevLPluginDescriptor m_bluetoothPluginDescriptor {
-	xdl::pluginName,
-	xdl::moduleNames,
-	xdl::XdevLBluetoothPluginMajorVersion,
-	xdl::XdevLBluetoothPluginMinorVersion,
-	xdl::XdevLBluetoothPluginPatchVersion
+xdl::XdevLModuleDescriptor bluetoothModuleDescriptor {
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
+	xdl::moduleNames[0],
+	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
+	xdl::XdevLString("Creates a Bluetooth connection."),
+	XDEVLBLUETOOTH_MODULE_MAJOR_VERSION,
+	XDEVLBLUETOOTH_MODULE_MINOR_VERSION,
+	XDEVLBLUETOOTH_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(m_bluetoothPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(bluetoothPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLBluetoothLinuxImpl::m_bluetoothModuleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLBluetoothLinuxImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLBluetoothLinuxImpl, bluetoothModuleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
 
-	XdevLBluetoothLinuxImpl::XdevLBluetoothLinuxImpl(XdevLModuleCreateParameter* parameter) : XdevLModuleImpl<XdevLBluetooth>(parameter, m_bluetoothModuleDescriptor),
+	XdevLBluetoothLinuxImpl::XdevLBluetoothLinuxImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLBluetooth>(parameter, descriptor),
 		m_socket(-1) {};
 
 	xdl_int XdevLBluetoothLinuxImpl::init() {

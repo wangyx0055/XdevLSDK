@@ -28,21 +28,6 @@
 
 namespace xdl {
 
-// Holds the major version number of the plugin.
-const xdl_uint XdevLBluetoothPluginMajorVersion = 0;
-// Holds the Minor version number of the plugin.
-const xdl_uint XdevLBluetoothPluginMinorVersion = 1;
-// Holds the Patch version number of the plugin.
-const xdl_uint XdevLBluetoothPluginPatchVersion = 0;
-
-
-// Holds the Major version number.
-const xdl_uint XdevLBluetoothMajorVersion = 0;
-// Holds the Minor version number.
-const xdl_uint XdevLBluetoothMinorVersion = 1;
-// Holds the Patch version number.
-const xdl_uint XdevLBluetoothPatchVersion = 0;
-
 /**
 	@class XdevLBluetoothAddress
 	@brief Bluetooth address

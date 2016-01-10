@@ -40,7 +40,7 @@
 #endif
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLOgreImpl::m_moduleDescriptor {
+xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[0],
@@ -65,24 +65,16 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(ogrePluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	// Create the "Ogre" module
-	if(xdl::XdevLOgreImpl::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOgreImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOgreImpl, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
 
 
-	XdevLOgreImpl::XdevLOgreImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLOgre>(parameter, m_moduleDescriptor),
+	XdevLOgreImpl::XdevLOgreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLOgre>(parameter, descriptor),
 		m_xdlWindow(nullptr),
 		m_ColorDepth(-1),
 		m_Antialiasing(-1),

@@ -53,39 +53,15 @@ xdl::XdevLModuleDescriptor moduleDescriptorCapture {
 	XDEVLAUDIOALSA_MODULE_PATCH_VERSION
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(moduleDescriptorPlayback.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLAudioPlaybackImpl(parameter, moduleDescriptorPlayback);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
-	} else if(moduleDescriptorCapture.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLAudioCaptureImpl(parameter, moduleDescriptorCapture);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLAudioPlaybackImpl, moduleDescriptorPlayback)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLAudioCaptureImpl, moduleDescriptorCapture)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {

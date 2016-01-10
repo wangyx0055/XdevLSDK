@@ -99,7 +99,7 @@ namespace xdl {
 	*/
 	class XdevLOgreImpl : public XdevLModuleImpl<XdevLOgre> {
 		public:
-			XdevLOgreImpl(XdevLModuleCreateParameter* parameter);
+			XdevLOgreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLOgreImpl();
 			static XdevLModuleDescriptor m_moduleDescriptor;
 			virtual xdl_int init();

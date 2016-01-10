@@ -33,23 +33,23 @@
 #include "XdevLOpenGLContextSDL.h"
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextSDL::m_moduleDescriptor {
-	glx_context_vendor,
-	glx_context_author,
-	glx_context_moduleNames[0],
-	glx_context_copyright,
-	glx_description,
-	XdevLOpenGLContexSDLMajorVersion,
-	XdevLOpenGLContextSDLMinorVersion,
-	XdevLOpenGLContextSDLPatchVersion
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::vendor,
+	xdl::author,
+	xdl::moduleNames[0],
+	xdl::copyright,
+	xdl::description,
+	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor pluginDescriptor {
-	xdl::glx_context_pluginName,
-	xdl::glx_context_moduleNames,
-	xdl::XdevLOpenGLContextSDLPluginMajorVersion,
-	xdl::XdevLOpenGLContextSDLPluginMinorVersion,
-	xdl::XdevLOpenGLContextSDLPluginPatchVersion
+	xdl::pluginName,
+	xdl::moduleNames,
+	XDEVLOPENGLCONTEXT_MODULE_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_MODULE_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
@@ -58,20 +58,14 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLOpenGLContextSDL::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextSDL,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLContextSDL, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
-	XdevLOpenGLContextSDL::XdevLOpenGLContextSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLOpenGLContextBase(parameter, m_moduleDescriptor),
+	XdevLOpenGLContextSDL::XdevLOpenGLContextSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLOpenGLContextBase(parameter, descriptor),
 		m_SDLWindow(nullptr),
 		m_OpenGLContext(nullptr),
 		m_previousOpenGLContext(nullptr) {

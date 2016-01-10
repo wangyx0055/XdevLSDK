@@ -10,23 +10,23 @@
 //#include <GL/wglew.h>
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLWGL::m_moduleDescriptor {
-	vendor,
-	author,
-	moduleNames[0],
-	copyright,
-	description,
-	XdevLOpenGLContextWGLMajorVersion,
-	XdevLOpenGLContextWGLMinorVersion,
-	XdevLOpenGLContextWGLPatchVersion
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::vendor,
+	xdl::author,
+	xdl::moduleNames[0],
+	xdl::copyright,
+	xdl::description,
+	XDEVLOPENGLCONTEXT_WGL_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_WGL_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_WGL_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor wglPluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
-	xdl::XdevLOpenGLContextWGLPluginMajorVersion,
-	xdl::XdevLOpenGLContextWGLPluginMinorVersion,
-	xdl::XdevLOpenGLContextWGLPluginPatchVersion
+	XDEVLOPENGLCONTEXT_WGL_MODULE_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_WGL_MODULE_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_WGL_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
@@ -35,22 +35,15 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(wglPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	// Create the "OpenGL" module.
-	if (xdl:: XdevLOpenGLWGL::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLWGL,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLWGL, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
+
 
 namespace xdl {
 
-	XdevLOpenGLWGL::XdevLOpenGLWGL(XdevLModuleCreateParameter* parameter) :
-		XdevLOpenGLContextBase(parameter, m_moduleDescriptor),
+	XdevLOpenGLWGL::XdevLOpenGLWGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLOpenGLContextBase(parameter, descriptor),
 		m_wnd(NULL),
 		m_DC(NULL),
 		m_RC(NULL),

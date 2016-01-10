@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -35,16 +35,10 @@
 
 namespace xdl {
 
-	static const XdevLString	vendor			{"www.codeposer.net"};
-	static const XdevLString	author			{"Cengiz Terzibas"};
-	static const XdevLString	copyright		{"(c) 2005 - 2014 Cengiz Terzibas."};
-	static const XdevLString	pluginName	{"XdevLBluetooth"};
-	static const XdevLString 	description	{"Creates a Bluetooth connection."};
+	static const std::vector<XdevLModuleName>	moduleNames {
+		XdevLModuleName("XdevLBluetooth")
+	};
 
-	static const std::vector<XdevLModuleName>	moduleNames	{
-																													XdevLModuleName("XdevLBluetooth")
-																												};
-	
 	class XdevLBluetoothAddressImpl : public XdevLBluetoothAddress {
 		public:
 			XdevLBluetoothAddressImpl(xdl::xdl_int socket, sockaddr_rc addr) : m_socket(socket), m_addr(addr) {}
@@ -65,11 +59,9 @@ namespace xdl {
 
 	class XdevLBluetoothLinuxImpl : public XdevLModuleImpl<XdevLBluetooth> {
 		public:
-			XdevLBluetoothLinuxImpl(XdevLModuleCreateParameter* parameter);
+			XdevLBluetoothLinuxImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLBluetoothLinuxImpl() {}
 
-			static XdevLModuleDescriptor m_bluetoothModuleDescriptor;
-			
 			virtual xdl_int scan(const xdl_char* device);
 
 			virtual xdl_int open(const XdevLFileName& host);

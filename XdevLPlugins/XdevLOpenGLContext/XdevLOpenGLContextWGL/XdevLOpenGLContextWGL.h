@@ -16,7 +16,7 @@ namespace xdl {
 	};
 
 	static const XdevLString copyright {
-		"(c) 2005 - 2015 Cengiz Terzibas."
+		"(c) 2005 - 2016 Cengiz Terzibas."
 	};
 
 	static const XdevLString description {
@@ -30,25 +30,6 @@ namespace xdl {
 	static const std::vector<XdevLModuleName> moduleNames {
 		XdevLModuleName("XdevLOpenGLContext")
 	};
-
-	// Holds the Major version number.
-	const xdl_uint XdevLOpenGLContextWGLPluginMajorVersion = 0;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLOpenGLContextWGLPluginMinorVersion = 1;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLOpenGLContextWGLPluginPatchVersion = 0;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLOpenGLContextWGLMajorVersion = 0;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLOpenGLContextWGLMinorVersion = 1;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLOpenGLContextWGLPatchVersion = 0;
 
 
 	//
@@ -88,9 +69,7 @@ namespace xdl {
 	*/
 	class XdevLOpenGLWGL : public XdevLOpenGLContextBase {
 		public:
-			XdevLOpenGLWGL(XdevLModuleCreateParameter* parameter);
-
-			static XdevLModuleDescriptor m_moduleDescriptor;
+			XdevLOpenGLWGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLOpenGLWGL();
 

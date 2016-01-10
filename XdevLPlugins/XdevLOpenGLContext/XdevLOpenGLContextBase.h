@@ -37,7 +37,7 @@ namespace xdl {
 	class XdevLOpenGLContextBase : public XdevLModuleAutoImpl<XdevLOpenGLContext> {
 
 		public:
-			XdevLOpenGLContextBase(XdevLModuleCreateParameter* parameter, XdevLModuleDescriptor& descriptor) :
+			XdevLOpenGLContextBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 				XdevLModuleAutoImpl(parameter, descriptor),
 				m_vsnyc(xdl_false),
 				m_fsaa(0),

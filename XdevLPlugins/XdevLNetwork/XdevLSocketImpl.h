@@ -290,7 +290,7 @@ namespace xdl {
 
 	class XdevLUDPSocketImpl : public XdevLUDPSocketBase, public XdevLModuleImpl<XdevLUDPSocket> {
 		public:
-			XdevLUDPSocketImpl(XdevLModuleCreateParameter* parameter);
+			XdevLUDPSocketImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLUDPSocketImpl();
 			virtual xdl_int setOpt(XdevLSocketOptionParam& opt);
 			virtual xdl_int connect(const XdevLHostName& host, const XdevLPort& port);
@@ -302,11 +302,6 @@ namespace xdl {
 			virtual xdl_int write(xdl_uint8* buffer, xdl_int size);
 			virtual xdl_int read(xdl_uint8* buffer, xdl_int size);
 			virtual xdl_int getError();
-			/// Holds the plugins XdevLModuleDescriptor.
-			static XdevLModuleDescriptor m_UDPSocketModuleDesc;
-			// --------------------------------------------------------------------------
-			// XdevLModule function
-			//
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
 	};
@@ -314,7 +309,7 @@ namespace xdl {
 
 	class XdevLTCPSocketImpl : public XdevLSocketImpl, public XdevLModuleImpl<XdevLTCPSocket> {
 		public:
-			XdevLTCPSocketImpl(XdevLModuleCreateParameter* parameter);
+			XdevLTCPSocketImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual void destroy();
 			virtual xdl_int open();
 			virtual xdl_int open(const XdevLFileName& name);
@@ -333,10 +328,6 @@ namespace xdl {
 			virtual xdl_int getMode();
 			virtual xdl_int getError();
 
-			static XdevLModuleDescriptor m_TCPSocketModuleDesc;
-			// --------------------------------------------------------------------------
-			// XdevLModule function
-			//
 			virtual xdl_int init();
 			virtual xdl_int shutdown();
 		protected:
@@ -349,10 +340,8 @@ namespace xdl {
 
 	class XdevLUDPSocket2Impl : public XdevLUDPSocketBase, public XdevLModuleImpl<XdevLUDPSocket2> {
 		public:
-			XdevLUDPSocket2Impl(XdevLModuleCreateParameter* parameter);
+			XdevLUDPSocket2Impl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual void destroy();
-
-			static XdevLModuleDescriptor m_UDPSocket2ModuleDesc;
 
 			virtual xdl_int connect(XdevLIPv4AddressPtr& addr);
 			virtual xdl_int getAddress(XdevLIPv4AddressPtr& addr, const XdevLPort& port, const XdevLHostName& host = XdevLHostName());

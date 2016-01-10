@@ -53,38 +53,15 @@ XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(m_joystickPluginDescriptor);
 
-//
-// Create Module function without XdevLCore.
-//
-extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
-
-	if(joystickModuleDesc.getName()  == moduleDescriptor.getName()) {
-		xdl::XdevLJoystickImpl*obj = new xdl::XdevLJoystickImpl(nullptr);
-		if(!obj) {
-			return nullptr;
-		}
-
-		return obj;
-	}
-
-	return nullptr;
-}
-
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(joystickModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLJoystickImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLJoystickImpl, joystickModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
-	XdevLJoystickImpl::XdevLJoystickImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLJoystickBase<XdevLJoystick>(parameter, joystickModuleDesc) {
+	XdevLJoystickImpl::XdevLJoystickImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLJoystickBase<XdevLJoystick>(parameter, descriptor) {
 	}
 
 	xdl_int XdevLJoystickImpl::init() {

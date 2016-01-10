@@ -37,21 +37,15 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	XDEVLAUDIO_MODULE_PATCH_VERSION
 };
 
-XDEVL_PLUGIN_CREATE_MODULE {
-	if(moduleAudioDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLAudioPlaybackAL,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
-}
-
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLAudioPlaybackAL, moduleAudioDesc);
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
+}
 
 namespace xdl {
 
@@ -184,8 +178,8 @@ namespace xdl {
 
 
 
-	XdevLAudioPlaybackAL::XdevLAudioPlaybackAL(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLAudio>(parameter, moduleAudioDesc),
+	XdevLAudioPlaybackAL::XdevLAudioPlaybackAL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLAudio>(parameter, descriptor),
 		m_device(nullptr),
 		m_context(nullptr),
 		m_previous(nullptr),

@@ -58,7 +58,7 @@ namespace xdl {
 	class XdevLOpenGLContextCocoa : public XdevLModuleAutoImpl<XdevLOpenGLContext> {
 
 		public:
-			XdevLOpenGLContextCocoa(XdevLModuleCreateParameter* parameter);
+			XdevLOpenGLContextCocoa(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLOpenGLContextCocoa();
 
 			static XdevLModuleDescriptor moduleDescriptor;

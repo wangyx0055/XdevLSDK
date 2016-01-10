@@ -4,46 +4,33 @@
 #include <sstream>
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLBluetoothWinImpl::m_moduleDescriptor{	vendor,
-																			author,
-																			moduleNames[0],
-																			copyright,
-																			description,
-																			XdevLBluetoothMajorVersion,
-																			XdevLBluetoothMinorVersion,
-																			XdevLBluetoothPatchVersion };
+xdl::XdevLPluginDescriptor bluetoothPluginDescriptor {
+	xdl::XdevLString("XdevLBluetooth"),
+	xdl::moduleNames,
+	XDEVLBLUETOOTH_MAJOR_VERSION,
+	XDEVLBLUETOOTH_MINOR_VERSION,
+	XDEVLBLUETOOTH_PATCH_VERSION
+};
 
-xdl::XdevLPluginDescriptor pluginDescriptor{ xdl::pluginName,
-											xdl::moduleNames,
-											xdl::XdevLBluetoothPluginMajorVersion,
-											xdl::XdevLBluetoothPluginMinorVersion,
-											xdl::XdevLBluetoothPluginPatchVersion };
+xdl::XdevLModuleDescriptor bluetoothModuleDescriptor {
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
+	xdl::moduleNames[0],
+	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
+	xdl::XdevLString("Creates a Bluetooth connection."),
+	XDEVLBLUETOOTH_MODULE_MAJOR_VERSION,
+	XDEVLBLUETOOTH_MODULE_MINOR_VERSION,
+	XDEVLBLUETOOTH_MODULE_PATCH_VERSION
+};
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
-}
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(bluetoothPluginDescriptor);
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if (xdl::XdevLBluetoothWinImpl::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLBluetoothWinImpl(parameter);
-		if (!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
-}
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if (obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLBluetoothWinImpl, bluetoothModuleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {

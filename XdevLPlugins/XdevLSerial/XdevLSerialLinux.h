@@ -31,42 +31,6 @@
 
 namespace xdl {
 
-	// Holds the major version number of the plugin.
-	const xdl_uint XdevLSerialPluginMajorVersion = XDEVLSERIAL_MAJOR_VERSION;
-
-	// Holds the Minor version number of the plugin.
-	const xdl_uint XdevLSerialPluginMinorVersion = XDEVLSERIAL_MINOR_VERSION;
-
-	// Holds the Patch version number of the plugin.
-	const xdl_uint XdevLSerialPluginPatchVersion = XDEVLSERIAL_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLSerialMajorVersion = XDEVLSERIAL_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLSerialMinorVersion = XDEVLSERIAL_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLSerialPatchVersion = XDEVLSERIAL_MODULE_PATCH_VERSION;
-
-
-	static const XdevLString vendor {
-		"www.codeposer.net"
-	};
-	static const XdevLString author {
-		"Cengiz Terzibas"
-	};
-	static const XdevLString copyright {
-		"(c) 2005 - 2015 Cengiz Terzibas."
-	};
-	static const XdevLString pluginName {
-		"XdevLSerial"
-	};
-	static const XdevLString description {
-		"The serial port communication plugin and modules for the Linux platform."
-	};
-
 	static const std::vector<XdevLModuleName>	moduleNames	{
 		XdevLModuleName("XdevLSerial")
 	};
@@ -78,10 +42,8 @@ namespace xdl {
 	*/
 	class XdevLSerialLinux : public XdevLSerialImpl, public XdevLModuleImpl<XdevLSerial>  {
 		public:
-			XdevLSerialLinux(XdevLModuleCreateParameter* parameter);
+			XdevLSerialLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLSerialLinux() {}
-
-			static XdevLModuleDescriptor m_moduleDescriptor;
 
 			virtual xdl_int open();
 			virtual xdl_int open(const XdevLFileName& name);

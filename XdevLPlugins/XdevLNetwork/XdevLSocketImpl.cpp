@@ -29,7 +29,7 @@
 #include <cstring>
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc {
+xdl::XdevLModuleDescriptor udpSocketModuleDesc {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[0],
@@ -40,7 +40,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc {
 	xdl::XdevLUDPSocketPatchVersion
 };
 
-xdl::XdevLModuleDescriptor xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc {
+xdl::XdevLModuleDescriptor udpSocket2ModuleDesc {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[2],
@@ -51,7 +51,7 @@ xdl::XdevLModuleDescriptor xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc {
 	xdl::XdevLUDPSocket2PatchVersion
 };
 
-xdl::XdevLModuleDescriptor xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc {
+xdl::XdevLModuleDescriptor tcpSocketModuleDesc {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[1],
@@ -77,56 +77,36 @@ XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(networkPluginDescriptor);
 
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
-	if(xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLUDPSocketImpl* obj = new xdl::XdevLUDPSocketImpl(nullptr);
+	if(udpSocketModuleDesc.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLUDPSocketImpl* obj = new xdl::XdevLUDPSocketImpl(nullptr, udpSocketModuleDesc);
 		if(!obj)
 			return nullptr;
 		// TODO How to do initialization and shutdown?
 		return obj;
 	}
-	if(xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLTCPSocketImpl* obj = new xdl::XdevLTCPSocketImpl(nullptr);
+	if(tcpSocketModuleDesc.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLTCPSocketImpl* obj = new xdl::XdevLTCPSocketImpl(nullptr, tcpSocketModuleDesc);
 		if(!obj)
 			return nullptr;
 		// TODO How to do initialization and shutdown?
 		return obj;
 	}
-	if(xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc.getName() == moduleDescriptor.getName()) {
-		xdl::XdevLUDPSocket2Impl* obj = new xdl::XdevLUDPSocket2Impl(nullptr);
+	if(udpSocket2ModuleDesc.getName() == moduleDescriptor.getName()) {
+		xdl::XdevLUDPSocket2Impl* obj = new xdl::XdevLUDPSocket2Impl(nullptr, udpSocket2ModuleDesc);
 		if(!obj)
 			return nullptr;
 		// TODO How to do initialization and shutdown?
 		return obj;
 	}
-
 
 	return nullptr;
 }
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLUDPSocketImpl::m_UDPSocketModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLUDPSocketImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
-
-		return xdl::ERR_OK;
-	}
-	if(xdl::XdevLTCPSocketImpl::m_TCPSocketModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLTCPSocketImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
-
-		return xdl::ERR_OK;
-	}
-	if(xdl::XdevLUDPSocket2Impl::m_UDPSocket2ModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLUDPSocket2Impl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLUDPSocketImpl, udpSocketModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLTCPSocketImpl, tcpSocketModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLUDPSocket2Impl, udpSocket2ModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
@@ -1356,8 +1336,8 @@ namespace xdl {
 
 // --------------------------------------------------------------------------
 
-	XdevLUDPSocketImpl::XdevLUDPSocketImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLUDPSocket>(parameter, m_UDPSocketModuleDesc) {
+	XdevLUDPSocketImpl::XdevLUDPSocketImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLUDPSocket>(parameter, descriptor) {
 	}
 
 	XdevLUDPSocketImpl::~XdevLUDPSocketImpl() {
@@ -1488,8 +1468,8 @@ namespace xdl {
 
 
 
-	XdevLTCPSocketImpl::XdevLTCPSocketImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLTCPSocket>(parameter, m_TCPSocketModuleDesc),
+	XdevLTCPSocketImpl::XdevLTCPSocketImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLTCPSocket>(parameter, descriptor),
 		m_acceptedConnection(XdevLInvalidSocket),
 		m_mode(0),
 		m_initialized(false) {
@@ -1689,6 +1669,10 @@ namespace xdl {
 // XdevLUDPSocket2
 //
 
+	XdevLUDPSocket2Impl::XdevLUDPSocket2Impl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLUDPSocket2>(parameter, descriptor) {
+	}
+
 	void XdevLUDPSocket2Impl::destroy() {
 		XdevLUDPSocketBase::destroy();
 	}
@@ -1776,10 +1760,6 @@ namespace xdl {
 
 	xdl_int  XdevLUDPSocket2Impl::sendArray(XdevLIPv4AddressPtr& ip, xdl_uint8* src, const XdevLArrayDeclaration& decl) {
 		return XdevLUDPSocketBase::sendArray(ip, src, decl);
-	}
-
-	XdevLUDPSocket2Impl::XdevLUDPSocket2Impl(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLUDPSocket2>(parameter, m_UDPSocket2ModuleDesc) {
 	}
 
 	xdl_int XdevLUDPSocket2Impl::setOpt(XdevLSocketOptionParam& opt) {

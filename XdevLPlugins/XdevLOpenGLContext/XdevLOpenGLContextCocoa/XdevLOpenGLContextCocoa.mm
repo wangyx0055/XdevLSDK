@@ -6,11 +6,11 @@
 #include "XdevLOpenGLcontextCocoa.h"
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextCocoa::moduleDescriptor {
-	cocoa_context_vendor,
-	cocoa_context_author,
-	cocoa_context_moduleNames[0],
-	cocoa_context_copyright,
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::cocoa_context_vendor,
+	xdl::cocoa_context_author,
+	xdl::cocoa_context_moduleNames[0],
+	xdl::cocoa_context_copyright,
 	cocoa_context_description,
 	XDEVLOPENGL_CONTEXT_CGL_MAJOR_VERSION,
 	XDEVLOPENGL_CONTEXT_CGL_MINOR_VERSION,
@@ -32,23 +32,15 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(cglPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-
-	if(xdl::XdevLOpenGLContextCocoa::moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextCocoa,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLContextCocoa, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
 
-	XdevLOpenGLContextCocoa::XdevLOpenGLContextCocoa(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleAutoImpl(parameter, moduleDescriptor),
+	XdevLOpenGLContextCocoa::XdevLOpenGLContextCocoa(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleAutoImpl(parameter, descriptor),
 		m_openGLContext(nil) {
 	}
 

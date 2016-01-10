@@ -23,41 +23,6 @@
 
 #include "XdevLFileSystemUnix.h"
 
-xdl::XdevLModuleDescriptor xdl::XdevLDirectoryUnix::m_moduleDescriptor {
-	xdl::XdevLFileSystemVendor,
-	xdl::XdevLFileSystemAuthor,
-	xdl::XdevLFileSystemModuleName[1],
-	xdl::XdevLFileSystemCopyright,
-	xdl::XdevLDescriptionForDirectory,
-	xdl::XdevLDirectoryMajorVersion,
-	xdl::XdevLDirectoryMinorVersion,
-	xdl::XdevLDirectoryPatchVersion
-};
-
-xdl::XdevLModuleDescriptor xdl::XdevLFileUnix::m_moduleDescriptor2 {
-	xdl::XdevLFileSystemVendor,
-	xdl::XdevLFileSystemAuthor,
-	xdl::XdevLFileSystemModuleName[0],
-	xdl::XdevLFileSystemCopyright,
-	xdl::XdevLDescriptionForFileSystem,
-	xdl::XdevLFileSystemMajorVersion,
-	xdl::XdevLFileSystemMinorVersion,
-	xdl::XdevLFileSystemPatchVersion
-};
-
-
-xdl::XdevLPluginDescriptor pluginDescriptor {
-	xdl::XdevLFileSystemPluginName,
-	xdl::XdevLFileSystemModuleName,
-	xdl::XdevLFileSystemPluginMajorVersion,
-	xdl::XdevLFileSystemPluginMinorVersion,
-	xdl::XdevLFileSystemPluginPatchVersion
-};
-
-XDEVL_PLUGIN_INIT_DEFAULT
-XDEVL_PLUGIN_SHUTDOWN_DEFAULT
-XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
 namespace xdl {
 	const char* parent_dir = "..";
@@ -71,8 +36,8 @@ namespace xdl {
 
 
 
-	XdevLFileUnix::XdevLFileUnix(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLFile>(parameter, m_moduleDescriptor2),
+	XdevLFileUnix::XdevLFileUnix(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLFile>(parameter, descriptor),
 		m_fd(-1) {
 
 	}
@@ -90,8 +55,8 @@ namespace xdl {
 		}
 	}
 
-	XdevLDirectoryUnix::XdevLDirectoryUnix(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLDirectory>(parameter, m_moduleDescriptor), m_dir(nullptr) {}
+	XdevLDirectoryUnix::XdevLDirectoryUnix(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLDirectory>(parameter, descriptor), m_dir(nullptr) {}
 
 	xdl_int XdevLDirectoryUnix::init() {
 		m_workingDirectoryBuffer = new char[512];

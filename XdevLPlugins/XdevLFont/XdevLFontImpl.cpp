@@ -67,22 +67,9 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(fontSystemModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLFontSystemImpl,  XDEVL_MODULE_PARAMETER,  fontSystemModuleDesc);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-
-	} else if(textLayoutModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLTextLayoutImpl,  XDEVL_MODULE_PARAMETER, fontSystemModuleDesc);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	} 
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLFontSystemImpl, fontSystemModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLTextLayoutImpl, textLayoutModuleDesc)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {

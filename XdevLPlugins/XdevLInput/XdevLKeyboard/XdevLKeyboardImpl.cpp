@@ -35,7 +35,7 @@
 #include "XdevLKeyboardImpl.h"
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLKeyboardImpl::m_keyboardModuleDesc {
+xdl::XdevLModuleDescriptor moduleKeyboardDescriptor {
 	xdl::keyboard_vendor,
 	xdl::keyboard_author,
 	xdl::keyboard_moduleNames[0],
@@ -60,21 +60,14 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(keyboardPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-
-	if(xdl::XdevLKeyboardImpl::m_keyboardModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME ) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLKeyboardImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLKeyboardImpl, moduleKeyboardDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
+
 
 namespace xdl {
 
-	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter) : XdevlKeyboardBase<XdevLKeyboard>(parameter, m_keyboardModuleDesc) {
+	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevlKeyboardBase<XdevLKeyboard>(parameter, descriptor) {
 	}
 
 	XdevLKeyboardImpl::~XdevLKeyboardImpl() {

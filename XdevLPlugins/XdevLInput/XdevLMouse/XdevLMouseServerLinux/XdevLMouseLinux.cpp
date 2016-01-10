@@ -29,7 +29,7 @@
 #include <linux/input.h>
 
 
-xdl::XdevLModuleDescriptor xdl::XdevLMouseLinux::m_moduleDescriptor {
+xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::vendor,
 	xdl::author,
 	xdl::moduleNames[0],
@@ -48,40 +48,21 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 	xdl::XdevLMouseServerPluginPatchVersion
 };
 
-extern "C" XDEVL_EXPORT xdl::xdl_int _init_plugin(xdl::XdevLPluginCreateParameter* parameter) {
-	return xdl::ERR_OK;
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+
+
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLMouseLinux, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _shutdown_plugin() {
-	return xdl::ERR_OK;
-}
-
-
-extern "C" XDEVL_EXPORT xdl::xdl_int _create(xdl::XdevLModuleCreateParameter* parameter) {
-	if(xdl::XdevLMouseLinux::m_moduleDescriptor.getName() == parameter->getModuleName()) {
-		xdl::XdevLModule* obj  = new xdl::XdevLMouseLinux(parameter);
-		if(!obj)
-			return xdl::ERR_ERROR;
-		parameter->setModuleInstance(obj);
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
-}
-extern "C" XDEVL_EXPORT void _delete(xdl::XdevLModule* obj) {
-	if(obj)
-		delete obj;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &pluginDescriptor;
-}
-
 
 namespace xdl {
 
-	XdevLMouseLinux::XdevLMouseLinux(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleAutoImpl<XdevLMouseServer>(parameter, m_moduleDescriptor),
+	XdevLMouseLinux::XdevLMouseLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleAutoImpl<XdevLMouseServer>(parameter, descriptor),
 		m_fd(-1),
 		m_button_left(0),
 		m_button_right(0),

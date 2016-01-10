@@ -110,7 +110,7 @@ namespace xdl {
 
 		public:
 
-			XdevLImagePluginBMP(XdevLModuleCreateParameter* parameter);
+			XdevLImagePluginBMP(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLImagePluginBMP();
 

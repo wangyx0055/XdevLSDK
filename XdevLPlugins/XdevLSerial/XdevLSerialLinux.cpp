@@ -33,25 +33,23 @@
 #include <sstream>
 #include <XdevLXstring.h>
 
-
-
-xdl::XdevLModuleDescriptor xdl::XdevLSerialLinux::m_moduleDescriptor {
-	xdl::vendor,
-	xdl::author,
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
 	xdl::moduleNames[0],
-	xdl::copyright,
-	xdl::description,
-	xdl::XdevLSerialMajorVersion,
-	xdl::XdevLSerialMinorVersion,
-	xdl::XdevLSerialPatchVersion
+	xdl::XdevLString("(c) 2005 - 2015 Cengiz Terzibas."),
+	xdl::XdevLString("The serial port communication plugin and modules for the Linux platform."),
+	XDEVLSERIAL_MAJOR_VERSION,
+	XDEVLSERIAL_MINOR_VERSION,
+	XDEVLSERIAL_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor serialPluginDescriptor {
-	xdl::pluginName,
+	xdl::XdevLString("XdevLSerial"),
 	xdl::moduleNames,
-	xdl::XdevLSerialPluginMajorVersion,
-	xdl::XdevLSerialPluginMinorVersion,
-	xdl::XdevLSerialPluginPatchVersion
+	XDEVLSERIAL_MODULE_MAJOR_VERSION,
+	XDEVLSERIAL_MODULE_MINOR_VERSION,
+	XDEVLSERIAL_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
@@ -60,20 +58,14 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLSerialLinux::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLSerialLinux,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLSerialLinux, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
-	XdevLSerialLinux::XdevLSerialLinux(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLSerial>(parameter, m_moduleDescriptor), 	m_fd(-1),
+	XdevLSerialLinux::XdevLSerialLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLSerial>(parameter, descriptor), 	m_fd(-1),
 		m_timeoutSpec(NULL) {};
 
 	xdl_int XdevLSerialLinux::shutdown() {

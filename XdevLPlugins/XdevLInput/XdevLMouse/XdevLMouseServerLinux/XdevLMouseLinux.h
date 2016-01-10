@@ -89,7 +89,7 @@ namespace xdl {
 	*/
 	class XdevLMouseLinux : public XdevLModuleAutoImpl<XdevLMouseServer>, public thread::Thread {
 		public:
-			XdevLMouseLinux(XdevLModuleCreateParameter* parameter);
+			XdevLMouseLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLMouseLinux();
 
 			static XdevLModuleDescriptor m_moduleDescriptor;

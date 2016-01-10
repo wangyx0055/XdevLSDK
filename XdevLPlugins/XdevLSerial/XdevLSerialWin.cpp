@@ -4,23 +4,23 @@
 #include <XdevLXstring.h>
 #include <sstream>
 
-xdl::XdevLModuleDescriptor xdl::XdevLSerialWin::m_serialModuleDescriptor {
-	vendor,
-	author,
-	moduleNames[0],
-	copyright,
-	description,
-	XdevLSerialMajorVersion,
-	XdevLSerialMinorVersion,
-	XdevLSerialPatchVersion
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
+	xdl::moduleNames[0],
+	xdl::XdevLString("(c) 2005 - 2015 Cengiz Terzibas."),
+	xdl::XdevLString("The serial port communication plugin and modules for the Linux platform."),
+	XDEVLSERIAL_MAJOR_VERSION,
+	XDEVLSERIAL_MINOR_VERSION,
+	XDEVLSERIAL_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor serialPluginDescriptor {
-	xdl::pluginName,
+	xdl::XdevLString("XdevLSerial"),
 	xdl::moduleNames,
-	xdl::XdevLSerialPluginMajorVersion,
-	xdl::XdevLSerialPluginMinorVersion,
-	xdl::XdevLSerialPluginPatchVersion
+	XDEVLSERIAL_MODULE_MAJOR_VERSION,
+	XDEVLSERIAL_MODULE_MINOR_VERSION,
+	XDEVLSERIAL_MODULE_PATCH_VERSION
 };
 
 
@@ -30,20 +30,14 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if (xdl::XdevLSerialWin::m_serialModuleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLSerialWin,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLSerialWin, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
-	XdevLSerialWin::XdevLSerialWin(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLSerial>(parameter, m_serialModuleDescriptor),
+	XdevLSerialWin::XdevLSerialWin(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLSerial>(parameter, descriptor),
 		m_handle(INVALID_HANDLE_VALUE) {};
 
 	xdl_int XdevLSerialWin::init() {

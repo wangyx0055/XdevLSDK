@@ -33,23 +33,25 @@
 #include "XdevLOpenGLContextGLX.h"
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLOpenGLContextGLX::m_moduleDescriptor {
-	glx_context_vendor,
-	glx_context_author,
-	glx_context_moduleNames[0],
-	glx_context_copyright,
-	glx_description,
-	XdevLOpenGLContexGLXMajorVersion,
-	XdevLOpenGLContextGLXMinorVersion,
-	XdevLOpenGLContextGLXPatchVersion
+
+
+xdl::XdevLModuleDescriptor moduleDescriptor {
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
+	xdl::moduleNames[0],
+	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
+	xdl::XdevLString("Module to create a GLX OpenGL context."),
+	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor glxPluginDescriptor {
-	xdl::glx_context_pluginName,
-	xdl::glx_context_moduleNames,
-	xdl::XdevLOpenGLContextGLXPluginMajorVersion,
-	xdl::XdevLOpenGLContextGLXPluginMinorVersion,
-	xdl::XdevLOpenGLContextGLXPluginPatchVersion
+	xdl::XdevLString("XdevLOpenGLContextGLX"),
+	xdl::moduleNames,
+	XDEVLOPENGLCONTEXT_MODULE_MAJOR_VERSION,
+	XDEVLOPENGLCONTEXT_MODULE_MINOR_VERSION,
+	XDEVLOPENGLCONTEXT_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT_DEFAULT
@@ -58,14 +60,8 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(glxPluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLOpenGLContextGLX::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLContextGLX,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);
-
-		return xdl::ERR_OK;
-	}
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLContextGLX, moduleDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
@@ -76,8 +72,8 @@ namespace xdl {
 		return 0;
 	}
 
-	XdevLOpenGLContextGLX::XdevLOpenGLContextGLX(XdevLModuleCreateParameter* parameter) :
-		XdevLOpenGLContextBase(parameter, m_moduleDescriptor),
+	XdevLOpenGLContextGLX::XdevLOpenGLContextGLX(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLOpenGLContextBase(parameter, descriptor),
 		m_display(nullptr),
 		m_window(None),
 		m_screenNumber(0),

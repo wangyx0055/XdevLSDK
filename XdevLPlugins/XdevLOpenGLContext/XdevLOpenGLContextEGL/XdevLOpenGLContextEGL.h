@@ -43,7 +43,7 @@ namespace xdl {
 	class XdevLOpenGLContextEGL : public XdevLOpenGLContextBase {
 		public:
 
-			XdevLOpenGLContextEGL(XdevLModuleCreateParameter* parameter);
+			XdevLOpenGLContextEGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLOpenGLContextEGL();
 			virtual xdl_int create(XdevLWindow* window) override;

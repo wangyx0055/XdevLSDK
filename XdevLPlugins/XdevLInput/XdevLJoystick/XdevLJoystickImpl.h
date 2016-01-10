@@ -486,7 +486,7 @@ namespace xdl {
 	*/
 	class XdevLJoystickImpl : public XdevLJoystickBase<XdevLJoystick> {
 		public:
-			XdevLJoystickImpl(XdevLModuleCreateParameter* parameter);
+			XdevLJoystickImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLJoystickImpl() {}
 
 			virtual xdl_int init() override;

@@ -109,12 +109,10 @@ namespace xdl {
 
 	class XdevLFileUnix : public XdevLModuleImpl<XdevLFile> {
 		public:
-			XdevLFileUnix(XdevLModuleCreateParameter* parameter);
+			XdevLFileUnix(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual ~XdevLFileUnix() {
 			}
-
-			static XdevLModuleDescriptor m_moduleDescriptor2;
 
 			virtual xdl_int open(const XdevLOpenForReadOnly& readOnly, const XdevLFileName& filename) {
 				m_fd = ::open(filename, O_RDONLY);
@@ -436,7 +434,7 @@ namespace xdl {
 
 	class XdevLDirectoryUnix : public XdevLModuleImpl<XdevLDirectory> {
 		public:
-			XdevLDirectoryUnix(XdevLModuleCreateParameter* parameter);
+			XdevLDirectoryUnix(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLDirectoryUnix() {
 				if(nullptr != m_dir) {
 					close();

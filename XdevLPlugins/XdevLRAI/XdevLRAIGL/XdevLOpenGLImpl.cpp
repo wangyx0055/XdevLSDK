@@ -30,7 +30,7 @@ xdl::XdevLModuleDescriptor openGLModuleDesc {
 	xdl::XdevLRAIGLPatchVersion
 };
 
-xdl::XdevLPluginDescriptor m_openglDescriptor {
+xdl::XdevLPluginDescriptor openglDescriptor {
 	xdl::pluginName,
 	xdl::moduleNames,
 	xdl::XdevLRAIGLPluginMajorVersion,
@@ -42,23 +42,17 @@ xdl::XdevLPluginDescriptor m_openglDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(m_openglDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(openglDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(openGLModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLOpenGLImpl, XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLImpl, openGLModuleDesc);
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
+
 
 namespace xdl {
 
-	XdevLOpenGLImpl::XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter) : XdevLModuleImpl<XdevLRAI>(parameter, openGLModuleDesc),
+	XdevLOpenGLImpl::XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevLModuleImpl<XdevLRAI>(parameter, descriptor),
 		m_window(nullptr),
 		m_gl_context(nullptr),
 		m_StencilDepth(8),

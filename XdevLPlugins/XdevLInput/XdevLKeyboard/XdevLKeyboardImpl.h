@@ -611,10 +611,8 @@ namespace xdl {
 	*/
 	class XdevLKeyboardImpl : public XdevlKeyboardBase<XdevLKeyboard> {
 		public:
-			XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter);
+			XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLKeyboardImpl();
-
-			static XdevLModuleDescriptor m_keyboardModuleDesc;
 
 			// --------------------------------------------------------------------------
 			// XdevLModule function

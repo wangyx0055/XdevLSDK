@@ -72,7 +72,7 @@ namespace xdl {
 	*/
 	class XdevLAudioPlaybackAL : public XdevLModuleImpl<XdevLAudio> {
 		public:
-			XdevLAudioPlaybackAL(XdevLModuleCreateParameter* parameter);
+			XdevLAudioPlaybackAL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLAudioPlaybackAL();
 
 			virtual xdl_int init() override;

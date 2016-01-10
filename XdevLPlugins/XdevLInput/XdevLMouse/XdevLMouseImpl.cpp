@@ -33,7 +33,7 @@
 #include <XdevLUtils.h>
 #include "XdevLMouseImpl.h"
 
-xdl::XdevLModuleDescriptor xdl::XdevLMouseImpl::m_moduleDescriptor {
+xdl::XdevLModuleDescriptor moduleMouseDescriptor {
 	xdl::mouse_vendor,
 	xdl::mouse_author,
 	xdl::mouse_moduleNames[0],
@@ -58,22 +58,15 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(mousePluginDescriptor);
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	if(xdl::XdevLMouseImpl::m_moduleDescriptor.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLMouseImpl,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_SET_MODULE_INSTACE(module);		
-
-		return xdl::ERR_OK;
-	}
-
-	return xdl::ERR_MODULE_NOT_FOUND;
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLMouseImpl, moduleMouseDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
 
 
-	XdevLMouseImpl::XdevLMouseImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLMouseBase<XdevLMouse>(parameter, m_moduleDescriptor) {
+	XdevLMouseImpl::XdevLMouseImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLMouseBase<XdevLMouse>(parameter, descriptor) {
 	}
 	
 	xdl_int XdevLMouseImpl::registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate) {
