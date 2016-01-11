@@ -52,13 +52,13 @@ public:
 		@return ERR_OK if it was succesful otherwise ERR_ERROR and errno
 		is set appropriately.
 	*/
-	virtual xdl_int bind(const xdl_char* host = 0) 				= 0;
+	virtual xdl_int bind(const xdl_char* host = 0) = 0;
 	/// Listen to the bluetooth socket.
 	/**
 		@return ERR_OK if it was succesful otherwise ERR_ERROR and errno
 		is set appropriately.
 	*/
-	virtual xdl_int listen(xdl::xdl_int backlog)					= 0;
+	virtual xdl_int listen(xdl::xdl_int backlog) = 0;
 	/// Accept client connections.
 	/**
 		To use this you create a valid XdevLBluetoothAddress pointer object and pass the pointer
@@ -73,7 +73,7 @@ public:
 		@return ERR_OK if it was succesful otherwise ERR_ERROR and errno
 		is set appropriately.
 	*/
-	virtual xdl_int accept(XdevLBluetoothAddress** addr)	= 0;
+	virtual xdl_int accept(XdevLBluetoothAddress** addr) = 0;
 };
 
 }
