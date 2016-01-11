@@ -141,7 +141,6 @@
 	#include <pthread.h>
 	#include <semaphore.h>
 	#include <sys/mman.h>
-	#include <sys/types.h>
 	#include <endian.h>
 	#include <dlfcn.h>
 	#include <netdb.h>
@@ -151,6 +150,13 @@
 	#include <netinet/tcp.h>
 	#include <sys/socket.h>
 	#include <arpa/inet.h>
+#endif
+
+// ssize_t on MinGW
+#ifdef __GNUC__
+    #ifdef __MINGW32__
+        #include <sys/types.h>
+    #endif
 #endif
 
 #include <errno.h>
