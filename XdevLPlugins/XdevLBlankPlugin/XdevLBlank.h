@@ -21,8 +21,8 @@
 	cengiz@terzibas.de
 */
 
-#ifndef XDEVL_BLANK_MODULEL_IMPL_H
-#define XDEVL_BLANK_MODULEL_IMPL_H
+#ifndef XDEVL_BLANK_MODULE_H
+#define XDEVL_BLANK_MODULE_H
 
 #include <XdevLModule.h>
 

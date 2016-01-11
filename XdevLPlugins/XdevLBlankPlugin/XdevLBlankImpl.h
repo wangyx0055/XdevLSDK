@@ -21,30 +21,13 @@
 	cengiz@terzibas.de
 */
 
-#ifndef XDEVL_BLANK_PLUGIN_H
-#define XDEVL_BLANK_PLUGIN_H
+#ifndef XDEVL_BLANK_MODULE_IMPL_H
+#define XDEVL_BLANK_MODULE_IMPL_H
 
 #include <XdevLBlank.h>
 #include <XdevLPluginImpl.h>
 
 namespace xdl {
-
-
-	static const XdevLString vendor {
-		"www.codeposer.net"
-	};
-	static const XdevLString author {
-		"Cengiz Terzibas"
-	};
-	static const XdevLString copyright {
-		"(c) 2005 - 2016 Cengiz Terzibas."
-	};
-	static const XdevLString pluginName {
-		"XdevLBlank"
-	};
-	static const XdevLString moduleDescription {
-		"This is an empty module"
-	};
 
 	static std::vector<XdevLModuleName>	moduleNames {
 		XdevLModuleName("XdevLBlank"),

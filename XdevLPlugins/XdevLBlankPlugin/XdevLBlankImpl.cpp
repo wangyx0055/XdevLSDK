@@ -31,7 +31,7 @@
 
 
 xdl::XdevLPluginDescriptor blankPluginDescriptor {
-	xdl::pluginName,
+	xdl::XdevLString("XdevLBlank"),
 	xdl::moduleNames,
 	XDEVLBLANK_MAJOR_VERSION,
 	XDEVLBLANK_MINOR_VERSION,
@@ -39,11 +39,11 @@ xdl::XdevLPluginDescriptor blankPluginDescriptor {
 };
 
 xdl::XdevLModuleDescriptor blankModuleDescriptor {
-	xdl::vendor,
-	xdl::author,
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
 	xdl::moduleNames[0],
-	xdl::copyright,
-	xdl::moduleDescription,
+	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
+	xdl::XdevLString("This is a description of an empty module"),
 	XDEVLBLANK_MODULE_MAJOR_VERSION,
 	XDEVLBLANK_MODULE_MINOR_VERSION,
 	XDEVLBLANK_MODULE_PATCH_VERSION
