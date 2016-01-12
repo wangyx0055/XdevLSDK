@@ -44,8 +44,7 @@ namespace xdl {
 	class XdevLDirectoryWatcherMacOSX : public XdevLModuleImpl<XdevLDirectoryWatcher> {
 		public:
 			XdevLDirectoryWatcherMacOSX(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)
-				: XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor)
-				, m_stream(nullptr) {};
+				: XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor) {};
 
 			virtual ~XdevLDirectoryWatcherMacOSX() {};
 
@@ -59,24 +58,20 @@ namespace xdl {
 
 			virtual int registerDelegate(const XdevLDirectoryWatcherDelegateType& delegate);
 			virtual int unregisterDelegate(const XdevLDirectoryWatcherDelegateType& delegate);
+			void handleChanges(ItemTypes itemType, EventTypes eventType, const XdevLString& path);
 
 		private:
-			void threadHandle();
-			static void FileSystemEventCallback(ConstFSEventStreamRef /*streamRef*/,
+
+			static void FileSystemEventCallback(ConstFSEventStreamRef,
 			                                    void* clientCallBackInfo,
 			                                    size_t numEvents,
 			                                    void* eventPaths,
 			                                    const FSEventStreamEventFlags eventFlags[],
 			                                    const FSEventStreamEventId eventIds[]);
 		private:
-			std::thread m_watcherThread;
-			std::mutex m_mutex;
-			std::atomic<bool> m_runThread;
 			std::vector<XdevLDirectoryWatcherDelegateType> m_delegates;
-			xdl_bool m_threadStarted;
-
 		private:
-			FSEventStreamRef m_stream;
+			std::vector<FSEventStreamRef> m_streams;
 
 			std::array<char, 1024> m_buffer;
 	};

@@ -71,7 +71,7 @@ extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDe
 		xdl::XdevLModule* obj = new xdl::XdevLDirectoryUnix(nullptr, moduleDirectoryDescriptor);
 		if(!obj)
 			return nullptr;
-		
+
 		return obj;
 
 	} else if(moduleFileDescriptor.getName() == moduleDescriptor.getName()) {
@@ -108,66 +108,51 @@ namespace xdl {
 	}
 
 	xdl_int XdevLDirectoryWatcherMacOSX::shutdown() {
-
-		if(xdl_true == m_threadStarted) {
-			stop();
+		for(auto stream : m_streams) {
+			FSEventStreamStop(stream);
+			FSEventStreamInvalidate(stream);
+			FSEventStreamRelease(stream);
 		}
-
-		FSEventStreamStop(m_stream);
-		FSEventStreamInvalidate(m_stream);
-		FSEventStreamRelease(m_stream);
-
 		return 0;
 	}
 
 	int XdevLDirectoryWatcherMacOSX::start() {
-		if(xdl_true == m_threadStarted) {
-			return ERR_ERROR;
+		for(auto stream : m_streams) {
+			FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+			FSEventStreamStart(stream);
 		}
-
-		m_watcherThread = std::thread(&XdevLDirectoryWatcherMacOSX::threadHandle, this);
-		m_threadStarted = xdl_true;
-		m_runThread			= xdl_true;
-
+		CFRunLoopRun();
 		return ERR_OK;
 	}
 
 	int XdevLDirectoryWatcherMacOSX::stop() {
-		if(xdl_true != m_threadStarted) {
-			return ERR_ERROR;
+		for(auto stream : m_streams) {
+			FSEventStreamStop(stream);
+			FSEventStreamInvalidate(stream);
+			FSEventStreamRelease(stream);
 		}
-
-		m_runThread = false;
-		m_watcherThread.join();
-
 		return ERR_OK;
 	}
 
 	xdl_int XdevLDirectoryWatcherMacOSX::addDirectoryToWatch(const XdevLString& folder) {
-		std::lock_guard<std::mutex> lock(m_mutex);
 
-		if(m_stream == nullptr) {
-			CFStringRef pathToWatchCF = CFStringCreateWithCString(nullptr, folder.toString().c_str(), kCFStringEncodingUTF8);
-			CFArrayRef pathsToWatch = CFArrayCreate(nullptr, (const void **)&pathToWatchCF, 1, nullptr);
+		CFStringRef pathToWatchCF = CFStringCreateWithCString(kCFAllocatorDefault, folder.toString().c_str(), kCFStringEncodingUTF8);
+		CFArrayRef pathsToWatch = CFArrayCreate(nullptr, (const void **)&pathToWatchCF, 1, nullptr);
 
-			FSEventStreamContext context;
-			context.version 					= 0;
-			context.release 					= nullptr;
-			context.retain 						= nullptr;
-			context.copyDescription 	= nullptr;
-			context.info 							= this;
+		FSEventStreamContext context {0, this, nullptr, nullptr, nullptr};;
+		FSEventStreamRef streamRef = FSEventStreamCreate(nullptr,
+		                             &XdevLDirectoryWatcherMacOSX::FileSystemEventCallback,
+		                             &context,
+		                             pathsToWatch,
+		                             kFSEventStreamEventIdSinceNow,
+		                             1.0,
+		                             kFSEventStreamCreateFlagFileEvents);
 
+		CFRelease(pathToWatchCF);
 
-			m_stream = FSEventStreamCreate(nullptr, &XdevLDirectoryWatcherMacOSX::FileSystemEventCallback, &context, pathsToWatch, kFSEventStreamEventIdSinceNow, 3.0, kFSEventStreamCreateFlagFileEvents);
-			FSEventStreamScheduleWithRunLoop(m_stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-			FSEventStreamStart(m_stream);
+		m_streams.push_back(streamRef);
 
-			CFRelease(pathToWatchCF);
-		} else  {
-			// Add new path here.
-		}
-
-		return 0;
+		return ERR_OK;
 	}
 
 	int XdevLDirectoryWatcherMacOSX::registerDelegate(const XdevLDirectoryWatcherDelegateType& delegate) {
@@ -176,47 +161,56 @@ namespace xdl {
 	}
 
 	int XdevLDirectoryWatcherMacOSX::unregisterDelegate(const XdevLDirectoryWatcherDelegateType& delegate) {
-		//m_delegates.find(delegate);
+		auto foundDelegate = std::find(m_delegates.begin(), m_delegates.end(), delegate);
+		if(foundDelegate != m_delegates.end()) {
+			m_delegates.erase(foundDelegate);
+		}
 		return ERR_OK;
 	}
 
-	void XdevLDirectoryWatcherMacOSX::threadHandle() {
-		XDEVL_MODULE_INFO("Starting Thread ...");
-
-		struct inotify_event* event;
-
-		// Start loop.
-		while(m_runThread) {
-
-			std::lock_guard<std::mutex> lock(m_mutex);
-		}
-
-		XDEVL_MODULE_INFO("Stopping Thread ...");
-	}
-
-	void XdevLDirectoryWatcherMacOSX::FileSystemEventCallback(ConstFSEventStreamRef,
-	        void *clientCallBackInfo,
-	        size_t numEvents,
-	        void *eventPaths,
-	        const FSEventStreamEventFlags eventFlags[],
-	        const FSEventStreamEventId eventIds[]) {
-		char **paths = (char **)eventPaths;
-
-		for(size_t i=0; i<numEvents; i++) {
-			// When a file is created we receive first a kFSEventStreamEventFlagItemCreated and second a (kFSEventStreamEventFlagItemCreated & kFSEventStreamEventFlagItemModified)
-			// when the file is finally copied. Catch this second event.
-			if(eventFlags[i] & kFSEventStreamEventFlagItemCreated
-			        && eventFlags[i] & kFSEventStreamEventFlagItemModified
-			        && !(eventFlags[i] & kFSEventStreamEventFlagItemIsDir)
-			        && !(eventFlags[i] & kFSEventStreamEventFlagItemIsSymlink)
-			        && !(eventFlags[i] & kFSEventStreamEventFlagItemFinderInfoMod)) {
-
-//            XdevLDirectoryWatcherMacOSX *watcher = (XdevLDirectoryWatcherMacOSX *)clientCallBackInfo;
-//            if (watcher->FileValidator(paths[i]))
-//                emit watcher->yourSignalHere();
+	void XdevLDirectoryWatcherMacOSX::handleChanges(ItemTypes itemType, EventTypes eventType, const XdevLString& path) {
+		//
+		// Now check which event type occurred and use the delegate
+		// to inform everyone.
+		//
+		if(eventType != EventTypes::DW_UNKNOWN) {
+			for(auto& delegate : m_delegates) {
+				delegate(itemType, eventType, path);
 			}
 		}
-		printf("**********\n");
+	}
+
+	void XdevLDirectoryWatcherMacOSX::FileSystemEventCallback(ConstFSEventStreamRef streamRef,
+	    void *clientCallBackInfo,
+	    size_t numEvents,
+	    void *eventPaths,
+	    const FSEventStreamEventFlags eventFlags[],
+	    const FSEventStreamEventId eventIds[]) {
+		char **paths = (char **)eventPaths;
+
+		XdevLDirectoryWatcherMacOSX* directoryWatcher = static_cast<XdevLDirectoryWatcherMacOSX*>(clientCallBackInfo);
+
+		ItemTypes types = ItemTypes::FILE;
+		EventTypes eventType = EventTypes::DW_UNKNOWN;
+		for(size_t i=0; i<numEvents; i++) {
+			if(eventFlags[i] & kFSEventStreamEventFlagItemCreated) {
+				eventType = EventTypes::DW_CREATE;
+			} else if(eventFlags[i] & kFSEventStreamEventFlagItemRemoved) {
+				eventType = EventTypes::DW_DELETE;
+			} else if(eventFlags[i] & kFSEventStreamEventFlagItemModified) {
+				eventType = EventTypes::DW_MODIFY;
+			}
+
+			if(eventFlags[i] & kFSEventStreamEventFlagItemIsFile) {
+				types = ItemTypes::FILE;
+			} else if(eventFlags[i] & kFSEventStreamEventFlagItemIsDir) {
+				types = ItemTypes::DIRECTORY;
+			}
+
+			directoryWatcher->handleChanges(types, eventType, XdevLString(paths[i]));
+
+		}
+
 	}
 
 
