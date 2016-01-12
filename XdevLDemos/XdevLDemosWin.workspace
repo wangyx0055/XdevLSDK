@@ -9,16 +9,16 @@
   <Project Name="udp_client_array_demo" Path="udp_client_array_demo/udp_client_array_demo.project" Active="No"/>
   <Project Name="udp_server_array_demo" Path="udp_server_array_demo/udp_server_array_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
-  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
+  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="Yes"/>
   <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="No"/>
-  <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="Yes"/>
+  <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="No"/>
   <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="No"/>
   <Project Name="events_demo" Path="events_demo/events_demo.project" Active="No"/>
   <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="No"/>
   <Project Name="audio_capture_demo" Path="audio_capture_demo/audio_capture_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug_Win32" Selected="no">
+    <WorkspaceConfiguration Name="Debug_Win32" Selected="yes">
       <Environment/>
       <Project Name="bluetooth_demo" ConfigName="Debug_Win32"/>
       <Project Name="serial_demo" ConfigName="Debug_Win32"/>
@@ -62,7 +62,7 @@
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
       <Project Name="audio_synthesizer_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_Win64" Selected="yes">
+    <WorkspaceConfiguration Name="Debug_Win64" Selected="no">
       <Environment/>
       <Project Name="audio_capture_demo" ConfigName="Debug"/>
       <Project Name="audio_demo" ConfigName="Debug_Win64"/>

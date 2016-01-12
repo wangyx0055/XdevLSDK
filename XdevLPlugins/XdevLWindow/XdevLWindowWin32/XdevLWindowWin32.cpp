@@ -47,6 +47,17 @@ xdl::XdevLModuleDescriptor windowModuleDesc {
 	XDEVLWINDOWS_MODULE_PATCH_VERSION
 };
 
+xdl::XdevLModuleDescriptor windowServerModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[xdl::XDEVL_WINDOW_SERVER_MODULE_NAME],
+	xdl::window_copyright,
+	xdl::windowDescription,
+	XDEVLWINDOWS_MODULE_MAJOR_VERSION,
+	XDEVLWINDOWS_MODULE_MINOR_VERSION,
+	XDEVLWINDOWS_MODULE_PATCH_VERSION
+};
+
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
@@ -97,10 +108,10 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	//
 	// Create XdevLWindowServer instance.
 	//
-	else if (xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+	else if (windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
 		// Initialize once default instances
-		if (xdl::initDefaultWindowInstances(parameter) != xdl::ERR_OK) {
+		if (xdl::initDefaultWindowInstances(XDEVL_MODULE_PARAMETER) != xdl::ERR_OK) {
 			return xdl::ERR_ERROR;
 		}
 
