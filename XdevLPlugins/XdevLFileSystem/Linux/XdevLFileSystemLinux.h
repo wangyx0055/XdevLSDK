@@ -61,16 +61,11 @@ namespace xdl {
 
 		private:
 
-			std::thread m_watcherThread;
-			std::mutex m_mutex;
-			std::atomic<xdl_bool> m_runThread;
-			std::vector<XdevLDirectoryWatcherDelegateType> m_delegates;
-			xdl_bool m_threadStarted;
-
-		private:
-
 			xdl_int m_fd;
 			std::vector<xdl_int> m_dfdList;
+			std::thread m_watcherThread;
+			std::atomic<xdl_bool> m_runThread;
+			std::vector<XdevLDirectoryWatcherDelegateType> m_delegates;
 			std::array<xdl_char, 1024> m_buffer;
 	};
 

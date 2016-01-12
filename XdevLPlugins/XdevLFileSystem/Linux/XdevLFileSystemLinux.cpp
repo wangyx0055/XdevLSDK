@@ -109,60 +109,82 @@ XDEVL_PLUGIN_CREATE_MODULE {
 
 namespace xdl {
 
-	XdevLDirectoryWatcherLinux::XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)
-		:
+	XdevLDirectoryWatcherLinux::XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor),
-		m_threadStarted(xdl_false),
 		m_fd(-1) {};
 
 	xdl_int XdevLDirectoryWatcherLinux::init() {
+		//
 		// Initialize notification system.
+		//
 		m_fd = inotify_init1(0); // Same as inotify_init
 		if(m_fd == -1) {
 			XDEVL_MODULE_INFO("Initialize XdevLDirectoryWatcher failed.\n");
 			return ERR_ERROR;
 		}
+
 		XDEVL_MODULE_INFO("Initialize XdevLDirectoryWatcher was successful.\n");
 		return ERR_OK;
 	}
 
 	xdl_int XdevLDirectoryWatcherLinux::shutdown() {
+		//
+		// If the notifications wasn't initialized we just return back now.
+		//
+		if(m_fd == -1) {
+			return ERR_OK;
+		}
 
-		close(m_fd);
-
-		if(xdl_true == m_threadStarted) {
+		//
+		// Check if the notification thread is running. If yes, stop the thread first.
+		//
+		if(m_runThread) {
 			stop();
 		}
 
-		return 0;
+		//
+		// Now close all opened files.
+		//
+		close(m_fd);
+		m_fd = -1;
+		for(auto watcherfd : m_dfdList) {
+			close(watcherfd);
+		}
+
+		return ERR_OK;
 	}
 
 	int XdevLDirectoryWatcherLinux::start() {
-		if(xdl_true == m_threadStarted) {
-			return ERR_ERROR;
-		}
 
+		//
+		// Start the thread that handles the events.
+		//
 		m_watcherThread = std::thread(&XdevLDirectoryWatcherLinux::threadHandle, this);
-		m_threadStarted = xdl_true;
 		m_runThread			= xdl_true;
 
 		return ERR_OK;
 	}
 
 	int XdevLDirectoryWatcherLinux::stop() {
-		if(xdl_true != m_threadStarted) {
-			return ERR_ERROR;
+
+		//
+		// Stop the thread that handles the events.
+		//
+		if(xdl_true != m_runThread) {
+			return ERR_OK;
 		}
 
-		m_runThread = false;
-//	m_watcherThread.join();
+		m_runThread = xdl_false;
+		m_watcherThread.join();
 
 		return ERR_OK;
 	}
 
 	xdl_int XdevLDirectoryWatcherLinux::addDirectoryToWatch(const XdevLString& folder) {
-//	std::lock_guard<std::mutex> lock(m_mutex);
 
+		//
+		// Add new directory watcher.
+		//
 		int wd = inotify_add_watch(m_fd, folder.toString().c_str(), IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_MODIFY );
 		if(wd == -1) {
 			XDEVL_MODULE_INFO("Adding directory: " << folder.toString() << " to watch failed.: " << strerror(errno) << std::endl);
@@ -174,12 +196,28 @@ namespace xdl {
 	}
 
 	int XdevLDirectoryWatcherLinux::registerDelegate(const XdevLDirectoryWatcherDelegateType& delegate) {
-		m_delegates.push_back(delegate);
+
+		//
+		// Add delegate only if not added already.
+		//
+		auto foundDelegate = std::find(m_delegates.begin(), m_delegates.end(), delegate);
+		if(foundDelegate == m_delegates.end()) {
+			m_delegates.push_back(delegate);
+		}
+
 		return ERR_OK;
 	}
 
 	int XdevLDirectoryWatcherLinux::unregisterDelegate(const XdevLDirectoryWatcherDelegateType& delegate) {
-		//m_delegates.find(delegate);
+
+		//
+		// Remove delegate only if added already.
+		//
+		auto foundDelegate = std::find(m_delegates.begin(), m_delegates.end(), delegate);
+		if(foundDelegate != m_delegates.end()) {
+			m_delegates.erase(foundDelegate);
+		}
+
 		return ERR_OK;
 	}
 
@@ -188,94 +226,115 @@ namespace xdl {
 
 		struct inotify_event* event;
 
-		// TODO As you can see this part is quite inefficient. Using a vector and
-		// collecting first all events and then call the delegates.
-		while(m_runThread) {
+		struct timeval timeout;
+		fd_set set;
 
-			std::lock_guard<std::mutex> lock(m_mutex);
+		//
+		// Here we start the main loop. First we use select to see if there are any events.
+		// If yes, then we handle those events. If not we use the timeout to checkout if
+		// we have to stop the event. This might not be the best way to exit a blocking thread
+		// but it works.
+		for(;;) {
+
+			//
+			// Reset timout variables.
+			//
+			timeout.tv_sec = 0;
+			timeout.tv_usec = 1000000;
+			FD_ZERO(&set);
+			FD_SET(m_fd, &set);
+
 
 			m_buffer = {{0}};
 
-			int i = 0;
-			int len = read(m_fd, m_buffer.data(), 1024);
+			xdl_int rv = select(m_fd + 1, &set, NULL, NULL, &timeout);
+			if(rv == -1) {
+				XDEVL_MODULE_INFO("select failed: " << strerror(errno) << std::endl);
+			} else if(rv == 0) {
+				// Ok we timed out here. Lets see if the user stopped the thread.
+				if(xdl_false == m_runThread) {
+					break;
+				}
+			} else {
+				xdl_int len = read(m_fd, m_buffer.data(), 1024);
+				xdl_int i = 0;
+				while(i < len) {
+					event = (struct inotify_event*)&m_buffer[i];
 
-			while(i < len) {
-				event = (struct inotify_event*)&m_buffer[i];
+					// Is it a file or directory?
+					ItemTypes types = ItemTypes::FILE;
+					EventTypes eventType = EventTypes::DW_UNKNOWN;
 
-				// Is it a file or directory?
-				ItemTypes types = ItemTypes::FILE;
-				EventTypes eventType = EventTypes::DW_UNKNOWN;
-
-				if(event->mask & IN_ISDIR) {
-					types = ItemTypes::DIRECTORY;
-				}
-
-				/* check for changes */
-				if(event->mask & IN_OPEN) {
-					eventType = EventTypes::DW_OPEN;
-				}
-				//
-				// A file or folder got created.
-				//
-				else if(event->mask & IN_CREATE) {
-					eventType = EventTypes::DW_CREATE;
-				}
-				//
-				// A file or folder got modified.
-				//
-				else if(event->mask & IN_MODIFY) {
-					eventType = EventTypes::DW_MODIFY;
-				}
-				//
-				// The flowing ones are not really implemented.
-				//
-				else if(event->mask & IN_ATTRIB) {
-					XDEVL_MODULE_INFO("IN_ATTRIB not handled.\n");
-				} else if(event->mask & IN_ACCESS) {
-					eventType = EventTypes::DW_ACCESS;
-				} else if(event->mask & IN_CLOSE_WRITE) {
-					eventType = EventTypes::DW_CLOSE;
-				} else if(event->mask & IN_CLOSE_NOWRITE) {
-					eventType = EventTypes::DW_CLOSE;
-				} else if(event->mask & IN_DELETE_SELF) {
-					XDEVL_MODULE_INFO("IN_DELETE_SELF not handled.\n");
-				}
-				//
-				// A file or folder got removed.
-				// We handle it as delete.
-				//
-				else if(event->mask & IN_MOVED_FROM) {
-					eventType = EventTypes::DW_DELETE;
-				}
-				//
-				// A file or folder got renamed.
-				// We handle this as create because renaming
-				// involves IN_MOVED_FROM then IN_MOVED_TO.
-				//
-				else if(event->mask & IN_MOVED_TO) {
-					eventType = EventTypes::DW_CREATE;
-				}
-				//
-				// A file or folder got really deleted.
-				//
-				else if(event->mask & IN_DELETE) {
-					eventType = EventTypes::DW_DELETE;
-				}
-
-				//
-				// Now check which event type occurred and use the delegate
-				// to inform everyone.
-				//
-				if(eventType != EventTypes::DW_UNKNOWN) {
-					for(auto& delegate : m_delegates) {
-						delegate(types, eventType, XdevLString(event->name));
+					if(event->mask & IN_ISDIR) {
+						types = ItemTypes::DIRECTORY;
 					}
+
+					/* check for changes */
+					if(event->mask & IN_OPEN) {
+						eventType = EventTypes::DW_OPEN;
+					}
+					//
+					// A file or folder got created.
+					//
+					else if(event->mask & IN_CREATE) {
+						eventType = EventTypes::DW_CREATE;
+					}
+					//
+					// A file or folder got modified.
+					//
+					else if(event->mask & IN_MODIFY) {
+						eventType = EventTypes::DW_MODIFY;
+					}
+					//
+					// The flowing ones are not really implemented.
+					//
+					else if(event->mask & IN_ATTRIB) {
+						XDEVL_MODULE_INFO("IN_ATTRIB not handled.\n");
+					} else if(event->mask & IN_ACCESS) {
+						eventType = EventTypes::DW_ACCESS;
+					} else if(event->mask & IN_CLOSE_WRITE) {
+						eventType = EventTypes::DW_CLOSE;
+					} else if(event->mask & IN_CLOSE_NOWRITE) {
+						eventType = EventTypes::DW_CLOSE;
+					} else if(event->mask & IN_DELETE_SELF) {
+						XDEVL_MODULE_INFO("IN_DELETE_SELF not handled.\n");
+					}
+					//
+					// A file or folder got removed.
+					// We handle it as delete.
+					//
+					else if(event->mask & IN_MOVED_FROM) {
+						eventType = EventTypes::DW_DELETE;
+					}
+					//
+					// A file or folder got renamed.
+					// We handle this as create because renaming
+					// involves IN_MOVED_FROM then IN_MOVED_TO.
+					//
+					else if(event->mask & IN_MOVED_TO) {
+						eventType = EventTypes::DW_CREATE;
+					}
+					//
+					// A file or folder got really deleted.
+					//
+					else if(event->mask & IN_DELETE) {
+						eventType = EventTypes::DW_DELETE;
+					}
+
+					//
+					// Now check which event type occurred and use the delegate
+					// to inform everyone.
+					//
+					if(eventType != EventTypes::DW_UNKNOWN) {
+						for(auto& delegate : m_delegates) {
+							delegate(types, eventType, XdevLString(event->name));
+						}
+					}
+
+					/* update index to start of next event */
+					i += sizeof(struct inotify_event) + event->len;
 				}
-
-				/* update index to start of next event */
-				i += sizeof(struct inotify_event) + event->len;
 			}
-
 		}
 
 		XDEVL_MODULE_INFO("Stopping Thread ...");
