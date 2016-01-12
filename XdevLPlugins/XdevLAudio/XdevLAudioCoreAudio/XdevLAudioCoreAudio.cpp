@@ -240,11 +240,11 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioCoreAudio::createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) {
-		return ERR_OK;
+	IPXdevLAudioBuffer XdevLAudioCoreAudio::createAudioBufferFromFile(const XdevLFileName& filename) {
+		return nullptr;
 	}
 
-	xdl_int XdevLAudioCoreAudio::create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels, XdevLAudioBuffer** buffer) {
+	IPXdevLAudioBuffer XdevLAudioCoreAudio::create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels) {
 
 		void* handle = nullptr;
 		m_streamType = streamType;
@@ -342,7 +342,7 @@ namespace xdl {
 		result = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property, 0, nullptr, &size, &devid);
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioObjectGetPropertyData failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		property.mSelector = kAudioDevicePropertyDeviceIsAlive;
@@ -353,11 +353,11 @@ namespace xdl {
 		result = AudioObjectGetPropertyData(devid, &property, 0, nullptr, &size, &alive);
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioObjectGetPropertyData failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		if(!alive) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		property.mSelector = kAudioDevicePropertyHogMode;
@@ -367,7 +367,7 @@ namespace xdl {
 		/* some devices don't support this property, so errors are fine here. */
 		if((result == noErr) && (pid != -1)) {
 
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		deviceID = devid;
@@ -394,7 +394,7 @@ namespace xdl {
 
 		if(comp == nullptr) {
 			XDEVL_MODULE_ERROR("Couldn't find the CoreAudio.\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 
@@ -415,7 +415,7 @@ namespace xdl {
 		result = AudioUnitSetProperty(audioUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &deviceID, sizeof(AudioDeviceID));
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioUnitSetProperty failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 #endif
 
@@ -431,7 +431,7 @@ namespace xdl {
 		result = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_StreamFormat, scope, bus, &description, sizeof(description));
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioUnitSetProperty failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		/* Set the audio callback */
@@ -443,7 +443,7 @@ namespace xdl {
 		result = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, scope, bus, &callback, sizeof(callback));
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioUnitSetProperty failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 
@@ -451,13 +451,13 @@ namespace xdl {
 		result = AudioUnitInitialize(audioUnit);
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioUnitInitialize failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		result = AudioOutputUnitStart(audioUnit);
 		if(kAudioHardwareNoError != result) {
 			XDEVL_MODULE_ERROR("AudioOutputUnitStart failed\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 #if MACOSX_COREAUDIO
@@ -468,15 +468,15 @@ namespace xdl {
 
 		m_buffer = new xdl_uint8[4096];
 
-		return ERR_OK;
+		return std::shared_ptr<XdevLAudioBuffer>(new XdevLAudioBufferCoreAudioBuffer());
 	}
 
-	xdl_int XdevLAudioCoreAudio::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) {
-		return create(AUDIO_STREAM_PLAYBACK, format, samplingRate, channels, buffer);
+	IPXdevLAudioBuffer XdevLAudioCoreAudio::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
+		return create(AUDIO_STREAM_PLAYBACK, format, samplingRate, channels);
 	}
 
-	xdl_int XdevLAudioCoreAudio::createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) {
-		return ERR_OK;
+	IPXdevLAudioSource XdevLAudioCoreAudio::createAudioSource(IPXdevLAudioBuffer buffer) {
+		return nullptr;
 	}
 
 	xdl_int XdevLAudioCoreAudio::write(xdl_uint8* buffer) {

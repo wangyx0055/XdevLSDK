@@ -47,6 +47,7 @@ namespace xdl {
 	};
 
 	class XdevLAudioBufferCoreAudioBuffer : public XdevLAudioBuffer {
+		public:
 			virtual ~XdevLAudioBufferCoreAudioBuffer() {}
 
 			virtual xdl_int getFormat() override;
@@ -78,7 +79,7 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 
 
-			virtual xdl_int create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels, XdevLAudioBuffer** buffer);
+			virtual IPXdevLAudioBuffer create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels);
 			virtual xdl_int write(xdl_uint8* buffer);
 			virtual xdl_int read(xdl_uint8* buffer);
 			virtual xdl_uint getBufferSize() override;
@@ -91,9 +92,9 @@ namespace xdl {
 
 
 			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
-			virtual xdl_int createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer);
-			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer);
-			virtual xdl_int createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) override;
+			virtual IPXdevLAudioBuffer createAudioBufferFromFile(const XdevLFileName& filename);
+			virtual IPXdevLAudioBuffer createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data);
+			virtual IPXdevLAudioSource createAudioSource(IPXdevLAudioBuffer buffer) override;
 			virtual void setGain(xdl_float gain) override;
 			virtual xdl_int makeCurrent() override;
 			virtual xdl_int releaseCurrent() override;
