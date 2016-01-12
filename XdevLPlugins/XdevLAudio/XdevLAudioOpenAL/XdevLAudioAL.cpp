@@ -185,10 +185,6 @@ namespace xdl {
 		m_previous(nullptr),
 		m_callbackFunction(nullptr), 
 		m_userData(nullptr) {
-		m_audioSources.reserve(10);
-		m_audioSources.resize(10);
-		m_audioBuffers.reserve(10);
-		m_audioBuffers.resize(10);
 	}
 
 	XdevLAudioPlaybackAL::~XdevLAudioPlaybackAL() {
@@ -230,25 +226,16 @@ namespace xdl {
 	}
 
 	xdl_int XdevLAudioPlaybackAL::shutdown() {
-		// Delete all sources.
-		std::vector<XdevLAudioSourceAL*>::iterator asi(m_audioSources.begin());
-		for(; asi != m_audioSources.end(); ++asi) {
-			delete(*asi);
-		}
-
-		// Delete all buffers.
-		std::vector<XdevLAudioBufferAL*>::iterator abi(m_audioBuffers.begin());
-		for(; abi != m_audioBuffers.end(); ++abi)
-			delete *abi;
-
 //		alutExit();
-		alcDestroyContext(m_context);
-		alcCloseDevice(m_device);
+		if(nullptr != m_context) {
+			alcDestroyContext(m_context);
+			alcCloseDevice(m_device);
+		}
 
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioBufferFromFile(const XdevLFileName& filename, IPXdevLAudioBuffer* buffer) {
+	IPXdevLAudioBuffer XdevLAudioPlaybackAL::createAudioBufferFromFile(const XdevLFileName& filename) {
 		ALuint id = 0;
 
 		XdevLAudioBufferFormat audioFormat = AUDIO_BUFFER_FORMAT_UNKNOWN;
@@ -258,6 +245,10 @@ namespace xdl {
 
 		std::vector<char> rawData;
 		std::ifstream ifile(filename, std::ifstream::binary);
+		if(!ifile.is_open()) {
+			XDEVL_MODULE_ERROR("Could not open file: " << filename << std::endl);
+			return nullptr;
+		}
 
 		RIFF_Header riff_header {{0}};
 		ifile.read((char*)&riff_header, sizeof(RIFF_Header));
@@ -329,7 +320,7 @@ namespace xdl {
 					format = AL_FORMAT_STEREO8;
 				} else {
 					XDEVL_MODULE_ERROR("Number of channels not supported.");
-					return ERR_ERROR;
+					return nullptr;
 				}
 			}
 			break;
@@ -340,7 +331,7 @@ namespace xdl {
 					format = AL_FORMAT_STEREO16;
 				} else {
 					XDEVL_MODULE_ERROR("Number of channels not supported.");
-					return ERR_ERROR;
+					return nullptr;
 				}
 			}
 			break;
@@ -352,44 +343,33 @@ namespace xdl {
 			break;
 		}
 
-		XdevLAudioBufferAL* buf = new XdevLAudioBufferAL(format, samplingRate, rawData.size());
+		std::shared_ptr<XdevLAudioBuffer> buf = std::shared_ptr<XdevLAudioBufferAL>(new XdevLAudioBufferAL(format, samplingRate, rawData.size()));
 		buf->lock();
 		buf->upload((xdl_int8*)rawData.data(), rawData.size());
 		buf->unlock();
 
-		*buffer = buf;
-
-		m_audioBuffers.push_back(buf);
 		XDEVL_MODULE_INFO("AudioFile: " << filename << ", ID: " << id << " successfully created. " << std::endl);
-		return ERR_OK;
+		return buf;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, IPXdevLAudioBuffer* buffer) {
+	IPXdevLAudioBuffer XdevLAudioPlaybackAL::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
 
 		ALenum fmat = wrapAudioBufferFormat(format, channels);
 
-		XdevLAudioBufferAL* buf = new XdevLAudioBufferAL(fmat, samplingRate, size);
-		buf->lock();
-		buf->upload((xdl_int8*)data, size);
-		buf->unlock();
+		std::shared_ptr<XdevLAudioBuffer> tmp = std::shared_ptr<XdevLAudioBufferAL>(new XdevLAudioBufferAL(fmat, samplingRate, size));
+		tmp->lock();
+		tmp->upload((xdl_int8*)data, size);
+		tmp->unlock();
 
-		*buffer = buf;
-
-		return ERR_OK;
+		return tmp;
 	}
 
-	xdl_int XdevLAudioPlaybackAL::createAudioSource(IPXdevLAudioSource* src, IPXdevLAudioBuffer buffer) {
+	IPXdevLAudioSource XdevLAudioPlaybackAL::createAudioSource(IPXdevLAudioBuffer buffer) {
 
-		XdevLAudioSourceAL* audioSource = new XdevLAudioSourceAL();
-		if(!audioSource) {
-			XDEVL_MODULE_ERROR("Could not allocate\n");
-			return ERR_ERROR;
-		}
+		std::shared_ptr<XdevLAudioSource> tmp = std::shared_ptr<XdevLAudioSourceAL>(new XdevLAudioSourceAL());
+		alSourcei(tmp->getID(), AL_BUFFER,  buffer->getID());
 
-		alSourcei(audioSource->getID(), AL_BUFFER,  buffer->getID());
-		*src = audioSource;
-		m_audioSources.push_back(audioSource);
-		return ERR_OK;
+		return tmp;
 	}
 
 	void XdevLAudioPlaybackAL::setGain(xdl_float gain) {

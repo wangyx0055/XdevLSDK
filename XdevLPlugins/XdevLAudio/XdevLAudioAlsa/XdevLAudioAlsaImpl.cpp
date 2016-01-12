@@ -218,11 +218,11 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLAudioAlsaBase::createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) {
-		return ERR_OK;
+	IPXdevLAudioBuffer XdevLAudioAlsaBase::createAudioBufferFromFile(const XdevLFileName& filename) {
+		return nullptr;
 	}
 
-	xdl_int XdevLAudioAlsaBase::create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels, XdevLAudioBuffer** buffer) {
+	IPXdevLAudioBuffer XdevLAudioAlsaBase::create(XdevLAudioStreamType streamType, XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels) {
 		xdl_int err;
 
 		m_supportedStreamType = streamType;
@@ -245,17 +245,17 @@ namespace xdl {
 
 		// Open device
 		if(openDevice(m_streamType) != ERR_OK) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		// Set parameters for the device.
 		if(setHardwareParameters(m_channels, m_bufferFormat, m_samplingRate) != ERR_OK) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		// Apply the parameters
 		if(applyHardwareParameters() != ERR_OK) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		//
@@ -279,22 +279,22 @@ namespace xdl {
 
 		// Now make the hardware ready to use.
 		if ((err = snd_pcm_prepare (m_handle)) < 0) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
-		XdevLAudioBufferAlsa* bufferAlsa = new XdevLAudioBufferAlsa(m_bufferFormat, samplingRate, m_channels);
+		auto buffer = std::shared_ptr<XdevLAudioBufferAlsa>(new XdevLAudioBufferAlsa(m_bufferFormat, samplingRate, m_channels));
 
-		return ERR_OK;
+		return buffer;
 	}
 
-	xdl_int XdevLAudioAlsaBase::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) {
+	IPXdevLAudioBuffer XdevLAudioAlsaBase::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
 		m_samplingRate = samplingRate;
 		m_channels = channels;
 		m_bufferFormat = wrapXdevLAudioBufferFormatToAlsaFormat(format);
 		m_bufferFormatSize = XdevLAudioBufferFormatBitSize(format)/8;
-		XdevLAudioBufferAlsa* tmp = new XdevLAudioBufferAlsa(m_bufferFormat, samplingRate, channels);
 
-		*buffer = tmp;
+		auto tmp = std::shared_ptr<XdevLAudioBufferAlsa>(new XdevLAudioBufferAlsa(m_bufferFormat, samplingRate, channels));
+		return tmp;
 	}
 
 	XdevLString XdevLAudioAlsaBase::getDeviceName() {
@@ -573,20 +573,20 @@ namespace xdl {
 		return XdevLAudioAlsaBase::shutdown();
 	}
 
-	xdl_int XdevLAudioPlaybackImpl::createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) {
-		return XdevLAudioAlsaBase::createAudioBufferFromFile(filename, buffer);
+	IPXdevLAudioBuffer XdevLAudioPlaybackImpl::createAudioBufferFromFile(const XdevLFileName& filename) {
+		return XdevLAudioAlsaBase::createAudioBufferFromFile(filename);
 	}
 
 //	xdl_int XdevLAudioPlaybackImpl::create(XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels, XdevLAudioBuffer** buffer) {
 //		return XdevLAudioAlsaBase::create(AUDIO_STREAM_PLAYBACK, bufferFormat, samplingRate, channels, buffer);
 //	}
 
-	xdl_int XdevLAudioPlaybackImpl::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) {
-		return XdevLAudioAlsaBase::create(AUDIO_STREAM_PLAYBACK, format, samplingRate, channels, buffer);
+	IPXdevLAudioBuffer XdevLAudioPlaybackImpl::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
+		return XdevLAudioAlsaBase::create(AUDIO_STREAM_PLAYBACK, format, samplingRate, channels);
 	}
 
-	xdl_int XdevLAudioPlaybackImpl::createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) {
-		return ERR_ERROR;
+	IPXdevLAudioSource XdevLAudioPlaybackImpl::createAudioSource(IPXdevLAudioBuffer buffer) {
+		return nullptr;
 	}
 
 	xdl_int XdevLAudioPlaybackImpl::write(xdl_uint8* buffer) {
@@ -654,20 +654,20 @@ namespace xdl {
 		return XdevLAudioAlsaBase::shutdown();
 	}
 
-	xdl_int XdevLAudioCaptureImpl::createAudioBufferFromFile(const XdevLFileName& filename, XdevLAudioBuffer** buffer) {
-		return XdevLAudioAlsaBase::createAudioBufferFromFile(filename, buffer);
+	IPXdevLAudioBuffer XdevLAudioCaptureImpl::createAudioBufferFromFile(const XdevLFileName& filename) {
+		return XdevLAudioAlsaBase::createAudioBufferFromFile(filename);
 	}
 
 //	xdl_int XdevLAudioCaptureImpl::create(XdevLAudioBufferFormat bufferFormat, XdevLAudioSamplingRate samplingRate, xdl_uint channels, XdevLAudioBuffer** buffer) {
 //		return XdevLAudioAlsaBase::create(AUDIO_STREAM_CAPTURE, bufferFormat, samplingRate, channels, buffer);
 //	}
 
-	xdl_int XdevLAudioCaptureImpl::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, XdevLAudioBuffer** buffer) {
-		return XdevLAudioAlsaBase::create(AUDIO_STREAM_CAPTURE, format, samplingRate, channels, buffer);
+	IPXdevLAudioBuffer XdevLAudioCaptureImpl::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
+		return XdevLAudioAlsaBase::create(AUDIO_STREAM_CAPTURE, format, samplingRate, channels);
 	}
 	
-	xdl_int XdevLAudioCaptureImpl::createAudioSource(XdevLAudioSource** src, XdevLAudioBuffer* buffer) {
-		return ERR_ERROR;
+	IPXdevLAudioSource XdevLAudioCaptureImpl::createAudioSource(IPXdevLAudioBuffer buffer) {
+		return nullptr;
 	}
 
 	xdl_int XdevLAudioCaptureImpl::read(xdl_uint8* buffer) {

@@ -107,7 +107,7 @@ namespace xdl {
 	};
 
 	typedef XdevLAudioSource	IXdevLAudioSource;
-	typedef XdevLAudioSource*	IPXdevLAudioSource;
+	typedef std::shared_ptr<XdevLAudioSource>	IPXdevLAudioSource;
 
 }
 

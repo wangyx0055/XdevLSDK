@@ -86,7 +86,7 @@ namespace xdl {
 	};
 
 	typedef XdevLAudioBuffer	IXdevLAudioBuffer;
-	typedef XdevLAudioBuffer*	IPXdevLAudioBuffer;
+	typedef std::shared_ptr<XdevLAudioBuffer>	IPXdevLAudioBuffer;
 
 }
 

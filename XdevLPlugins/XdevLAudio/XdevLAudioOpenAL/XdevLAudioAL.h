@@ -79,9 +79,9 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 
 			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
-			virtual xdl_int createAudioBufferFromFile(const XdevLFileName& filename, IPXdevLAudioBuffer* buffer) override;
-			virtual xdl_int createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data, IPXdevLAudioBuffer* buffer) override;
-			virtual xdl_int createAudioSource(IPXdevLAudioSource* src, IPXdevLAudioBuffer buffer) override;
+			virtual IPXdevLAudioBuffer createAudioBufferFromFile(const XdevLFileName& filename) override;
+			virtual IPXdevLAudioBuffer createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) override;
+			virtual IPXdevLAudioSource createAudioSource(IPXdevLAudioBuffer buffer) override;
 			virtual void setGain(xdl_float gain) override;
 			virtual xdl_int makeCurrent() override;
 			virtual xdl_int releaseCurrent() override;
@@ -99,8 +99,6 @@ namespace xdl {
 			ALCcontext* m_previous;
 			callbackFunctionType m_callbackFunction;
 			void* m_userData;
-			std::vector<XdevLAudioSourceAL*> m_audioSources;
-			std::vector<XdevLAudioBufferAL*> m_audioBuffers;
 	};
 
 

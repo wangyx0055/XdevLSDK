@@ -137,8 +137,8 @@ int main (int argc, char *argv[]) {
 		return -1;
 	}
 
-	xdl::XdevLAudioBuffer* buffer2 = nullptr;
-	if(alsa_playback->createAudioBuffer(xdl::AUDIO_BUFFER_FORMAT_S16, xdl::AUDIO_SAMPLE_RATE_44100, 1, 0, nullptr, &buffer2) != xdl::ERR_OK) {
+	xdl::IPXdevLAudioBuffer buffer2 = alsa_playback->createAudioBuffer(xdl::AUDIO_BUFFER_FORMAT_S16, xdl::AUDIO_SAMPLE_RATE_44100, 1, 0, nullptr);
+	if(nullptr == buffer2) {
 		xdl::destroyCore(core);
 		return -1;
 	}

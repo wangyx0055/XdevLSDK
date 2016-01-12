@@ -30,6 +30,7 @@
 #include <XdevLUserData.h>
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 namespace xdl {
 
