@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -28,25 +28,30 @@
 
 namespace xdl {
 
+	class XdevLImageInfo {
+		public:
+			xdl_uint32 Width;
+			xdl_uint32 Height;
+			xdl_uint16 BitsPerPixel;
+	};
+
 	/**
 	  @struct XdevLImage
 	  @brief  The image object.
 	*/
-	class XdevLImage {
+	class XdevLImage : public XdevLImageInfo {
 		public:
 
-			XdevLImage() : Buffer(0), LOD(0) {}
+			XdevLImage() : Buffer(0) {}
 			~XdevLImage() {
 				delete [] Buffer;
-				delete LOD;
 			}
-			xdl_char* Id;
-			xdl_uint32 Width;
-			xdl_uint32 Height;
-			xdl_uint16 BitsPerPixel;
 			xdl_uint8* Buffer;
-			XdevLImage* LOD;
 	};
+
+	typedef XdevLImage IXdevLImage;
+	typedef std::shared_ptr<XdevLImage> IPXdevLImage;
+
 
 	class XdevLImageObject {
 		public:
@@ -58,6 +63,9 @@ namespace xdl {
 			int NumImages;
 			XdevLImage* Images;
 	};
+
+	typedef XdevLImageObject IXdevLImageObject;
+	typedef std::shared_ptr<XdevLImageObject> IPXdevLImageObject;
 
 
 	/**
@@ -77,7 +85,7 @@ namespace xdl {
 			virtual xdl_int readInfo(const XdevLFileName& filename, XdevLImageObject* imageObject) = 0;
 
 			/// Loads the specified image an converts it into a RGB or RGBA image format.
-			virtual xdl_int load(const XdevLFileName& filename, XdevLImageObject* imageObject) = 0;
+			virtual IPXdevLImageObject load(const XdevLFileName& filename) = 0;
 
 			/// Returns the supported extension.
 			virtual const XdevLString& getExtension() const = 0;
@@ -91,7 +99,7 @@ namespace xdl {
 			virtual xdl_int readInfo(const XdevLFileName& filename, XdevLImageObject* imageObject) = 0;
 
 			/// Loads the specified image an converts it into a RGB or RGBA image format.
-			virtual xdl_int load(const XdevLFileName& filename, XdevLImageObject* imageObject) = 0;
+			virtual IPXdevLImageObject load(const XdevLFileName& filename) = 0;
 
 	};
 

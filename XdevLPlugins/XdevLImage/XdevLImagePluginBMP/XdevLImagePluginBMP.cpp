@@ -106,8 +106,6 @@ namespace xdl {
 		if(!pInfo->Images) {
 			pInfo->Images								= new XdevLImage[1];
 		}
-		pInfo->Images[0].LOD					= 0;
-		pInfo->Images[0].Id						= nullptr;
 		pInfo->Images[0].Width				= iheader.biWidth;
 		pInfo->Images[0].Height				=	iheader.biHeight;
 		pInfo->Images[0].BitsPerPixel	= iheader.biBitCount;
@@ -116,12 +114,12 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLImagePluginBMP::load(const XdevLFileName& filename, XdevLImageObject* pImageObject) {
+	IPXdevLImageObject XdevLImagePluginBMP::load(const XdevLFileName& filename) {
 		std::ifstream in;
 		// Open the image file.
 		in.open(filename.toString().c_str(), std::ios_base::binary);
 		if(!in.is_open()) {
-			return ERR_ERROR;
+			return nullptr;
 		}
 
 		// Read the bmp file and info header into buffer. (we store driver access)
@@ -134,7 +132,7 @@ namespace xdl {
 		fheader.bfType			= *(int16_t*)(&buffer[0]);
 		if(fheader.bfType != BMP_TYPE) {
 			XDEVL_MODULE_ERROR("\"" << filename << "\" has not the right Bmp format.\n");
-			return ERR_ERROR;
+			return nullptr;
 		}
 		fheader.bfSize			= *(int32_t*)(&buffer[2]);
 		fheader.bfReserved1 = *(int16_t*)(&buffer[6]);
@@ -155,21 +153,21 @@ namespace xdl {
 		iheader.biClrUsed				= *(uint32_t*)(&buffer[46]);
 		iheader.biClrImportant	= *(uint32_t*)(&buffer[50]);
 
+		auto imageOjbect = std::make_shared<XdevLImageObject>();
+
 		// We have only one image in a BMP file.
-		pImageObject->NumImages										= 1;
-		if(!pImageObject->Images) {
-			pImageObject->Images										= new XdevLImage[1];
+		imageOjbect->NumImages										= 1;
+		if(!imageOjbect->Images) {
+			imageOjbect->Images										= new XdevLImage[1];
 		}
 		// We dont have lod images in BMP files.
-		pImageObject->Images[0].LOD						= 0;
-		pImageObject->Images[0].Id						= nullptr;
-		pImageObject->Images[0].Width					= 0;
-		pImageObject->Images[0].Height				=	0;
-		pImageObject->Images[0].BitsPerPixel	= 0;
-		pImageObject->Images[0].Buffer				= 0;
+		imageOjbect->Images[0].Width				= 0;
+		imageOjbect->Images[0].Height				=	0;
+		imageOjbect->Images[0].BitsPerPixel	= 0;
+		imageOjbect->Images[0].Buffer				= 0;
 
 		// We make allways an RGB image.
-		pImageObject->Images[0].Buffer = new xdl_uint8[iheader.biHeight*iheader.biWidth*3];
+		imageOjbect->Images[0].Buffer = new xdl_uint8[iheader.biHeight*iheader.biWidth*3];
 		int compression = UNKNOWN;
 		compression =  iheader.biCompression;
 		switch(iheader.biCompression) {
@@ -177,37 +175,37 @@ namespace xdl {
 			case BMP_RGB: {
 				switch(iheader.biBitCount) {
 					case 1:
-						Read1Bit(in, &iheader, pImageObject->Images[0].Buffer);
+						Read1Bit(in, &iheader, imageOjbect->Images[0].Buffer);
 						break;
 					case 4:
-						Read4Bit(in, &iheader, pImageObject->Images[0].Buffer);
+						Read4Bit(in, &iheader, imageOjbect->Images[0].Buffer);
 						break;
 					case 8:
-						Read8Bit(in, &iheader, pImageObject->Images[0].Buffer);
+						Read8Bit(in, &iheader, imageOjbect->Images[0].Buffer);
 						break;
 					case 24:
-						Read24Bit(in, &iheader, pImageObject->Images[0].Buffer);
+						Read24Bit(in, &iheader, imageOjbect->Images[0].Buffer);
 						break;
 					case 32:
-						Read24Bit(in, &iheader, pImageObject->Images[0].Buffer);
+						Read24Bit(in, &iheader, imageOjbect->Images[0].Buffer);
 						break;
 					default:
 						XDEVL_MODULE_ERROR("Unknown BMP pixel size.\n");
-						return ERR_ERROR;
+						return nullptr;
 				}
 			}
 			break;
 			// Read compressed data
 			case BMP_RLE4:
 			case BMP_RLE8:
-				ReadRLE8(in, &iheader, pImageObject->Images[0].Buffer);
+				ReadRLE8(in, &iheader, imageOjbect->Images[0].Buffer);
 				break;
 		}
-		pImageObject->Images[0].Height				= iheader.biHeight;
-		pImageObject->Images[0].Width					= iheader.biWidth;
-		pImageObject->Images[0].BitsPerPixel	= 24;
+		imageOjbect->Images[0].Height				= iheader.biHeight;
+		imageOjbect->Images[0].Width					= iheader.biWidth;
+		imageOjbect->Images[0].BitsPerPixel	= 24;
 		in.close();
-		return ERR_OK;
+		return imageOjbect;
 	}
 
 	const XdevLString& XdevLImagePluginBMP::getExtension() const {

@@ -115,7 +115,7 @@ namespace xdl {
 			virtual ~XdevLImagePluginBMP();
 
 			virtual xdl_int readInfo(const XdevLFileName& filename, XdevLImageObject* pInfo) override;
-			virtual xdl_int load(const XdevLFileName& filename, XdevLImageObject* pImageObject) override;
+			virtual IPXdevLImageObject load(const XdevLFileName& filename) override;
 			virtual const XdevLString& getExtension() const;
 		private:
 			void Read1Bit(std::ifstream& in, BmpInfoHeader* pHeader, xdl_uint8* pBuffer);
