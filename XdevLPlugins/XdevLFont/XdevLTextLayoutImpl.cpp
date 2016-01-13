@@ -186,56 +186,6 @@ void main(void) {                                                               
 	}
 
 	xdl_int XdevLTextLayoutImpl::shutdown() {
-
-		//
-		// Destroy XdevLRAI objects
-		//
-		
-		if(nullptr != m_vd) {
-			m_rai->destroy(m_vd);
-			m_vd = nullptr;
-		}
-
-		if(nullptr != m_texture) {
-			m_rai->destroy(m_texture);
-			m_texture = nullptr;
-		}
-
-		if(nullptr != m_vertexArray) {
-			m_rai->destroy(m_vertexArray);
-			m_vertexArray = nullptr;
-		}
-
-		if(nullptr != m_vertexBuffer) {
-			m_rai->destroy(m_vertexBuffer);
-			m_vertexBuffer = nullptr;
-		}
-
-		if(nullptr != m_staticVertexArray) {
-			m_rai->destroy(m_staticVertexArray);
-			m_staticVertexArray = nullptr;
-		}
-
-		if(nullptr != m_staticVertexBuffer) {
-			m_rai->destroy(m_staticVertexBuffer);
-			m_staticVertexBuffer = nullptr;
-		}
-
-		if(nullptr != m_vertexShader) {
-			m_rai->destroy(m_vertexShader);
-			m_vertexShader = nullptr;
-		}
-
-		if(nullptr != m_fragmentShader) {
-			m_rai->destroy(m_fragmentShader);
-			m_fragmentShader = nullptr;
-		}
-
-		if(nullptr != m_shaderProgram) {
-			m_rai->destroy(m_shaderProgram);
-			m_shaderProgram = nullptr;
-		}
-
 		return ERR_OK;
 	}
 
@@ -282,10 +232,10 @@ void main(void) {                                                               
 		m_screenWidth = window->getWidth();
 		m_screenHeight = window->getHeight();
 
-		m_rai->createShaderProgram(&m_shaderProgram);
-		m_rai->createVertexShader(&m_vertexShader);
-		m_rai->createFragmentShader(&m_fragmentShader);
-		m_rai->createTexture(&m_texture);
+		m_shaderProgram = m_rai->createShaderProgram();
+		m_vertexShader = m_rai->createVertexShader();
+		m_fragmentShader = m_rai->createFragmentShader();
+		m_texture = m_rai->createTexture();
 
 		m_vertexShader->addShaderCode(vertex_shader_330.c_str());
 		if(m_vertexShader->compile() != ERR_OK) {
@@ -312,21 +262,21 @@ void main(void) {                                                               
 		m_effectid				= m_shaderProgram->getUniformLocation("effect");
 		m_shadowOffsetid		= m_shaderProgram->getUniformLocation("shadowOffset");
 
-		m_vd = new XdevLVertexDeclaration();
+		m_vd = rai->createVertexDeclaration();
 		m_vd->add(2, XDEVL_BUFFER_ELEMENT_FLOAT, XDEVL_VERTEX_POSITION);
 		m_vd->add(4, XDEVL_BUFFER_ELEMENT_UNSIGNED_BYTE, XDEVL_VERTEX_COLOR);
 		m_vd->add(2, XDEVL_BUFFER_ELEMENT_FLOAT, XDEVL_VERTEX_TEXTURE_COORD);
 
 
-		m_rai->createVertexBuffer(&m_vertexBuffer);
+		m_vertexBuffer = m_rai->createVertexBuffer();
 		m_vertexBuffer->init();
-		m_rai->createVertexArray(&m_vertexArray);
+		m_vertexArray = m_rai->createVertexArray();
 		m_vertexArray->init(m_vertexBuffer, m_vd);
 
 
-		m_rai->createVertexBuffer(&m_staticVertexBuffer);
+		m_staticVertexBuffer = m_rai->createVertexBuffer();
 		m_staticVertexBuffer->init();
-		m_rai->createVertexArray(&m_staticVertexArray);
+		m_staticVertexArray = m_rai->createVertexArray();
 		m_staticVertexArray->init(m_staticVertexBuffer, m_vd);
 
 		return ERR_OK;

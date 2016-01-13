@@ -90,16 +90,16 @@ namespace xdl {
 	};
 	
 	typedef XdevLShader IXdevLShader;
-	typedef XdevLShader* IPXdevLShader;
+	typedef std::shared_ptr<XdevLShader> IPXdevLShader;
 	
 	typedef XdevLVertexShader IXdevLVertexShader;
-	typedef XdevLVertexShader* IPXdevLVertexShader;
+	typedef std::shared_ptr<XdevLVertexShader> IPXdevLVertexShader;
 	
 	typedef XdevLFragmentShader IXdevLFragmentShader;
-	typedef XdevLFragmentShader* IPXdevLFragmentShader;
+	typedef std::shared_ptr<XdevLFragmentShader> IPXdevLFragmentShader;
 	
 	typedef XdevLGeometryShader IXdevLGeometryShader;
-	typedef XdevLGeometryShader* IPXdevLGeometryShader;
+	typedef std::shared_ptr<XdevLGeometryShader> IPXdevLGeometryShader;
 	
 }
 

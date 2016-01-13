@@ -299,7 +299,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLTexture IXdevLTexture;
-	typedef XdevLTexture* IPXdevLTexture;
+	typedef std::shared_ptr<XdevLTexture> IPXdevLTexture;
 }
 
 

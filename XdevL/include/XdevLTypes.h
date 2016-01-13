@@ -26,6 +26,7 @@
 
 #include <XdevLPlatform.h>
 #include <string>
+#include <memory>
 
 #ifdef __GNUC__
 #include <stdint.h>

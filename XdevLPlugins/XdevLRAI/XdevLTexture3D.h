@@ -90,7 +90,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLTexture3D IXdevLTexture3D;
-	typedef XdevLTexture3D* IPXdevLTexture3D;
+	typedef std::shared_ptr<XdevLTexture3D> IPXdevLTexture3D;
 }
 
 

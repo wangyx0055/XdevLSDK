@@ -140,40 +140,40 @@ namespace xdl {
 			//
 
 			/// Create a Vertex Declaration
-			virtual xdl_int createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration) = 0;
+			virtual IPXdevLVertexDeclaration createVertexDeclaration() = 0;
 
 			/// Create a Vertex Shader.
-			virtual xdl_int createVertexShader(IPXdevLVertexShader* vertex_shader) = 0;
+			virtual IPXdevLVertexShader createVertexShader() = 0;
 
 			/// Create a Fragment shader.
-			virtual xdl_int createFragmentShader(IPXdevLFragmentShader* fragment_shader) = 0;
+			virtual IPXdevLFragmentShader createFragmentShader() = 0;
 
 			/// Create a Geometry shader.
-			virtual xdl_int createGeometryShader(IPXdevLGeometryShader* geometry_shader) = 0;
+			virtual IPXdevLGeometryShader createGeometryShader() = 0;
 
 			/// Create a Shader Program.
-			virtual xdl_int createShaderProgram(IPXdevLShaderProgram* program) = 0;
+			virtual IPXdevLShaderProgram createShaderProgram() = 0;
 
 			/// Create a Texture.
-			virtual xdl_int createTexture(IPXdevLTexture* texture) = 0;
+			virtual IPXdevLTexture createTexture() = 0;
 
 			/// Create a Cube Texture.
-			virtual xdl_int createTextureCube(IPXdevLTextureCube* textureCube) = 0;
+			virtual IPXdevLTextureCube createTextureCube() = 0;
 
 			/// Create a 3D Texture.
-			virtual xdl_int createTexture3D(IPXdevLTexture3D* texture3D) = 0;
+			virtual IPXdevLTexture3D createTexture3D() = 0;
 
 			/// Create a Frame Buffer.
-			virtual xdl_int createFrameBuffer(IPXdevLFrameBuffer* fbo) = 0;
+			virtual IPXdevLFrameBuffer createFrameBuffer() = 0;
 
 			/// Create a Vertex Buffer.
-			virtual xdl_int createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer) = 0;
+			virtual IPXdevLVertexBuffer createVertexBuffer() = 0;
 
 			/// Create a Index Buffer.
-			virtual xdl_int createIndexBuffer(IPXdevLIndexBuffer* indexBuffer) = 0;
+			virtual IPXdevLIndexBuffer createIndexBuffer() = 0;
 
 			/// Create a Vertex Array.
-			virtual xdl_int createVertexArray(IPXdevLVertexArray* vertexArray) = 0;
+			virtual IPXdevLVertexArray createVertexArray() = 0;
 
 
 			//
@@ -211,37 +211,6 @@ namespace xdl {
 			                                 IPXdevLVertexBuffer vertexBuffer,
 			                                 IPXdevLVertexDeclaration vertexDeclaration,
 			                                 IPXdevLIndexBuffer indexBuffer) = 0;
-
-			//
-			// Destroying methods.
-			//
-			/// Destroy a Vertex Declaration.
-			virtual xdl_int destroy(IPXdevLVertexDeclaration vertexDeclaration) = 0;
-
-			/// Destroy a Shader Program.
-			virtual xdl_int destroy(IPXdevLShaderProgram shaderProgram) = 0;
-
-			/// Destroy a Shader.
-			virtual xdl_int destroy(IPXdevLShader shader) = 0;
-
-			/// Destroy a Vertex Array.
-			virtual xdl_int destroy(IPXdevLVertexArray vertexArray) = 0;
-
-			/// Destroy a Vertex Buffer.
-			virtual xdl_int destroy(IPXdevLVertexBuffer vertexBuffer) = 0;
-
-			/// Destroy a Index Buffer.
-			virtual xdl_int destroy(IPXdevLIndexBuffer indexBuffer) = 0;
-
-			/// Destroy a Frame Buffer.
-			virtual xdl_int destroy(IPXdevLFrameBuffer frameBuffer) = 0;
-
-			/// Destroy a Texture.
-			virtual xdl_int destroy(IPXdevLTexture texture) = 0;
-
-			/// Destroy a Cube Texture.
-			virtual xdl_int destroy(IPXdevLTextureCube textureCube) = 0;
-
 	};
 
 	typedef XdevLRAI	IXdevLRAI;

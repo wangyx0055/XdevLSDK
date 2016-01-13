@@ -21,7 +21,7 @@ namespace xdl {
 		}
 	}
 
-	xdl_int XdevLOpenGLProgramImpl::attach(XdevLShader* shader) {
+	xdl_int XdevLOpenGLProgramImpl::attach(IPXdevLShader shader) {
 		glAttachShader(m_id, shader->id());
 		return ERR_OK;
 	}

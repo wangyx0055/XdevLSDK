@@ -38,7 +38,7 @@ namespace xdl {
 		public:
 			virtual ~XdevLShaderProgram() {}
 
-			virtual xdl_int attach(XdevLShader* shader) = 0;
+			virtual xdl_int attach(IPXdevLShader shader) = 0;
 			virtual xdl_int link() = 0;
 
 			virtual xdl_int getUniformLocation(const char* id) = 0;
@@ -91,7 +91,7 @@ namespace xdl {
 	};
 
 	typedef XdevLShaderProgram IXdevLShaderProgram;
-	typedef XdevLShaderProgram* IPXdevLShaderProgram;
+	typedef std::shared_ptr<XdevLShaderProgram> IPXdevLShaderProgram;
 
 }
 

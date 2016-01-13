@@ -34,7 +34,7 @@ class XdevLOpenGLProgramImpl: public XdevLShaderProgram {
 		XdevLOpenGLProgramImpl();
 		virtual ~XdevLOpenGLProgramImpl();
 
-		virtual xdl_int attach(XdevLShader* shader) ;
+		virtual xdl_int attach(IPXdevLShader shader) ;
 
 		virtual xdl_int link();
 

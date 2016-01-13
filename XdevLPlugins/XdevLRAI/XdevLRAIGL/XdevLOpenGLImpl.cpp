@@ -331,94 +331,67 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration) {
-		IPXdevLVertexDeclaration vd = new XdevLVertexDeclaration();
-		*vertexDeclaration = vd;
-		return ERR_OK;
+	IPXdevLVertexDeclaration XdevLOpenGLImpl::createVertexDeclaration() {
+		auto tmp = std::shared_ptr<XdevLVertexDeclaration>(new XdevLVertexDeclaration());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createVertexShader(XdevLVertexShader** vertex_shader) {
-		XdevLOpenGLVertexShaderImpl* vs = new XdevLOpenGLVertexShaderImpl();
-		*vertex_shader = vs;
-		return ERR_OK;
+	IPXdevLVertexShader XdevLOpenGLImpl::createVertexShader() {
+		auto tmp = std::shared_ptr<XdevLOpenGLVertexShaderImpl>(new XdevLOpenGLVertexShaderImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createFragmentShader(XdevLFragmentShader** fragment_shader) {
-
-		XdevLOpenGLFragmentShaderImpl* fs = new XdevLOpenGLFragmentShaderImpl();
-		*fragment_shader = fs;
-
-		return ERR_OK;
+	IPXdevLFragmentShader XdevLOpenGLImpl::createFragmentShader() {
+		auto tmp = std::shared_ptr<XdevLOpenGLFragmentShaderImpl>(new XdevLOpenGLFragmentShaderImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createGeometryShader(XdevLGeometryShader** geometry_shader) {
-		XdevLOpenGLGeometryShaderImpl* fs = new XdevLOpenGLGeometryShaderImpl();
-		*geometry_shader = fs;
-		return ERR_OK;;
+	IPXdevLGeometryShader XdevLOpenGLImpl::createGeometryShader() {
+		auto tmp = std::shared_ptr<XdevLOpenGLGeometryShaderImpl>(new XdevLOpenGLGeometryShaderImpl());
+		return tmp;;
 	}
 
-
-	xdl_int XdevLOpenGLImpl::createShaderProgram(XdevLShaderProgram** program) {
-		XdevLOpenGLProgramImpl* prg = new XdevLOpenGLProgramImpl();
-		*program = prg;
-		return ERR_OK;
+	IPXdevLShaderProgram XdevLOpenGLImpl::createShaderProgram() {
+		auto tmp = std::shared_ptr<XdevLOpenGLProgramImpl>(new XdevLOpenGLProgramImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createTexture(IPXdevLTexture* texture) {
-		XdevLTextureImpl* tmp = new XdevLTextureImpl();
-		*texture = tmp;
-		return ERR_OK;
+	IPXdevLTexture XdevLOpenGLImpl::createTexture() {
+		auto tmp = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createTextureCube(XdevLTextureCube** textureCube) {
-		XdevLTextureCubeImpl* tmp = new XdevLTextureCubeImpl();
-		*textureCube = tmp;
-		return ERR_OK;
+	IPXdevLTextureCube XdevLOpenGLImpl::createTextureCube() {
+		auto tmp = std::shared_ptr<XdevLTextureCubeImpl>(new XdevLTextureCubeImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createTexture3D(XdevLTexture3D** texture3D) {
-		XdevLTexture3DImpl* tmp = new XdevLTexture3DImpl();
-		*texture3D = tmp;
-		return ERR_OK;
+	IPXdevLTexture3D XdevLOpenGLImpl::createTexture3D() {
+		auto tmp = std::shared_ptr<XdevLTexture3DImpl>(new XdevLTexture3DImpl());
+		return tmp;
 	}
 
-
-	xdl_int XdevLOpenGLImpl::createFrameBuffer(XdevLFrameBuffer** fbo) {
-
-		XdevLFrameBufferImpl* tmp = new XdevLFrameBufferImpl();
-
-		// Return back the framebuffer.
-		*fbo = tmp;
-
-		XDEVL_MODULE_SUCCESS("Framebuffer object created successfully.\n");
-		return ERR_OK;
+	IPXdevLFrameBuffer XdevLOpenGLImpl::createFrameBuffer() {
+		auto tmp = std::shared_ptr<XdevLFrameBufferImpl>(new XdevLFrameBufferImpl());
+		return tmp;
 	}
 
-
-	xdl_int XdevLOpenGLImpl::createVertexArray(XdevLVertexArray** vertexArray) {
-		XdevLVertexArrayImpl* vba = new XdevLVertexArrayImpl();
-		*vertexArray = vba;
-
-		return ERR_OK;
+	IPXdevLVertexArray XdevLOpenGLImpl::createVertexArray() {
+		auto tmp = std::shared_ptr<XdevLVertexArrayImpl>(new XdevLVertexArrayImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer) {
-
-		XdevLVertexBufferImpl* vbo = new XdevLVertexBufferImpl();
-
-		*vertexBuffer = vbo;
-		return ERR_OK;
+	IPXdevLVertexBuffer XdevLOpenGLImpl::createVertexBuffer() {
+		auto tmp = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::createIndexBuffer(XdevLIndexBuffer** indexBuffer) {
-
-		XdevLIndexBufferImpl* ibo = new XdevLIndexBufferImpl();
-
-		*indexBuffer = ibo;
-		return ERR_OK;
+	IPXdevLIndexBuffer XdevLOpenGLImpl::createIndexBuffer() {
+		auto tmp = std::shared_ptr<XdevLIndexBufferImpl>(new XdevLIndexBufferImpl());
+		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveFrameBuffer(XdevLFrameBuffer* frambuffer) {
+	xdl_int XdevLOpenGLImpl::setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer) {
 		assert(frambuffer && "XdevLOpenGLImpl::setActiveFrameBuffer: No valid Framebuffer specified.");
 		frambuffer->activate();
 		m_activeFrameBuffer = frambuffer;
@@ -426,14 +399,14 @@ namespace xdl {
 	}
 
 
-	xdl_int XdevLOpenGLImpl::setActiveVertexArray(XdevLVertexArray* vertexArray) {
+	xdl_int XdevLOpenGLImpl::setActiveVertexArray(IPXdevLVertexArray vertexArray) {
 		assert(vertexArray && "XdevLOpenGLImpl::setActiveVertexArray: No valid Vertex Array specified.");
 		vertexArray->activate();
 		m_activeVertexArray = vertexArray;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveShaderProgram(XdevLShaderProgram* shaderProgram) {
+	xdl_int XdevLOpenGLImpl::setActiveShaderProgram(IPXdevLShaderProgram shaderProgram) {
 		assert(shaderProgram && "XdevLOpenGLImpl::setActiveShaderProgram: No valid Shader Program specified.");
 		shaderProgram->activate();
 		m_activeShaderProgram = shaderProgram;
@@ -552,51 +525,6 @@ namespace xdl {
 			glDisableVertexAttribArray(vertexDeclaration->get(idx)->shaderAttribute);
 		}
 
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexDeclaration vertexDeclaration) {
-		delete vertexDeclaration;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLShaderProgram shaderProgram) {
-		delete shaderProgram;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLShader shader) {
-		delete shader;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexArray vertexArray) {
-		delete vertexArray;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexBuffer vertexBuffer) {
-		delete vertexBuffer;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLIndexBuffer indexBuffer) {
-		delete indexBuffer;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLFrameBuffer frameBuffer) {
-		delete frameBuffer;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLTexture texture) {
-		delete texture;
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::destroy(IPXdevLTextureCube textureCube) {
-		delete textureCube;
 		return ERR_OK;
 	}
 

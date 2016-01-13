@@ -44,12 +44,12 @@ namespace xdl {
 		m_activated = xdl_false;
 	}
 
-	xdl_int XdevLVertexArrayImpl::setVertexStreamBuffer(xdl_uint shaderAttribute, xdl_uint numberOfComponents, XdevLBufferElementTypes itemSizeType, XdevLVertexBuffer* vertexBuffer) {
+	xdl_int XdevLVertexArrayImpl::setVertexStreamBuffer(xdl_uint shaderAttribute, xdl_uint numberOfComponents, XdevLBufferElementTypes itemSizeType, IPXdevLVertexBuffer vertexBuffer) {
 		assert(m_activated && "XdevLVertexArrayImpl::activate: Not activated.");
 		assert(vertexBuffer && "XdevLVertexArrayImpl::activate: No valid Vertex Buffer specified.");
 
 		if(m_vd == NULL) {
-			m_vd = new XdevLVertexDeclaration();
+			m_vd = std::make_shared<XdevLVertexDeclaration>();
 		}
 
 		m_vd->add(numberOfComponents, itemSizeType, shaderAttribute);
@@ -66,7 +66,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLVertexArrayImpl::setIndexBuffer(XdevLIndexBuffer* indexBuffer) {
+	xdl_int XdevLVertexArrayImpl::setIndexBuffer(IPXdevLIndexBuffer indexBuffer) {
 		assert(m_activated && "XdevLVertexArrayImpl::activate: Not activated.");
 		assert(indexBuffer && "XdevLVertexArrayImpl::activate: No valid Index Buffer specified.");
 
@@ -82,7 +82,7 @@ namespace xdl {
 	xdl_int XdevLVertexArrayImpl::init(xdl_uint8 numberOfStreamBuffers,
 	                                   xdl_uint8* srcOfSreamBuffers[],
 	                                   xdl_uint numberOfVertex,
-	                                   XdevLVertexDeclaration* vd) {
+	                                   IPXdevLVertexDeclaration vd) {
 		m_vd = vd;
 
 		glGenVertexArrays(1, &m_id);
@@ -92,7 +92,7 @@ namespace xdl {
 		m_vertexBufferList.resize(numberOfStreamBuffers);
 
 		for(xdl_uint a = 0; a < numberOfStreamBuffers; a++) {
-			XdevLVertexBuffer* vb = new XdevLVertexBufferImpl();
+			IPXdevLVertexBuffer vb = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
 			m_vertexBufferList[a] = vb;
 		}
 
@@ -116,7 +116,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLVertexArrayImpl::init(xdl_uint8* src, xdl_uint numberOfVertex, XdevLVertexDeclaration* vd) {
+	xdl_int XdevLVertexArrayImpl::init(xdl_uint8* src, xdl_uint numberOfVertex, IPXdevLVertexDeclaration vd) {
 		m_vd = vd;
 
 		// Create array object.
@@ -127,7 +127,7 @@ namespace xdl {
 		m_vertexBufferList.reserve(1);
 		m_vertexBufferList.resize(1);
 
-		XdevLVertexBuffer* vb = new XdevLVertexBufferImpl();
+		IPXdevLVertexBuffer vb = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
 		vb->init(src,  vd->vertexSize()*numberOfVertex);
 		m_vertexBufferList.push_back(vb);
 		vb->activate();
@@ -152,7 +152,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int  XdevLVertexArrayImpl::init(XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vd) {
+	xdl_int  XdevLVertexArrayImpl::init(IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vd) {
 		m_vd = vd;
 
 		// Create array object.
@@ -191,7 +191,7 @@ namespace xdl {
 	                                   xdl_uint8 numberOfStreamBuffers,
 	                                   xdl_uint8* srcOfSreamBuffers[],
 	                                   xdl_uint numberOfVertex,
-	                                   XdevLVertexDeclaration* vd) {
+	                                   IPXdevLVertexDeclaration vd) {
 
 
 
@@ -200,7 +200,7 @@ namespace xdl {
 		glGenVertexArrays(1, &m_id);
 		glBindVertexArray(m_id);
 
-		m_indexBuffer = new XdevLIndexBufferImpl();
+		m_indexBuffer = std::shared_ptr<XdevLIndexBufferImpl>(new XdevLIndexBufferImpl());
 		m_indexBuffer->init();
 		m_indexBuffer->activate();
 
@@ -212,7 +212,7 @@ namespace xdl {
 		m_vertexBufferList.resize(numberOfStreamBuffers);
 
 		for(xdl_uint a = 0; a < numberOfStreamBuffers; a++) {
-			XdevLVertexBuffer* vb = new XdevLVertexBufferImpl();
+			IPXdevLVertexBuffer vb = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
 			m_vertexBufferList[a] = vb;
 		}
 
@@ -241,7 +241,7 @@ namespace xdl {
 	}
 
 
-	XdevLVertexDeclaration* XdevLVertexArrayImpl::getVertexDeclaration() {
+	IPXdevLVertexDeclaration XdevLVertexArrayImpl::getVertexDeclaration() {
 		return m_vd;
 	}
 
@@ -249,12 +249,12 @@ namespace xdl {
 		return m_id;
 	}
 
-	XdevLVertexBuffer* XdevLVertexArrayImpl::getVertexBuffer(xdl_uint indexNumber) {
+	IPXdevLVertexBuffer XdevLVertexArrayImpl::getVertexBuffer(xdl_uint indexNumber) {
 
 		return m_vertexBufferList[indexNumber];
 	}
 
-	XdevLIndexBuffer* XdevLVertexArrayImpl::getIndexBuffer() {
+	IPXdevLIndexBuffer XdevLVertexArrayImpl::getIndexBuffer() {
 		return m_indexBuffer;
 	}
 

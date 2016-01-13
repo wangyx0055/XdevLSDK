@@ -49,34 +49,34 @@ namespace xdl {
 			XdevLVertexArrayImpl();
 			virtual ~XdevLVertexArrayImpl();
 			virtual xdl_int init();
-			virtual xdl_int init(xdl_uint8* src, xdl_uint numberOfVertex, XdevLVertexDeclaration* vd);
-			virtual xdl_int init(XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vd);
+			virtual xdl_int init(xdl_uint8* src, xdl_uint numberOfVertex, IPXdevLVertexDeclaration vd);
+			virtual xdl_int init(IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vd);
 			virtual xdl_int init(xdl_uint8 numberOfStreamBuffers,
 			                     xdl_uint8* srcOfSreamBuffers[],
 			                     xdl_uint numberOfVertex,
-			                     XdevLVertexDeclaration* vd);
+			                     IPXdevLVertexDeclaration vd);
 			virtual xdl_int init(xdl_uint32 numberIndices,
 			                     xdl_uint8* srcOfIndices,
 			                     xdl_uint8 numberOfStreamBuffers,
 			                     xdl_uint8* srcOfSreamBuffers[],
 			                     xdl_uint numberOfVertex,
-			                     XdevLVertexDeclaration* vd);
+			                     IPXdevLVertexDeclaration vd);
 			virtual void activate();
 			virtual void deactivate();
 			virtual xdl_int setVertexStreamBuffer(xdl_uint shaderAttribute,
 			                                      xdl_uint numberOfComponents,
 			                                      XdevLBufferElementTypes itemSizeType,
-			                                      XdevLVertexBuffer* vertexBuffer);
-			virtual xdl_int setIndexBuffer(XdevLIndexBuffer* indexBuffer);
-			virtual XdevLVertexBuffer* getVertexBuffer(xdl_uint indexNumber);
-			virtual XdevLIndexBuffer* getIndexBuffer();
-			virtual XdevLVertexDeclaration* getVertexDeclaration();
+			                                      IPXdevLVertexBuffer vertexBuffer);
+			virtual xdl_int setIndexBuffer(IPXdevLIndexBuffer indexBuffer);
+			virtual IPXdevLVertexBuffer getVertexBuffer(xdl_uint indexNumber);
+			virtual IPXdevLIndexBuffer getIndexBuffer();
+			virtual IPXdevLVertexDeclaration getVertexDeclaration();
 			virtual xdl_uint id();
 		private:
 			GLuint 														m_id;
-			XdevLVertexDeclaration* 					m_vd;
-			std::vector<XdevLVertexBuffer*>		m_vertexBufferList;
-			XdevLIndexBuffer*									m_indexBuffer;
+			IPXdevLVertexDeclaration 					m_vd;
+			std::vector<IPXdevLVertexBuffer>	m_vertexBufferList;
+			IPXdevLIndexBuffer								m_indexBuffer;
 			xdl::xdl_bool 										m_activated;
 
 	};

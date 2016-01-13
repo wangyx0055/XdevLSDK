@@ -184,13 +184,6 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 		~MyOpenGLApp() {
 
-			m_rai->destroy(m_vd);
-			m_rai->destroy(m_vertexDeclaration);
-			m_rai->destroy(m_frameBuffer);
-			m_rai->destroy(m_vs);
-			m_rai->destroy(m_fs);
-			m_rai->destroy(m_sp);
-
 		}
 
 		virtual void main(const Arguments& argv) throw() {
@@ -412,25 +405,27 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		//
 		xdl::xdl_int initFramebuffer() {
 
-			m_rai->createFrameBuffer(&m_frameBuffer);
+			m_frameBuffer = m_rai->createFrameBuffer();
 			m_frameBuffer->init(16, 16);
 			m_frameBuffer->addColorTarget(0	, xdl::XDEVL_FB_COLOR_RGBA);
-			m_frameBuffer->getTexture(0)->lock();
-			m_frameBuffer->getTexture(0)->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
-			m_frameBuffer->getTexture(0)->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_NEAREST);
-			m_frameBuffer->getTexture(0)->unlock();
+
+			auto texture = m_frameBuffer->getTexture(0);
+			texture->lock();
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_NEAREST);
+			texture->unlock();
 
 
 			m_frameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24);
 
 			createScreenVertexArray(getWindow());
 
-			m_rai->createShaderProgram(&m_frameBufferSP);
+			m_frameBufferSP = m_rai->createShaderProgram();
 
-			m_rai->createVertexShader(&m_frameBufferVS);
+			m_frameBufferVS = m_rai->createVertexShader();
 			m_frameBufferVS->compileFromFile("frameBuffer_vs.glsl");
 
-			m_rai->createFragmentShader(&m_frameBufferFS);
+			m_frameBufferFS = m_rai->createFragmentShader();
 			m_frameBufferFS->compileFromFile("frameBuffer_fs.glsl");
 
 			m_frameBufferSP->attach(m_frameBufferVS);
@@ -449,7 +444,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		//
 		xdl::xdl_int initRenderAssets() {
 
-			m_rai->createVertexDeclaration(&m_vd);
+			m_vd = m_rai->createVertexDeclaration();
 			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);		// Position
 			m_vd->add(4, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 1);		// Color
 			m_vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 2);		// Normal
@@ -460,17 +455,17 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			list.push_back((xdl::xdl_uint8*)g_normal_buffer_data);
 
 
-			m_rai->createVertexArray(&m_va);
+			m_va = m_rai->createVertexArray();
 			m_va->init(list.size(), list.data(), 36, m_vd);
 
 
 			// Create the shader program.
-			m_rai->createShaderProgram(&m_sp);
+			m_sp = m_rai->createShaderProgram();
 
-			m_rai->createVertexShader(&m_vs);
+			m_vs = m_rai->createVertexShader();
 			m_vs->compileFromFile("vs1.vs");
 
-			m_rai->createFragmentShader(&m_fs);
+			m_fs = m_rai->createFragmentShader();
 			m_fs->compileFromFile("fs1.fs");
 
 			m_sp->attach(m_vs);
@@ -491,7 +486,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 			// Layz destroying of the previous vertex array.
 			if(m_frameBufferArray != nullptr) {
-				m_rai->destroy(m_frameBufferArray);
+				//m_rai->destroy(m_frameBufferArray);
 			}
 
 
@@ -515,7 +510,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 				0.0f, 0.0f
 			};
 
-			m_rai->createVertexDeclaration(&m_vertexDeclaration);
+			m_vertexDeclaration = m_rai->createVertexDeclaration();
 			m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);
 			m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 9);
 
@@ -523,26 +518,26 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			list2.push_back((xdl::xdl_uint8*)screen_vertex);
 			list2.push_back((xdl::xdl_uint8*)screen_uv);
 
-			m_rai->createVertexArray(&m_frameBufferArray);
+			m_frameBufferArray = m_rai->createVertexArray();
 			m_frameBufferArray->init(list2.size(), list2.data(), 6, m_vertexDeclaration);
 		}
 
 	private:
 
 		xdl::IPXdevLRAI 			m_rai;
-		xdl::XdevLFrameBuffer*		m_frameBuffer;
-		xdl::XdevLVertexDeclaration* m_vertexDeclaration;
-		xdl::XdevLVertexArray*		m_frameBufferArray;
-		xdl::XdevLVertexShader*		m_frameBufferVS;
-		xdl::XdevLFragmentShader*	m_frameBufferFS;
-		xdl::XdevLShaderProgram*	m_frameBufferSP;
+		xdl::IPXdevLFrameBuffer		m_frameBuffer;
+		xdl::IPXdevLVertexDeclaration m_vertexDeclaration;
+		xdl::IPXdevLVertexArray		m_frameBufferArray;
+		xdl::IPXdevLVertexShader		m_frameBufferVS;
+		xdl::IPXdevLFragmentShader	m_frameBufferFS;
+		xdl::IPXdevLShaderProgram	m_frameBufferSP;
 
 
-		xdl::XdevLVertexArray*			m_va;
-		xdl::XdevLVertexDeclaration*	m_vd;
-		xdl::XdevLVertexShader*			m_vs;
-		xdl::XdevLFragmentShader*		m_fs;
-		xdl::XdevLShaderProgram*		m_sp;
+		xdl::IPXdevLVertexArray			m_va;
+		xdl::IPXdevLVertexDeclaration	m_vd;
+		xdl::IPXdevLVertexShader			m_vs;
+		xdl::IPXdevLFragmentShader		m_fs;
+		xdl::IPXdevLShaderProgram		m_sp;
 
 		xdl::xdl_int m_modelMatrix;
 		xdl::xdl_int m_projViewMatrix;

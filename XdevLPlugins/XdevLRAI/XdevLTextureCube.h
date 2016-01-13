@@ -67,7 +67,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLTextureCube IXdevLTextureCube;
-	typedef XdevLTextureCube* IPXdevLTextureCube;
+	typedef std::shared_ptr<XdevLTextureCube> IPXdevLTextureCube;
 
 }
 

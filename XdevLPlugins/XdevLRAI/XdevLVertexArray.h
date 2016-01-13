@@ -25,6 +25,8 @@
 #define XDEVL_VERTEX_ARRAY_H
 
 #include <XdevLRAI/XdevLVertexDeclaration.h>
+#include <XdevLRAI/XdevLVertexBuffer.h>
+#include <XdevLRAI/XdevLIndexBuffer.h>
 
 namespace xdl {
 
@@ -45,16 +47,16 @@ namespace xdl {
 			virtual xdl_int init() = 0;
 
 			/// Initialize a vertex array with one vertex buffer.
-			virtual xdl_int init(xdl_uint8* src, xdl_uint numberOfVertex, XdevLVertexDeclaration* vd) = 0;
+			virtual xdl_int init(xdl_uint8* src, xdl_uint numberOfVertex, IPXdevLVertexDeclaration vd) = 0;
 
 			/// Initialize with a provided vertex buffer.
-			virtual xdl_int init(XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vd) = 0;
+			virtual xdl_int init(IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vd) = 0;
 
 			/// Initialize with a list of stream buffers.
 			virtual xdl_int init(	xdl_uint8 numberOfStreamBuffers,
 			                        xdl_uint8* srcOfSreamBuffers[],
 			                        xdl_uint numberOfVertex,
-			                        XdevLVertexDeclaration* vd) = 0;
+			                        IPXdevLVertexDeclaration vd) = 0;
 
 			/// Initialize with a list of stream buffers and a index buffer.
 			virtual xdl_int init(	xdl_uint32 numberIndices,
@@ -62,7 +64,7 @@ namespace xdl {
 			                        xdl_uint8 numberOfStreamBuffers,
 			                        xdl_uint8* srcOfSreamBuffers[],
 			                        xdl_uint numberOfVertex,
-			                        XdevLVertexDeclaration* vd) = 0;
+			                        IPXdevLVertexDeclaration vd) = 0;
 
 			/// Activate.
 			virtual void activate() = 0;
@@ -74,26 +76,26 @@ namespace xdl {
 			virtual xdl_int setVertexStreamBuffer(xdl_uint shaderAttribute,
 			                                      xdl_uint numberOfComponents,
 			                                      XdevLBufferElementTypes itemSizeType,
-			                                      XdevLVertexBuffer* vertexBuffer) = 0;
+			                                      IPXdevLVertexBuffer vertexBuffer) = 0;
 
 			/// Sets the index buffer.
-			virtual xdl_int setIndexBuffer(XdevLIndexBuffer* indexBuffer) = 0;
+			virtual xdl_int setIndexBuffer(IPXdevLIndexBuffer indexBuffer) = 0;
 
 			/// Returns the specified vertex buffer.
-			virtual XdevLVertexBuffer* getVertexBuffer(xdl_uint indexNumber) = 0;
+			virtual IPXdevLVertexBuffer getVertexBuffer(xdl_uint indexNumber) = 0;
 
 			/// Returns the index buffer.
-			virtual XdevLIndexBuffer* getIndexBuffer() = 0;
+			virtual IPXdevLIndexBuffer getIndexBuffer() = 0;
 
 			/// Returns the vertex declaration.
-			virtual XdevLVertexDeclaration* getVertexDeclaration() = 0;
+			virtual IPXdevLVertexDeclaration getVertexDeclaration() = 0;
 
 			/// Returns the identification code.
 			virtual xdl_uint id() = 0;
 	};
 	
 	typedef XdevLVertexArray IXdevLVertexArray;
-	typedef XdevLVertexArray* IPXdevLVertexArray;
+	typedef std::shared_ptr<XdevLVertexArray> IPXdevLVertexArray;
 
 }
 

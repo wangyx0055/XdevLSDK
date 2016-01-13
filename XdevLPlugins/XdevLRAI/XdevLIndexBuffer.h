@@ -45,7 +45,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLIndexBuffer IXdevLIndexBuffer;
-	typedef XdevLIndexBuffer* IPXdevLIndexBuffer;
+	typedef std::shared_ptr<XdevLIndexBuffer> IPXdevLIndexBuffer;
 
 }
 

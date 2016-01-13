@@ -61,10 +61,10 @@ namespace xdl {
 
 		xdl_uint m_id;
 		xdl_uint m_size;
-		std::vector<XdevLTextureImpl*> 	m_colorTargetTextures;
-		XdevLTextureCubeImpl*						m_textureCube;
-		std::vector<xdl::xdl_uint>      m_activeColorTargetList;
-		XdevLTextureImpl m_depthTexture;
+		std::vector<IPXdevLTexture>		m_colorTargetTextures;
+		IPXdevLTextureCube						m_textureCube;
+		std::vector<xdl::xdl_uint>		m_activeColorTargetList;
+		IPXdevLTexture 								m_depthTexture;
 		xdl_bool m_inUse;
 		xdl_uint m_width;
 		xdl_uint m_height;

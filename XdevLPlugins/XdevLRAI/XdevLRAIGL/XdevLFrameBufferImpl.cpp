@@ -22,20 +22,7 @@ namespace xdl {
 	}
 
 	XdevLFrameBufferImpl::~XdevLFrameBufferImpl() {
-		// Delete depth/stencil targets texture.
-		glDeleteTextures(1, &m_depthTexture.m_id);
-
-		// Delete color targets texture.
-		std::vector<XdevLTextureImpl*>::iterator ib(m_colorTargetTextures.begin());
-		while(ib != m_colorTargetTextures.end()) {
-			delete(*ib);
-
-			ib++;
-		}
-
 		glDeleteFramebuffers(1, &m_id);
-
-
 	}
 
 	xdl_int XdevLFrameBufferImpl::init(xdl_uint width,
@@ -73,7 +60,7 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_colorTargetTextures[target_index] = new XdevLTextureImpl(id, m_width, m_height);
+		m_colorTargetTextures[target_index] = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(id, m_width, m_height));
 
 		// Check if the Framebuffer was build correct.
 		GLenum status;
@@ -95,7 +82,7 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_colorTargetTextures[target_index] = static_cast<XdevLTextureImpl*>(texture);
+		m_colorTargetTextures[target_index] = texture;
 
 		// Check if the Framebuffer was build correct.
 		GLenum status;
@@ -108,7 +95,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, XdevLTextureCube* textureCube) {
+	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, IPXdevLTextureCube textureCube) {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCube->id());
@@ -116,7 +103,7 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-		m_textureCube = static_cast<XdevLTextureCubeImpl*>(textureCube);
+		m_textureCube = textureCube;
 
 		// Check if the Framebuffer was build correct.
 		GLenum status;
@@ -142,7 +129,8 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_depthTexture = XdevLTextureImpl(id, m_width, m_height);
+		m_depthTexture = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(id, m_width, m_height));
+
 		return ERR_OK;
 	}
 
@@ -155,7 +143,7 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_depthTexture = XdevLTextureImpl(texture->id(), texture->getWidth(), texture->getHeight());
+		m_depthTexture = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(texture->id(), texture->getWidth(), texture->getHeight()));
 
 		return ERR_OK;
 	}
@@ -174,7 +162,7 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_depthTexture = XdevLTextureImpl(id, m_width, m_height);
+		m_depthTexture = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(id, m_width, m_height));
 
 		return ERR_OK;
 	}
@@ -263,11 +251,12 @@ namespace xdl {
 	}
 
 	IPXdevLTexture XdevLFrameBufferImpl::getTexture(xdl_uint idx) {
-		return m_colorTargetTextures[idx];
+		auto texture = m_colorTargetTextures.at(idx);
+		return texture;
 	}
 
 	IPXdevLTexture XdevLFrameBufferImpl::getDepthTexture() {
-		return &m_depthTexture;
+		return m_depthTexture;
 	}
 
 }

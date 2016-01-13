@@ -129,7 +129,7 @@ namespace xdl {
 						}
 					}
 
-					m_rai->createTexture(&texture);
+					texture = m_rai->createTexture();
 
 					texture->init(width, height, XDEVL_RGBA, XDEVL_RGBA, vflipedimage.data());
 					image.clear();

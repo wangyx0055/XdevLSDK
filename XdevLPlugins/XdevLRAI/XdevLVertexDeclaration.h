@@ -103,7 +103,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLVertexDeclaration IXdevLVertexDeclaration;
-	typedef XdevLVertexDeclaration* IPXdevLVertexDeclaration;
+	typedef std::shared_ptr<XdevLVertexDeclaration> IPXdevLVertexDeclaration;
 
 }
 

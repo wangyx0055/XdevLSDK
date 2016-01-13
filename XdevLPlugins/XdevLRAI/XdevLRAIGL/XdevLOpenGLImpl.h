@@ -79,39 +79,27 @@ namespace xdl {
 			virtual xdl_int setActiveRenderWindow(XdevLWindow* window);
 			virtual xdl_int swapBuffers();
 
-			virtual xdl_int createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration);
-			virtual xdl_int createVertexShader(XdevLVertexShader** vertex_shader);
-			virtual xdl_int createFragmentShader(XdevLFragmentShader** fragment_shader);
-			virtual xdl_int createGeometryShader(XdevLGeometryShader** geometry_shader);
-			virtual xdl_int createShaderProgram(XdevLShaderProgram** program);
-			virtual xdl_int createTexture(IPXdevLTexture* texture);
-			virtual xdl_int createTextureCube(XdevLTextureCube** textureCube);
-			virtual xdl_int createTexture3D(XdevLTexture3D** texture3D);
-			virtual xdl_int createFrameBuffer(XdevLFrameBuffer** fbo);
-			virtual xdl_int createVertexArray(XdevLVertexArray** vertexArray);
-			virtual xdl_int createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer);
-			virtual xdl_int createIndexBuffer(XdevLIndexBuffer** indexBuffer);
+			virtual IPXdevLVertexDeclaration createVertexDeclaration() override;
+			virtual IPXdevLVertexShader createVertexShader() override;
+			virtual IPXdevLFragmentShader createFragmentShader() override;
+			virtual IPXdevLGeometryShader createGeometryShader() override;
+			virtual IPXdevLShaderProgram createShaderProgram() override;
+			virtual IPXdevLTexture createTexture() override;
+			virtual IPXdevLTextureCube createTextureCube() override;
+			virtual IPXdevLTexture3D createTexture3D() override;
+			virtual IPXdevLFrameBuffer createFrameBuffer() override;
+			virtual IPXdevLVertexBuffer createVertexBuffer() override;
+			virtual IPXdevLIndexBuffer createIndexBuffer() override;
+			virtual IPXdevLVertexArray createVertexArray() override;
 
-			virtual xdl_int setActiveFrameBuffer(XdevLFrameBuffer* frambuffer);
-			virtual xdl_int setActiveVertexArray(XdevLVertexArray* vertexArray);
-			virtual xdl_int setActiveShaderProgram(XdevLShaderProgram* shaderProgram);
+			virtual xdl_int setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer);
+			virtual xdl_int setActiveVertexArray(IPXdevLVertexArray vertexArray);
+			virtual xdl_int setActiveShaderProgram(IPXdevLShaderProgram shaderProgram);
 
 			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements);
 			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number);
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration);
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration, IPXdevLIndexBuffer indexBuffer);
-
-
-
-			virtual xdl_int destroy(IPXdevLVertexDeclaration vertexDeclaration);
-			virtual xdl_int destroy(IPXdevLShaderProgram shaderProgram);
-			virtual xdl_int destroy(IPXdevLShader shader);
-			virtual xdl_int destroy(IPXdevLVertexArray vertexArray);
-			virtual xdl_int destroy(IPXdevLVertexBuffer vertexBuffer);
-			virtual xdl_int destroy(IPXdevLIndexBuffer indexBuffer);
-			virtual xdl_int destroy(IPXdevLFrameBuffer frameBuffer);
-			virtual xdl_int destroy(IPXdevLTexture texture);
-			virtual xdl_int destroy(IPXdevLTextureCube textureCube);
 
 			void shaderLog(xdl_uint shaderID);
 			xdl_int initExtensions();
@@ -155,9 +143,9 @@ namespace xdl {
 			// Supported geometry shader
 			xdl_int m_geometry_shader_version;
 
-			XdevLFrameBuffer*	m_activeFrameBuffer;
-			XdevLVertexArray* 	m_activeVertexArray;
-			XdevLShaderProgram*	m_activeShaderProgram;
+			IPXdevLFrameBuffer	m_activeFrameBuffer;
+			IPXdevLVertexArray 	m_activeVertexArray;
+			IPXdevLShaderProgram	m_activeShaderProgram;
 	};
 
 }

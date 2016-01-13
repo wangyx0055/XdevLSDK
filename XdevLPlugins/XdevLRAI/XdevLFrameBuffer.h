@@ -208,7 +208,7 @@ namespace xdl {
 	};
 
 	typedef XdevLFrameBuffer IXdevLFrameBuffer;
-	typedef XdevLFrameBuffer* IPXdevLFrameBuffer;
+	typedef std::shared_ptr<XdevLFrameBuffer> IPXdevLFrameBuffer;
 }
 
 #endif

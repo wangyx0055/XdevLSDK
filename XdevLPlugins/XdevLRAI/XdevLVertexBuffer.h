@@ -37,7 +37,7 @@ namespace xdl {
 	};
 	
 	typedef XdevLVertexBuffer IXdevLVertexBuffer;
-	typedef XdevLVertexBuffer* IPXdevLVertexBuffer;
+	typedef std::shared_ptr<XdevLVertexBuffer> IPXdevLVertexBuffer;
 
 }
 

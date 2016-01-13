@@ -353,8 +353,7 @@ int main(int argc, char* argv[]) {
 	// Create Buffers
 	//
 
-	xdl::XdevLVertexDeclaration* vd = nullptr;
-	rai->createVertexDeclaration(&vd);
+	auto vd = rai->createVertexDeclaration();
 	vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);		// Position
 	vd->add(4, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 1);		// Color
 	vd->add(3, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 2);		// Normal
@@ -364,23 +363,13 @@ int main(int argc, char* argv[]) {
 	list.push_back((xdl::xdl_uint8*)g_color_buffer_data);
 	list.push_back((xdl::xdl_uint8*)g_normal_buffer_data);
 
-	xdl::XdevLVertexArray* va = nullptr;
-	rai->createVertexArray(&va);
+	auto va = rai->createVertexArray();
 	va->init(list.size(), list.data(), 36, vd);
 
-
-	//
-	// Create basic shaders
-	//
-
-	xdl::XdevLVertexShader*			vs;
-	xdl::XdevLFragmentShader*		fs;
-	xdl::XdevLShaderProgram*		sp;
-
 	// Create the shader object instances.
-	rai->createShaderProgram(&sp);
-	rai->createVertexShader(&vs);
-	rai->createFragmentShader(&fs);
+	auto vs = rai->createVertexShader();
+	auto fs = rai->createFragmentShader();
+	auto sp = rai->createShaderProgram();
 
 	// Create the source of the shaders.
 	vs->addShaderCode(vertex_shader_source.c_str());
@@ -395,11 +384,9 @@ int main(int argc, char* argv[]) {
 	sp->attach(fs);
 	sp->link();
 
-
 	// Get the vertex attributes from the shaders. We need that to pass those two matrices
 	xdl::xdl_int modelMatrix	= sp->getUniformLocation("modelMatrix");
 	xdl::xdl_int projViewMatrix	= sp->getUniformLocation("projViewMatrix");
-
 
 	//
 	// Setup some other stuff
@@ -481,12 +468,6 @@ int main(int argc, char* argv[]) {
 		rai->swapBuffers();
 
 	}
-
-	rai->destroy(vd);
-	rai->destroy(va);
-	rai->destroy(vs);
-	rai->destroy(fs);
-	rai->destroy(sp);
 
 	xdl::destroyCore(core);
 
