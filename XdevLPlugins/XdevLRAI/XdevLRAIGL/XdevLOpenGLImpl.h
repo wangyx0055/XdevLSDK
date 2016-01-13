@@ -53,7 +53,7 @@ namespace xdl {
 			virtual ~XdevLOpenGLImpl();
 
 
-			virtual xdl_int create(XdevLWindow* window) override;
+			virtual xdl_int create(IPXdevLWindow window) override;
 			virtual xdl_int init();
 			virtual xdl_int initGLEW();
 			virtual const xdl_char* getVersion();

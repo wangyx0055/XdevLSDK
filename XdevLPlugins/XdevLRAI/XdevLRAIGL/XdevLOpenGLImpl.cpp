@@ -95,7 +95,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	int XdevLOpenGLImpl::create(XdevLWindow* window) {
+	int XdevLOpenGLImpl::create(IPXdevLWindow window) {
 
 		// Create OpenGL context.
 		if(m_gl_context->create(window) != xdl::ERR_OK) {
@@ -321,7 +321,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveRenderWindow(XdevLWindow* window) {
+	xdl_int XdevLOpenGLImpl::setActiveRenderWindow(IPXdevLWindow window) {
 		m_gl_context->makeCurrent(window);
 		return ERR_OK;
 	}

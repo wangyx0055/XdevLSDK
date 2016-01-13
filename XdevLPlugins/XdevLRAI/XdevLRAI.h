@@ -42,6 +42,7 @@
 namespace xdl {
 
 	class XdevLWindow;
+	typedef XdevLWindow* IPXdevLWindow;
 
 	enum XdevLPrimitiveType {
 	  XDEVL_PRIMITIVE_POINTS			= 0x0000,
@@ -89,7 +90,7 @@ namespace xdl {
 			//
 			// Create the RAI
 			//
-			virtual xdl_int create(XdevLWindow* window) = 0;
+			virtual xdl_int create(IPXdevLWindow window) = 0;
 
 			//
 			// Change Point and Line size.
@@ -129,7 +130,7 @@ namespace xdl {
 
 
 			/// Change the rendering window.
-			virtual xdl_int setActiveRenderWindow(XdevLWindow* window) = 0;
+			virtual xdl_int setActiveRenderWindow(IPXdevLWindow window) = 0;
 
 			/// Swaps buffers.
 			virtual xdl_int swapBuffers() = 0;
