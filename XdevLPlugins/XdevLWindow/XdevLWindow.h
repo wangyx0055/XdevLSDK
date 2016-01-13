@@ -76,7 +76,7 @@ namespace xdl {
 	class XdevLWindowAttribute {
 		public:
 			XdevLWindowAttribute() :
-				title(XdevLWindowTitle("XdevL (c) 2007 - 20015 Cengiz Terzibas")),
+				title(XdevLWindowTitle("XdevL (c) 2007 - 20016 Cengiz Terzibas")),
 				position(0, 0),
 				size(640, 480),
 				type(XDEVL_WINDOW_TYPE_NORMAL) {}
@@ -105,15 +105,7 @@ namespace xdl {
 
 			virtual ~XdevLWindow() {}
 
-			/// Creates the window in manual mode.
-			/**
-				This method is used in combination with the XdevLWindowServer. Do not
-				use this if you ceate a window using XdevLCore system.
-				The procedure would be that you create a window object using
-				the XdevLWindowServer method, set all window parameters
-				and call the create method. After calling this method the OS window
-				will be created using the parameters specified.
-			*/
+			/// Creates window using default values.
 			virtual xdl_int create() = 0;
 
 			/// Create a window using the attribute structure.
@@ -180,15 +172,12 @@ namespace xdl {
 			virtual void setFullscreen(xdl_bool state) = 0;
 
 			/// Show the window.
-			/**
-				Shows the window without setting the input focus.
-			*/
 			virtual void show() = 0;
 
 			/// Hide the window.
 			virtual void hide() = 0;
 
-			/// Returns if the window is hidden.
+			/// Returns the hidden state of the window.
 			virtual xdl_bool isHidden() = 0;
 
 			/// Raise window above others.
@@ -208,9 +197,6 @@ namespace xdl {
 
 			/// Sets the parent window.
 			virtual void setParent(XdevLWindow* window) = 0;
-
-			/// Sets the window decoration
-			virtual void setWindowDecoration(xdl_bool enable) = 0;
 
 			/// Checks if the cursor is inside the window.
 			virtual xdl_bool isPointerInside() = 0;
