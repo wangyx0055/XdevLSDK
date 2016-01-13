@@ -5,10 +5,11 @@ namespace xdl {
 
 
 	XdevLFrameBufferImpl::XdevLFrameBufferImpl() :
-		m_size(0),
-		m_inUse(xdl_false),
+		m_id(0),
 		m_width(0),
-		m_height(0) {
+		m_height(0),
+		m_size(0),
+		m_inUse(xdl_false){
 		m_colorTargetTextures.reserve(4);
 		m_colorTargetTextures.resize(4);
 		m_activeColorTargetList.reserve(4);
