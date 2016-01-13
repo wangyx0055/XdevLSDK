@@ -139,7 +139,7 @@ namespace xdl {
 		CFStringRef pathToWatchCF = CFStringCreateWithCString(kCFAllocatorDefault, folder.toString().c_str(), kCFStringEncodingUTF8);
 		CFArrayRef pathsToWatch = CFArrayCreate(nullptr, (const void **)&pathToWatchCF, 1, nullptr);
 
-		FSEventStreamContext context {0, this, nullptr, nullptr, nullptr};;
+		FSEventStreamContext context {0, this, nullptr, nullptr, nullptr};
 		FSEventStreamRef streamRef = FSEventStreamCreate(nullptr,
 		                             &XdevLDirectoryWatcherMacOSX::FileSystemEventCallback,
 		                             &context,
