@@ -970,6 +970,8 @@ namespace xdl {
 
 		XSetWMProperties(globalDisplay, m_window, &windowName, &iconName, nullptr, 0, nullptr, nullptr, class_hints);
 		XFree(class_hints);
+		XFree(windowName.value);
+		XFree(iconName.value);
 	}
 
 
