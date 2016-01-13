@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -44,35 +44,35 @@ namespace xdl {
 	class XdevLWindow;
 
 	enum XdevLPrimitiveType {
-	    XDEVL_PRIMITIVE_POINTS			= 0x0000,
-	    XDEVL_PRIMITIVE_LINES			= 0x0001,
-	    XDEVL_PRIMITIVE_LINE_LOOP		= 0x0002,
-	    XDEVL_PRIMITIVE_LINE_STRIP		= 0x0003,
-	    XDEVL_PRIMITIVE_TRIANGLES		= 0x0004,
-	    XDEVL_PRIMITIVE_TRIANGLE_STRIP	= 0x0005,
-	    XDEVL_PRIMITIVE_TRIANGLE_FAN	= 0x0006,
-	    XDEVL_PRIMITIVE_QUADS			= 0x0007,
-	    XDEVL_PRIMITIVE_QUAD_STRIP		= 0x0008,
-	    XDEVL_PRIMITIVE_POLYGON			= 0x0009
+	  XDEVL_PRIMITIVE_POINTS			= 0x0000,
+	  XDEVL_PRIMITIVE_LINES			= 0x0001,
+	  XDEVL_PRIMITIVE_LINE_LOOP		= 0x0002,
+	  XDEVL_PRIMITIVE_LINE_STRIP		= 0x0003,
+	  XDEVL_PRIMITIVE_TRIANGLES		= 0x0004,
+	  XDEVL_PRIMITIVE_TRIANGLE_STRIP	= 0x0005,
+	  XDEVL_PRIMITIVE_TRIANGLE_FAN	= 0x0006,
+	  XDEVL_PRIMITIVE_QUADS			= 0x0007,
+	  XDEVL_PRIMITIVE_QUAD_STRIP		= 0x0008,
+	  XDEVL_PRIMITIVE_POLYGON			= 0x0009
 	};
 
 	enum XdevLBlendModes {
-	    XDEVL_BLEND_NONE,
-	    XDEVL_BLEND_ZERO,
-	    XDEVL_BLEND_ONE,
-	    XDEVL_BLEND_SRC_COLOR,
-	    XDEVL_BLEND_ONE_MINUS_SRC_COLOR,
-	    XDEVL_BLEND_DST_COLOR,
-	    XDEVL_BLEND_ONE_MINUS_DST_COLOR,
-	    XDEVL_BLEND_SRC_ALPHA,
-	    XDEVL_BLEND_ONE_MINUS_SRC_ALPHA,
-	    XDEVL_BLEND_DST_ALPHA,
-	    XDEVL_BLEND_ONE_MINUS_DST_ALPHA,
-	    XDEVL_BLEND_CONSTANT_COLOR,
-	    XDEVL_BLEND_ONE_MINUS_CONSTANT_COLOR,
-	    XDEVL_BLEND_CONSTANT_ALPHA,
-	    XDEVL_BLEND_ONE_MINUS_CONSTANT_ALPHA,
-	    XDEVL_BLEND_SRC_ALPHA_SATURATE
+	  XDEVL_BLEND_NONE,
+	  XDEVL_BLEND_ZERO,
+	  XDEVL_BLEND_ONE,
+	  XDEVL_BLEND_SRC_COLOR,
+	  XDEVL_BLEND_ONE_MINUS_SRC_COLOR,
+	  XDEVL_BLEND_DST_COLOR,
+	  XDEVL_BLEND_ONE_MINUS_DST_COLOR,
+	  XDEVL_BLEND_SRC_ALPHA,
+	  XDEVL_BLEND_ONE_MINUS_SRC_ALPHA,
+	  XDEVL_BLEND_DST_ALPHA,
+	  XDEVL_BLEND_ONE_MINUS_DST_ALPHA,
+	  XDEVL_BLEND_CONSTANT_COLOR,
+	  XDEVL_BLEND_ONE_MINUS_CONSTANT_COLOR,
+	  XDEVL_BLEND_CONSTANT_ALPHA,
+	  XDEVL_BLEND_ONE_MINUS_CONSTANT_ALPHA,
+	  XDEVL_BLEND_SRC_ALPHA_SATURATE
 	};
 
 	/**
@@ -93,7 +93,7 @@ namespace xdl {
 
 			//
 			// Change Point and Line size.
-			// 
+			//
 
 			virtual void setPointSize(xdl_float size) = 0;
 			virtual void setLineSize(xdl_float size) = 0;
@@ -193,26 +193,23 @@ namespace xdl {
 			//
 
 			/// Draw a Vertex Array.
-			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType,
-			                                xdl_uint numberOfElements) = 0;
+			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) = 0;
 
 			/// Draw a Instanced Vertex Array.
-			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType,
-			        xdl_uint numberOfElements,
-			        xdl_uint number) = 0;
+			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number) = 0;
 
 			/// Draw Vertex Buffer.
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType,
 			                                 xdl_uint numberOfElements,
-			                                 XdevLVertexBuffer* vertexBuffer,
-			                                 XdevLVertexDeclaration* vertexDeclaration) = 0;
+			                                 IPXdevLVertexBuffer vertexBuffer,
+			                                 IPXdevLVertexDeclaration vertexDeclaration) = 0;
 
 			/// Draw indexed Vertex Buffer.
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType,
 			                                 xdl_uint numberOfElements,
-			                                 XdevLVertexBuffer* vertexBuffer,
-			                                 XdevLVertexDeclaration* vertexDeclaration,
-			                                 XdevLIndexBuffer* indexBuffer) = 0;
+			                                 IPXdevLVertexBuffer vertexBuffer,
+			                                 IPXdevLVertexDeclaration vertexDeclaration,
+			                                 IPXdevLIndexBuffer indexBuffer) = 0;
 
 			//
 			// Destroying methods.

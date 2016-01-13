@@ -5,10 +5,10 @@ namespace xdl {
 
 
 	XdevLFrameBufferImpl::XdevLFrameBufferImpl() :
-    m_size(0),
-    m_inUse(xdl_false),
-    m_width(0),
-    m_height(0) {
+		m_size(0),
+		m_inUse(xdl_false),
+		m_width(0),
+		m_height(0) {
 		m_colorTargetTextures.reserve(4);
 		m_colorTargetTextures.resize(4);
 		m_activeColorTargetList.reserve(4);
@@ -51,7 +51,7 @@ namespace xdl {
 		xdl::xdl_uint list[] = {GL_NONE};
 		glDrawBuffers(1, (const GLenum*)list);
 
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, false );
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, false);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -64,21 +64,16 @@ namespace xdl {
 		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
-		GLuint tid;
-		glGenTextures(1, &tid);
-		glBindTexture(GL_TEXTURE_2D, tid);
+		GLuint id;
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_RED,  GL_UNSIGNED_BYTE, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_2D, tid, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_2D, id, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_colorTargetTextures[target_index] = new XdevLTextureImpl();
-		m_colorTargetTextures[target_index]->m_id = tid;
-		m_colorTargetTextures[target_index]->m_height = m_height;
-		m_colorTargetTextures[target_index]->m_width = m_width;
-		m_colorTargetTextures[target_index]->setInitialized(xdl_true);
-
+		m_colorTargetTextures[target_index] = new XdevLTextureImpl(id, m_width, m_height);
 
 		// Check if the Framebuffer was build correct.
 		GLenum status;
@@ -137,23 +132,20 @@ namespace xdl {
 	xdl_int XdevLFrameBufferImpl::addDepthTarget(XdevLFrameBufferDepthFormat internal_format) {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
-		GLuint fbt;
-		glGenTextures(1, &fbt);
+		GLuint id;
+		glGenTextures(1, &id);
 
-		glBindTexture(GL_TEXTURE_2D, fbt);
+		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_DEPTH_COMPONENT,  GL_UNSIGNED_BYTE, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbt, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, id, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_depthTexture.m_id = fbt;
-		m_depthTexture.m_height = m_height;
-		m_depthTexture.m_width = m_width;
-		m_depthTexture.setInitialized(xdl_true);
+		m_depthTexture = XdevLTextureImpl(id, m_width, m_height);
 		return ERR_OK;
 	}
-	
+
 	xdl_int XdevLFrameBufferImpl::addDepthTarget(IPXdevLTexture texture) {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
@@ -163,33 +155,27 @@ namespace xdl {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_depthTexture.m_id 		= texture->id();
-		m_depthTexture.m_height = texture->getHeight();
-		m_depthTexture.m_width 	= texture->getWidth();
-		m_depthTexture.setInitialized(xdl_true);
-		
+		m_depthTexture = XdevLTextureImpl(texture->id(), texture->getWidth(), texture->getHeight());
+
 		return ERR_OK;
-	}	
+	}
 
 	xdl_int XdevLFrameBufferImpl::addDepthStencilTarget(XdevLFrameBufferDepthStencilFormat internal_format) {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
-		GLuint fbt;
-		glGenTextures(1, &fbt);
+		GLuint id;
+		glGenTextures(1, &id);
 
-		glBindTexture(GL_TEXTURE_2D, fbt);
+		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_DEPTH_STENCIL,  GL_UNSIGNED_BYTE, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 		fbt, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 	fbt, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 		id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 	id, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		m_depthTexture = XdevLTextureImpl(id, m_width, m_height);
 
-		m_depthTexture.m_id = fbt;
-		m_depthTexture.m_height = m_height;
-		m_depthTexture.m_width = m_width;
-		m_depthTexture.setInitialized(xdl_true);
 		return ERR_OK;
 	}
 
@@ -207,7 +193,7 @@ namespace xdl {
 		}
 		return ERR_OK;
 	}
-	
+
 	xdl_int XdevLFrameBufferImpl::activateColorTargetCubePosition(xdl_uint target_index, XdevLCubemapPosition cubemapPosition) {
 		assert(m_inUse && "XdevLFrameBufferImpl::draw: Framebuffer not activated.");
 		assert(m_textureCube && "XdevLFrameBufferImpl::activateColorTargetCube: Cube Texture not added.");
@@ -215,7 +201,7 @@ namespace xdl {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, cubemapPosition, m_textureCube->id(), 0);
 		return ERR_OK;
 	}
-	
+
 	xdl_int  XdevLFrameBufferImpl::clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) {
 		glClearColor(r,g,b,a);
 		glClear(GL_COLOR_BUFFER_BIT);

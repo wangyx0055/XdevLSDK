@@ -20,22 +20,22 @@ class wrappPrimitiveType;
 
 
 xdl::XdevLModuleDescriptor openGLModuleDesc {
-	xdl::vendor,
-	xdl::author,
+	xdl::XdevLString("www.codeposer.net"),
+	xdl::XdevLString("Cengiz Terzibas"),
 	xdl::moduleNames[0],
-	xdl::copyright,
-	xdl::description,
-	xdl::XdevLRAIGLMajorVersion,
-	xdl::XdevLRAIGLMinorVersion,
-	xdl::XdevLRAIGLPatchVersion
+	xdl::XdevLString("(c) 2005 - 2012 Cengiz Terzibas."),
+	xdl::XdevLString("Creates a OpenGL context for rendering 3D graphics. Depending on your graphics card all supported extensions will be avaiable."),
+	XDEVLRAIGL_MAJOR_VERSION,
+	XDEVLRAIGL_MINOR_VERSION,
+	XDEVLRAIGL_PATCH_VERSION
 };
 
 xdl::XdevLPluginDescriptor openglDescriptor {
-	xdl::pluginName,
+	xdl::XdevLString("XdevLRAIGL"),
 	xdl::moduleNames,
-	xdl::XdevLRAIGLPluginMajorVersion,
-	xdl::XdevLRAIGLPluginMinorVersion,
-	xdl::XdevLRAIGLPluginPatchVersion
+	XDEVLRAIGL_MODULE_MAJOR_VERSION,
+	XDEVLRAIGL_MODULE_MINOR_VERSION,
+	XDEVLRAIGL_MODULE_PATCH_VERSION
 };
 
 
@@ -331,8 +331,8 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration) {
-		XdevLVertexDeclaration* vd = new XdevLVertexDeclaration();
+	xdl_int XdevLOpenGLImpl::createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration) {
+		IPXdevLVertexDeclaration vd = new XdevLVertexDeclaration();
 		*vertexDeclaration = vd;
 		return ERR_OK;
 	}
@@ -363,20 +363,6 @@ namespace xdl {
 		*program = prg;
 		return ERR_OK;
 	}
-
-
-	void XdevLOpenGLImpl::shaderLog(xdl_uint shaderId) {
-		// Get the length of the message.
-		GLint Len;
-		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &Len);
-
-		GLsizei ActualLen;
-		GLchar *Log = new GLchar[Len];
-		glGetShaderInfoLog(shaderId, Len, &ActualLen, Log);
-		XDEVL_MODULE_ERROR(Log << "\n");
-		delete [] Log;
-	}
-
 
 	xdl_int XdevLOpenGLImpl::createTexture(IPXdevLTexture* texture) {
 		XdevLTextureImpl* tmp = new XdevLTextureImpl();
@@ -416,7 +402,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::createVertexBuffer(XdevLVertexBuffer** vertexBuffer) {
+	xdl_int XdevLOpenGLImpl::createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer) {
 
 		XdevLVertexBufferImpl* vbo = new XdevLVertexBufferImpl();
 
@@ -456,7 +442,7 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLImpl::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
 
-		XdevLVertexDeclaration* vd = m_activeVertexArray->getVertexDeclaration();
+		IPXdevLVertexDeclaration vd = m_activeVertexArray->getVertexDeclaration();
 		assert(vd && "XdevLOpenGLImpl::drawVertexArray: Vertex Declaration not found in XdevLVertexArray object.");
 
 		glBindVertexArray(m_activeVertexArray->id());
@@ -485,7 +471,7 @@ namespace xdl {
 
 		glBindVertexArray(m_activeVertexArray->id());
 
-		XdevLVertexDeclaration* vd = m_activeVertexArray->getVertexDeclaration();
+		IPXdevLVertexDeclaration vd = m_activeVertexArray->getVertexDeclaration();
 		assert(vd && "XdevLOpenGLImpl::drawVertexArray: Vertex Declaration not found in XdevLVertexArray object.");
 
 		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
@@ -505,9 +491,9 @@ namespace xdl {
 
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	        xdl_uint numberOfElements,
-	        XdevLVertexBuffer* vertexBuffer,
-	        XdevLVertexDeclaration* vertexDeclaration) {
+	    xdl_uint numberOfElements,
+	    IPXdevLVertexBuffer vertexBuffer,
+	    IPXdevLVertexDeclaration vertexDeclaration) {
 
 		glBindVertexArray(m_activeVertexArray->id());
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
@@ -537,10 +523,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	        xdl_uint numberOfElements,
-	        XdevLVertexBuffer* vertexBuffer,
-	        XdevLVertexDeclaration* vertexDeclaration,
-	        XdevLIndexBuffer* indexBuffer) {
+	    xdl_uint numberOfElements,
+	    IPXdevLVertexBuffer vertexBuffer,
+	    IPXdevLVertexDeclaration vertexDeclaration,
+	    IPXdevLIndexBuffer indexBuffer) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
@@ -569,37 +555,37 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLVertexDeclaration* vertexDeclaration) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexDeclaration vertexDeclaration) {
 		delete vertexDeclaration;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLShaderProgram* shaderProgram) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLShaderProgram shaderProgram) {
 		delete shaderProgram;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLShader* shader) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLShader shader) {
 		delete shader;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLVertexArray* vertexArray) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexArray vertexArray) {
 		delete vertexArray;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLVertexBuffer* vertexBuffer) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLVertexBuffer vertexBuffer) {
 		delete vertexBuffer;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLIndexBuffer* indexBuffer) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLIndexBuffer indexBuffer) {
 		delete indexBuffer;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLFrameBuffer* frameBuffer) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLFrameBuffer frameBuffer) {
 		delete frameBuffer;
 		return ERR_OK;
 	}
@@ -609,13 +595,13 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::destroy(XdevLTextureCube* textureCube) {
+	xdl_int XdevLOpenGLImpl::destroy(IPXdevLTextureCube textureCube) {
 		delete textureCube;
 		return ERR_OK;
 	}
 
 	xdl_int XdevLOpenGLImpl::initExtensions() {
-		glGenVertexArrays =  (PFNGLGENVERTEXARRAYSPROC)m_gl_context->getProcAddress("glGenVertexArrays");
+		glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)m_gl_context->getProcAddress("glGenVertexArrays");
 		glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)m_gl_context->getProcAddress("glDeleteVertexArrays");
 		glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)m_gl_context->getProcAddress("glBindVertexArray");
 		glIsVertexArray = (PFNGLISVERTEXARRAYPROC)m_gl_context->getProcAddress("glIsVertexArray");
@@ -653,5 +639,17 @@ namespace xdl {
 		glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)m_gl_context->getProcAddress("glDrawArraysEXT");
 
 		return ERR_OK;
+	}
+
+	void XdevLOpenGLImpl::shaderLog(xdl_uint shaderId) {
+		// Get the length of the message.
+		GLint Len;
+		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &Len);
+
+		GLsizei ActualLen;
+		GLchar *Log = new GLchar[Len];
+		glGetShaderInfoLog(shaderId, Len, &ActualLen, Log);
+		XDEVL_MODULE_ERROR(Log << "\n");
+		delete [] Log;
 	}
 }

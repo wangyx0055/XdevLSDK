@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -37,33 +37,6 @@
 #include <GL/glew.h>
 
 namespace xdl {
-
-	// Holds the major version number of the plugin.
-	const xdl_uint XdevLRAIGLPluginMajorVersion = XDEVLRAIGL_MAJOR_VERSION;
-	// Holds the Minor version number of the plugin.
-	const xdl_uint XdevLRAIGLPluginMinorVersion = XDEVLRAIGL_MINOR_VERSION;
-	// Holds the Patch version number of the plugin.
-	const xdl_uint XdevLRAIGLPluginPatchVersion = XDEVLRAIGL_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLRAIGLMajorVersion = XDEVLRAIGL_MODULE_MAJOR_VERSION;
-	// Holds the Minor version number.
-	const xdl_uint XdevLRAIGLMinorVersion = XDEVLRAIGL_MODULE_MINOR_VERSION;
-	// Holds the Patch version number.
-	const xdl_uint XdevLRAIGLPatchVersion = XDEVLRAIGL_MODULE_PATCH_VERSION;
-
-	static const XdevLString	vendor 				{"www.codeposer.net"
-	};
-	static const XdevLString	author				{"Cengiz Terzibas"
-	};
-	static const XdevLString	copyright			{"(c) 2005 - 2012 Cengiz Terzibas."
-	};
-	static const XdevLString	pluginName 		{"XdevLRAIGL"
-	};
-	static const XdevLString 	description		{"Creates a OpenGL context for rendering 3D graphics. Depending on \
-	your graphics card all supported extensions will be avaiable."
-	};
 
 	static const std::vector<XdevLModuleName>	moduleNames	{
 		XdevLModuleName("XdevLRAIGL")
@@ -106,44 +79,39 @@ namespace xdl {
 			virtual xdl_int setActiveRenderWindow(XdevLWindow* window);
 			virtual xdl_int swapBuffers();
 
-
-			virtual xdl_int createVertexDeclaration(XdevLVertexDeclaration** vertexDeclaration);
+			virtual xdl_int createVertexDeclaration(IPXdevLVertexDeclaration* vertexDeclaration);
 			virtual xdl_int createVertexShader(XdevLVertexShader** vertex_shader);
 			virtual xdl_int createFragmentShader(XdevLFragmentShader** fragment_shader);
 			virtual xdl_int createGeometryShader(XdevLGeometryShader** geometry_shader);
 			virtual xdl_int createShaderProgram(XdevLShaderProgram** program);
-
 			virtual xdl_int createTexture(IPXdevLTexture* texture);
 			virtual xdl_int createTextureCube(XdevLTextureCube** textureCube);
 			virtual xdl_int createTexture3D(XdevLTexture3D** texture3D);
-
 			virtual xdl_int createFrameBuffer(XdevLFrameBuffer** fbo);
-
-
 			virtual xdl_int createVertexArray(XdevLVertexArray** vertexArray);
+			virtual xdl_int createVertexBuffer(IPXdevLVertexBuffer* vertexBuffer);
+			virtual xdl_int createIndexBuffer(XdevLIndexBuffer** indexBuffer);
 
 			virtual xdl_int setActiveFrameBuffer(XdevLFrameBuffer* frambuffer);
 			virtual xdl_int setActiveVertexArray(XdevLVertexArray* vertexArray);
 			virtual xdl_int setActiveShaderProgram(XdevLShaderProgram* shaderProgram);
 
-
 			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements);
 			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number);
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vertexDeclaration);
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vertexDeclaration,XdevLIndexBuffer* indexBuffer);
+			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration);
+			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration, IPXdevLIndexBuffer indexBuffer);
 
-			virtual xdl_int createVertexBuffer(XdevLVertexBuffer** vertexBuffer);
-			virtual xdl_int createIndexBuffer(XdevLIndexBuffer** indexBuffer);
 
-			virtual xdl_int destroy(XdevLVertexDeclaration* vertexDeclaration);
-			virtual xdl_int destroy(XdevLShaderProgram* shaderProgram);
-			virtual xdl_int destroy(XdevLShader* shader);
-			virtual xdl_int destroy(XdevLVertexArray* vertexArray);
-			virtual xdl_int destroy(XdevLVertexBuffer* vertexBuffer);
-			virtual xdl_int destroy(XdevLIndexBuffer* indexBuffer);
-			virtual xdl_int destroy(XdevLFrameBuffer* frameBuffer);
+
+			virtual xdl_int destroy(IPXdevLVertexDeclaration vertexDeclaration);
+			virtual xdl_int destroy(IPXdevLShaderProgram shaderProgram);
+			virtual xdl_int destroy(IPXdevLShader shader);
+			virtual xdl_int destroy(IPXdevLVertexArray vertexArray);
+			virtual xdl_int destroy(IPXdevLVertexBuffer vertexBuffer);
+			virtual xdl_int destroy(IPXdevLIndexBuffer indexBuffer);
+			virtual xdl_int destroy(IPXdevLFrameBuffer frameBuffer);
 			virtual xdl_int destroy(IPXdevLTexture texture);
-			virtual xdl_int destroy(XdevLTextureCube* textureCube);
+			virtual xdl_int destroy(IPXdevLTextureCube textureCube);
 
 			void shaderLog(xdl_uint shaderID);
 			xdl_int initExtensions();

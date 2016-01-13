@@ -29,6 +29,7 @@ namespace xdl {
 	class XdevLTextureImpl: public XdevLTexture {
 		public:
 			XdevLTextureImpl() : m_id(0), m_initialized(xdl_false), m_idx(0), m_lock(xdl_false), m_width(0), m_height(0) {}
+			XdevLTextureImpl(xdl_uint id, xdl_uint width, xdl_uint height) : m_id(id), m_initialized(xdl_true), m_idx(0), m_lock(xdl_false), m_width(width), m_height(height) {}
 
 			virtual ~XdevLTextureImpl() {
 				if(m_initialized) {
