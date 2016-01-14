@@ -11,11 +11,11 @@
   <Project Name="udp_server_array_demo" Path="udp_server_array_demo/udp_server_array_demo.project" Active="No"/>
   <Project Name="events_demo" Path="events_demo/events_demo.project" Active="No"/>
   <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="No"/>
-  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="No"/>
+  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="Yes"/>
   <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
   <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="No"/>
-  <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="Yes"/>
+  <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>

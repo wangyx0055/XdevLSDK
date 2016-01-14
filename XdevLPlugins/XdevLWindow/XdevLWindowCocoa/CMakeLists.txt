@@ -79,6 +79,9 @@ set(SOURCE_FILES
 	${SRC_DIR}/XdevLWindowCocoa.mm
 )
 
+if(NOT XDEVL_BUILD_STATIC)
+	set(SOURCE_FILES ${SOURCE_FILES} ${SRC_DIR}/XdevLWindowCocoaPlugin.mm)
+endif()
 
 #
 # Add external libraries folder
