@@ -31,7 +31,7 @@ namespace xdl {
 
 	static xdl_uint windowCounter = 1;
 
-	xdl_int initDefaultWindowInstances(xdl::XdevLModuleCreateParameter* parameter) {
+	xdl_int initDefaultWindowInstances(xdl::XdevLPluginCreateParameter* parameter) {
 
 		if (xdl::windowEventServer == nullptr) {
 			xdl::windowEventServer = static_cast<xdl::XdevLWindowEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
@@ -49,17 +49,6 @@ namespace xdl {
 
 		return ERR_OK;
 	}
-
-	xdl::XdevLModuleDescriptor xdl::XdevLWindowServerImpl::m_windowServerModuleDesc {
-		window_vendor,
-		window_author,
-		window_moduleNames[1],
-		window_copyright,
-		windowServerDescription,
-		XdevLWindowServerMajorVersion,
-		XdevLWindowServerMinorVersion,
-		XdevLWindowServerPatchVersion
-	};
 
 	xdl::XdevLWindowEventServer* windowEventServer = nullptr;
 	xdl::XdevLCursor* cursor = nullptr;
@@ -332,8 +321,8 @@ namespace xdl {
 	// -------------------------------------------------------------------------
 	//
 
-	XdevLWindowServerImpl::XdevLWindowServerImpl(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleAutoImpl<XdevLWindowServer>(parameter, m_windowServerModuleDesc)  {
+	XdevLWindowServerImpl::XdevLWindowServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLModuleAutoImpl<XdevLWindowServer>(parameter, desriptor)  {
 
 	}
 

@@ -17,7 +17,7 @@
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevLPlugins/XdevLAudio"/>
     <Include Path="/home/yaakuro/Project/XdevLSDK/XdevL/include"/>
   </WorkspaceParserPaths>
-  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="Yes"/>
+  <Project Name="ogre_demo" Path="ogre_demo/ogre_demo.project" Active="No"/>
   <Project Name="audio_demo" Path="audio_demo/audio_demo.project" Active="No"/>
   <Project Name="xml_demo" Path="xml_demo/xml_demo.project" Active="No"/>
   <Project Name="tcp_client_demo" Path="tcp_client_demo/tcp_client_demo.project" Active="No"/>
@@ -29,7 +29,7 @@
   <Project Name="serial_demo" Path="serial_demo/serial_demo.project" Active="No"/>
   <Project Name="events_demo" Path="events_demo/events_demo.project" Active="No"/>
   <Project Name="filesystem_demo" Path="filesystem_demo/filesystem_demo.project" Active="No"/>
-  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="No"/>
+  <Project Name="glsl_demo" Path="glsl_demo/glsl_demo.project" Active="Yes"/>
   <Environment>
     <![CDATA[]]>
   </Environment>

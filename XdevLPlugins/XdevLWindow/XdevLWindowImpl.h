@@ -153,11 +153,8 @@ namespace xdl {
 
 	class XdevLWindowServerImpl : public XdevLModuleAutoImpl<XdevLWindowServer> {
 		public:
-			XdevLWindowServerImpl(XdevLModuleCreateParameter* parameter);
+			XdevLWindowServerImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowServerImpl();
-
-			/// The modules descriptor.
-			static XdevLModuleDescriptor m_windowServerModuleDesc;
 
 			/// Creates a new window.
 			using XdevLWindowServer::createWindow;
@@ -202,7 +199,7 @@ namespace xdl {
 	extern xdl::XdevLWindowEventServer* windowEventServer;
 	extern xdl::XdevLCursor* cursor;
 	extern xdl::XdevLModuleCreateParameter* XdevLWindowEventServerParameter;
-	extern xdl::xdl_int initDefaultWindowInstances(xdl::XdevLModuleCreateParameter* parameter);
+	extern xdl::xdl_int initDefaultWindowInstances(xdl::XdevLPluginCreateParameter* parameter);
 }
 
 #endif

@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -35,158 +35,9 @@
 #define _NET_WM_STATE_ADD       1l
 #define _NET_WM_STATE_TOGGLE    2l
 
-//
-// The XdevLWindow plugin descriptor.
-//
-xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
-	xdl::windowX11PluginName,
-	xdl::window_moduleNames,
-	xdl::XdevLWindowPluginMajorVersion,
-	xdl::XdevLWindowPluginMinorVersion,
-	xdl::XdevLWindowPluginPatchVersion
-};
-
-//
-// The XdevLWindow module descriptor.
-//
-xdl::XdevLModuleDescriptor windowX11ModuleDesc {
-	xdl::window_vendor,
-	xdl::window_author,
-	xdl::window_moduleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
-	xdl::window_copyright,
-	xdl::window_x11_description,
-	xdl::XdevLWindowMajorVersion,
-	xdl::XdevLWindowMinorVersion,
-	xdl::XdevLWindowPatchVersion
-};
-
-//
-// The XdevLWindowEventServer module descriptor.
-//
-xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
-	xdl::window_vendor,
-	xdl::window_author,
-	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
-	xdl::window_copyright,
-	xdl::windowServerDescription,
-	xdl::XdevLWindowEventServerMajorVersion,
-	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
-};
-
-//
-// The XdevLCursor module descriptor.
-//
-xdl::XdevLModuleDescriptor cursorModuleDesc {
-	xdl::window_vendor,
-	xdl::window_author,
-	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
-	xdl::window_copyright,
-	xdl::windowServerDescription,
-	xdl::XdevLWindowEventServerMajorVersion,
-	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
-};
-
-static xdl::XdevLCursorX11* x11cursor = nullptr;
+static xdl::xdl_bool x11Initialized = xdl::xdl_false;
 static Display* globalDisplay = nullptr;
-static Colormap defaultColorMap;
 
-
-XDEVL_PLUGIN_INIT {
-
-	// Start X server with thread support.
-	XInitThreads();
-
-	// Connect to X server.
-	if(globalDisplay == nullptr) {
-		globalDisplay = XOpenDisplay(nullptr);
-		if(globalDisplay == nullptr) {
-			return xdl::ERR_ERROR;
-		}
-
-		// Print out some useless information :D
-		std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
-		std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
-		std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
-		std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
-
-		// If there is not event server first create one.
-		if(xdl::windowEventServer == nullptr) {
-			// If there is no even server active, create and activate it.
-			xdl::windowEventServer = static_cast<xdl::XdevLWindowX11EventServer*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
-		}
-
-		if(xdl::cursor == nullptr) {
-			xdl::cursor = static_cast<xdl::XdevLCursor*>(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
-		}
-
-	}
-	return xdl::ERR_OK;
-}
-
-XDEVL_PLUGIN_SHUTDOWN {
-
-	if(globalDisplay) {
-		XCloseDisplay(globalDisplay);
-		globalDisplay = nullptr;
-	}
-
-	return xdl::ERR_OK;
-}
-
-
-XDEVL_PLUGIN_CREATE_MODULE  {
-
-	//
-	// Create XdevLWindow instance.
-	//
-	if(windowX11ModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME ) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowX11,  XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
-	}
-
-	//
-	// Create XdevLWindowServer instance.
-	//
-	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowServerX11, XDEVL_MODULE_PARAMETER);
-		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
-	}
-
-	//
-	// Create XdevLEventServer instance.
-	//
-	else if(windowEventServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-		if(xdl::windowEventServer == nullptr) {
-			xdl::windowEventServer = XDEVL_NEW_MODULE(xdl::XdevLWindowX11EventServer, XDEVL_MODULE_PARAMETER);
-			xdl::XdevLWindowEventServerParameter = XDEVL_MODULE_PARAMETER;
-		}
-		xdl::IPXdevLModule module = XDEVL_USE_MODULE(xdl::XdevLWindowX11EventServer, xdl::windowEventServer);
-		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
-	}
-
-	//
-	// Create XdevLCursor instance.
-	//
-	else if(cursorModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
-		x11cursor =  XDEVL_NEW_MODULE(xdl::XdevLCursorX11,  XDEVL_MODULE_PARAMETER);
-		xdl::cursor = x11cursor;
-		
-		xdl::IPXdevLModule module = XDEVL_USE_MODULE(xdl::XdevLCursorX11, x11cursor);
-		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
-
-	} else {
-		return xdl::ERR_MODULE_NOT_FOUND;
-	}
-
-	return xdl::ERR_OK;
-}
-
-XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(windowX11PluginDescriptor);
 
 namespace xdl {
 
@@ -212,8 +63,8 @@ namespace xdl {
 	};
 
 
-	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, windowX11ModuleDesc),
+	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, desriptor),
 		m_display(nullptr),
 		m_rootWindow(0),
 		m_window(0),
@@ -230,6 +81,50 @@ namespace xdl {
 
 	XdevLWindowX11::~XdevLWindowX11() {
 
+	}
+
+	xdl_int XdevLWindowX11::initX11(XdevLPluginCreateParameter* parameter) {
+		if(xdl::xdl_true == x11Initialized) {
+			return ERR_OK;
+		}
+
+		// Start X server with thread support.
+		XInitThreads();
+
+		// Connect to X server.
+		if(globalDisplay == nullptr) {
+			globalDisplay = XOpenDisplay(nullptr);
+			if(globalDisplay == nullptr) {
+				return xdl::ERR_ERROR;
+			}
+
+			// Print out some useless information :D
+			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
+			std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
+			std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
+			std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
+
+			initDefaultWindowInstances(parameter);
+		}
+
+		x11Initialized = xdl_true;
+
+		return xdl::ERR_OK;
+	}
+
+	xdl_int XdevLWindowX11::shutdownX11() {
+		if(xdl::xdl_true != x11Initialized) {
+			return xdl::ERR_ERROR;
+		}
+
+		if(globalDisplay) {
+			XCloseDisplay(globalDisplay);
+			globalDisplay = nullptr;
+		}
+
+		x11Initialized = xdl_false;
+
+		return xdl::ERR_OK;
 	}
 
 	xdl_int XdevLWindowX11::init() {
@@ -312,7 +207,7 @@ namespace xdl {
 		//
 		// What shall we do with the override_redirect flag? Shall we use it for popups, tooltips etc.
 		// If we use it then the Window Manager has no influence on this window which can cause issues.
-		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
+		if((m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
@@ -628,9 +523,9 @@ namespace xdl {
 
 		}
 		XFlush(globalDisplay);
-		
+
 		displayFromFullscreenToNormal();
-		
+
 		m_fullscreenModeActive = xdl_false;
 	}
 
@@ -1299,8 +1194,8 @@ namespace xdl {
 // -------------------------------------------------------------------------
 //
 
-	XdevLWindowServerX11::XdevLWindowServerX11(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowServerImpl(parameter) {
+	XdevLWindowServerX11::XdevLWindowServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLWindowServerImpl(parameter, desriptor) {
 
 	}
 
@@ -1314,7 +1209,7 @@ namespace xdl {
 	    const XdevLWindowSize& size,
 	    const XdevLWindowTypes& type) {
 
-		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr);
+		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr, getDescriptor());
 		wnd->create(title, position, size, type);
 		*window = wnd;
 		m_windowList[wnd->getWindowID()] = wnd;
@@ -1327,8 +1222,8 @@ namespace xdl {
 // -----------------------------------------------------------------------------
 //
 
-	XdevLWindowX11EventServer::XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc),
+	XdevLWindowX11EventServer::XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLWindowEventServerImpl(parameter, desriptor),
 		m_focusWindow(nullptr),
 		m_keyboard(nullptr) {
 		m_keyboard = new XdevLWindowX11Keyboard(globalDisplay, getMediator());
@@ -1393,8 +1288,9 @@ namespace xdl {
 				XGenericEventCookie* cookie = &event.xcookie;
 				XGetEventData(globalDisplay, cookie);
 
-				if(x11cursor) {
-					x11cursor->onHandleXinputEvent(cookie, m_focusWindow);
+				if(xdl::cursor) {
+					// TODO Don't cast here. Find another way.
+					static_cast<XdevLCursorX11*>(xdl::cursor)->onHandleXinputEvent(cookie, m_focusWindow);
 				}
 
 				XFreeEventData(globalDisplay, cookie);
@@ -1446,11 +1342,11 @@ namespace xdl {
 					// Check if the auto repeat is on.
 					//
 					xdl_uint8 repeat = 0;
-					if (XPending(window->getNativeDisplay())) {
+					if(XPending(window->getNativeDisplay())) {
 						XEvent nev;
 						XPeekEvent(window->getNativeDisplay(), &nev);
 
-						if (nev.type == KeyPress && nev.xkey.time == event.xkey.time && nev.xkey.keycode == event.xkey.keycode) {
+						if(nev.type == KeyPress && nev.xkey.time == event.xkey.time && nev.xkey.keycode == event.xkey.keycode) {
 							repeat = 1;
 						}
 					}
@@ -1462,7 +1358,7 @@ namespace xdl {
 				// Mouse pointer moved.
 				//
 				case MotionNotify: {
-					if(x11cursor->isRelativeMotionEnabled() == xdl_false) {
+					if(xdl::cursor->isRelativeMotionEnabled() == xdl_false) {
 						ev.type 						= MouseMotion.getHashCode();
 						ev.motion.x					= (2.0 / window->getWidth()*event.xmotion.x - 1.0f) * 32768.0f;
 						ev.motion.y					= -(2.0 / window->getHeight() * event.xmotion.y - 1.0f) * 32768.0f;
@@ -1714,7 +1610,7 @@ namespace xdl {
 				// Resized or moved
 				//
 				case ConfigureNotify: {
-					if( (event.xconfigure.x != window->getX()) || (event.xconfigure.y != window->getY())) {
+					if((event.xconfigure.x != window->getX()) || (event.xconfigure.y != window->getY())) {
 
 						ev.type					= XDEVL_WINDOW_EVENT;
 						ev.window.event 		= XDEVL_WINDOW_MOVED;
@@ -1726,7 +1622,7 @@ namespace xdl {
 
 						getMediator()->fireEvent(ev);
 					}
-					if( (event.xconfigure.width != window->getWidth()) || (event.xconfigure.height != window->getHeight())) {
+					if((event.xconfigure.width != window->getWidth()) || (event.xconfigure.height != window->getHeight())) {
 						ev.type					= XDEVL_WINDOW_EVENT;
 						ev.window.event 		= XDEVL_WINDOW_RESIZED;
 						ev.window.x				= event.xconfigure.x;
@@ -1774,8 +1670,8 @@ namespace xdl {
 // -----------------------------------------------------------------------------
 //
 
-	XdevLCursorX11::XdevLCursorX11(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc),
+	XdevLCursorX11::XdevLCursorX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLModuleImpl<XdevLCursor>(parameter, desriptor),
 		m_window(nullptr),
 		m_barriersSupported(xdl_false),
 		m_xinput2Supported(xdl_false),

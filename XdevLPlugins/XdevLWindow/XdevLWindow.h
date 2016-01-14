@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -33,33 +33,33 @@ namespace xdl {
 		@brief Events a Window device can fire.
 	*/
 	enum XdevLWindowEvents {
-	    XDEVL_WINDOW_SHOWN				= (1 << 0),		/// Window was shown.
-	    XDEVL_WINDOW_HIDDEN				= (1 << 1),		/// Window was hidden.
-	    XDEVL_WINDOW_EXPOSED			= (1 << 2),		/// Window got exposed.
-	    XDEVL_WINDOW_MOVED				= (1 << 3),		/// Window got moved.
-	    XDEVL_WINDOW_RESIZED			= (1 << 4),		/// Window got resized.
-	    XDEVL_WINDOW_MINIMIZED			= (1 << 5),		/// Window got minimized.
-	    XDEVL_WINDOW_MAXIMIZED			= (1 << 6),		/// Window got maximized.
-	    XDEVL_WINDOW_RESTORED			= (1 << 7),		/// Window got restored. (After icon state for example)
-	    XDEVL_WINDOW_ENTER				= (1 << 8),		/// Mouse cursor entered window area.
-	    XDEVL_WINDOW_LEAVE				= (1 << 9),		/// Mouse cursor left window area.
-	    XDEVL_WINDOW_INPUT_FOCUS_GAINED	= (1 << 10),	/// Keyboard focus gained.
-	    XDEVL_WINDOW_INPUT_FOCUS_LOST	= (1 << 11),	/// Keyboard focus lost.
-	    XDEVL_WINDOW_CLOSE				= (1 << 12),	/// Window closed.
-	    XDEVL_WINDOW_FULLSCREEN			= (1 << 13),	/// Window got into fullscreen.
-	    XDEVL_WINDOW_CREATE				= (1 << 14), 	/// Window got created.
-	    XDEVL_WINDOW_HITTEST			= (1 << 15),	/// Window hittest area got clicked.
+	  XDEVL_WINDOW_SHOWN				= (1 << 0),		/// Window was shown.
+	  XDEVL_WINDOW_HIDDEN				= (1 << 1),		/// Window was hidden.
+	  XDEVL_WINDOW_EXPOSED			= (1 << 2),		/// Window got exposed.
+	  XDEVL_WINDOW_MOVED				= (1 << 3),		/// Window got moved.
+	  XDEVL_WINDOW_RESIZED			= (1 << 4),		/// Window got resized.
+	  XDEVL_WINDOW_MINIMIZED			= (1 << 5),		/// Window got minimized.
+	  XDEVL_WINDOW_MAXIMIZED			= (1 << 6),		/// Window got maximized.
+	  XDEVL_WINDOW_RESTORED			= (1 << 7),		/// Window got restored. (After icon state for example)
+	  XDEVL_WINDOW_ENTER				= (1 << 8),		/// Mouse cursor entered window area.
+	  XDEVL_WINDOW_LEAVE				= (1 << 9),		/// Mouse cursor left window area.
+	  XDEVL_WINDOW_INPUT_FOCUS_GAINED	= (1 << 10),	/// Keyboard focus gained.
+	  XDEVL_WINDOW_INPUT_FOCUS_LOST	= (1 << 11),	/// Keyboard focus lost.
+	  XDEVL_WINDOW_CLOSE				= (1 << 12),	/// Window closed.
+	  XDEVL_WINDOW_FULLSCREEN			= (1 << 13),	/// Window got into fullscreen.
+	  XDEVL_WINDOW_CREATE				= (1 << 14), 	/// Window got created.
+	  XDEVL_WINDOW_HITTEST			= (1 << 15),	/// Window hittest area got clicked.
 	};
 
 
 	enum XdevLWindowTypes {
-	    XDEVL_WINDOW_TYPE_NORMAL,
-	    XDEVL_WINDOW_TYPE_TOOLTIP,
-	    XDEVL_WINDOW_TYPE_POPUP,
-	    XDEVL_WINDOW_TYPE_DROPDOWN_MENU,
-	    XDEVL_WINDOW_TYPE_SPLASH,
-	    XDEVL_WINDOW_TYPE_NOTIFICATION,
-			XDEVL_WINDOW_TYPE_UNKNOWN
+	  XDEVL_WINDOW_TYPE_NORMAL,
+	  XDEVL_WINDOW_TYPE_TOOLTIP,
+	  XDEVL_WINDOW_TYPE_POPUP,
+	  XDEVL_WINDOW_TYPE_DROPDOWN_MENU,
+	  XDEVL_WINDOW_TYPE_SPLASH,
+	  XDEVL_WINDOW_TYPE_NOTIFICATION,
+	  XDEVL_WINDOW_TYPE_UNKNOWN
 	};
 
 
@@ -267,6 +267,9 @@ namespace xdl {
 
 			/// Disable relative motion mode.
 			virtual void disableRelativeMotion() = 0;
+
+			/// Checks if the relative motion is activated.
+			virtual xdl_bool isRelativeMotionEnabled() = 0;
 	};
 
 	typedef XdevLWindow*		IPXdevLWindow;

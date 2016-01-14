@@ -46,6 +46,18 @@ xdl::XdevLModuleDescriptor windowSDLModuleDesc {
 	xdl::XdevLWindowPatchVersion
 };
 
+xdl::XdevLModuleDescriptor windowServerModuleDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[1],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	xdl::XdevLWindowEventServerMajorVersion,
+	xdl::XdevLWindowEventServerMinorVersion,
+	xdl::XdevLWindowEventServerPatchVersion,
+	xdl::XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY
+};
+
 xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_vendor,
 	xdl::window_author,
@@ -155,7 +167,7 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	//
 	if(windowSDLModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowSDL,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLWindowSDL,  XDEVL_MODULE_PARAMETER, windowSDLModuleDesc);
 		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 	}
@@ -163,9 +175,9 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	//
 	// Create XdevLWindowServer instance.
 	//
-	else if(xdl::XdevLWindowServerImpl::m_windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
+	else if(windowServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLWindowServerSDL,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLWindowServerSDL,  XDEVL_MODULE_PARAMETER, windowServerModuleDesc);
 		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 	}
@@ -175,7 +187,7 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	//
 	else if(windowEventServerModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::windowEventServer = XDEVL_NEW_MODULE(xdl::XdevLWindowSDLEventServer,  XDEVL_MODULE_PARAMETER);
+		xdl::windowEventServer = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLWindowSDLEventServer,  XDEVL_MODULE_PARAMETER, windowEventServerModuleDesc);
 		xdl::IPXdevLModule module = xdl::windowEventServer ;
 		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 		xdl::XdevLWindowEventServerParameter = XDEVL_MODULE_PARAMETER;
@@ -187,7 +199,7 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	//
 	else if(cursorModuleDesc.getName() == XDEVL_MODULE_PARAMETER_NAME) {
 
-		xdl::IPXdevLModule module = XDEVL_NEW_MODULE(xdl::XdevLCursorSDL,  XDEVL_MODULE_PARAMETER);
+		xdl::IPXdevLModule module = XDEVL_NEW_MODULE_DESCRIPTOR(xdl::XdevLCursorSDL,  XDEVL_MODULE_PARAMETER, cursorModuleDesc);
 		XDEVL_MODULE_PARAMETER->setModuleInstance(module);
 
 	} else {
@@ -336,8 +348,8 @@ namespace xdl {
 	};
 
 
-	XdevLWindowSDL::XdevLWindowSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, windowSDLModuleDesc),
+	XdevLWindowSDL::XdevLWindowSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, descriptor),
 		m_window(nullptr) {
 	}
 
@@ -366,10 +378,10 @@ namespace xdl {
 	xdl_int XdevLWindowSDL::create() {
 
 		xdl_uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
-		if(	(m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
-		        (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
-		        (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
-		        (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
+		if((m_attribute.type == XDEVL_WINDOW_TYPE_TOOLTIP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
+		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
@@ -628,8 +640,8 @@ namespace xdl {
 	// -------------------------------------------------------------------------
 	//
 
-	XdevLWindowServerSDL::XdevLWindowServerSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowServerImpl(parameter) {
+	XdevLWindowServerSDL::XdevLWindowServerSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLWindowServerImpl(parameter, descriptor) {
 
 	}
 
@@ -638,12 +650,12 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size,
-	        const XdevLWindowTypes& type) {
+	    const XdevLWindowTitle& title,
+	    const XdevLWindowPosition& position,
+	    const XdevLWindowSize& size,
+	    const XdevLWindowTypes& type) {
 
-		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
+		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr, getDescriptor());
 		sdlWindow->setTitle(title);
 		sdlWindow->setPosition(position);
 		sdlWindow->setSize(size);
@@ -658,8 +670,8 @@ namespace xdl {
 
 
 
-	XdevLWindowSDLEventServer::XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter) :
-		XdevLWindowEventServerImpl(parameter, windowEventServerModuleDesc)
+	XdevLWindowSDLEventServer::XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLWindowEventServerImpl(parameter, descriptor)
 	{}
 
 
@@ -997,8 +1009,8 @@ namespace xdl {
 // -----------------------------------------------------------------------------
 //
 
-	XdevLCursorSDL::XdevLCursorSDL(XdevLModuleCreateParameter* parameter) :
-		XdevLModuleImpl<XdevLCursor>(parameter, cursorModuleDesc),
+	XdevLCursorSDL::XdevLCursorSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLCursor>(parameter, descriptor),
 		m_window(nullptr) {
 
 	}
@@ -1052,4 +1064,7 @@ namespace xdl {
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 
+	xdl_bool XdevLCursorSDL::isRelativeMotionEnabled() {
+		return SDL_GetRelativeMouseMode();
+	}
 }

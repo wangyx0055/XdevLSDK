@@ -86,7 +86,7 @@ namespace xdl {
 
 	class XdevLWindowSDL : public XdevLWindowImpl, public thread::Thread  {
 		public:
-			XdevLWindowSDL(XdevLModuleCreateParameter* parameter);
+			XdevLWindowSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLWindowSDL();
 
 			//
@@ -153,7 +153,7 @@ namespace xdl {
 
 	class XdevLWindowServerSDL : public XdevLWindowServerImpl {
 		public:
-			XdevLWindowServerSDL(XdevLModuleCreateParameter* parameter);
+			XdevLWindowServerSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLWindowServerSDL();
 
 			/// Creates a new window.
@@ -167,7 +167,7 @@ namespace xdl {
 
 	class XdevLWindowSDLEventServer : public XdevLWindowEventServerImpl {
 		public:
-			XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter);
+			XdevLWindowSDLEventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
@@ -186,7 +186,7 @@ namespace xdl {
 		public:
 			virtual ~XdevLCursorSDL() {}
 
-			XdevLCursorSDL(XdevLModuleCreateParameter* parameter);
+			XdevLCursorSDL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
@@ -200,6 +200,7 @@ namespace xdl {
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion();
 			virtual void disableRelativeMotion();
+			virtual xdl_bool isRelativeMotionEnabled() override;
 		private:
 			XdevLWindowSDL* m_window;
 

@@ -97,8 +97,11 @@ namespace xdl {
 	class XdevLWindowX11: public XdevLWindowImpl {
 		public:
 
-			XdevLWindowX11(XdevLModuleCreateParameter* parameter);
+			XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowX11();
+
+			static xdl_int initX11(XdevLPluginCreateParameter* parameter);
+			static xdl_int shutdownX11();
 
 			//
 			// XdevLModule related methods.
@@ -284,7 +287,7 @@ namespace xdl {
 
 	class XdevLWindowServerX11 : public XdevLWindowServerImpl {
 		public:
-			XdevLWindowServerX11(XdevLModuleCreateParameter* parameter);
+			XdevLWindowServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowServerX11();
 
 			/// Creates a new window.
@@ -299,7 +302,7 @@ namespace xdl {
 
 	class XdevLWindowX11EventServer : public XdevLWindowEventServerImpl {
 		public:
-			XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter);
+			XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowX11EventServer();
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
@@ -329,7 +332,7 @@ namespace xdl {
 		public:
 			virtual ~XdevLCursorX11() {}
 
-			XdevLCursorX11(XdevLModuleCreateParameter* parameter);
+			XdevLCursorX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
@@ -343,8 +346,7 @@ namespace xdl {
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
-			virtual xdl_bool isRelativeMotionEnabled();
-
+			virtual xdl_bool isRelativeMotionEnabled() override;
 			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
 		private:
 			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);

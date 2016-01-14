@@ -115,6 +115,9 @@ set(SOURCE_FILES
 	${SRC_DIR}/imKStoUCS.c
 )
 
+if(NOT XDEVL_BUILD_STATIC)
+	set(SOURCE_FILES ${SOURCE_FILES} ${SRC_DIR}/XdevLWindowX11Plugin.cpp)
+endif()
 
 #
 # Add external libraries folder
