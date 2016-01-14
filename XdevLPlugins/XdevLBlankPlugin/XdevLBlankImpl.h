@@ -29,11 +29,6 @@
 
 namespace xdl {
 
-	static std::vector<XdevLModuleName>	moduleNames {
-		XdevLModuleName("XdevLBlank"),
-	};
-
-
 	class XdevLBlankModuleImpl : public XdevLModuleImpl<XdevLBlankModule> {
 		public:
 			XdevLBlankModuleImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);

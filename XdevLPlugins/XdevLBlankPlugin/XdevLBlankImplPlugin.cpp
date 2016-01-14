@@ -1,8 +1,13 @@
 #include "XdevLBlankImpl.h"
 
+static std::vector<xdl::XdevLModuleName>	moduleNames {
+	xdl::XdevLModuleName("XdevLBlank"),
+};
+
+
 xdl::XdevLPluginDescriptor blankPluginDescriptor {
 	xdl::XdevLString("XdevLBlank"),
-	xdl::moduleNames,
+	moduleNames,
 	XDEVLBLANK_MAJOR_VERSION,
 	XDEVLBLANK_MINOR_VERSION,
 	XDEVLBLANK_PATCH_VERSION
@@ -11,7 +16,7 @@ xdl::XdevLPluginDescriptor blankPluginDescriptor {
 xdl::XdevLModuleDescriptor blankModuleDescriptor {
 	xdl::XdevLString("www.codeposer.net"),
 	xdl::XdevLString("Cengiz Terzibas"),
-	xdl::moduleNames[0],
+	moduleNames[0],
 	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
 	xdl::XdevLString("This is a description of an empty module"),
 	XDEVLBLANK_MODULE_MAJOR_VERSION,

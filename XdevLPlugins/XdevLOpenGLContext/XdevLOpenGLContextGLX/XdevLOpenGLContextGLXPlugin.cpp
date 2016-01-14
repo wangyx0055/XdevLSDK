@@ -1,9 +1,13 @@
 #include "XdevLOpenGLContextGLX.h"
 
+static const std::vector<xdl::XdevLModuleName> moduleNames	{
+	xdl::XdevLModuleName("XdevLOpenGLContext")
+};
+
 xdl::XdevLModuleDescriptor moduleDescriptor {
 	xdl::XdevLString("www.codeposer.net"),
 	xdl::XdevLString("Cengiz Terzibas"),
-	xdl::moduleNames[0],
+	moduleNames[0],
 	xdl::XdevLString("(c) 2005 - 2016 Cengiz Terzibas."),
 	xdl::XdevLString("Module to create a GLX OpenGL context."),
 	XDEVLOPENGLCONTEXT_MODULE_MAJOR_VERSION,
@@ -13,7 +17,7 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 
 xdl::XdevLPluginDescriptor glxPluginDescriptor {
 	xdl::XdevLString("XdevLOpenGLContextCGL"),
-	xdl::moduleNames,
+	moduleNames,
 	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
 	XDEVLOPENGLCONTEXT_MINOR_VERSION,
 	XDEVLOPENGLCONTEXT_PATCH_VERSION

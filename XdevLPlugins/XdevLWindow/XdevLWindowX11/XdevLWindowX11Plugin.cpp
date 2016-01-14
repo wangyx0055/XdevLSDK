@@ -1,14 +1,18 @@
 #include "XdevLWindowX11.h"
 
+static const xdl::XdevLString windowX11PluginName {
+	"XdevLWindowX11"
+};
+
 //
 // The XdevLWindow plugin descriptor.
 //
 xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
-	xdl::windowX11PluginName,
+	windowX11PluginName,
 	xdl::window_moduleNames,
-	xdl::XdevLWindowPluginMajorVersion,
-	xdl::XdevLWindowPluginMinorVersion,
-	xdl::XdevLWindowPluginPatchVersion
+	XDEVLX11_MAJOR_VERSION,
+	XDEVLX11_MINOR_VERSION,
+	XDEVLX11_PATCH_VERSION
 };
 
 //
@@ -19,10 +23,10 @@ xdl::XdevLModuleDescriptor windowX11ModuleDesc {
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
 	xdl::window_copyright,
-	xdl::window_x11_description,
-	xdl::XdevLWindowMajorVersion,
-	xdl::XdevLWindowMinorVersion,
-	xdl::XdevLWindowPatchVersion
+	xdl::XdevLString("Support for X11 window creation."),
+	XDEVLX11_MODULE_MAJOR_VERSION,
+	XDEVLX11_MODULE_MINOR_VERSION,
+	XDEVLX11_MODULE_PATCH_VERSION
 };
 
 //
@@ -34,9 +38,9 @@ xdl::XdevLModuleDescriptor windowServerModuleDesc {
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
-	xdl::XdevLWindowEventServerMajorVersion,
-	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
+	XDEVLX11_SERVER_MODULE_MAJOR_VERSION,
+	XDEVLX11_SERVER_MODULE_MINOR_VERSION,
+	XDEVLX11_SERVER_MODULE_PATCH_VERSION
 };
 
 //
@@ -48,9 +52,9 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
-	xdl::XdevLWindowEventServerMajorVersion,
-	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
+	XDEVLX11_EVENT_SERVER_MODULE_MAJOR_VERSION,
+	XDEVLX11_EVENT_SERVER_MODULE_MINOR_VERSION,
+	XDEVLX11_EVENT_SERVER_MODULE_PATCH_VERSION
 };
 
 //
@@ -62,9 +66,9 @@ xdl::XdevLModuleDescriptor cursorModuleDesc {
 	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
 	xdl::window_copyright,
 	xdl::windowServerDescription,
-	xdl::XdevLWindowEventServerMajorVersion,
-	xdl::XdevLWindowEventServerMinorVersion,
-	xdl::XdevLWindowEventServerPatchVersion
+	XDEVLX11CURSOR_MODULE_MAJOR_VERSION,
+	XDEVLX11CURSOR_MODULE_MINOR_VERSION,
+	XDEVLX11CURSOR_MODULE_PATCH_VERSION
 };
 
 XDEVL_PLUGIN_INIT {

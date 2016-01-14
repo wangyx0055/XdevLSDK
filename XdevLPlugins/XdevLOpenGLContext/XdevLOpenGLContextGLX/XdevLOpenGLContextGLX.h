@@ -37,10 +37,6 @@
 
 namespace xdl {
 
-	static const std::vector<XdevLModuleName> moduleNames	{
-		XdevLModuleName("XdevLOpenGLContext")
-	};
-
 	typedef void ( * PFNGLXSWAPINTERVALEXTPROC) (Display* dpy, GLXDrawable drawable, int interval);
 	typedef int ( * PFNGLXSWAPINTERVALSGIPROC) (int interval);
 

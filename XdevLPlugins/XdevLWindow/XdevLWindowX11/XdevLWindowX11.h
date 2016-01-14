@@ -46,54 +46,6 @@
 
 namespace xdl {
 
-	// Holds the plugin major version.
-	const xdl_uint XdevLWindowPluginMajorVersion = XDEVLX11_MAJOR_VERSION;
-
-	// Holds the plugin minor version.
-	const xdl_uint XdevLWindowPluginMinorVersion = XDEVLX11_MINOR_VERSION;
-
-	// Holds the plugin patch version.
-	const xdl_uint XdevLWindowPluginPatchVersion = XDEVLX11_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLWindowMajorVersion = XDEVLX11_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLWindowMinorVersion = XDEVLX11_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLWindowPatchVersion = XDEVLX11_MODULE_PATCH_VERSION;
-
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLWindowEventServerMajorVersion = XDEVLX11_EVENT_SERVER_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLWindowEventServerMinorVersion = XDEVLX11_EVENT_SERVER_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLWindowEventServerPatchVersion = XDEVLX11_EVENT_SERVER_MODULE_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLCursorMajorVersion = XDEVLX11CURSOR_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLCursorMinorVersion = XDEVLX11CURSOR_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLCursorPatchVersion = XDEVLX11CURSOR_MODULE_PATCH_VERSION;
-
-
-	static const XdevLString windowX11PluginName {
-		"XdevLWindowX11"
-	};
-	static const XdevLString window_x11_description {
-		"Support for X11 window creation."
-	};
-
 	class XdevLWindowX11: public XdevLWindowImpl {
 		public:
 
