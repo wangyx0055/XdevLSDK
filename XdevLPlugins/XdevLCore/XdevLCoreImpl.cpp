@@ -408,6 +408,11 @@ namespace xdl {
 		}
 
 		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shtudown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
+		if(plugin_descriptor()->getArchitecture() != XDEVL_CURRENT_ARCHITECTURE_AS_STRING) {
+			XDEVL_MODULE_ERROR("This intance uses: " << XDEVL_CURRENT_ARCHITECTURE_AS_STRING << " the plugin used: " << plugin_descriptor()->getArchitecture() << "\n");
+			XDEVL_ASSERT(0, "Plugin has wrong architecture.");
+		}
+
 		m_plugins.insert(pluginMap::value_type(plugin_descriptor()->getName(), plugininfo));
 
 		// Add all module names into a map. We need that later if the user only
@@ -755,7 +760,7 @@ namespace xdl {
 						return ERR_ERROR;
 					}
 				} else {
-					
+
 				}
 			} else {
 				XDEVL_MODULE_WARNING("No plugin tag found in the xml file.\n");
