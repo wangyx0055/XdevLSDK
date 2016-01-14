@@ -16,7 +16,7 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 };
 
 xdl::XdevLPluginDescriptor glxPluginDescriptor {
-	xdl::XdevLString("XdevLOpenGLContextCGL"),
+	xdl::XdevLString("XdevLOpenGLContextGLX"),
 	moduleNames,
 	XDEVLOPENGLCONTEXT_MAJOR_VERSION,
 	XDEVLOPENGLCONTEXT_MINOR_VERSION,

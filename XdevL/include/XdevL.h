@@ -181,6 +181,11 @@ namespace xdl {
 	*/
 	xdl_int destroyCore(XdevLCore* core);
 
+#if 1
+#define createModuleText(CORE, INTERFACE, ID, MODULE) xdl::createModule<xdl::INTERFACE*>(CORE, xdl::XdevLModuleName(#INTERFACE), xdl::XdevLID(ID))
+#else
+#define createModuleText(CORE, INTERFACE, ID, MODULE) new xdl::INTERFACE##MODULE
+#endif
 
 }
 
