@@ -42,8 +42,8 @@ add_definitions(
 #
 # Set variable names for the library
 
-set(HEADERS_DIR .)
-set(SRC_DIR .)
+set(HEADERS_DIR ${XdevLBlank_SOURCE_DIR})
+set(SRC_DIR ${XdevLBlank_SOURCE_DIR})
 
 #
 # Set the output directories
@@ -76,6 +76,10 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	${SRC_DIR}/XdevLBlankImpl.cpp
 )
+
+if(NOT XDEVL_BUILD_STATIC)
+	set(SOURCE_FILES ${SOURCE_FILES} ${SRC_DIR}/XdevLBlankImplPlugin.cpp)
+endif()
 
 #
 # Add external libraries folder

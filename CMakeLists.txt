@@ -8,6 +8,9 @@ project(XdevLSDK)
 # Set the main variables that holds project folders
 #
 
+
+set(XDEVL_BUILD_STATIC Off)
+
 set(CMAKE_MODULE_PATH "${XdevLSDK_SOURCE_DIR}/cmake")
 set(XDEVL_SDK ${XdevLSDK_SOURCE_DIR})
 set(XDEVL_HOME ${XDEVL_SDK}/XdevL)
