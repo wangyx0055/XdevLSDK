@@ -91,6 +91,11 @@ set(SOURCE_FILES
 	${SRC_DIR}/XdevLOpenGLContextGLX.cpp
 )
 
+if(NOT XDEVL_BUILD_STATIC)
+	set(SOURCE_FILES ${SOURCE_FILES} ${SRC_DIR}/XdevLOpenGLContextGLXPlugin.cpp)
+endif()
+
+
 #
 # Add external libraries folder
 
