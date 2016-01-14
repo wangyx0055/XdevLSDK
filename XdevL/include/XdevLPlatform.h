@@ -60,6 +60,16 @@
 	#error XDEVL_UNKNOWN_PLATFORM
 #endif
 
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("x86_64")
+#elif defined(__i386__) || defined(__i686__) || defined(__i386) || defined(_M_I86) || defined(_X86_)
+	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("x86_32")
+#elif defined(__arm__) || defined(_M_ARM)
+	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("arm")
+#elif defined(__aarch64__)
+	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("arm_64")
+#endif
+
 //
 // Add deprecated macro
 //

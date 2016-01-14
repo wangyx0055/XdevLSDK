@@ -100,6 +100,8 @@ namespace xdl {
 		std::cout << copyright << "\n\n\n";
 
 		std::cout << "----------------------------------------------------------\n\n";
+		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Platform" << std::setw(3) << std::left << ":" << m_corePluginDescriptor.getPlatformName() << std::endl);
+		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Architecture" << std::setw(3) << std::left << ":" << m_corePluginDescriptor.getArchitecture() << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Internal ID" << std::setw(3) << std::left << ":" << m_id << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Event buffer size" << std::setw(3) << std::left << ":" << m_event_queue.get_size() << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Core XML file" << std::setw(3) << std::left << ":" << m_XmlFilename << std::endl);

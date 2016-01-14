@@ -442,7 +442,25 @@ namespace xdl {
 				m_value = t;
 				return *this;
 			}
+	};
 
+	/**
+		@class XdevLArchitecture
+		@brief A class that holds the name of CPU architecture.
+
+	*/
+	class XdevLArchitecture : public XdevLString {
+		public:
+			XdevLArchitecture() : XdevLString() {}
+
+			explicit XdevLArchitecture(const char* t) : XdevLString(t) {}
+
+			explicit XdevLArchitecture(const std::string& t) : XdevLString(t) {}
+
+			XdevLArchitecture& operator = (XdevLString::type t) {
+				m_value = t;
+				return *this;
+			}
 	};
 
 #define STRING(MSG) xdl::XdevLString(MSG)
