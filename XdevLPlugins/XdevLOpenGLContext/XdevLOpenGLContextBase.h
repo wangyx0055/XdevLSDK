@@ -51,8 +51,8 @@ namespace xdl {
 				TiXmlDocument xmlDocument;
 
 				if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
-					XDEVL_MODULE_ERROR("Could not parse xml file: " << getMediator()->getXmlFilename() << std::endl);
-					return ERR_ERROR;
+					XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << std::endl);
+					return ERR_OK;
 				}
 
 				return readModuleInformation(&xmlDocument);
