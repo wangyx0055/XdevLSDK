@@ -425,6 +425,26 @@ namespace xdl {
 			}
 	};
 
+	/**
+		@class XdevLPlatformName
+		@brief A class that holds the name of the platform.
+
+	*/
+	class XdevLPlatformName : public XdevLString {
+		public:
+			XdevLPlatformName() : XdevLString() {}
+
+			explicit XdevLPlatformName(const char* t) : XdevLString(t) {}
+
+			explicit XdevLPlatformName(const std::string& t) : XdevLString(t) {}
+
+			XdevLPlatformName& operator = (XdevLString::type t) {
+				m_value = t;
+				return *this;
+			}
+
+	};
+
 #define STRING(MSG) xdl::XdevLString(MSG)
 }
 

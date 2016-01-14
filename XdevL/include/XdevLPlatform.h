@@ -26,36 +26,36 @@
 
 #ifdef __MINGW32__
 	#define XDEVL_PLATFORM_MINGW 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("Windows")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Windows")
 #elif defined(_MSC_VER)
 	#define XDEVL_PLATFORM_WINDOWS 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("Windows")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Windows")
 #elif defined(__linux__)
 	#define XDEVL_PLATFORM_LINUX 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("Linux")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Linux")
 #elif defined(__APPLE__)
 	#define XDEVL_PLATFORM_APPLE 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("Apple")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Apple")
 #elif defined(__unix__) // All unixes, not all compilers.
 	#define XDEVL_PLATFORM_UNIX
 #elif defined(__DragonFly__)
 	#define XDEVL_PLATFORM_DRAGONFLY 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("Dragonfly")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Dragonfly")
 #elif defined(__FreeBSD__)
 	#define XDEVL_PLATFORM_FREEBSD 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("FreeBSD")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("FreeBSD")
 #elif defined(__NetBSD__)
 	#define XDEVL_PLATFORM_NETBSD 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("NetBSD")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("NetBSD")
 #elif defined(__OpenBSD__)
 	#define XDEVL_PLATFORM_OPENBSD 1
 	#define XDEVL_PLATFORM_UNIX 1
-	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLString("OpenBSD")
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("OpenBSD")
 #else
 	#error XDEVL_UNKNOWN_PLATFORM
 #endif

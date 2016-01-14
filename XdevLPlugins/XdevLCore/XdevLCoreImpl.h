@@ -140,7 +140,7 @@ namespace xdl {
 			                                  XdevLUserData* userParameter);
 			virtual XdevLModule* createModule(XdevLModuleCreateParameter* parameter);
 			virtual xdl_int deleteModule(const XdevLID& id);
-			virtual xdl_int plug(const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion::zero);
+			virtual xdl_int plug(const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion::zero, const XdevLPlatformName& platform = XDEVL_CURRENT_PLATFORM_AS_STRING);
 			virtual xdl_int unplug(const XdevLPluginName& pluginName);
 			virtual const XdevLFileName& getXmlFilename() const;
 			virtual xdl_int init();

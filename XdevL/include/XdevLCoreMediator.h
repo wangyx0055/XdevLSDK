@@ -74,7 +74,7 @@ namespace xdl {
 				@return Returns ERR_OK if the plugin process was successful. Otherwise it
 				will return ERR_ERROR.
 			*/
-			virtual xdl_int plug(const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion::zero) = 0;
+			virtual xdl_int plug(const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion::zero, const XdevLPlatformName& platform = XDEVL_CURRENT_PLATFORM_AS_STRING) = 0;
 
 			/// Unplugs a plugin from the core system.
 			/**

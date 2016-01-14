@@ -227,7 +227,10 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLCoreImpl::plug(const XdevLPluginName& pluginName, const XdevLVersion& version) {
+	xdl_int XdevLCoreImpl::plug(const XdevLPluginName& pluginName, const XdevLVersion& version, const XdevLPlatformName& platform) {
+		if(XDEVL_CURRENT_PLATFORM_AS_STRING != platform) {
+			return ERR_ERROR;
+		}
 
 		std::string path, name, ext;
 		std::string pluginNameString = pluginName.toString();
@@ -721,7 +724,7 @@ namespace xdl {
 				// filename of the plugin.
 				XdevLPluginName pluginName;
 				XdevLVersion version;
-				XdevLString platform("");
+				XdevLPlatformName platform("");
 				if(child->Attribute("filename")) {
 					pluginName = child->Attribute("filename");
 				} else {
@@ -745,12 +748,12 @@ namespace xdl {
 						return ERR_ERROR;
 					}
 				} else if(XDEVL_CURRENT_PLATFORM_AS_STRING == platform) {
-					if(plug(pluginName, version) != ERR_OK) {
+					if(plug(pluginName, version, platform) != ERR_OK) {
 						XDEVL_MODULE_ERROR("Could not plug plugin: " << pluginName << "\n");
 						return ERR_ERROR;
 					}
 				} else {
-					// TODO Shall we put some info here? I think for now it is not necessary.
+					
 				}
 			} else {
 				XDEVL_MODULE_WARNING("No plugin tag found in the xml file.\n");
