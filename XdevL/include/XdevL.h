@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -51,7 +51,7 @@ namespace xdl {
 	inline xdl_int plug(XdevLCore* core, const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion()) {
 		return core->plug(pluginName, version);
 	}
-	
+
 	/// Unplug a plugin from the specified core.
 	inline xdl_int unplug(XdevLCore* core, const XdevLPluginName& pluginName) {
 		return core->unplug(pluginName);
@@ -75,7 +75,7 @@ namespace xdl {
 		@param id A null terminated string which identifies the created module.
 		@return
 		- Returns a valid pointer for the interface T.
-		- NULL if an error occurs.
+		- nullptr if an error occurs.
 	*/
 	template<typename T>
 	T getModule(XdevLCore* core, const XdevLID& id) {
@@ -87,7 +87,7 @@ namespace xdl {
 	               const XdevLModuleName& moduleName,
 	               const XdevLID& id,
 	               const XdevLPluginName& pluginName = XdevLPluginName("Not Specified"),
-	               XdevLUserData* data = NULL)
+	               XdevLUserData* data = nullptr)
 		@brief Creates a module which is in a plugin.
 		@param core A valid pointer to the XdevLCore object.
 		@param moduleName A null terminated string which represents the module name.
@@ -96,7 +96,7 @@ namespace xdl {
 		@param data Not used at the moment.
 		@return
 		- Returns a valid pointer for the interface T.
-		- NULL if an error occurs.
+		- nullptr if an error occurs.
 
 	*/
 	template<typename T>
@@ -104,7 +104,7 @@ namespace xdl {
 	               const XdevLModuleName& moduleName,
 	               const XdevLID& id,
 	               const XdevLPluginName& pluginName = XdevLPluginName("Not Specified"),
-	               XdevLUserData* data = NULL) {
+	               XdevLUserData* data = nullptr) {
 		return static_cast<T>(core->createModule(moduleName, id, pluginName, data));
 	}
 
@@ -142,15 +142,15 @@ namespace xdl {
 	/**
 		@fn xdl_int createCore(XdevLCore** core,
 	                   xdl_int argc = 0,
-	                   xdl_char* argv[] = NULL,
+	                   xdl_char* argv[] = nullptr,
 	                   const XdevLFileName& xmlFilename = XdevLFileName(),
-	                   XdevLUserData* userDataList[] = NULL,
+	                   XdevLUserData* userDataList[] = nullptr,
 	                   xdl_uint numberOfUserData = 0)
 		@brief Creates the main XdevL core system.
 
 		@param core A valid pointer to the XdevLCore object.
 		@param argc The C/C++ main argc parameter. Use 0 if you don't pass arguments.
-		@param argv The C/C++ the main argv parameter. Use NULL if you don't pass arguments.
+		@param argv The C/C++ the main argv parameter. Use nullptr if you don't pass arguments.
 		@param xmlFilename A null terminated string which points to the main xml file.
 		@param userDataList Is not used at the moment.
 		@param numberOfUserData Number of Userdata in the list.
@@ -160,12 +160,16 @@ namespace xdl {
 	*/
 	xdl_int createCore(XdevLCore** core,
 	                   xdl_int argc = 0,
-	                   xdl_char* argv[] = NULL,
+	                   xdl_char* argv[] = nullptr,
 	                   const XdevLFileName& xmlFilename = XdevLFileName(),
-	                   XdevLUserData* userDataList[] = NULL,
+	                   XdevLUserData* userDataList[] = nullptr,
 	                   xdl_uint numberOfUserData = 0);
 
-
+	XdevLCore* createCore(xdl_int argc = 0,
+	                      xdl_char* argv[] = nullptr,
+	                      const XdevLFileName& xmlFilename = XdevLFileName(),
+	                      XdevLUserData* userDataList[] = nullptr,
+	                      xdl_uint numberOfUserData = 0);
 	/**
 		@fn xdl_int destroyCore(XdevLCore* core)
 		@brief Destroys the XdevLCore system.

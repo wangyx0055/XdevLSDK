@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -40,8 +40,8 @@
 
 namespace xdl {
 
-	XdevLVersion XdevLVersion::zero{0,0,0};
-	
+	XdevLVersion XdevLVersion::zero {0,0,0};
+
 	// Typedef for the command line arguments.
 	typedef std::vector<std::string> Arguments;
 
@@ -90,11 +90,11 @@ namespace xdl {
 	//
 	xdl_int checkLocal(std::string& pluginFilename) {
 
-		
+
 		// Make platform dependent fileformat.
 		xstd::make_path(pluginFilename);
 		xstd::make_path(xdevl_plugin_path);
-		
+
 		if(verbose) {
 			std::cout << ">> XdevLCore plugins search information: " << std::endl;
 			std::cout << ">> Version   : " << version_number << std::endl;
@@ -117,22 +117,21 @@ namespace xdl {
 					std::cout << "Found and loaded.\n";
 				}
 			}
-		}
-		else {
+		} else {
 			// It was not at the specified path. Let's check if the
 			// 'XDEVL_PLUGINS' path is set as a environment variable.
-			if (verbose) {
+			if(verbose) {
 				std::cout << "Not found.\n";
 
 				std::cout << ">> Checking if XDEVL_PLUGINS environment variable is set ... ";
 			}
 
-			if (getenv("XDEVL_PLUGINS") == nullptr){ 
+			if(getenv("XDEVL_PLUGINS") == nullptr) {
 				std::cerr << "It is not set. Can not find: " << pluginFilename << std::endl;
 				exit(-1);
 			}
 
-			std::string evnironment_variable{getenv("XDEVL_PLUGINS")};
+			std::string evnironment_variable {getenv("XDEVL_PLUGINS")};
 			if(evnironment_variable.size() == 0) {
 				std::cerr << "It is not set. Can not find: " <<  pluginFilename << std::endl;
 				exit(-1);
@@ -151,7 +150,7 @@ namespace xdl {
 			}
 			xdevl_plugin_path = evnironment_variable + "/lib/";
 			pluginFilename = xdevl_plugin_path + xstd::get_pathless(pluginFilename);
-						
+
 			fs.open(pluginFilename.c_str());
 			if(fs.is_open()) {
 				fs.close();
@@ -185,19 +184,13 @@ namespace xdl {
 		result += XdevLSharedLibrary::extension;
 	}
 
+	XdevLCore* createCore(xdl_int argc,
+	                      xdl_char* argv[],
+	                      const XdevLFileName& xmlFilename,
+	                      XdevLUserData* userDataList[],
+	                      xdl_uint numberOfUserData) {
+		xml_file = xmlFilename;
 
-
-//
-// Create the XdevLCore system.
-//
-	xdl_int createCore(XdevLCore** core,
-	                   xdl_int argc,
-	                   xdl_char* argv[],
-	                   const XdevLFileName& xmlFile,
-	                   XdevLUserData* userDataList[], xdl_uint numberOfUserData) {
-
-		xml_file 			= xmlFile;
-		
 		std::stringstream vn;
 		vn << XDEVL_MAJOR_VERSION << "." << XDEVL_MINOR_VERSION << "." << XDEVL_PATCH_VERSION;
 		version_number = vn.str();
@@ -290,11 +283,13 @@ namespace xdl {
 		//
 		create_xdevl_core = (CREATE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_createXdevLCore"));
 		if(!create_xdevl_core) {
-			return ERR_GET_FUNCTION_ADDRESS_FAILED;
+			std::cerr << "## XdevLCore plugin method format wrong: CREATE_XDEVL_CORE not found." <<  std::endl;
+			exit(-1);
 		}
 		delete_xdevL_core = (DELETE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_deleteXdevLCore"));
 		if(!delete_xdevL_core) {
-			return ERR_GET_FUNCTION_ADDRESS_FAILED;
+			std::cerr << "## XdevLCore plugin method format wrong: DELETE_XDEVL_CORE not found." << std::endl;
+			exit(-1);
 		}
 
 		//
@@ -315,24 +310,42 @@ namespace xdl {
 		parameters.pluginsPath 			= xdevl_plugin_path;
 		parameters.userDataList 		= userDataList;
 		parameters.numberOfUserData = numberOfUserData;
-		
+
 		if(xdevlCoreObject->init(parameters) != ERR_OK) {
 			std::cerr << "## Couldn't initialize XdevLCore object." << std::endl;
 			exit(-1);
 		}
 
-		*core = xdevlCoreObject;
+		return xdevlCoreObject;
+	}
+
+//
+// Create the XdevLCore system.
+//
+	xdl_int createCore(XdevLCore** core,
+	                   xdl_int argc,
+	                   xdl_char* argv[],
+	                   const XdevLFileName& xmlFile,
+	                   XdevLUserData* userDataList[],
+	                   xdl_uint numberOfUserData) {
+
+		*core = createCore(argc, argv, xmlFile, userDataList, numberOfUserData);
+		if(*core == nullptr) {
+			return ERR_ERROR;
+		}
 
 		return ERR_OK;
 	}
 
 
+
+
 	XdevLModule* createModule(const XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
 		XdevLString pluginName = pluginDescriptor.getName() + STRING("-") + XdevLString(pluginDescriptor.getVersion().toString());
-		#ifdef XDEVL_DEBUG
-				pluginName += STRING("d");
-		#endif
+#ifdef XDEVL_DEBUG
+		pluginName += STRING("d");
+#endif
 		pluginName += XdevLSharedLibrary::extension;
 		std::string tmp = pluginName.toString();
 		xdl_int ret;
@@ -340,7 +353,7 @@ namespace xdl {
 			std::cerr << "## Could not find XdevLCore plugin at all." << std::endl;
 			exit(-1);
 		}
-		
+
 		//
 		// Get the plugins create and delte function pointer.
 		//
@@ -352,8 +365,8 @@ namespace xdl {
 		if(!deleteModule) {
 			return nullptr;
 		}
-		
-		return createModule(pluginDescriptor, moduleDescriptor );
+
+		return createModule(pluginDescriptor, moduleDescriptor);
 
 	}
 
