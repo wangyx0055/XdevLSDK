@@ -219,9 +219,4 @@ namespace xdl {
 		return m_Axes[axis]->getMax();
 	}
 
-	void  XdevLMouseImpl::setRelativeMode(xdl_bool state) {
-		m_relativeMode = state;
-	}
-
-
 }

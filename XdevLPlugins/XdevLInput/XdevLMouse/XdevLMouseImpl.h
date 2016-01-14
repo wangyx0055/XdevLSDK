@@ -81,7 +81,7 @@ namespace xdl {
 	static const XdevLID ButtonPressed("XDEVL_MOUSE_BUTTON_PRESSED");
 	static const XdevLID ButtonReleased("XDEVL_MOUSE_BUTTON_RELEASED");
 	static const XdevLID MouseMotion("XDEVL_MOUSE_MOTION");
-
+	static const XdevLID MouseMotionRelative("XDEVL_MOUSE_MOTION_RELATIVE");
 
 	template<typename T>
 	class XdevLMouseBase : public XdevLModuleAutoImpl<T> {
@@ -98,7 +98,6 @@ namespace xdl {
 				m_mouse_button_down(xdl_false),
 				m_mouse_moved(xdl_false),
 				m_mouse_moved_old(xdl_false),
-				m_relativeMode(xdl_false),
 				m_simulate_wheel_buttons(xdl_false),
 				m_attached(xdl_false),
 				m_skip(0),
@@ -146,7 +145,6 @@ namespace xdl {
 			xdl_bool		m_mouse_button_down;
 			xdl_bool		m_mouse_moved;
 			xdl_bool		m_mouse_moved_old;
-			xdl_bool		m_relativeMode;
 			xdl_bool		m_simulate_wheel_buttons;
 			xdl_bool		m_attached;
 			xdl_int			m_skip;
@@ -288,7 +286,7 @@ namespace xdl {
 						m_windowHeight = event.window.height;
 					}
 				}
-			} else if( event.type == ButtonPressed.getHashCode()) {
+			} else if(event.type == ButtonPressed.getHashCode()) {
 				if(m_Buttons.size() == 0)
 					return xdl_false;
 
@@ -303,16 +301,14 @@ namespace xdl {
 					delegate(covertIdxToXdevLButton(idx), BUTTON_PRESSED);
 				}
 
-
-
 				XdevLButtonId id = covertIdxToXdevLButton(idx);
 				auto pp = m_buttonIdDelegates.equal_range(id);
-				for (auto it = pp.first; it != pp.second; ++it) {
+				for(auto it = pp.first; it != pp.second; ++it) {
 					auto delegate = it->second;
 					delegate(BUTTON_PRESSED);
 				}
 
-			} else if( event.type == ButtonReleased.getHashCode()) {
+			} else if(event.type == ButtonReleased.getHashCode()) {
 				if(m_Buttons.size() == 0)
 					return xdl_false;
 
@@ -330,12 +326,12 @@ namespace xdl {
 
 				XdevLButtonId id = covertIdxToXdevLButton(idx);
 				auto pp = m_buttonIdDelegates.equal_range(id);
-				for (auto it = pp.first; it != pp.second; ++it) {
+				for(auto it = pp.first; it != pp.second; ++it) {
 					auto delegate = it->second;
 					delegate(BUTTON_RELEASED);
 				}
 
-			} else if( event.type == MouseMotion.getHashCode()) {
+			} else if(event.type == MouseMotion.getHashCode()) {
 
 				xdl_uint32 x = event.motion.x;
 				xdl_uint32 y = event.motion.y;
@@ -345,19 +341,6 @@ namespace xdl {
 				m_mouse_old_y = m_mouse_curr_y;
 				m_mouse_curr_y = y;
 				m_mouse_moved = true;
-
-				if(m_window && m_relativeMode) {
-
-					if( (x <= 0) || (x >= m_windowWidth - 1) || (y <= 0) || (y >= m_windowHeight - 1))   {
-						m_window->setPointerPosition(m_windowWidth/2, m_windowHeight/2);
-						m_mouse_old_x 	= m_windowWidth/2;
-						m_mouse_old_y 	= m_windowHeight/2;
-						m_mouse_curr_x 	= m_windowWidth/2;
-						m_mouse_curr_y 	= m_windowHeight/2;
-						return ERR_OK;
-					}
-
-				}
 
 				//
 				// Why do I do x + 1? Because: 0 <= x < width. The same goes for y.
@@ -401,6 +384,25 @@ namespace xdl {
 						delegate(m_Axes[AXIS_1]->getValue());
 					}
 
+				}
+			} else if(event.type == MouseMotionRelative.getHashCode()) {
+
+				m_Axes[AXIS_0]->setDeltaValue(event.motion.xrel);
+				m_Axes[AXIS_1]->setDeltaValue(event.motion.yrel);
+
+				//
+				// Handle delegates that registered only for one specific axis id.
+				//
+				auto pp1 = m_axisIdDelegates.equal_range(AXIS_0);
+				for(auto it = pp1.first; it != pp1.second; ++it) {
+					auto delegate = it->second;
+					delegate(m_Axes[AXIS_0]->getValue());
+				}
+
+				auto pp2 = m_axisIdDelegates.equal_range(AXIS_1);
+				for(auto it = pp2.first; it != pp2.second; ++it) {
+					auto delegate = it->second;
+					delegate(m_Axes[AXIS_1]->getValue());
 				}
 			}
 
@@ -452,11 +454,6 @@ namespace xdl {
 			if(root->Attribute("id")) {
 				XdevLID id(root->Attribute("id"));
 				if(this->getID() == id) {
-					// If there is a crt attribute, set this value for all buttons.
-					if(root->Attribute("relative")) {
-						m_relativeMode = xstd::from_string<xdl_bool>(root->Attribute("relative"));
-					}
-
 					// If there is a crt attribute, set this value for all buttons.
 					if(root->Attribute("crt")) {
 						xdl_double crt = xstd::from_string<xdl_int>(root->Attribute("crt"));
@@ -586,9 +583,6 @@ namespace xdl {
 			virtual void getAxisRangeMinMax(const xdl_uint axis, xdl_float* min, xdl_float* max);
 			virtual xdl_float getAxisRangeMin(const xdl_uint axis) const;
 			virtual xdl_float getAxisRangeMax(const xdl_uint axis) const;
-
-
-			virtual void setRelativeMode(xdl_bool state);
 	};
 
 }

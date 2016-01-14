@@ -1957,12 +1957,12 @@ namespace xdl {
 				XQueryPointer(m_window->getNativeDisplay(), m_window->getNativeWindow(), &rootWindow, &childWindow, &x_root, &y_root, &x_window, &y_window, &modifier_mask);
 
 				XdevLEvent ev;
-				ev.type 				= MouseMotion.getHashCode();
+				ev.type 							= MouseMotionRelative.getHashCode();
 				ev.motion.timestamp		= getMediator()->getTimer().getTime64();
-				ev.motion.x				= x_window;
-				ev.motion.y				= y_window;
-				ev.motion.xrel			= relative_cords[0];
-				ev.motion.yrel			= relative_cords[1];
+				ev.motion.x						= x_window;
+				ev.motion.y						= y_window;
+				ev.motion.xrel				= relative_cords[0];
+				ev.motion.yrel				= relative_cords[1];
 				ev.window.windowid		= window->getWindowID();
 				getMediator()->fireEvent(ev);
 

@@ -300,14 +300,6 @@ namespace xdl {
 
 			/// Returns the relative axis movement.
 			virtual xdl_float getDeltaValue(const xdl_uint axis) = 0;
-
-			/// Sets the relative mode.
-			/**
-				This mode will move the mouse pointer always to the center of the window
-				if one of the window's border are reached. Use this to get a infinite
-				mouse delta movement.
-			*/
-			virtual void setRelativeMode(xdl_bool state) = 0;
 	};
 
 
