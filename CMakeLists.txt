@@ -61,7 +61,6 @@ endif()
 
 #
 # Check for platform
-#
 
 if(WIN32)
   if(NOT WINDOWS)
@@ -130,6 +129,18 @@ if(NOT PLATFORM_LINUX)
 	set(BUILD_X11 OFF)
 	set(BUILD_MOUSE_SERVER OFF)
 	set(BUILD_FTDI OFF)
+endif()
+
+if(PLATFORM_ANDROID)
+	set(BUILD_X11 OFF)
+	set(BUILD_WAYLAND OFF)
+	set(BUILD_X11 OFF)
+	set(BUILD_MOUSE_SERVER OFF)
+	set(BUILD_FTDI OFF)
+	set(BUILD_OGRE OFF)
+	set(BUILD_MOUSE_SERVER OFF)
+	set(BUILD_NATIVE_AUDIO OFF)
+	set(BUILD_SERIAL OFF)
 endif()
 
 #

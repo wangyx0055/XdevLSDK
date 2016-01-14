@@ -139,7 +139,10 @@ namespace xdl {
 
 	void XdevLDirectoryUnix::seek(xdl_uint64 pos) {
 		if(m_dir) {
+#if XDEVL_PLATFORM_ANDROID
+#else
 			seekdir(m_dir, pos);
+#endif
 		}
 	}
 
@@ -150,7 +153,11 @@ namespace xdl {
 	}
 
 	xdl_uint64 XdevLDirectoryUnix::tell() {
+#if XDEVL_PLATFORM_ANDROID
+		return 0;
+#else
 		return telldir(m_dir);
+#endif
 	}
 
 	XdevLString XdevLDirectoryUnix::getWorkingDirectory() {
