@@ -56,6 +56,9 @@
 	#define XDEVL_PLATFORM_OPENBSD 1
 	#define XDEVL_PLATFORM_UNIX 1
 	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("OpenBSD")
+#elif defined(__ANDROID__)
+	#define XDEVL_PLATFORM_ANDROID 1
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Android")
 #else
 	#error XDEVL_UNKNOWN_PLATFORM
 #endif
