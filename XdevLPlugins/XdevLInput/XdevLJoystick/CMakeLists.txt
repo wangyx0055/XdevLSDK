@@ -114,8 +114,8 @@ endif()
 
 #
 # Change the outputname of the library
-#
-set_property(TARGET ${XdevLJoystickLibrary} PROPERTY PREFIX "")
+
+set_property(TARGET ${XdevLJoystickLibrary} PROPERTY PREFIX "${XDEVL_SHARED_LIBRARY_FILE_PREFIX}")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	set_property(TARGET ${XdevLJoystickLibrary} PROPERTY SUFFIX "-${XDEVLJOYSTICK_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")

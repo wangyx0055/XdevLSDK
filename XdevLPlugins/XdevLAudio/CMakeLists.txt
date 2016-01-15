@@ -9,7 +9,6 @@ find_package(OpenAL)
 
 set(XdevLAudioALLibrary XdevLAudioAL)
 
-
 #
 # Set the Plugin version
 #

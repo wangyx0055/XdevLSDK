@@ -118,14 +118,14 @@ target_link_libraries(${XdevLBlankLibrary} ${LIBS})
 
 #
 # Change the outputname of the library
-
-set_property(TARGET ${XdevLBlankLibrary} PROPERTY PREFIX "")
+set_property(TARGET ${XdevLBlankLibrary} PROPERTY PREFIX "${XDEVL_SHARED_LIBRARY_FILE_PREFIX}")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	set_property(TARGET ${XdevLBlankLibrary} PROPERTY SUFFIX "-${XDEVLBLANK_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 else()
 	set_property(TARGET ${XdevLBlankLibrary} PROPERTY SUFFIX "-${XDEVLBLANK_VERSION}${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")
 endif()
+
 
 install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
 install(TARGETS ${XdevLBlankLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})

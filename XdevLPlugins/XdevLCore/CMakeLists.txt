@@ -132,8 +132,8 @@ endif()
 
 #
 # Change the outputname of the library
-#
-set_property(TARGET ${XdevLCoreLibrary} PROPERTY PREFIX "")
+
+set_property(TARGET ${XdevLCoreLibrary} PROPERTY PREFIX "${XDEVL_SHARED_LIBRARY_FILE_PREFIX}")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	set_property(TARGET ${XdevLCoreLibrary} PROPERTY SUFFIX "-${XDEVLCORE_VERSION}d${XDEVL_SHARED_LIBRARY_FILE_EXTENSION}")

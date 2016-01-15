@@ -9,7 +9,7 @@ project(XdevLSDK)
 #
 
 
-set(XDEVL_BUILD_STATIC Off)
+set(XDEVL_BUILD_MODULAR FALSE)
 
 set(CMAKE_MODULE_PATH "${XdevLSDK_SOURCE_DIR}/cmake")
 set(XDEVL_SDK ${XdevLSDK_SOURCE_DIR})
@@ -18,14 +18,13 @@ set(XDEVL_PLUGINS ${XDEVL_SDK}/XdevLPlugins)
 set(XDEVL_DEMOS ${XDEVL_SDK}/XdevLDemos)
 set(XDEVL_TOOLS ${XDEVL_SDK}/XdevLUtils)
 set(XDEVL_EXTERNALS ${XDEVL_SDK}/XdevLExternals)
-set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".xdp")
 
 # Where shall we install the libs, headers and plugins?
 set(XDEVL_INCLUDE_INSTALL_PATH "/usr/include/XdevL")
 set(XDEVL_LIB_INSTALL_PATH "/usr/lib")
 set(XDEVL_PLUGINS_INCLUDE_INSTALL_PATH "/usr/include/XdevLPlugins")
 set(XDEVL_PLUGINS_INSTALL_PATH "/usr/lib/XdevLPlugins")
-
+set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "")
 #
 # Set the XdevL version
 #
@@ -80,6 +79,19 @@ elseif(APPLE)
     set(PLATFORM_MACOSX TRUE)
   endif()
 endif()
+
+if(XDEVL_BUILD_MODULAR)
+		set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".xdp")
+		set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "")
+else(XDEVL_BUILD_MODULAR)
+		if(PLATFORM_WINDOWS)
+			set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".dll")
+			set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "")
+		else()
+			set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".so")
+			set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "lib")
+		endif()
+endif(XDEVL_BUILD_MODULAR)
 
 message(STATUS ${CMAKE_SYSTEM_NAME})
 
