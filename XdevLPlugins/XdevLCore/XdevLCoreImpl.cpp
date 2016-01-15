@@ -603,6 +603,7 @@ namespace xdl {
 		parameter->setModuleId(module->getID());
 		// User parameter
 		parameter->setUserParameter(nullptr);
+		parameter->setModuleInstance(module.get());
 		
 		module->setMediator(this);
 		

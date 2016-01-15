@@ -36,8 +36,8 @@
 #define _NET_WM_STATE_TOGGLE    2l
 
 static xdl::xdl_bool x11Initialized = xdl::xdl_false;
-static Display* globalDisplay = nullptr;
-static std::shared_ptr<xdl::XdevLX11Initialize> initializeX11;
+static std::shared_ptr<xdl::XdevLX11Display> globalDisplay;
+static Display* display = nullptr;
 
 static const xdl::XdevLString windowX11PluginName {
 	"XdevLWindowX11"
@@ -134,41 +134,44 @@ namespace xdl {
 	  KDE_staysOnTop = 2048
 	};
 
-	XdevLX11Initialize::XdevLX11Initialize(XdevLCoreMediator* core) {
+	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) {
 		// Start X server with thread support.
 		XInitThreads();
 
 		// Connect to X server.
-		if(globalDisplay == nullptr) {
-			globalDisplay = XOpenDisplay(nullptr);
-			if(globalDisplay == nullptr) {
-				return;
-			}
+		display = XOpenDisplay(nullptr);
+		if(display == nullptr) {
+			return;
+		}
 
-			// Print out some useless information :D
-			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
-			std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
-			std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
-			std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
+		// Print out some useless information :D
+		std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
+		std::clog << "Vendor              : " << XServerVendor(display) << "\n";
+		std::clog << "Release             : " << XVendorRelease(display)<< "\n";
+		std::clog << "Number of Screens   : " << XScreenCount(display) 	<< std::endl;
 
-			if(nullptr != core) {
-				initDefaultWindowInstances(core);
-			} else {
-				XdevLWindowX11EventServer* eventServer = new XdevLWindowX11EventServer(nullptr, windowEventServerModuleDesc);
-				eventServer->init();
-				xdl::windowEventServer = eventServer;
-				XdevLCursorX11* x11Cursor = new XdevLCursorX11(nullptr, cursorModuleDesc);
-				x11Cursor->init();
-				xdl::cursor = x11Cursor;
-				
-			}
+		if(nullptr != core) {
+//				initDefaultWindowInstances(core);
+//			} else {
+
+			XdevLModuleCreateParameter parameter;
+			parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
+
+			windowEventServer = std::make_shared<XdevLWindowX11EventServer>(&parameter, windowEventServerModuleDesc);
+			core->registerModule(windowEventServer);
+
+			parameter.setModuleId(XdevLID("XdevLCursor"));
+			cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorModuleDesc);
+			core->registerModule(cursor);
+
 		}
 	}
 
-	XdevLX11Initialize::~XdevLX11Initialize() {
-		if(globalDisplay) {
-			XCloseDisplay(globalDisplay);
-			globalDisplay = nullptr;
+
+	XdevLX11Display::~XdevLX11Display() {
+		if(display) {
+			XCloseDisplay(display);
+			display = nullptr;
 		}
 	}
 
@@ -197,26 +200,26 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowX11::initX11(XdevLCoreMediator* core) {
-		if(nullptr != initializeX11) {
+		if(nullptr != globalDisplay) {
 			return ERR_OK;
 		}
 
-		initializeX11 = std::make_shared<XdevLX11Initialize>(core);
+		globalDisplay = std::make_shared<XdevLX11Display>(core);
 
 		return xdl::ERR_OK;
 	}
 
 	xdl_int XdevLWindowX11::shutdownX11() {
-		if(nullptr != initializeX11) {
-			initializeX11.reset();
+		if(nullptr != globalDisplay) {
+			globalDisplay.reset();
 		}
 
 		return xdl::ERR_OK;
 	}
 
 	xdl_int XdevLWindowX11::init() {
-		if(nullptr == initializeX11) {
-			initializeX11 = std::make_shared<XdevLX11Initialize>(getMediator());
+		if(nullptr == globalDisplay) {
+			globalDisplay = std::make_shared<XdevLX11Display>(getMediator());
 		}
 		return XdevLWindowImpl::init();
 	}
@@ -243,22 +246,22 @@ namespace xdl {
 		Visual* 						visual;
 		XVisualInfo*					vinfo;
 
-		m_display = globalDisplay;
+		m_display = display;
 
 		// Get the default screen number.
-		m_screenNumber = DefaultScreen(globalDisplay);
+		m_screenNumber = DefaultScreen(m_display);
 
 		// Get the default screen with.
-		m_screenWidth = DisplayWidth(globalDisplay, m_screenNumber);
+		m_screenWidth = DisplayWidth(m_display, m_screenNumber);
 
 		// Get the default screen height.
-		m_screenHeight = DisplayHeight(globalDisplay,m_screenNumber);
+		m_screenHeight = DisplayHeight(m_display,m_screenNumber);
 
 		// Get the root window.
-		m_rootWindow = RootWindow(globalDisplay, m_screenNumber);
+		m_rootWindow = RootWindow(m_display, m_screenNumber);
 
 		// Get the default color map.
-		m_defaultColorMap = DefaultColormap(globalDisplay, m_screenNumber);
+		m_defaultColorMap = DefaultColormap(m_display, m_screenNumber);
 
 		XColor color;
 		color.red 	= 0;
@@ -275,14 +278,14 @@ namespace xdl {
 //		windowAttributes.colormap 					= XCreateColormap(globalDisplay, m_rootWindow, visual, AllocNone);
 
 		// Check if the RandR extension is avaible.
-		if(!XRRQueryVersion(globalDisplay, &m_randrMajor, &m_randrMinor)) {
+		if(!XRRQueryVersion(m_display, &m_randrMajor, &m_randrMinor)) {
 			XDEVL_MODULE_ERROR("RandR extension missing.\n");
 			return ERR_ERROR;
 		}
 
 		Colormap colormap = m_defaultColorMap;
 
-		XRRQueryExtension(globalDisplay, &m_event_basep, &m_error_basep);
+		XRRQueryExtension(m_display, &m_event_basep, &m_error_basep);
 
 		if(m_rootTitle.toString().size() > 0) {
 			XdevLWindow* rootWindow = static_cast<XdevLWindow*>(getMediator()->getModule(XdevLID(m_rootTitle.toString().c_str())));
@@ -312,7 +315,7 @@ namespace xdl {
 		WindowAttributes.border_pixel = 0;
 		WindowAttributes.colormap = CopyFromParent;
 
-		m_window = XCreateWindow(globalDisplay,
+		m_window = XCreateWindow(m_display,
 		                         m_rootWindow,
 		                         m_attribute.position.x,
 		                         m_screenHeight - (m_attribute.size.height + m_attribute.position.y),
@@ -348,9 +351,9 @@ namespace xdl {
 		                     GenericEvent;
 
 
-		XSelectInput(globalDisplay, m_window, event_mask);
+		XSelectInput(m_display, m_window, event_mask);
 
-		XClearWindow(globalDisplay, m_window);
+		XClearWindow(m_display, m_window);
 
 		//
 		// Set the WM hints
@@ -360,7 +363,7 @@ namespace xdl {
 		                  InputHint;  // We want to set the input focus model.
 		wmHints->input = True;          // Does this application rely on the window manager to get keyboard input?
 		wmHints->initial_state = NormalState; // Most applications start this way. WithdrawnState would hide the window and IconicState would start as icon.
-		XSetWMHints(globalDisplay, m_window, wmHints);
+		XSetWMHints(m_display, m_window, wmHints);
 		XFree(wmHints);
 
 		// Set title of the window.
@@ -375,23 +378,23 @@ namespace xdl {
 		}
 
 		const long _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1;
-		XChangeProperty(globalDisplay, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
+		XChangeProperty(m_display, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
 
 		// Tell the Window Manager to show or hide the decorations.
 		if(hasNotDecoration) {
 			disableDecoration();
 		}
 
-		XFlush(globalDisplay);
+		XFlush(m_display);
 
 		//	initKeyboardKeyCodes();
 
 		m_id = m_window;
 
-		windowEventServer->registerWindowForEvents(this);
+		globalDisplay->getWindowEventServer()->registerWindowForEvents(this);
 
-		XMapRaised(globalDisplay, m_window);
-		XSync(globalDisplay, False);
+		XMapRaised(m_display, m_window);
+		XSync(m_display, False);
 
 		return ERR_OK;
 	}
@@ -399,7 +402,7 @@ namespace xdl {
 	void* XdevLWindowX11::getInternal(const XdevLInternalName& id) {
 		std::string data(id);
 		if(data == "X11_DISPLAY")
-			return globalDisplay;
+			return m_display;
 		if(data == "X11_WINDOW")
 			return (void*)m_window;
 		if(data == "X11_SCREEN_NUMBER")
@@ -419,11 +422,11 @@ namespace xdl {
 
 		ev.xclient.type = ClientMessage;
 		ev.xclient.window = m_window;
-		ev.xclient.message_type = XInternAtom(globalDisplay, "WM_PROTOCOLS", true);
+		ev.xclient.message_type = XInternAtom(m_display, "WM_PROTOCOLS", true);
 		ev.xclient.format = 32;
-		ev.xclient.data.l[0] = XInternAtom(globalDisplay, "WM_DELETE_WINDOW", false);
+		ev.xclient.data.l[0] = XInternAtom(m_display, "WM_DELETE_WINDOW", false);
 		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(globalDisplay, m_window, False, NoEventMask, &ev);
+		XSendEvent(m_display, m_window, False, NoEventMask, &ev);
 
 		// Ok, check if the are in fullscreen mode.
 		if(m_fullscreenModeActive)  {
@@ -431,15 +434,15 @@ namespace xdl {
 		}
 
 		Atom atom;
-		atom = XInternAtom(globalDisplay, "_WIN_HINTS", True);
+		atom = XInternAtom(m_display, "_WIN_HINTS", True);
 		if(atom != None) {
-			XDeleteProperty(globalDisplay, m_window, atom);
+			XDeleteProperty(m_display, m_window, atom);
 		}
 
 		// We have to destroy the window. The X-Server can do it automatically but it's better
 		// to do it manually.
-		if(globalDisplay && m_window && !m_rootWindow)
-			XDestroyWindow(globalDisplay, m_window);
+		if(m_display && m_window && !m_rootWindow)
+			XDestroyWindow(m_display, m_window);
 
 		if(XdevLWindowImpl::shutdown() != ERR_OK) {
 			return ERR_ERROR;
@@ -462,7 +465,7 @@ namespace xdl {
 		int ratecount;
 
 		// Get current resolution and frequency.
-		m_originalScreenConfig 	= XRRGetScreenInfo(globalDisplay, m_rootWindow);
+		m_originalScreenConfig 	= XRRGetScreenInfo(display, m_rootWindow);
 		m_originalScreenRate 	= XRRConfigCurrentRate(m_originalScreenConfig);
 		m_originalSizeId		= XRRConfigCurrentConfiguration(m_originalScreenConfig, &m_originalRotation);
 
@@ -523,7 +526,7 @@ namespace xdl {
 			rate = m_best_fit_rate;
 
 		// Change screen mode.
-		XRRSetScreenConfigAndRate(globalDisplay,
+		XRRSetScreenConfigAndRate(m_display,
 		                          m_originalScreenConfig,
 		                          m_rootWindow,
 		                          m_bestSizeId,
@@ -534,16 +537,16 @@ namespace xdl {
 		//
 		// Store old screen saver settings and disable it.
 		//
-		XGetScreenSaver(globalDisplay, &timeout_return, &interval_return, &prefer_blanking_return, &allow_exposures_return);
-		XSetScreenSaver(globalDisplay, 0, 0, DontPreferBlanking, DefaultExposures);
+		XGetScreenSaver(m_display, &timeout_return, &interval_return, &prefer_blanking_return, &allow_exposures_return);
+		XSetScreenSaver(m_display, 0, 0, DontPreferBlanking, DefaultExposures);
 
-		XSync(globalDisplay, False);
+		XSync(m_display, False);
 	}
 
 	void XdevLWindowX11::displayFromFullscreenToNormal() {
 
 		// Change screen mode into it's original form.
-		XRRSetScreenConfigAndRate(globalDisplay,
+		XRRSetScreenConfigAndRate(m_display,
 		                          m_originalScreenConfig,
 		                          m_rootWindow,
 		                          m_originalSizeId,
@@ -552,7 +555,7 @@ namespace xdl {
 		                          CurrentTime);
 
 		// Set the previous screen saver settings.
-		XSetScreenSaver(globalDisplay, timeout_return, interval_return, prefer_blanking_return, allow_exposures_return);
+		XSetScreenSaver(m_display, timeout_return, interval_return, prefer_blanking_return, allow_exposures_return);
 
 		// If we have changed the screen configuration, let's switch back.
 		if(m_originalScreenConfig) {
@@ -562,7 +565,7 @@ namespace xdl {
 		// Enable disabled window manager decoration.
 		enableDecoration();
 
-		XSync(globalDisplay, False);
+		XSync(m_display, False);
 	}
 
 	void XdevLWindowX11::setFullscreenVideoMode() {
@@ -584,10 +587,10 @@ namespace xdl {
 		msg.xclient.data.l[2] 	= 0;
 		msg.xclient.data.l[3] 	= 1; // Normal application
 
-		if(XSendEvent(globalDisplay, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+		if(XSendEvent(m_display, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
 
 		}
-		XFlush(globalDisplay);
+		XFlush(m_display);
 
 		m_fullscreenModeActive = xdl_true;
 	}
@@ -609,10 +612,10 @@ namespace xdl {
 		msg.xclient.data.l[2] 	= 0;
 		msg.xclient.data.l[3] 	= 1; // Normal application
 
-		if(XSendEvent(globalDisplay, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+		if(XSendEvent(m_display, m_rootWindow,  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
 
 		}
-		XFlush(globalDisplay);
+		XFlush(m_display);
 
 		displayFromFullscreenToNormal();
 
@@ -636,24 +639,24 @@ namespace xdl {
 				unsigned long status;
 			} MWMHints = { MWM_HINTS_DECORATIONS, 0, 0, 0, 0 };
 
-			XChangeProperty(globalDisplay, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32, PropModeReplace, (unsigned char *)&MWMHints, sizeof(MWMHints)/4);
+			XChangeProperty(m_display, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32, PropModeReplace, (unsigned char *)&MWMHints, sizeof(MWMHints)/4);
 			decorations_removed = xdl_true;
 		}
 
-		hintAtom = XInternAtom(globalDisplay, "KWM_WIN_DECORATION", True);
+		hintAtom = XInternAtom(m_display, "KWM_WIN_DECORATION", True);
 		if(hintAtom != None) {
 			long KWMHints = KDE_tinyDecoration;
 
-			XChangeProperty(globalDisplay,m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&KWMHints,  sizeof(KWMHints)/4);
+			XChangeProperty(m_display,m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&KWMHints,  sizeof(KWMHints)/4);
 			decorations_removed = xdl_true;
 		}
 
 		// Now try to set GNOME hints
-		hintAtom = XInternAtom(globalDisplay, "_WIN_HINTS", True);
+		hintAtom = XInternAtom(m_display, "_WIN_HINTS", True);
 		if(hintAtom != None) {
 			long GNOMEHints = 0;
 
-			XChangeProperty(globalDisplay, m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&GNOMEHints, sizeof(GNOMEHints)/4);
+			XChangeProperty(m_display, m_window, hintAtom, hintAtom, 32, PropModeReplace, (unsigned char *)&GNOMEHints, sizeof(GNOMEHints)/4);
 			decorations_removed = xdl_true;
 		}
 
@@ -661,7 +664,7 @@ namespace xdl {
 		if(_NET_WM_WINDOW_TYPE != None) {
 			Atom NET_WMHints[2] = {_KDE_NET_WM_WINDOW_TYPE_OVERRIDE, _NET_WM_WINDOW_TYPE_NORMAL};
 
-			XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&NET_WMHints, 2);
+			XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&NET_WMHints, 2);
 			decorations_removed = 1;
 		}
 
@@ -678,7 +681,7 @@ namespace xdl {
 			msg.xclient.data.l[2] 		= 0;
 			msg.xclient.data.l[3] 		= 1; // Normal application
 
-			if(XSendEvent(globalDisplay, DefaultRootWindow(globalDisplay),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+			if(XSendEvent(m_display, DefaultRootWindow(m_display),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
 				XDEVL_MODULE_WARNING("Could not add _NET_WM_STATE_FULLSCREEN state.\n");
 			}
 		}
@@ -686,18 +689,18 @@ namespace xdl {
 		// Did we sucessfully remove the window decorations?
 		if(decorations_removed) {
 			// Finally set the transient hints
-			XSetTransientForHint(globalDisplay, m_window, m_rootWindow);
-			XRaiseWindow(globalDisplay, m_window);
+			XSetTransientForHint(m_display, m_window, m_rootWindow);
+			XRaiseWindow(m_display, m_window);
 		} else {
 			// Seems like we couldn't remove the decoration using EWMH hints. Let's try to change they window into a override_redirect window
 			// which means the Window Manager is supposed to ignore this window totally.
 			XSetWindowAttributes  attributes;
 			attributes.override_redirect = True;
-			XChangeWindowAttributes(globalDisplay, m_window, CWOverrideRedirect, &attributes);
+			XChangeWindowAttributes(m_display, m_window, CWOverrideRedirect, &attributes);
 		}
-		XFlush(globalDisplay);
+		XFlush(m_display);
 
-		XRRSelectInput(globalDisplay, m_window, RRScreenChangeNotifyMask);
+		XRRSelectInput(m_display, m_window, RRScreenChangeNotifyMask);
 
 		return ERR_OK;
 	}
@@ -709,32 +712,32 @@ namespace xdl {
 		ActivatedDecorations = 0;
 
 		// Unset MWM hints
-		HintAtom = XInternAtom(globalDisplay, "_MOTIF_WM_HINTS", True);
+		HintAtom = XInternAtom(m_display, "_MOTIF_WM_HINTS", True);
 		if(HintAtom != None) {
-			XDeleteProperty(globalDisplay, m_window, HintAtom);
+			XDeleteProperty(m_display, m_window, HintAtom);
 			ActivatedDecorations = 1;
 		}
 
 		// Unset KWM hints
-		HintAtom = XInternAtom(globalDisplay, "KWM_WIN_DECORATION", True);
+		HintAtom = XInternAtom(m_display, "KWM_WIN_DECORATION", True);
 		if(HintAtom != None) {
-			XDeleteProperty(globalDisplay, m_window, HintAtom);
+			XDeleteProperty(m_display, m_window, HintAtom);
 			ActivatedDecorations = 1;
 		}
 
 		// Unset GNOME hints
-		HintAtom = XInternAtom(globalDisplay, "_WIN_HINTS", True);
+		HintAtom = XInternAtom(m_display, "_WIN_HINTS", True);
 		if(HintAtom != None) {
-			XDeleteProperty(globalDisplay, m_window, HintAtom);
+			XDeleteProperty(m_display, m_window, HintAtom);
 			ActivatedDecorations = 1;
 		}
 
 		// Unset NET_WM hints
-		HintAtom = XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE", True);
+		HintAtom = XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", True);
 		if(HintAtom != None) {
-			Atom NET_WMHints = XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+			Atom NET_WMHints = XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
 			if(NET_WMHints != None) {
-				XChangeProperty(globalDisplay, m_window,
+				XChangeProperty(m_display, m_window,
 				                HintAtom, XA_ATOM, 32, PropModeReplace,
 				                (unsigned char *)&NET_WMHints, 1);
 				ActivatedDecorations = 1;
@@ -755,7 +758,7 @@ namespace xdl {
 			msg.xclient.data.l[2] 		= 0;
 			msg.xclient.data.l[3] 		= 1; // Normal application
 
-			if(XSendEvent(globalDisplay, DefaultRootWindow(globalDisplay),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
+			if(XSendEvent(m_display, DefaultRootWindow(m_display),  False, SubstructureNotifyMask | SubstructureRedirectMask, &msg) == 0) {
 				XDEVL_MODULE_WARNING("Could not remove _NET_WM_STATE_FULLSCREEN state.\n");
 			}
 
@@ -764,9 +767,9 @@ namespace xdl {
 		// Finally unset the transient hints if necessary
 		if(ActivatedDecorations) {
 			// NOTE: Does this work?
-			XSetTransientForHint(globalDisplay, m_window, None);
-			XUnmapWindow(globalDisplay, m_window);
-			XMapWindow(globalDisplay, m_window);
+			XSetTransientForHint(m_display, m_window, None);
+			XUnmapWindow(m_display, m_window);
+			XMapWindow(m_display, m_window);
 		}
 		return ERR_OK;
 	}
@@ -783,7 +786,7 @@ namespace xdl {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.position.x = wa.x;
 //		m_attribute.position.y = wa.y;
 		return m_attribute.position;
@@ -793,7 +796,7 @@ namespace xdl {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
 //		m_attribute.size.height = wa.height;
 		return m_attribute.size;
@@ -802,7 +805,7 @@ namespace xdl {
 	XdevLWindowSize::type  XdevLWindowX11::getWidth() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
 //		m_attribute.size.height = wa.height;
 		return m_attribute.size.width;
@@ -811,7 +814,7 @@ namespace xdl {
 	XdevLWindowSize::type  XdevLWindowX11::getHeight() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.size.width 	= wa.width;
 //		m_attribute.size.height = wa.height;
 		return m_attribute.size.height;
@@ -820,7 +823,7 @@ namespace xdl {
 	XdevLWindowPosition::type XdevLWindowX11::getX() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.position.x = wa.x;
 //		m_attribute.position.y = wa.y;
 		return m_attribute.position.x;
@@ -829,7 +832,7 @@ namespace xdl {
 	XdevLWindowPosition::type XdevLWindowX11::getY() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 //		XWindowAttributes wa;
-//		XGetWindowAttributes(globalDisplay, m_window, &wa);
+//		XGetWindowAttributes(m_display, m_window, &wa);
 //		m_attribute.position.x = wa.x;
 //		m_attribute.position.y = wa.y;
 		return m_attribute.position.y;
@@ -857,32 +860,32 @@ namespace xdl {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		XdevLWindowImpl::setX(x);
-		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
-		XMapWindow(globalDisplay, m_window);
+		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
+		XMapWindow(m_display, m_window);
 	}
 
 	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		XdevLWindowImpl::setY(m_screenHeight - (m_attribute.size.height + y));
-		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
-		XMapWindow(globalDisplay, m_window);
+		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
+		XMapWindow(m_display, m_window);
 	}
 
 	void XdevLWindowX11::setWidth(XdevLWindowSize::type width) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		XdevLWindowImpl::setWidth(width);
-		XResizeWindow(globalDisplay, m_window, m_attribute.size.width, m_attribute.size.height);
-		XMapWindow(globalDisplay, m_window);
+		XResizeWindow(m_display, m_window, m_attribute.size.width, m_attribute.size.height);
+		XMapWindow(m_display, m_window);
 	}
 
 	void XdevLWindowX11::setHeight(XdevLWindowSize::type height) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		XdevLWindowImpl::setHeight(height);
-		XResizeWindow(globalDisplay, m_window,  m_attribute.size.width, m_attribute.size.height);
-		XMapWindow(globalDisplay, m_window);
+		XResizeWindow(m_display, m_window,  m_attribute.size.width, m_attribute.size.height);
+		XMapWindow(m_display, m_window);
 	}
 
 	void XdevLWindowX11::setSize(const XdevLWindowSize& size) {
@@ -893,13 +896,13 @@ namespace xdl {
 		XSizeHints *sizehints = XAllocSizeHints();
 		long userhints;
 
-		XGetWMNormalHints(globalDisplay, m_window, sizehints, &userhints);
+		XGetWMNormalHints(m_display, m_window, sizehints, &userhints);
 
 		sizehints->min_width = sizehints->max_width = m_attribute.size.width;
 		sizehints->min_height = sizehints->max_height = m_attribute.size.height;
 		sizehints->flags |= PMinSize | PMaxSize;
 
-		XSetWMNormalHints(globalDisplay, m_window, sizehints);
+		XSetWMNormalHints(m_display, m_window, sizehints);
 
 		XFree(sizehints);
 
@@ -907,10 +910,10 @@ namespace xdl {
 		// resize only after either the user move/resize the window or within the code
 		// or first unmapping then mapping.
 
-		XResizeWindow(globalDisplay, m_window, m_attribute.size.width, m_attribute.size.height);
-		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
-		XRaiseWindow(globalDisplay, m_window);
-		XFlush(globalDisplay);
+		XResizeWindow(m_display, m_window, m_attribute.size.width, m_attribute.size.height);
+		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
+		XRaiseWindow(m_display, m_window);
+		XFlush(m_display);
 	}
 
 	void XdevLWindowX11::setPosition(const XdevLWindowPosition& position) {
@@ -918,8 +921,8 @@ namespace xdl {
 
 		m_attribute.position.x = position.x;
 		m_attribute.position.y = m_screenHeight - (m_attribute.size.height + position.y);
-		XMoveWindow(globalDisplay, m_window, m_attribute.position.x, m_attribute.position.y);
-		XMapWindow(globalDisplay, m_window);
+		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
+		XMapWindow(m_display, m_window);
 	}
 
 	void XdevLWindowX11::setResizeable(xdl_bool state) {
@@ -931,7 +934,7 @@ namespace xdl {
 		sizeHints->height		= m_attribute.size.height;
 		sizeHints->min_width	= m_attribute.size.width;
 		sizeHints->min_height	= m_attribute.size.height;
-		XSetWMNormalHints(globalDisplay, m_window, sizeHints);
+		XSetWMNormalHints(m_display, m_window, sizeHints);
 		XFree(sizeHints);
 	}
 
@@ -953,7 +956,7 @@ namespace xdl {
 		class_hints->res_name   = (char*)getTitle().toString().c_str();
 		class_hints->res_class  = (char*)getTitle().toString().c_str();
 
-		XSetWMProperties(globalDisplay, m_window, &windowName, &iconName, nullptr, 0, nullptr, nullptr, class_hints);
+		XSetWMProperties(m_display, m_window, &windowName, &iconName, nullptr, 0, nullptr, nullptr, class_hints);
 		XFree(class_hints);
 		XFree(windowName.value);
 		XFree(iconName.value);
@@ -961,11 +964,11 @@ namespace xdl {
 
 
 	void XdevLWindowX11::show() {
-		XMapWindow(globalDisplay, m_window);
+		XMapWindow(m_display, m_window);
 
 		//XEvent event;
-		//XIfEvent(globalDisplay, &event, &isMapNotify, (XPointer)&m_window);
-		XFlush(globalDisplay);
+		//XIfEvent(m_display, &event, &isMapNotify, (XPointer)&m_window);
+		XFlush(m_display);
 	}
 
 	void XdevLWindowX11::hide() {
@@ -973,26 +976,26 @@ namespace xdl {
 		event.type = UnmapNotify;
 		event.window = m_window;
 		event.from_configure = False;
-		XSendEvent(globalDisplay, m_rootWindow, False, StructureNotifyMask | SubstructureNotifyMask, (XEvent*)&event);
+		XSendEvent(m_display, m_rootWindow, False, StructureNotifyMask | SubstructureNotifyMask, (XEvent*)&event);
 
-		XUnmapWindow(globalDisplay, m_window);
+		XUnmapWindow(m_display, m_window);
 
 		//XEvent event;
-		//XIfEvent(globalDisplay, &event, &isUnmapNotify, (XPointer)&m_window);
-		XFlush(globalDisplay);
+		//XIfEvent(m_display, &event, &isUnmapNotify, (XPointer)&m_window);
+		XFlush(m_display);
 	}
 
 	void XdevLWindowX11::raise() {
-		XRaiseWindow(globalDisplay, m_window);
-		//XFlush(globalDisplay);
+		XRaiseWindow(m_display, m_window);
+		//XFlush(m_display);
 	}
 
 	void XdevLWindowX11::setPointerPosition(xdl_uint x, xdl_uint y) {
 
 		XWindowAttributes wa;
-		XGetWindowAttributes(globalDisplay, m_window, &wa);
+		XGetWindowAttributes(m_display, m_window, &wa);
 		// (display, src window, dst windiw, src x, src y, src width, src height, dst x, dst y)
-		XWarpPointer(globalDisplay, m_window, m_window, 0, 0, wa.width, wa.height, x, y);
+		XWarpPointer(m_display, m_window, m_window, 0, 0, wa.width, wa.height, x, y);
 	}
 
 	xdl_bool XdevLWindowX11::isHidden() {
@@ -1001,7 +1004,7 @@ namespace xdl {
 		unsigned long i, numItems, bytesAfter;
 		unsigned char *propertyValue = nullptr;
 		long maxLength = 1024;
-		if(XGetWindowProperty(globalDisplay, m_window, _NET_WM_STATE,
+		if(XGetWindowProperty(m_display, m_window, _NET_WM_STATE,
 		                      0l, maxLength, False, XA_ATOM, &actualType,
 		                      &actualFormat, &numItems, &bytesAfter,
 		                      &propertyValue) == Success) {
@@ -1024,7 +1027,7 @@ namespace xdl {
 		long maxLength = 1024;
 		xdl_uint32 flags = 0;
 
-		if(XGetWindowProperty(globalDisplay, m_window, _NET_WM_STATE,
+		if(XGetWindowProperty(m_display, m_window, _NET_WM_STATE,
 		                      0l, maxLength, False, XA_ATOM, &actualType,
 		                      &actualFormat, &numItems, &bytesAfter,
 		                      &propertyValue) == Success) {
@@ -1070,28 +1073,28 @@ namespace xdl {
 				(1 << 1), 0, static_cast<unsigned long>((state == xdl_true) ? 1 : 0), 0, 0
 			};
 
-			XChangeProperty(globalDisplay, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32,
+			XChangeProperty(m_display, m_window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 32,
 			                PropModeReplace, (unsigned char *) &MWMHints,
 			                sizeof(MWMHints) / 4);
 		} else {  /* set the transient hints instead, if necessary */
-			XSetTransientForHint(globalDisplay, m_window, m_rootWindow);
+			XSetTransientForHint(m_display, m_window, m_rootWindow);
 		}
 	}
 
 	void XdevLWindowX11::setInputFocus() {
 
 		XWindowAttributes attribute;
-		XGetWindowAttributes(globalDisplay,m_window,&attribute);
+		XGetWindowAttributes(m_display,m_window,&attribute);
 		if(attribute.map_state == IsViewable) {
-			XSetInputFocus(globalDisplay, m_window,  RevertToParent, CurrentTime);
+			XSetInputFocus(m_display, m_window,  RevertToParent, CurrentTime);
 		}
-		XFlush(globalDisplay);
+		XFlush(m_display);
 
 
-		//XGrabKeyboard(globalDisplay, m_window, False, GrabModeAsync, GrabModeAsync, CurrentTime);
+		//XGrabKeyboard(m_display, m_window, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
 //		Atom atom = _NET_ACTIVE_WINDOW;
-//		XChangeProperty(globalDisplay, m_window, _NET_WM_STATE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&atom, 1);
+//		XChangeProperty(m_display, m_window, _NET_WM_STATE, XA_ATOM, 32, PropModeReplace, (unsigned char *)&atom, 1);
 
 //		XEvent event;
 //		event.xany.type 						= ClientMessage;
@@ -1102,7 +1105,7 @@ namespace xdl {
 //		event.xclient.data.l[1] 		= CurrentTime;
 //		event.xclient.data.l[2] 		= m_window;
 //
-//		XSendEvent(globalDisplay, m_rootWindow, 0, SubstructureNotifyMask | SubstructureRedirectMask, &event);
+//		XSendEvent(m_display, m_rootWindow, 0, SubstructureNotifyMask | SubstructureRedirectMask, &event);
 //
 	}
 
@@ -1112,7 +1115,7 @@ namespace xdl {
 		unsigned long i, numItems, bytesAfter;
 		unsigned char *propertyValue = nullptr;
 		long maxLength = 1024;
-		if(XGetWindowProperty(globalDisplay, m_window, _NET_WM_STATE,
+		if(XGetWindowProperty(m_display, m_window, _NET_WM_STATE,
 		                      0l, maxLength, False, XA_ATOM, &actualType,
 		                      &actualFormat, &numItems, &bytesAfter,
 		                      &propertyValue) == Success) {
@@ -1133,58 +1136,58 @@ namespace xdl {
 
 	xdl_int XdevLWindowX11::initializeEWMH() {
 
-		_MOTIF_WM_HINTS 					= XInternAtom(globalDisplay, "_MOTIF_WM_HINTS", False);
-		_NET_WM_WINDOW_TYPE					= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE", False);
-		_NET_WM_WINDOW_TYPE_DESKTOP			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
-		_NET_WM_WINDOW_TYPE_DOCK			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_DOCK", False);
-		_NET_WM_WINDOW_TYPE_TOOLBAR			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
-		_NET_WM_WINDOW_TYPE_MENU			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_MENU", False);
-		_NET_WM_WINDOW_TYPE_UTILITY			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_UTILITY", False);
-		_NET_WM_WINDOW_TYPE_SPLASH			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_SPLASH", False);
-		_NET_WM_WINDOW_TYPE_DIALOG			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_DIALOG", False);
-		_NET_WM_WINDOW_TYPE_DROPDOWN_MENU	= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_DROPDOWN_MENU", False);
-		_NET_WM_WINDOW_TYPE_POPUP_MENU		= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_POPUP_MENU", False);
-		_NET_WM_WINDOW_TYPE_TOOLTIP			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_TOOLTIP", False);
-		_NET_WM_WINDOW_TYPE_NOTIFICATION	= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
-		_NET_WM_WINDOW_TYPE_COMBO			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_COMBO", False);
-		_NET_WM_WINDOW_TYPE_DND				= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_DND", False);
-		_NET_WM_WINDOW_TYPE_NORMAL			= XInternAtom(globalDisplay, "_NET_WM_WINDOW_TYPE_NORMAL", False);
-		_NET_WM_WINDOW_OPACITY 				= XInternAtom(globalDisplay, "_NET_WM_WINDOW_OPACITY", False);
-		_NET_WM_BYPASS_COMPOSITOR			= XInternAtom(globalDisplay, "_NET_WM_BYPASS_COMPOSITOR", False);
-		_NET_WM_ACTION_RESIZE				= XInternAtom(globalDisplay, "_NET_WM_ACTION_RESIZE", False);
-		_NET_WM_STATE						= XInternAtom(globalDisplay, "_NET_WM_STATE", False);
-		_NET_WM_STATE_MAXIMIZED_VERT		= XInternAtom(globalDisplay, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-		_NET_WM_STATE_MAXIMIZED_HORZ		= XInternAtom(globalDisplay, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-		_NET_WM_STATE_FULLSCREEN			= XInternAtom(globalDisplay, "_NET_WM_STATE_FULLSCREEN", False);
-		_NET_WM_STATE_HIDDEN				= XInternAtom(globalDisplay, "_NET_WM_STATE_HIDDEN", False);
-		_NET_WM_STATE_FOCUSED				= XInternAtom(globalDisplay, "_NET_WM_STATE_FOCUSED", False);
+		_MOTIF_WM_HINTS 					= XInternAtom(m_display, "_MOTIF_WM_HINTS", False);
+		_NET_WM_WINDOW_TYPE					= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE", False);
+		_NET_WM_WINDOW_TYPE_DESKTOP			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
+		_NET_WM_WINDOW_TYPE_DOCK			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DOCK", False);
+		_NET_WM_WINDOW_TYPE_TOOLBAR			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+		_NET_WM_WINDOW_TYPE_MENU			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_MENU", False);
+		_NET_WM_WINDOW_TYPE_UTILITY			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_UTILITY", False);
+		_NET_WM_WINDOW_TYPE_SPLASH			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_SPLASH", False);
+		_NET_WM_WINDOW_TYPE_DIALOG			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+		_NET_WM_WINDOW_TYPE_DROPDOWN_MENU	= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DROPDOWN_MENU", False);
+		_NET_WM_WINDOW_TYPE_POPUP_MENU		= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_POPUP_MENU", False);
+		_NET_WM_WINDOW_TYPE_TOOLTIP			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_TOOLTIP", False);
+		_NET_WM_WINDOW_TYPE_NOTIFICATION	= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
+		_NET_WM_WINDOW_TYPE_COMBO			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_COMBO", False);
+		_NET_WM_WINDOW_TYPE_DND				= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_DND", False);
+		_NET_WM_WINDOW_TYPE_NORMAL			= XInternAtom(m_display, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+		_NET_WM_WINDOW_OPACITY 				= XInternAtom(m_display, "_NET_WM_WINDOW_OPACITY", False);
+		_NET_WM_BYPASS_COMPOSITOR			= XInternAtom(m_display, "_NET_WM_BYPASS_COMPOSITOR", False);
+		_NET_WM_ACTION_RESIZE				= XInternAtom(m_display, "_NET_WM_ACTION_RESIZE", False);
+		_NET_WM_STATE						= XInternAtom(m_display, "_NET_WM_STATE", False);
+		_NET_WM_STATE_MAXIMIZED_VERT		= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+		_NET_WM_STATE_MAXIMIZED_HORZ		= XInternAtom(m_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		_NET_WM_STATE_FULLSCREEN			= XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
+		_NET_WM_STATE_HIDDEN				= XInternAtom(m_display, "_NET_WM_STATE_HIDDEN", False);
+		_NET_WM_STATE_FOCUSED				= XInternAtom(m_display, "_NET_WM_STATE_FOCUSED", False);
 
-		_NET_WM_NAME						= XInternAtom(globalDisplay, "_NET_WM_NAME", False);
-		_NET_WM_ICON_NAME					= XInternAtom(globalDisplay, "_NET_WM_ICON_NAME", False);
-		_NET_WM_ICON						= XInternAtom(globalDisplay, "_NET_WM_ICON", False);
-		_NET_WM_PING						= XInternAtom(globalDisplay, "_NET_WM_PING", False);
+		_NET_WM_NAME						= XInternAtom(m_display, "_NET_WM_NAME", False);
+		_NET_WM_ICON_NAME					= XInternAtom(m_display, "_NET_WM_ICON_NAME", False);
+		_NET_WM_ICON						= XInternAtom(m_display, "_NET_WM_ICON", False);
+		_NET_WM_PING						= XInternAtom(m_display, "_NET_WM_PING", False);
 
-		WM_STATE							= XInternAtom(globalDisplay, "WM_STATE", False);
-		WM_NAME								= XInternAtom(globalDisplay, "WM_NAME", False);
-		WM_NORMAL_HINTS						= XInternAtom(globalDisplay, "WM_NORMAL_HINTS", False);
-		WM_HINTS							= XInternAtom(globalDisplay, "WM_HINTS", False);
-		WM_ICON_SIZE						= XInternAtom(globalDisplay, "WM_ICON_SIZE", False);
-		WM_DELETE_WINDOW					= XInternAtom(globalDisplay, "WM_DELETE_WINDOW", False);
-		WM_PROTOCOLS						= XInternAtom(globalDisplay, "WM_PROTOCOLS", False);
-		WM_TRANSIENT_FOR					= XInternAtom(globalDisplay, "WM_TRANSIENT_FOR", False);
-		WM_CLASS							= XInternAtom(globalDisplay, "WM_CLASS", False);
+		WM_STATE							= XInternAtom(m_display, "WM_STATE", False);
+		WM_NAME								= XInternAtom(m_display, "WM_NAME", False);
+		WM_NORMAL_HINTS						= XInternAtom(m_display, "WM_NORMAL_HINTS", False);
+		WM_HINTS							= XInternAtom(m_display, "WM_HINTS", False);
+		WM_ICON_SIZE						= XInternAtom(m_display, "WM_ICON_SIZE", False);
+		WM_DELETE_WINDOW					= XInternAtom(m_display, "WM_DELETE_WINDOW", False);
+		WM_PROTOCOLS						= XInternAtom(m_display, "WM_PROTOCOLS", False);
+		WM_TRANSIENT_FOR					= XInternAtom(m_display, "WM_TRANSIENT_FOR", False);
+		WM_CLASS							= XInternAtom(m_display, "WM_CLASS", False);
 
-		XdndEnter							= XInternAtom(globalDisplay, "XdndEnter", False);
-		XdndPosition						= XInternAtom(globalDisplay, "XdndPosition", False);
-		XdndStatus							= XInternAtom(globalDisplay, "XdndStatus", False);
-		XdndTypeList						= XInternAtom(globalDisplay, "XdndTypeList", False);
-		XdndActionCopy						= XInternAtom(globalDisplay, "XdndActionCopy", False);
-		XdndDrop							= XInternAtom(globalDisplay, "XdndDrop", False);
-		XdndFinished						= XInternAtom(globalDisplay, "XdndFinished", False);
-		XdndSelection						= XInternAtom(globalDisplay, "XdndSelection", False);
+		XdndEnter							= XInternAtom(m_display, "XdndEnter", False);
+		XdndPosition						= XInternAtom(m_display, "XdndPosition", False);
+		XdndStatus							= XInternAtom(m_display, "XdndStatus", False);
+		XdndTypeList						= XInternAtom(m_display, "XdndTypeList", False);
+		XdndActionCopy						= XInternAtom(m_display, "XdndActionCopy", False);
+		XdndDrop							= XInternAtom(m_display, "XdndDrop", False);
+		XdndFinished						= XInternAtom(m_display, "XdndFinished", False);
+		XdndSelection						= XInternAtom(m_display, "XdndSelection", False);
 
 
-		_KDE_NET_WM_WINDOW_TYPE_OVERRIDE	= XInternAtom(globalDisplay, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", False);
+		_KDE_NET_WM_WINDOW_TYPE_OVERRIDE	= XInternAtom(m_display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", False);
 
 
 		// Now we are going to tell the WM in which protocols we are interested are or which one we support.
@@ -1225,7 +1228,7 @@ namespace xdl {
 
 
 
-		XSetWMProtocols(globalDisplay, m_window, protocols.data(), protocols.size());
+		XSetWMProtocols(m_display, m_window, protocols.data(), protocols.size());
 		return ERR_OK;
 	}
 
@@ -1235,28 +1238,28 @@ namespace xdl {
 
 			case XDEVL_WINDOW_TYPE_NORMAL: {
 				if(_NET_WM_WINDOW_TYPE_NORMAL != 0) {
-					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
+					XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
 				} else {
 				}
 			}
 			break;
 			case XDEVL_WINDOW_TYPE_TOOLTIP: {
 				if(_NET_WM_WINDOW_TYPE_TOOLTIP != 0) {
-					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_TOOLTIP, 1);
+					XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_TOOLTIP, 1);
 				} else {
 				}
 			}
 			break;
 			case XDEVL_WINDOW_TYPE_DROPDOWN_MENU: {
 				if(_NET_WM_WINDOW_TYPE_DROPDOWN_MENU != 0) {
-					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_DROPDOWN_MENU, 1);
+					XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_DROPDOWN_MENU, 1);
 				} else {
 				}
 			}
 			break;
 			case XDEVL_WINDOW_TYPE_SPLASH: {
 				if(_NET_WM_WINDOW_TYPE_SPLASH != 0) {
-					XChangeProperty(globalDisplay, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_SPLASH, 1);
+					XChangeProperty(m_display, m_window, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,PropModeReplace, (unsigned char *)&_NET_WM_WINDOW_TYPE_SPLASH, 1);
 				} else {
 				}
 			}
@@ -1265,7 +1268,7 @@ namespace xdl {
 			default:
 				break;
 		}
-		XFlush(globalDisplay);
+		XFlush(m_display);
 	}
 
 	Display* XdevLWindowX11::getNativeDisplay() {
@@ -1316,11 +1319,6 @@ namespace xdl {
 		XdevLWindowEventServerImpl(parameter, desriptor),
 		m_focusWindow(nullptr),
 		m_keyboard(nullptr) {
-		m_keyboard = new XdevLWindowX11Keyboard(globalDisplay, getMediator());
-
-		WM_DELETE_WINDOW					= XInternAtom(globalDisplay, "WM_DELETE_WINDOW", False);
-		WM_PROTOCOLS						= XInternAtom(globalDisplay, "WM_PROTOCOLS", False);
-		_NET_WM_PING						= XInternAtom(globalDisplay, "_NET_WM_PING", False);
 	}
 
 	XdevLWindowX11EventServer::~XdevLWindowX11EventServer() {
@@ -1337,6 +1335,13 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowX11EventServer::init() {
+
+		m_keyboard = new XdevLWindowX11Keyboard(display, getMediator());
+
+		WM_DELETE_WINDOW					= XInternAtom(display, "WM_DELETE_WINDOW", False);
+		WM_PROTOCOLS						= XInternAtom(display, "WM_PROTOCOLS", False);
+		_NET_WM_PING						= XInternAtom(display, "_NET_WM_PING", False);
+
 		XDEVL_MODULE_SUCCESS("Created successfully" << std::endl);
 		return ERR_OK;
 	}
@@ -1365,25 +1370,25 @@ namespace xdl {
 	xdl_int XdevLWindowX11EventServer::pollEvents() {
 
 		// Only run this while loop when we have events in the queue.
-		while(XPending(globalDisplay) > 0) {
+		while(XPending(display) > 0) {
 			XEvent event;
 
 			// Get next event.
-			XNextEvent(globalDisplay, &event);
+			XNextEvent(display, &event);
 
 			//
 			// Handle generic events like xinput2, xfixes etc.
 			//
 			if(event.type == GenericEvent) {
 				XGenericEventCookie* cookie = &event.xcookie;
-				XGetEventData(globalDisplay, cookie);
+				XGetEventData(display, cookie);
 
-				if(xdl::cursor) {
+				if(globalDisplay->getCursor()) {
 					// TODO Don't cast here. Find another way.
-					static_cast<XdevLCursorX11*>(xdl::cursor)->onHandleXinputEvent(cookie, m_focusWindow);
+					globalDisplay->getCursor()->onHandleXinputEvent(cookie, m_focusWindow);
 				}
 
-				XFreeEventData(globalDisplay, cookie);
+				XFreeEventData(display, cookie);
 				continue;
 			}
 
@@ -1448,7 +1453,7 @@ namespace xdl {
 				// Mouse pointer moved.
 				//
 				case MotionNotify: {
-					if(xdl::cursor->isRelativeMotionEnabled() == xdl_false) {
+					if(globalDisplay->getCursor()->isRelativeMotionEnabled() == xdl_false) {
 						ev.type 						= MouseMotion.getHashCode();
 						ev.motion.x					= (2.0 / window->getWidth()*event.xmotion.x - 1.0f) * 32768.0f;
 						ev.motion.y					= -(2.0 / window->getHeight() * event.xmotion.y - 1.0f) * 32768.0f;
@@ -1507,20 +1512,20 @@ namespace xdl {
 					sevent.xselection.time = event.xselectionrequest.time;
 
 					// Check if  we have a cut buffer.
-					if(XGetWindowProperty(globalDisplay, window->getNativeRootWindow(),
+					if(XGetWindowProperty(display, window->getNativeRootWindow(),
 					                      XA_CUT_BUFFER0, 0, INT_MAX/4, False, event.xselectionrequest.target,
 					                      &sevent.xselection.target, &seln_format, &nbytes,
 					                      &overflow, &seln_data) == Success) {
 
-						Atom XA_TARGETS = XInternAtom(globalDisplay, "TARGETS", 0);
+						Atom XA_TARGETS = XInternAtom(display, "TARGETS", 0);
 						if(sevent.xselection.target == event.xselectionrequest.target) {
-							XChangeProperty(globalDisplay, event.xselectionrequest.requestor, event.xselectionrequest.property,
+							XChangeProperty(display, event.xselectionrequest.requestor, event.xselectionrequest.property,
 							                sevent.xselection.target, seln_format, PropModeReplace,
 							                seln_data, nbytes);
 							sevent.xselection.property = event.xselectionrequest.property;
 						} else if(XA_TARGETS == event.xselectionrequest.target) {
 							Atom SupportedFormats[] = { sevent.xselection.target, XA_TARGETS };
-							XChangeProperty(globalDisplay, event.xselectionrequest.requestor, event.xselectionrequest.property,
+							XChangeProperty(display, event.xselectionrequest.requestor, event.xselectionrequest.property,
 							                XA_ATOM, 32, PropModeReplace,
 							                (unsigned char*)SupportedFormats,
 							                sizeof(SupportedFormats)/sizeof(*SupportedFormats));
@@ -1528,8 +1533,8 @@ namespace xdl {
 						}
 						XFree(seln_data);
 					}
-					XSendEvent(globalDisplay, event.xselectionrequest.requestor, False, 0, &sevent);
-					XSync(globalDisplay, False);
+					XSendEvent(display, event.xselectionrequest.requestor, False, 0, &sevent);
+					XSync(display, False);
 
 				}
 				break;
@@ -1669,9 +1674,9 @@ namespace xdl {
 					else if((event.xclient.message_type == WM_PROTOCOLS) &&
 					        (event.xclient.format == 32) &&
 					        (event.xclient.data.l[0] == _NET_WM_PING)) {
-						Window root = DefaultRootWindow(globalDisplay);
+						Window root = DefaultRootWindow(display);
 						event.xclient.window = root;
-						XSendEvent(globalDisplay, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
+						XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
 					}
 				}
 				break;
@@ -1770,7 +1775,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLCursorX11::init() {
-
 		return ERR_OK;
 	}
 

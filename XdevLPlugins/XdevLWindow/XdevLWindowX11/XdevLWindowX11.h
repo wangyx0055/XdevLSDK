@@ -45,12 +45,6 @@
 
 namespace xdl {
 
-	class XdevLX11Initialize {
-	public:
-		XdevLX11Initialize(XdevLCoreMediator* core);
-		~XdevLX11Initialize();
-	};
-	
 	class XdevLWindowX11: public XdevLWindowImpl {
 		public:
 
@@ -335,7 +329,21 @@ namespace xdl {
 
 			xdl_bool m_reltaiveModeEnabled;
 	};
-
+	
+	class XdevLX11Display {
+	public:
+		XdevLX11Display(XdevLCoreMediator* core);
+		~XdevLX11Display();
+		XdevLWindowX11EventServer* getWindowEventServer() {
+			return windowEventServer.get();
+		}
+		XdevLCursorX11* getCursor() {
+			return cursor.get();
+		}
+public:
+		std::shared_ptr<XdevLWindowX11EventServer> windowEventServer;
+		std::shared_ptr<XdevLCursorX11> cursor;
+	};
 }
 
 
