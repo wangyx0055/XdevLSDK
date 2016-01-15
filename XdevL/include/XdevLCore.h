@@ -30,14 +30,14 @@
 namespace xdl {
 
 	/**
-	  @class XdevLCoreInitParameters
+	  @class XdevLCoreParameters
 	  @brief A parameter class for the XdevLCore init method.
 	  @author Cengiz Terzibas
 	*/
-	class XdevLCoreInitParameters {
+	class XdevLCoreParameters {
 		public:
 
-			XdevLCoreInitParameters() : pluginsPath("."),
+			XdevLCoreParameters() : pluginsPath("."),
 				userDataList(nullptr),
 				numberOfUserData(0) {
 			}
@@ -84,7 +84,7 @@ namespace xdl {
 				- @b ERR_ERROR
 				The core system couldn't be initialized.
 			*/
-			virtual xdl_int init(const XdevLCoreInitParameters& parameters) = 0;
+			virtual xdl_int setParameters(const XdevLCoreParameters& parameters) = 0;
 
 	};
 

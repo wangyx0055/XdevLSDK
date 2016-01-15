@@ -29,10 +29,10 @@
 
 namespace xdl {
 
-	class XdevLBlankModuleImpl : public XdevLModuleImpl<XdevLBlankModule> {
+	class XdevLBlankImpl : public XdevLModuleImpl<XdevLBlank> {
 		public:
-			XdevLBlankModuleImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
-			virtual ~XdevLBlankModuleImpl();
+			XdevLBlankImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
+			virtual ~XdevLBlankImpl();
 
 
 	};

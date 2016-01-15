@@ -43,7 +43,6 @@
 #include <X11/extensions/Xrandr.h>
 #include <X11/XKBlib.h>
 
-
 namespace xdl {
 
 	class XdevLWindowX11: public XdevLWindowImpl {

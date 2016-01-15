@@ -46,15 +46,14 @@ namespace xdl {
 	typedef std::vector<std::string> Arguments;
 
 	// Typedefs for creating and deleting the XdevLCore object.
-	typedef xdl_int(*CREATE_XDEVL_CORE)(XdevLCore** core, XdevLCommandLineParser* param);
-	typedef void (*DELETE_XDEVL_CORE)(XdevLCore* core);
+	typedef void (*DELETE_XDEVL_CORE)(XdevLModule* core);
 
 	typedef xdl::XdevLModule*(*CREATE_XDEVL_MODULE)(const XdevLPluginDescriptor& pluginDescriptor, const XdevLModuleDescriptor& moduleDescriptor);
 	typedef void (*DELETE_XDEVL_MODULE)(xdl::XdevLModule* obj);
 
 
 	// Function pointer to the create function of the XdevLCore module.
-	CREATE_XDEVL_CORE create_xdevl_core = nullptr;
+	XdevLCreateModuleFunction create_xdevl_core = nullptr;
 
 	// Function pointer to the delete function of the XdevLCore module.
 	DELETE_XDEVL_CORE delete_xdevL_core = nullptr;
@@ -281,12 +280,12 @@ namespace xdl {
 		//
 		// Get the plugins create and delte function pointer.
 		//
-		create_xdevl_core = (CREATE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_createXdevLCore"));
+		create_xdevl_core = (XdevLCreateModuleFunction)(dynamicLibraryLoader.getFunctionAddress("_create"));
 		if(!create_xdevl_core) {
 			std::cerr << "## XdevLCore plugin method format wrong: CREATE_XDEVL_CORE not found." <<  std::endl;
 			exit(-1);
 		}
-		delete_xdevL_core = (DELETE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_deleteXdevLCore"));
+		delete_xdevL_core = (DELETE_XDEVL_CORE)(dynamicLibraryLoader.getFunctionAddress("_delete"));
 		if(!delete_xdevL_core) {
 			std::cerr << "## XdevLCore plugin method format wrong: DELETE_XDEVL_CORE not found." << std::endl;
 			exit(-1);
@@ -295,23 +294,43 @@ namespace xdl {
 		//
 		// Create the XdevLCore object.
 		//
-		XdevLCore* xdevlCoreObject =  nullptr;
-		cmdl = new xdl::XdevLCommandLineParser(argc, argv);
-		if(create_xdevl_core(&xdevlCoreObject, cmdl) != ERR_OK) {
+	//	cmdl = new xdl::XdevLCommandLineParser(argc, argv);
+		XdevLUserData userData;
+
+		userData.id = XdevLID("XDEVL_COMMAND_LINE_PARSER");
+		userData.data = (void*)&cmdParser;
+
+
+		XdevLModuleCreateParameter parameter;
+		XdevLID CoreID("XdevLCoreMain");
+		parameter.setPluginName(xdl::XdevLPluginName("XdevLCore"));
+		parameter.setModuleName(xdl::XdevLModuleName("XdevLCore"));
+		parameter.setUserParameter(&userData);
+		parameter.setModuleId(CoreID);
+
+		if(create_xdevl_core(&parameter) != ERR_OK) {
 			std::cerr << "## Couldn't create XdevLCore object." << std::endl;
 			exit(-1);
 		}
+		XdevLCore* xdevlCoreObject = static_cast<XdevLCore*>(parameter.getModuleInstance());
+
+
+		XdevLEvent moduleInit;
+		moduleInit.type = XDEVL_MODULE_EVENT;
+		moduleInit.module.sender = CoreID.getHashCode();
+		moduleInit.module.event = XDEVL_MODULE_INIT;
+		xdevlCoreObject->notify(moduleInit);
 
 		//
 		// Initialize the XdevLCore system.
 		//
-		XdevLCoreInitParameters parameters;
+		XdevLCoreParameters parameters;
 		parameters.xmlFileName 			= xml_file;
 		parameters.pluginsPath 			= xdevl_plugin_path;
 		parameters.userDataList 		= userDataList;
 		parameters.numberOfUserData = numberOfUserData;
 
-		if(xdevlCoreObject->init(parameters) != ERR_OK) {
+		if(xdevlCoreObject->setParameters(parameters) != ERR_OK) {
 			std::cerr << "## Couldn't initialize XdevLCore object." << std::endl;
 			exit(-1);
 		}

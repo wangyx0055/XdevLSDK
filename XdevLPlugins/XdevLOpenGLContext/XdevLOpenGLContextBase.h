@@ -48,6 +48,10 @@ namespace xdl {
 			virtual ~XdevLOpenGLContextBase() {};
 
 			virtual xdl_int init() {
+				if(getMediator() == nullptr) {
+					return ERR_OK;
+				}
+
 				TiXmlDocument xmlDocument;
 
 				if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {

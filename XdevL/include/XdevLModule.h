@@ -43,9 +43,18 @@ namespace xdl {
 //#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER))
 //#define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) std::shared_ptr<CLASS_NAME>(new CLASS_NAME(PARAMETER, DESCRIPTOR))
 
-	#define XDEVL_USE_MODULE(CLASS_NAME, MODULE) (MODULE)
-	#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) new CLASS_NAME(PARAMETER)
-	#define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) new CLASS_NAME(PARAMETER, DESCRIPTOR)
+#define XDEVL_USE_MODULE(CLASS_NAME, MODULE) (MODULE)
+#define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) new CLASS_NAME(PARAMETER)
+#define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) new CLASS_NAME(PARAMETER, DESCRIPTOR)
+
+#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(MODULENAME) extern "C" XDEVL_EXPORT std::shared_ptr<xdl::XdevLModule> create##MODULENAME();
+#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(MODULENAME, MODULECLASS, DESCRIPTOR) extern "C" XDEVL_EXPORT std::shared_ptr<xdl::XdevLModule> create##MODULENAME() {\
+		return std::make_shared<MODULECLASS>(MODULECLASS(nullptr, DESCRIPTOR));\
+	}
+
+#define XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DECLARATION(PLUGINNAME) extern "C" XDEVL_EXPORT xdl::xdl_int init##PLUGINNAME();
+#define XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DEFINITION(PLUGINNAME) extern "C" XDEVL_EXPORT xdl::xdl_int init##PLUGINNAME()
+#define XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DEFINITION_DEFAULT(PLUGINNAME) extern "C" XDEVL_EXPORT xdl::xdl_int init##PLUGINNAME(){return xdl::ERR_OK;}
 
 	/**
 		@enum XdevLModuleEvents
@@ -228,6 +237,12 @@ namespace xdl {
 	*/
 	class XdevLModuleCreateParameter {
 		public:
+			XdevLModuleCreateParameter() :
+				m_moduleInstance(nullptr),
+				m_logger(nullptr),
+				m_mediator(nullptr),
+				m_userData(nullptr) {}
+
 			XdevLModuleCreateParameter(XdevLCoreMediator* mediator) :
 				m_moduleInstance(nullptr),
 				m_logger(nullptr),

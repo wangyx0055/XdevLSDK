@@ -13,7 +13,7 @@ namespace xdl {
 	class XdevLUserData {
 		public:
 			XdevLID			id;
-			xdl_uint8*	data;
+			void*				data;
 	};
 
 }

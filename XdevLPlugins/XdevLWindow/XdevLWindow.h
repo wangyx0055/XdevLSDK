@@ -284,6 +284,8 @@ namespace xdl {
 	typedef XdevLCursor*		IPXdevLCursor;
 	typedef XdevLCursor			IXdevLCursor;
 
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLWindow)
+	XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DECLARATION(XdevLWindow)
 }
 
 #endif

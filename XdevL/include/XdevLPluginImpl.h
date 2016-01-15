@@ -73,7 +73,7 @@ namespace xdl {
 	template<typename T>
 	class XdevLListenerImpl: public XdevLClassifierImpl<T> {
 		public:
-			XdevLListenerImpl(XdevLModuleCreateParameter* parameter) :	XdevLClassifierImpl<T>(parameter) {
+			XdevLListenerImpl(XdevLModuleCreateParameter* parameter) :	XdevLClassifierImpl<T>(parameter), m_core(nullptr) {
 				if(parameter != nullptr) {
 					m_core = parameter->getMediator();
 				}

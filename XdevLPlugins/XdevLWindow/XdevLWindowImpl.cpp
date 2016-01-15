@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -33,16 +33,16 @@ namespace xdl {
 
 	xdl_int initDefaultWindowInstances(xdl::XdevLPluginCreateParameter* parameter) {
 
-		if (xdl::windowEventServer == nullptr) {
+		if(xdl::windowEventServer == nullptr) {
 			xdl::windowEventServer = static_cast<xdl::XdevLWindowEventServer*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLWindowEventServer"), xdl::XdevLID("XdevLWindowEventServer")));
-			if (nullptr == xdl::windowEventServer) {
+			if(nullptr == xdl::windowEventServer) {
 				return ERR_ERROR;
 			}
 		}
 
-		if (xdl::cursor == nullptr) {
+		if(xdl::cursor == nullptr) {
 			xdl::cursor = static_cast<xdl::XdevLCursor*>(parameter->getMediator()->createModule(xdl::XdevLModuleName("XdevLCursor"), xdl::XdevLID("XdevLCursor")));
-			if (nullptr == xdl::cursor) {
+			if(nullptr == xdl::cursor) {
 				return ERR_ERROR;
 			}
 		}
@@ -106,13 +106,15 @@ namespace xdl {
 						m_attribute.position.y = event.window.y;
 						m_attribute.size.width = event.window.width;
 						m_attribute.size.height = event.window.height;
-					}break;
+					}
+					break;
 					case XDEVL_WINDOW_RESIZED:  {
 						m_attribute.position.x = event.window.x;
 						m_attribute.position.y = event.window.y;
 						m_attribute.size.width = event.window.width;
 						m_attribute.size.height = event.window.height;
-					} break;
+					}
+					break;
 				}
 			}
 			break;
@@ -208,7 +210,7 @@ namespace xdl {
 	void XdevLWindowImpl::setWindowDecoration(xdl_bool enable) {
 
 	}
-	
+
 	XdevLWindowTypes XdevLWindowImpl::getType() {
 		return  m_attribute.type;
 	}
@@ -269,18 +271,19 @@ namespace xdl {
 	}
 
 	xdl_int XdevLWindowImpl::init() {
-		TiXmlDocument xmlDocument;
-		if(getMediator()->getXmlFilename()) {
-			if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
-				XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n" );
+		if(getMediator() != nullptr) {
+			TiXmlDocument xmlDocument;
+			if(getMediator()->getXmlFilename()) {
+				if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
+					XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << "\n");
+					return ERR_OK;
+				}
+
+				if(readWindowInfo(xmlDocument) != ERR_OK)
+					XDEVL_MODULE_WARNING("Some issues happend when parsing the XML file.\n");
 				return ERR_OK;
 			}
-
-			if(readWindowInfo(xmlDocument) != ERR_OK)
-				XDEVL_MODULE_WARNING("Some issues happend when parsing the XML file.\n" );
-				return ERR_OK;
 		}
-
 		return ERR_OK;
 	}
 
@@ -360,7 +363,7 @@ namespace xdl {
 
 	xdl_bool XdevLWindowEventServerImpl::isWindowRegistered(XdevLWindow* window) {
 		WindowEventMapType::iterator it = m_windows.find(window->getWindowID());
-		if (it == m_windows.end()) {
+		if(it == m_windows.end()) {
 			return xdl_false;
 		}
 		return xdl_true;
@@ -386,7 +389,7 @@ namespace xdl {
 
 	XdevLWindow* XdevLWindowEventServerImpl::getWindow(xdl_uint64 id) {
 		auto window = m_windows.find(id);
-		if (window == m_windows.end()) {
+		if(window == m_windows.end()) {
 			return nullptr;
 		}
 		return window->second;

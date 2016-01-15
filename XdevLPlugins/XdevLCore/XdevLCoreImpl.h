@@ -44,26 +44,6 @@
 
 namespace xdl {
 
-	// Holds the plugin major version.
-	const xdl_uint XdevLCorePluginMajorVersion = XDEVLCORE_MAJOR_VERSION;
-
-	// Holds the plugin minor version.
-	const xdl_uint XdevLCorePluginMinorVersion = XDEVLCORE_MINOR_VERSION;
-
-	// Holds the plugin patch version.
-	const xdl_uint XdevLCorePluginPatchVersion = XDEVLCORE_PATCH_VERSION;
-
-
-	// Holds the Major version number.
-	const xdl_uint XdevLCoreMajorVersion = XDEVLCORE_MODULE_MAJOR_VERSION;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLCoreMinorVersion = XDEVLCORE_MODULE_MINOR_VERSION;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLCorePatchVersion = XDEVLCORE_MODULE_PATCH_VERSION;
-
-
 	static const XdevLString vendor {
 		"www.codeposer.net"
 	};
@@ -121,14 +101,10 @@ namespace xdl {
 		@brief Implementation of XdevLCore
 		@author Cengiz Terzibas
 	*/
-	class XdevLCoreImpl : public XdevLCore {
-		public:
-			XdevLCoreImpl(XdevLCommandLineParser* param);
+	class XdevLCoreImpl : public XdevLModuleImpl<XdevLCore> {
+	public:
+			XdevLCoreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLCoreImpl();
-
-			static XdevLModuleDescriptor m_coreDescriptor;
-
-			virtual XdevLModuleDescriptor& getDescriptor();
 			virtual void* getInternal(const XdevLInternalName& id);
 			virtual xdl_int update();
 			virtual xdl_int shutdown();
@@ -144,12 +120,11 @@ namespace xdl {
 			virtual xdl_int unplug(const XdevLPluginName& pluginName);
 			virtual const XdevLFileName& getXmlFilename() const;
 			virtual xdl_int init();
-			virtual xdl_int init(const XdevLCoreInitParameters& parameters);
+			virtual xdl_int setParameters(const XdevLCoreParameters& parameters);
 			virtual xdl_int registerListener(XdevLListener* listener);
 			virtual xdl_int sendEventTo(xdl_uint64 receiver, XdevLEvent& ev);
 			virtual void fireEvent(XdevLEvent& event);
 			virtual xdl_int notify(XdevLEvent& event);
-			virtual const XdevLID& getID() const;
 			virtual xdl_double getTime();
 			virtual xdl_double getDT();
 			virtual XdevLTimer& getTimer();
@@ -163,9 +138,6 @@ namespace xdl {
 
 			// Holds the initialized state.
 			xdl_bool m_initialized;
-
-			// Holds the id.
-			XdevLID		m_id;
 
 			// Holds the logger.
 			XdevLLog*		m_logger;
@@ -192,7 +164,7 @@ namespace xdl {
 			std::string m_xdevlPluginPath;
 
 			// Holds the command line information.
-			XdevLCommandLineParser* m_commandLine;
+			XdevLCommandLineParser* m_commandLineParser;
 
 			// TODO This is the event queue. Maybe another approach would be better.
 			XdevLRingBuffer<XdevLEvent, 500> m_event_queue;

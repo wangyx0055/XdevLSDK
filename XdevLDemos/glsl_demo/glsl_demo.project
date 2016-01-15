@@ -212,7 +212,7 @@
         <Library Value="GL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../bin/$(ProjectName)d" IntermediateDirectory="$(ConfigurationName)" Command="./$(ProjectName)d" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="../bin/$(ProjectName)d" IntermediateDirectory="$(ConfigurationName)" Command="./$(ProjectName)d" CommandArguments="-pp /home/yaakuro/" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

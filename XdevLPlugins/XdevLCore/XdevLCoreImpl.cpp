@@ -39,38 +39,32 @@
 
 #include <tinyxml.h>
 
-xdl::XdevLModuleDescriptor xdl::XdevLCoreImpl::m_coreDescriptor {
-	vendor,
-	author,
-	moduleName[0],
-	copyright,
-	description,
-	XdevLCoreMajorVersion,
-	XdevLCoreMinorVersion,
-	XdevLCorePatchVersion
-};
-
-xdl::XdevLPluginDescriptor m_corePluginDescriptor {
+xdl::XdevLPluginDescriptor corePluginDescriptor {
 	xdl::pluginName,
 	xdl::moduleName,
-	xdl::XdevLCorePluginMajorVersion,
-	xdl::XdevLCorePluginMinorVersion,
-	xdl::XdevLCorePluginPatchVersion
+	XDEVLCORE_MAJOR_VERSION,
+	XDEVLCORE_MINOR_VERSION,
+	XDEVLCORE_PATCH_VERSION
 };
 
-extern "C" XDEVL_EXPORT int _createXdevLCore(xdl::XdevLCore** core, xdl::XdevLCommandLineParser* param) {
-	// TODO Do we have to do something if *core==nullptr?
-	*core = new xdl::XdevLCoreImpl(param);
-	return xdl::ERR_OK;
-}
+xdl::XdevLModuleDescriptor coreDescriptor {
+	xdl::vendor,
+	xdl::author,
+	xdl::moduleName[0],
+	xdl::copyright,
+	xdl::description,
+	XDEVLCORE_MODULE_MAJOR_VERSION,
+	XDEVLCORE_MODULE_MINOR_VERSION,
+	XDEVLCORE_MODULE_PATCH_VERSION
+};
 
-extern "C" XDEVL_EXPORT void _deleteXdevLCore(xdl::XdevLCore* core) {
-	if(core)
-		delete core;
-}
-
-extern "C" XDEVL_EXPORT xdl::XdevLPluginDescriptor* _getDescriptor() {
-	return &m_corePluginDescriptor;
+XDEVL_PLUGIN_INIT_DEFAULT
+XDEVL_PLUGIN_SHUTDOWN_DEFAULT
+XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(corePluginDescriptor);
+XDEVL_PLUGIN_CREATE_MODULE {
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLCoreImpl, coreDescriptor)
+	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
 namespace xdl {
@@ -81,10 +75,12 @@ namespace xdl {
 		std::cout << "Time [us]: " << item.timestamp << ", Module: " << item.additional << " : " << item.message << std::endl;
 	}
 
-	XdevLCoreImpl::XdevLCoreImpl(XdevLCommandLineParser* param) :
-		m_initialized(xdl_false),
-		m_id(XdevLID(getDescriptor().getName().toString().c_str())),
-		m_commandLine(param) {
+	XdevLCoreImpl::XdevLCoreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+		XdevLModuleImpl<XdevLCore>(parameter, desriptor),
+		m_initialized(xdl_false) {
+		
+		XdevLUserData* userData = parameter->getUserDefinedData();
+		m_commandLineParser = static_cast<XdevLCommandLineParser*>(userData->data);
 
 		// Print Core information and copyright.
 		XdevLVersion moduleVersion = getDescriptor().getVersion();
@@ -100,14 +96,13 @@ namespace xdl {
 		std::cout << copyright << "\n\n\n";
 
 		std::cout << "----------------------------------------------------------\n\n";
-		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Platform" << std::setw(3) << std::left << ":" << m_corePluginDescriptor.getPlatformName() << std::endl);
-		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Architecture" << std::setw(3) << std::left << ":" << m_corePluginDescriptor.getArchitecture() << std::endl);
-		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Internal ID" << std::setw(3) << std::left << ":" << m_id << std::endl);
+		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Platform" << std::setw(3) << std::left << ":" << corePluginDescriptor.getPlatformName() << std::endl);
+		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Architecture" << std::setw(3) << std::left << ":" << corePluginDescriptor.getArchitecture() << std::endl);
+		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Internal ID" << std::setw(3) << std::left << ":" << getID() << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Event buffer size" << std::setw(3) << std::left << ":" << m_event_queue.get_size() << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Core XML file" << std::setw(3) << std::left << ":" << m_XmlFilename << std::endl);
 		XDEVL_MODULE_INFO(std::left << std::setw(20) << "Plugin path" << std::setw(3) << std::left << ":" << m_xdevlPluginPath << std::endl);
 		std::cout << "----------------------------------------------------------\n\n\n";
-
 	}
 
 	XdevLCoreImpl::~XdevLCoreImpl() {
@@ -116,20 +111,12 @@ namespace xdl {
 		}
 	}
 
-	XdevLModuleDescriptor& XdevLCoreImpl::getDescriptor() {
-		return m_coreDescriptor;
-	}
-
 	xdl_bool  XdevLCoreImpl::coreInitialized() {
 		return m_initialized;
 	}
 
 	XdevLLog* XdevLCoreImpl::getLogger() {
 		return m_logger;
-	}
-
-	const XdevLID& XdevLCoreImpl::getID() const {
-		return m_id;
 	}
 
 	xdl_double XdevLCoreImpl::getTime() {
@@ -659,14 +646,10 @@ namespace xdl {
 	}
 
 	xdl_int XdevLCoreImpl::init() {
-
-		// Initialize with empty parameters.
-		XdevLCoreInitParameters parameters;
-
-		return init(parameters);
+		return ERR_OK;
 	}
 
-	xdl_int XdevLCoreImpl::init(const XdevLCoreInitParameters& parameters) {
+	xdl_int XdevLCoreImpl::setParameters(const XdevLCoreParameters& parameters) {
 
 		m_xdevlPluginPath = parameters.pluginsPath;
 
@@ -903,7 +886,7 @@ namespace xdl {
 			} break;
 
 		}
-		return ERR_OK;
+		return XdevLModuleImpl::notify(event);
 
 	}
 

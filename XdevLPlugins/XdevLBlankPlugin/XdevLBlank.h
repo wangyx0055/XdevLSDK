@@ -28,20 +28,18 @@
 
 namespace xdl {
 
-
 	/**
-		@class XdevLBlankModule
+		@class XdevLBlank
 	*/
-	class XdevLBlankModule : public XdevLModule {
+	class XdevLBlank : public XdevLModule {
 		public:
-			virtual ~XdevLBlankModule() {};
+			virtual ~XdevLBlank() {};
 	};
 
+	typedef XdevLBlank	IXdevLBlank;
+	typedef XdevLBlank*	IPXdevLBlank;
 
-
-	typedef XdevLBlankModule	IXdevLBlankModule;
-	typedef XdevLBlankModule*	IPXdevLBlankModule;
-
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLBlank)
 }
 
 #endif
