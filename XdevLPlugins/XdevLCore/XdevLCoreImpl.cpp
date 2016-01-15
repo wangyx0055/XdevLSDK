@@ -67,6 +67,9 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
+XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLCore, xdl::XdevLCoreImpl, coreDescriptor)
+XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DEFINITION_DEFAULT(XdevLCore)
+
 namespace xdl {
 
 	XDEVL_DECLARE_LOG(XdevLCore);
@@ -78,10 +81,13 @@ namespace xdl {
 	XdevLCoreImpl::XdevLCoreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLModuleImpl<XdevLCore>(parameter, desriptor),
 		m_initialized(xdl_false) {
-		
-		XdevLUserData* userData = parameter->getUserDefinedData();
-		m_commandLineParser = static_cast<XdevLCommandLineParser*>(userData->data);
 
+		if(nullptr != parameter) {
+			XdevLUserData* userData = parameter->getUserDefinedData();
+			if(nullptr != userData) {
+				m_commandLineParser = static_cast<XdevLCommandLineParser*>(userData->data);
+			}
+		}
 		// Print Core information and copyright.
 		XdevLVersion moduleVersion = getDescriptor().getVersion();
 
@@ -584,6 +590,40 @@ namespace xdl {
 		return parameter->getModuleInstance();
 	}
 
+	xdl_int XdevLCoreImpl::registerModule(std::shared_ptr<XdevLModule> module) {
+
+		//	XdevLPluginInfo* pluginInfo = new XdevLPluginInfo(nullptr, nullptr, nullptr, nullptr);
+		auto parameter = new XdevLModuleCreateParameter(this);
+
+		// Sets the plugins name.
+		parameter->setPluginName(XdevLPluginName("Not Specified"));
+		// The requested module name
+		parameter->setModuleName(module->getDescriptor().getName());
+		// The requested id
+		parameter->setModuleId(module->getID());
+		// User parameter
+		parameter->setUserParameter(nullptr);
+		
+		module->setMediator(this);
+		
+		registerListener(module.get());
+
+		XdevLEvent moduleInit;
+		moduleInit.type = XDEVL_MODULE_EVENT;
+		moduleInit.module.sender = getID().getHashCode();
+		moduleInit.module.event = XDEVL_MODULE_INIT;
+
+		if(sendEventTo(module->getID().getHashCode(), moduleInit) != ERR_OK) {
+			XDEVL_MODULE_ERROR("Initialize failed.\n");
+			return ERR_ERROR;
+		}
+
+		auto di = new XdevLModuleInfo(parameter, nullptr);
+		m_modules.insert(moduleMap::value_type(parameter->getModuleId().getName(), di));
+		
+		XDEVL_MODULE_SUCCESS("Module: " << module->getDescriptor().getName() << " registered successul.\n");
+		return ERR_OK;
+	}
 
 	xdl_int XdevLCoreImpl::deleteModule(const XdevLID& id) {
 

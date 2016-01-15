@@ -45,13 +45,19 @@
 
 namespace xdl {
 
+	class XdevLX11Initialize {
+	public:
+		XdevLX11Initialize(XdevLCoreMediator* core);
+		~XdevLX11Initialize();
+	};
+	
 	class XdevLWindowX11: public XdevLWindowImpl {
 		public:
 
 			XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowX11();
 
-			static xdl_int initX11(XdevLPluginCreateParameter* parameter);
+			static xdl_int initX11(XdevLCoreMediator* parameter);
 			static xdl_int shutdownX11();
 
 			//

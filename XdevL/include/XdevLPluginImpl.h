@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -60,6 +60,9 @@ namespace xdl {
 				return this->m_id;
 			}
 
+			void setID(const XdevLID& id) {
+				m_id = id;
+			}
 		private:
 			// Holds the module id.
 			XdevLID	m_id;
@@ -82,14 +85,13 @@ namespace xdl {
 			// --------------------------------------------------------------------------
 			// XdevLListener functions
 			//
-
-			virtual xdl_int notify(XdevLEvent& event) {
-				return ERR_OK;
-			}
-
 			/// Returns the pointer to the mediator
 			XdevLCoreMediator* getMediator() const {
 				return this->m_core;
+			}
+
+			void setMediator(XdevLCoreMediator* core) {
+				m_core = core;
 			}
 
 		private:
@@ -105,11 +107,11 @@ namespace xdl {
 	class XdevLModuleImpl: public XdevLListenerImpl<T> {
 		public:
 			XdevLModuleImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :	XdevLListenerImpl<T>(parameter),
-                                                      m_descriptor(descriptor){
+				m_descriptor(descriptor) {
 
 			}
 			virtual ~XdevLModuleImpl() {};
-      
+
 			// --------------------------------------------------------------------------
 			// XdevLModule function
 			//
@@ -124,11 +126,11 @@ namespace xdl {
 			virtual void* getInternal(const XdevLInternalName& id) {
 				return nullptr;
 			}
-      
-      virtual XdevLModuleDescriptor& getDescriptor() {
-        return m_descriptor;
-      }
-      
+
+			virtual XdevLModuleDescriptor& getDescriptor() {
+				return m_descriptor;
+			}
+
 			// --------------------------------------------------------------------------
 			// XdevLListener functions
 			//
@@ -147,10 +149,10 @@ namespace xdl {
 						return shutdown();
 				}
 
-				return ERR_OK;
+				return XdevLListenerImpl<T>::notify(event);
 			}
-  protected:
-      XdevLModuleDescriptor m_descriptor;
+		protected:
+			XdevLModuleDescriptor m_descriptor;
 	};
 
 	/**

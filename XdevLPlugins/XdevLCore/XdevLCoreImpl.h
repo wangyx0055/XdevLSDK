@@ -115,6 +115,7 @@ namespace xdl {
 			                                  const XdevLPluginName& pluginName,
 			                                  XdevLUserData* userParameter);
 			virtual XdevLModule* createModule(XdevLModuleCreateParameter* parameter);
+			virtual xdl_int registerModule(std::shared_ptr<XdevLModule> module);
 			virtual xdl_int deleteModule(const XdevLID& id);
 			virtual xdl_int plug(const XdevLPluginName& pluginName, const XdevLVersion& version = XdevLVersion::zero, const XdevLPlatformName& platform = XDEVL_CURRENT_PLATFORM_AS_STRING);
 			virtual xdl_int unplug(const XdevLPluginName& pluginName);

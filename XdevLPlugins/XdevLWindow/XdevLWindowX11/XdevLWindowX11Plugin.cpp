@@ -7,7 +7,7 @@ extern xdl::XdevLModuleDescriptor windowEventServerModuleDesc;
 extern xdl::XdevLModuleDescriptor cursorModuleDesc;
 
 XDEVL_PLUGIN_INIT {
-	return xdl::XdevLWindowX11::initX11(XDEVL_PLUGIN_CREATE_PARAMETER);
+	return xdl::XdevLWindowX11::initX11(XDEVL_PLUGIN_CREATE_PARAMETER_MEDIATOR);
 }
 
 XDEVL_PLUGIN_SHUTDOWN {

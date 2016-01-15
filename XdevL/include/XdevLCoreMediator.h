@@ -107,6 +107,9 @@ namespace xdl {
 			                                  const XdevLPluginName& pluginName = XdevLPluginName("Not Specified"),
 			                                  XdevLUserData* userParameter = NULL) = 0;
 
+
+			virtual xdl_int registerModule(std::shared_ptr<XdevLModule> module) = 0;
+
 			/// Removes a module from the core system.
 			/**
 				@param id The id of the module that should be deleted. You can get the XdevLModuleId

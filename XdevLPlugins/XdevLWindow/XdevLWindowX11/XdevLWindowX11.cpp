@@ -37,7 +37,7 @@
 
 static xdl::xdl_bool x11Initialized = xdl::xdl_false;
 static Display* globalDisplay = nullptr;
-
+static std::shared_ptr<xdl::XdevLX11Initialize> initializeX11;
 
 static const xdl::XdevLString windowX11PluginName {
 	"XdevLWindowX11"
@@ -134,6 +134,47 @@ namespace xdl {
 	  KDE_staysOnTop = 2048
 	};
 
+	XdevLX11Initialize::XdevLX11Initialize(XdevLCoreMediator* core) {
+		// Start X server with thread support.
+		XInitThreads();
+
+		// Connect to X server.
+		if(globalDisplay == nullptr) {
+			globalDisplay = XOpenDisplay(nullptr);
+			if(globalDisplay == nullptr) {
+				return;
+			}
+
+			// Print out some useless information :D
+			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
+			std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
+			std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
+			std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
+
+			if(nullptr != core) {
+				initDefaultWindowInstances(core);
+			} else {
+				XdevLWindowX11EventServer* eventServer = new XdevLWindowX11EventServer(nullptr, windowEventServerModuleDesc);
+				eventServer->init();
+				xdl::windowEventServer = eventServer;
+				XdevLCursorX11* x11Cursor = new XdevLCursorX11(nullptr, cursorModuleDesc);
+				x11Cursor->init();
+				xdl::cursor = x11Cursor;
+				
+			}
+		}
+	}
+
+	XdevLX11Initialize::~XdevLX11Initialize() {
+		if(globalDisplay) {
+			XCloseDisplay(globalDisplay);
+			globalDisplay = nullptr;
+		}
+	}
+
+//
+//
+//
 
 	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, desriptor),
@@ -155,56 +196,28 @@ namespace xdl {
 
 	}
 
-	xdl_int XdevLWindowX11::initX11(XdevLPluginCreateParameter* parameter) {
-		if(xdl::xdl_true == x11Initialized) {
+	xdl_int XdevLWindowX11::initX11(XdevLCoreMediator* core) {
+		if(nullptr != initializeX11) {
 			return ERR_OK;
 		}
 
-		// Start X server with thread support.
-		XInitThreads();
-
-		// Connect to X server.
-		if(globalDisplay == nullptr) {
-			globalDisplay = XOpenDisplay(nullptr);
-			if(globalDisplay == nullptr) {
-				return xdl::ERR_ERROR;
-			}
-
-			// Print out some useless information :D
-			std::clog << "\n---------------------------- X11 Server Information ----------------------------\n";
-			std::clog << "Vendor              : " << XServerVendor(globalDisplay) << "\n";
-			std::clog << "Release             : " << XVendorRelease(globalDisplay)<< "\n";
-			std::clog << "Number of Screens   : " << XScreenCount(globalDisplay) 	<< std::endl;
-
-			if(nullptr != parameter) {
-				initDefaultWindowInstances(parameter);
-			} else {
-				xdl::windowEventServer = new XdevLWindowX11EventServer(nullptr, windowEventServerModuleDesc);
-				xdl::cursor = new XdevLCursorX11(nullptr, cursorModuleDesc);
-			}
-		}
-
-		x11Initialized = xdl_true;
+		initializeX11 = std::make_shared<XdevLX11Initialize>(core);
 
 		return xdl::ERR_OK;
 	}
 
 	xdl_int XdevLWindowX11::shutdownX11() {
-		if(xdl::xdl_true != x11Initialized) {
-			return xdl::ERR_ERROR;
+		if(nullptr != initializeX11) {
+			initializeX11.reset();
 		}
-
-		if(globalDisplay) {
-			XCloseDisplay(globalDisplay);
-			globalDisplay = nullptr;
-		}
-
-		x11Initialized = xdl_false;
 
 		return xdl::ERR_OK;
 	}
 
 	xdl_int XdevLWindowX11::init() {
+		if(nullptr == initializeX11) {
+			initializeX11 = std::make_shared<XdevLX11Initialize>(getMediator());
+		}
 		return XdevLWindowImpl::init();
 	}
 

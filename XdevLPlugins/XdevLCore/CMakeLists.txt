@@ -103,6 +103,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
 			 XdevLd
+			 dl
 	)
 	elseif(APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
@@ -117,6 +118,7 @@ else()
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${XdevLCoreLibrary}
 			 XdevL
+			 dl
 		)
 	elseif(APPLE)
 			target_link_libraries(${XdevLCoreLibrary}
