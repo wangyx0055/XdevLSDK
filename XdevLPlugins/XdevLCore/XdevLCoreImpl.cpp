@@ -664,8 +664,9 @@ namespace xdl {
 		m_listener.erase(id.getHashCode());
 
 		// Delete it from the shared memory.
-		moduleIterator->second->getPluginInfo()->deleteModule(moduleIterator->second->getModuleCreateParameter()->getModuleInstance());
-
+		if(moduleIterator->second->getPluginInfo() != nullptr) {
+			moduleIterator->second->getPluginInfo()->deleteModule(moduleIterator->second->getModuleCreateParameter()->getModuleInstance());
+		}
 		// Delete the XdevLModuleInfo object.
 		delete moduleIterator->second;
 
