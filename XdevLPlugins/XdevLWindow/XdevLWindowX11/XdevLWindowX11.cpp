@@ -57,7 +57,7 @@ xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
 //
 // The XdevLWindow module descriptor.
 //
-xdl::XdevLModuleDescriptor windowX11ModuleDesc {
+xdl::XdevLModuleDescriptor windowX11Desc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_MODULE_NAME],
@@ -71,7 +71,7 @@ xdl::XdevLModuleDescriptor windowX11ModuleDesc {
 //
 // The XdevLWindowEventServer module descriptor.
 //
-xdl::XdevLModuleDescriptor windowServerModuleDesc {
+xdl::XdevLModuleDescriptor windowServerX11Desc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_SERVER_MODULE_NAME],
@@ -85,7 +85,7 @@ xdl::XdevLModuleDescriptor windowServerModuleDesc {
 //
 // The XdevLWindowEventServer module descriptor.
 //
-xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
+xdl::XdevLModuleDescriptor windowEventServerX11Desc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME],
@@ -99,7 +99,7 @@ xdl::XdevLModuleDescriptor windowEventServerModuleDesc {
 //
 // The XdevLCursor module descriptor.
 //
-xdl::XdevLModuleDescriptor cursorModuleDesc {
+xdl::XdevLModuleDescriptor cursorX11Desc {
 	xdl::window_vendor,
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
@@ -157,11 +157,11 @@ namespace xdl {
 			XdevLModuleCreateParameter parameter;
 			parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
 
-			windowEventServer = std::make_shared<XdevLWindowX11EventServer>(&parameter, windowEventServerModuleDesc);
+			windowEventServer = std::make_shared<XdevLWindowEventServerX11>(&parameter, windowEventServerX11Desc);
 			core->registerModule(windowEventServer);
 
 			parameter.setModuleId(XdevLID("XdevLCursor"));
-			cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorModuleDesc);
+			cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorX11Desc);
 			core->registerModule(cursor);
 
 		}
@@ -1315,26 +1315,26 @@ namespace xdl {
 // -----------------------------------------------------------------------------
 //
 
-	XdevLWindowX11EventServer::XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
+	XdevLWindowEventServerX11::XdevLWindowEventServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLWindowEventServerImpl(parameter, desriptor),
 		m_focusWindow(nullptr),
 		m_keyboard(nullptr) {
 	}
 
-	XdevLWindowX11EventServer::~XdevLWindowX11EventServer() {
+	XdevLWindowEventServerX11::~XdevLWindowEventServerX11() {
 
 	}
 
 
-	xdl_int XdevLWindowX11EventServer::registerWindowForEvents(XdevLWindow* window) {
+	xdl_int XdevLWindowEventServerX11::registerWindowForEvents(XdevLWindow* window) {
 		return XdevLWindowEventServerImpl::registerWindowForEvents(window);
 	}
 
-	xdl_int XdevLWindowX11EventServer::unregisterWindowFromEvents(XdevLWindow* window) {
+	xdl_int XdevLWindowEventServerX11::unregisterWindowFromEvents(XdevLWindow* window) {
 		return XdevLWindowEventServerImpl::unregisterWindowFromEvents(window);
 	}
 
-	xdl_int XdevLWindowX11EventServer::init() {
+	xdl_int XdevLWindowEventServerX11::init() {
 
 		m_keyboard = new XdevLWindowX11Keyboard(display, getMediator());
 
@@ -1346,12 +1346,12 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void* XdevLWindowX11EventServer::getInternal(const XdevLInternalName& id) {
+	void* XdevLWindowEventServerX11::getInternal(const XdevLInternalName& id) {
 
 		return nullptr;
 	}
 
-	xdl_int XdevLWindowX11EventServer::shutdown() {
+	xdl_int XdevLWindowEventServerX11::shutdown() {
 
 		// Free the keyboard device.
 		if(m_keyboard != nullptr) {
@@ -1363,11 +1363,11 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int XdevLWindowX11EventServer::update() {
+	xdl_int XdevLWindowEventServerX11::update() {
 		return pollEvents();
 	}
 
-	xdl_int XdevLWindowX11EventServer::pollEvents() {
+	xdl_int XdevLWindowEventServerX11::pollEvents() {
 
 		// Only run this while loop when we have events in the queue.
 		while(XPending(display) > 0) {
@@ -1757,7 +1757,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	void XdevLWindowX11EventServer::flush() {
+	void XdevLWindowEventServerX11::flush() {
 		pollEvents();
 	}
 

@@ -45,7 +45,7 @@
 
 namespace xdl {
 
-	class XdevLWindowX11: public XdevLWindowImpl {
+	class XdevLWindowX11 :  public XdevLWindowImpl {
 		public:
 
 			XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
@@ -250,11 +250,10 @@ namespace xdl {
 			                            );
 	};
 
-
-	class XdevLWindowX11EventServer : public XdevLWindowEventServerImpl {
+	class XdevLWindowEventServerX11 : public XdevLWindowEventServerImpl {
 		public:
-			XdevLWindowX11EventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
-			virtual ~XdevLWindowX11EventServer();
+			XdevLWindowEventServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
+			virtual ~XdevLWindowEventServerX11();
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
@@ -334,14 +333,14 @@ namespace xdl {
 	public:
 		XdevLX11Display(XdevLCoreMediator* core);
 		~XdevLX11Display();
-		XdevLWindowX11EventServer* getWindowEventServer() {
+		XdevLWindowEventServerX11* getWindowEventServer() {
 			return windowEventServer.get();
 		}
 		XdevLCursorX11* getCursor() {
 			return cursor.get();
 		}
 public:
-		std::shared_ptr<XdevLWindowX11EventServer> windowEventServer;
+		std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
 		std::shared_ptr<XdevLCursorX11> cursor;
 	};
 }
