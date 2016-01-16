@@ -24,6 +24,7 @@
 #ifndef XDEVL_CORE_MEDIATOR_H
 #define XDEVL_CORE_MEDIATOR_H
 
+#include <XdevLPlatform.h>
 #include <XdevLEvent.h>
 #include <XdevLVersion.h>
 #include <string>

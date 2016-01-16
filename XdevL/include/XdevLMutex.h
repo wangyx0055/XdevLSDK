@@ -26,7 +26,7 @@
 
 #include <XdevLPlatform.h>
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 typedef pthread_mutex_t THREAD_MUTEX;
 #elif XDEVL_PLATFORM_WINDOWS
 typedef CRITICAL_SECTION THREAD_MUTEX;

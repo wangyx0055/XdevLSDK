@@ -40,6 +40,7 @@
 	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Apple")
 #elif defined(__unix__) // All unixes, not all compilers.
 	#define XDEVL_PLATFORM_UNIX
+	#define XDEVL_CURRENT_PLATFORM_AS_STRING XdevLPlatformName("Unix")
 #elif defined(__DragonFly__)
 	#define XDEVL_PLATFORM_DRAGONFLY 1
 	#define XDEVL_PLATFORM_UNIX 1
@@ -71,6 +72,9 @@
 	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("arm")
 #elif defined(__aarch64__)
 	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("arm_64")
+#else
+	#define XDEVL_CURRENT_ARCHITECTURE_AS_STRING XdevLArchitecture("html5")
+//	#error XDEVL_UNKNOWN_ARCHITECTURE
 #endif
 
 //

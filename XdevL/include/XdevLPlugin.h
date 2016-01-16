@@ -24,6 +24,7 @@
 #ifndef XDEVL_PLUGIN_H
 #define XDEVL_PLUGIN_H
 
+#include <XdevLPlatform.h>
 #include <XdevLTypes.h>
 #include <XdevLVersion.h>
 #include <XdevLDynLib.h>

@@ -23,7 +23,7 @@
 #include <XdevLTypes.h>
 #include <XdevLMutex.h>
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 typedef pthread_cond_t THREAD_COND;
 #elif XDEVL_PLATFORM_WINDOWS 
 typedef CONDITION_VARIABLE THREAD_COND;

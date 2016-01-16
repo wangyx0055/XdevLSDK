@@ -40,7 +40,7 @@ namespace thread {
 	}
 
 	Thread::~Thread() {
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 #else
 		if(m_thread) {
 			if(CloseHandle(m_thread) == 0) {
@@ -53,7 +53,7 @@ namespace thread {
 
 	int Thread::Start(ThreadArgument* arg) {
 		Arguments(arg);
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		if(pthread_create(&m_thread, NULL, Thread::ThreadProc, this) != 0) {
 			std::cerr << "Thread::Could not create thread." << std::endl;
 			return 1;
@@ -68,7 +68,7 @@ namespace thread {
 	}
 
 int Thread::StartUsingFuncPointer() {
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		if(pthread_create(&m_thread, NULL, Thread::ThreadProc2, this) != 0) {
 			std::cerr << "Thread::Could not create thread." << std::endl;
 			return 1;
@@ -89,7 +89,7 @@ int Thread::StartUsingFuncPointer() {
 			return 1;
 
 		int ret = 0;
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		if(pthread_join(m_thread, NULL) != 0)
 			ret = 1;
 #else
@@ -100,7 +100,7 @@ int Thread::StartUsingFuncPointer() {
 	}
 
 	void Thread::Exit(int exitCode) {
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		int tmp = exitCode;
 		pthread_exit(&tmp);
 #else
@@ -108,13 +108,13 @@ int Thread::StartUsingFuncPointer() {
 #endif
 	}
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 	void* Thread::ThreadProc(void* p_this) {
 #else
 	unsigned long __stdcall Thread::ThreadProc(void* p_this) {
 #endif
 		Thread* ptr = static_cast<Thread*>(p_this);
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		return reinterpret_cast<void*>(ptr->RunThread(ptr->Arguments()));
 #else
 		return static_cast<unsigned long>(ptr->RunThread(ptr->Arguments()));
@@ -122,14 +122,14 @@ int Thread::StartUsingFuncPointer() {
 
 	}
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 	void* Thread::ThreadProc2(void* p_this) {
 #else
 	unsigned long __stdcall Thread::ThreadProc2(void* p_this) {
 #endif
 		Thread* ptr = static_cast<Thread*>(p_this);
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 		return reinterpret_cast<void*>(ptr->callbackFunction());
 #else
 		return static_cast<unsigned long>(ptr->callbackFunction());

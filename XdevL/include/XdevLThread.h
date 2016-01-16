@@ -26,7 +26,7 @@
 
 #include <XdevLPlatform.h>
 
-#if XDEVL_PLATFORM_UNIX  || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 	typedef pthread_t THREAD_THREAD;
 	#define THREAD_INIT(THREAD) THREAD(0)
 	const int THREAD_INVALID = 0;
@@ -157,7 +157,7 @@ namespace thread {
 			/// Override this function for your purpose.
 			virtual int RunThread(ThreadArgument* arg);
 
-#if XDEVL_PLATFORM_UNIX || XDEVL_PLATFORM_MINGW
+#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
 			/// Don't touch this function.
 			static void* ThreadProc(void* p_this);
 			static void* ThreadProc2(void* p_this);

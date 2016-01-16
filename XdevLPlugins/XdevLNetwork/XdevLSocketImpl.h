@@ -112,7 +112,7 @@ namespace xdl {
 	typedef SOCKET XDEVL_SOCKET;
 	typedef int ssize_t;
 	typedef unsigned long in_addr_t;
-#elif XDEVL_PLATFORM_UNIX
+#elif defined(XDEVL_PLATFORM_UNIX)
 #define XdevLSocketGetLastError() errno
 #define XdevLGetInetAddr(host,addrPtr) *addrPtr = inet_addr(host)
 #define XdevLInvalidSocket -1
