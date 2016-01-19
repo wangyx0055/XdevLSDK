@@ -393,7 +393,7 @@ namespace xdl {
 		XdevLCreateModuleFunction create_module		= (XdevLCreateModuleFunction)(modulesSharedLibrary->getFunctionAddress("_create"));
 		XdevLDeleteModuleFunction delete_module		= (XdevLDeleteModuleFunction)(modulesSharedLibrary->getFunctionAddress("_delete"));
 		XdevLPluginInitFunction init_plugin = (XdevLPluginInitFunction)(modulesSharedLibrary->getFunctionAddress("_init_plugin"));
-		XdevLPluginShutdownFunction shtudown_plugin = (XdevLPluginShutdownFunction)(modulesSharedLibrary->getFunctionAddress("_shutdown_plugin"));
+		XdevLPluginShutdownFunction shutdown_plugin = (XdevLPluginShutdownFunction)(modulesSharedLibrary->getFunctionAddress("_shutdown_plugin"));
 
 
 		// Check if we have all necessary module functions from the dynamic library.
@@ -402,7 +402,7 @@ namespace xdl {
 			XDEVL_ASSERT(0, "Plugin has not the right functions defined or another problem exists.");
 		}
 
-		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shtudown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
+		auto plugininfo 	= new XdevLPluginInfo(init_plugin, shutdown_plugin, create_module, delete_module, plugin_descriptor, modulesSharedLibrary);
 		if(plugin_descriptor()->getArchitecture() != XDEVL_CURRENT_ARCHITECTURE_AS_STRING) {
 			XDEVL_MODULE_ERROR("This intance uses: " << XDEVL_CURRENT_ARCHITECTURE_AS_STRING << " the plugin used: " << plugin_descriptor()->getArchitecture() << "\n");
 			XDEVL_ASSERT(0, "Plugin has wrong architecture.");
@@ -657,9 +657,11 @@ namespace xdl {
 		moduleInit.type 			= XDEVL_MODULE_EVENT;
 		moduleInit.module.sender 	= getID().getHashCode();
 		moduleInit.module.event 	= XDEVL_MODULE_SHUTDOWN;
-
+		XDEVL_MODULE_INFO("Starting shutdown process for: " << id << std::endl);
 		if(sendEventTo(moduleIterator->second->getModuleCreateParameter()->getModuleInstance()->getID().getHashCode(), moduleInit) != ERR_OK) {
 			XDEVL_MODULE_ERROR("Error occurred during the shutdown process of: '" << id.getName() << "'\n");
+		} else {
+			XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		}
 
 		// Remove from the listener list.

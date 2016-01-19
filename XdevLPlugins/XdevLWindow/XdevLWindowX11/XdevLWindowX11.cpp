@@ -414,8 +414,6 @@ namespace xdl {
 
 	xdl_int XdevLWindowX11::shutdown() {
 
-		XDEVL_MODULE_INFO("Starting shutdown process.\n");
-
 		// Send a more or less random value to unblock the
 		// XNextEvent functions in the thread.
 
@@ -449,8 +447,6 @@ namespace xdl {
 		if(XdevLWindowImpl::shutdown() != ERR_OK) {
 			return ERR_ERROR;
 		}
-
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 
 		return ERR_OK;
 	}

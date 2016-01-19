@@ -469,8 +469,6 @@ namespace xdl {
 
 	xdl_int XdevLWindowSDL::shutdown() {
 
-		XDEVL_MODULE_INFO("Starting shutdown process.\n");
-
 		stopEventThread();
 
 		Join();
@@ -482,8 +480,6 @@ namespace xdl {
 			SDL_DestroyWindow(m_window);
 			m_window = nullptr;
 		}
-
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 
 		return ERR_OK;
 	}

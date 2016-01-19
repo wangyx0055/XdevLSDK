@@ -180,8 +180,6 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevlKeyboardBase<T>::shutdown() {
-		XDEVL_MODULE_INFO("Starting shutdown process.\n");
-
 		// Delete all XdevLButton objects.
 		for(auto& button : m_Buttons) {
 			delete button.second;
@@ -196,7 +194,6 @@ namespace xdl {
 			Join();
 		}
 		m_initialized = xdl_false;
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
 

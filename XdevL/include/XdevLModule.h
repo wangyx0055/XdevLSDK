@@ -34,6 +34,7 @@
 
 namespace xdl {
 
+	class XdevLModuleCreateParameter;
 	class XdevLCoreMediator;
 	class XdevLCommandLineParser;
 	class XdevLLog;
@@ -47,11 +48,9 @@ namespace xdl {
 #define XDEVL_NEW_MODULE(CLASS_NAME, PARAMETER) new CLASS_NAME(PARAMETER)
 #define XDEVL_NEW_MODULE_DESCRIPTOR(CLASS_NAME, PARAMETER, DESCRIPTOR) new CLASS_NAME(PARAMETER, DESCRIPTOR)
 
-#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(MODULENAME) extern "C" XDEVL_EXPORT xdl::xdl_int create##MODULENAME(const xdl::XdevLID& id, std::shared_ptr<xdl::XdevLModule>& module);
-#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(MODULENAME, MODULECLASS, DESCRIPTOR) extern "C" XDEVL_EXPORT xdl::xdl_int create##MODULENAME(const xdl::XdevLID& id, std::shared_ptr<xdl::XdevLModule>& module) {\
-		xdl::XdevLModuleCreateParameter parameter;\
-		parameter.setModuleId(id);\
-		module = std::make_shared<MODULECLASS>(&parameter, DESCRIPTOR);\
+#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(MODULENAME) extern "C" XDEVL_EXPORT xdl::xdl_int create##MODULENAME(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
+#define XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(MODULENAME, MODULECLASS, DESCRIPTOR) extern "C" XDEVL_EXPORT xdl::xdl_int create##MODULENAME(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module) {\
+		module = std::make_shared<MODULECLASS>(parameter, DESCRIPTOR);\
 		return xdl::ERR_OK;\
 	}
 
@@ -335,6 +334,11 @@ namespace xdl {
 			/// Sets the plugins name.
 			virtual void setPluginName(const XdevLPluginName& name) {
 				m_pluginsName = name;
+			}
+			
+			/// Sets the modules mediator.
+			virtual void setModuleMediator(XdevLCoreMediator* mediator) {
+				m_mediator = mediator;
 			}
 
 		private:
