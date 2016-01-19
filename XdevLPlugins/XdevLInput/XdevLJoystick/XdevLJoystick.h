@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -48,48 +48,48 @@ namespace xdl {
 		@author Cengiz Terzibas
 	*/
 	enum class XdevLJoystickId {
-		JOYSTICK_0 = 0,
-		JOYSTICK_DEFAULT = 0,
-		JOYSTICK_1,
-		JOYSTICK_2,
-		JOYSTICK_3,
-		JOYSTICK_4,
-		JOYSTICK_5,
-		JOYSTICK_6,
-		JOYSTICK_7,
-		JOYSTICK_8,
-		JOYSTICK_9,
-		JOYSTICK_10,
-		JOYSTICK_11,
-		JOYSTICK_12,
-		JOYSTICK_13,
-		JOYSTICK_14,
-		JOYSTICK_15,
-		JOYSTICK_UNKNOWN
+	  JOYSTICK_0 = 0,
+	  JOYSTICK_DEFAULT = 0,
+	  JOYSTICK_1,
+	  JOYSTICK_2,
+	  JOYSTICK_3,
+	  JOYSTICK_4,
+	  JOYSTICK_5,
+	  JOYSTICK_6,
+	  JOYSTICK_7,
+	  JOYSTICK_8,
+	  JOYSTICK_9,
+	  JOYSTICK_10,
+	  JOYSTICK_11,
+	  JOYSTICK_12,
+	  JOYSTICK_13,
+	  JOYSTICK_14,
+	  JOYSTICK_15,
+	  JOYSTICK_UNKNOWN
 	};
-	
+
 	/**
 		@enum XdevLGameControllerId
 		@brief Game Controller Id's
 		@author Cengiz Terzibas
 	*/
 	enum class XdevLGameControllerId {
-		CONTROLLER_X,
-		CONTROLLER_Y,
-		CONTROLLER_A,
-		CONTROLLER_B,
-		CONTROLLER_START,
-		CONTROLLER_BACK,
-		CONTROLLER_DPAD_UP,
-		CONTROLLER_DPAD_DOWN,
-		CONTROLLER_DPAD_LEFT,
-		CONTROLLER_DPAD_RIGHT,
-		CONTROLLER_LEFT_SHOULDER,
-		CONTROLLER_RIGHT_SHOULDER,
-		CONTROLLER_LEFT_STICK,
-		CONTROLLER_RIGHT_STICK
+	  CONTROLLER_X,
+	  CONTROLLER_Y,
+	  CONTROLLER_A,
+	  CONTROLLER_B,
+	  CONTROLLER_START,
+	  CONTROLLER_BACK,
+	  CONTROLLER_DPAD_UP,
+	  CONTROLLER_DPAD_DOWN,
+	  CONTROLLER_DPAD_LEFT,
+	  CONTROLLER_DPAD_RIGHT,
+	  CONTROLLER_LEFT_SHOULDER,
+	  CONTROLLER_RIGHT_SHOULDER,
+	  CONTROLLER_LEFT_STICK,
+	  CONTROLLER_RIGHT_STICK
 	};
-	
+
 	/**
 		@class XdevLJoystickDeviceInfo
 		@brief Structure that holds joystick information for the joystick server.
@@ -286,6 +286,10 @@ namespace xdl {
 			virtual xdl_float getValue(const xdl_uint axis) = 0;
 	};
 
+	typedef XdevLJoystick	IXdevLJoystick;
+	typedef XdevLJoystick* IPXdevLJoystick;
+
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLJoystick)
 }
 
 

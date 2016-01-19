@@ -89,6 +89,7 @@ namespace xdl {
 			XdevLMouseBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor)	:
 				XdevLModuleAutoImpl<T>(parameter, descriptor),
 				m_window(NULL),
+				m_initialized(xdl_false),
 				m_windowWidth(640),
 				m_windowHeight(480),
 				m_mouse_curr_x(0),
@@ -136,6 +137,7 @@ namespace xdl {
 
 		protected:
 			XdevLWindow*	m_window;
+			xdl_bool m_initialized;
 			xdl_int			m_windowWidth;
 			xdl_int			m_windowHeight;
 			xdl_int			m_mouse_curr_x;
@@ -225,12 +227,13 @@ namespace xdl {
 
 		reset();
 
+		m_initialized = xdl_true;
+
 		return ERR_OK;
 	}
 
 	template<typename T>
 	xdl_int XdevLMouseBase<T>::shutdown() {
-		XDEVL_MODULE_INFO("Starting shutdown process.\n");
 
 		for(size_t a = 0; a < m_Buttons.size(); ++a)
 			delete m_Buttons[a];
@@ -242,7 +245,8 @@ namespace xdl {
 
 		setAttached(xdl_false);
 
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
+		m_initialized = xdl_false;
+
 		return ERR_OK;
 	}
 
@@ -419,6 +423,12 @@ namespace xdl {
 		}
 		m_window = window;
 
+		if(xdl_false == m_initialized) {
+			if(init() != ERR_OK) {
+				return ERR_ERROR;
+			}
+		}
+
 		const XdevLWindowSize& size = window->getSize();
 
 		m_windowWidth	= size.width;
@@ -427,12 +437,13 @@ namespace xdl {
 		if(this->getMediator()->getXmlFilename()) {
 			TiXmlDocument xmlDocument;
 			if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
-				XDEVL_MODULE_ERROR("Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl);
-				return ERR_ERROR;
-			}
+				XDEVL_MODULE_WARNING("Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl);
+			} else {
 
-			if(readMouseInfo(xmlDocument, modulename) != ERR_OK)
-				return ERR_ERROR;
+				if(readMouseInfo(xmlDocument, modulename) != ERR_OK) {
+					return ERR_ERROR;
+				}
+			}
 		}
 
 		// If threading is activated it will start only if this device is attached.

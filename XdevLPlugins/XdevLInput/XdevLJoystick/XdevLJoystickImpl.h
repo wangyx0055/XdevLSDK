@@ -249,7 +249,6 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevLJoystickBase<T>::shutdown() {
-		XDEVL_MODULE_INFO("Starting shutdown process.\n");
 
 		for(size_t a = 0; a < m_Buttons.size(); ++a)
 			delete m_Buttons[a];
@@ -259,7 +258,6 @@ namespace xdl {
 		m_Buttons.clear();
 		m_Axes.clear();
 
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
 

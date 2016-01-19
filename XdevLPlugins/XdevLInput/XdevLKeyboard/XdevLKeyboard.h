@@ -79,6 +79,7 @@ namespace xdl {
 	typedef XdevLKeyboard*	IPXdevLKeyboard;
 
 	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLKeyboard)
+
 }
 
 #endif

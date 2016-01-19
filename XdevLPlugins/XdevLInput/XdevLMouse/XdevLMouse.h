@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -49,7 +49,7 @@ namespace xdl {
 		- Gives easy access to mouse axis values.
 		- Change axis range values.
 
-		It is expected that the necessary plugin is already plugged into the core system to do all the steps in the 
+		It is expected that the necessary plugin is already plugged into the core system to do all the steps in the
 		following sections. Let's start with creating the module.
 
 		@section xdevl_mouse_xml_create Creating the module manually
@@ -70,16 +70,16 @@ namespace xdl {
 		}
 		@endcode
 
-		The last parameter @e "MyMouse" is the identification code for the module that will be managed withing the core. You can not 
+		The last parameter @e "MyMouse" is the identification code for the module that will be managed withing the core. You can not
 		use the same identification name for a another module. Internally the system will change this literal into an unique
 		integer value that corresponds to the string.
 
 		@section xdevl_mouse_xml_create_via_xml Creating the module via XML file
 
 		Here is an alternative method to create the module. You can instruct XdevLCore to create the module during start up time
-		using the main XML file. 
-		To do that add the "<XdevLModules>" section (if not added already) into the main core XML file. To instruct XdevLCore 
-		to create a valid object of that module add the "<XdevLModule>" element into the "<XdevLModules>" section. The "<Modules>" 
+		using the main XML file.
+		To do that add the "<XdevLModules>" section (if not added already) into the main core XML file. To instruct XdevLCore
+		to create a valid object of that module add the "<XdevLModule>" element into the "<XdevLModules>" section. The "<Modules>"
 		section of the XML file could look like this:
 
 		@code
@@ -101,45 +101,45 @@ namespace xdl {
 		@endcode
 
 		@section xdevl_mouse_usage Usage
-		
+
 		@subsection xdevl_mouse_usage_easy Easy access.
 		The easiest way to check if a button is press/released/clicked use the getPressed() and getClicked() method.
 		To get easy access to the values of the mouse axis use the getValue() method.
-		
+
 		@code
 			if(mouse->getPressed(xdl::BUTTON_0) == xdl::xdl_true) {
 				// Mouse button 0 is pressed.
 			}
-			
+
 			if(mouse->getClicked(xdl::BUTTON_0) == xdl::xdl_true) {
 				// Mouse button 0 is clicked.
 			}
-			
+
 			xdl_float value = mouse->getValue(xdl::AXIS_0);
 		@endcode
 
 		@subsection xdevl_mouse_usage_object_oriented Using the XdevLButton and/or XdevLAxis interface.
-		Another way got get press/click/motion events is to assign buttons and axis to the XdevLButton and XdevLAxis objects. 
-		That gives you more flexibility how ot interpret button press/click etc. In the @ref xdevl_keyboard_usage you can assign 
+		Another way got get press/click/motion events is to assign buttons and axis to the XdevLButton and XdevLAxis objects.
+		That gives you more flexibility how ot interpret button press/click etc. In the @ref xdevl_keyboard_usage you can assign
 		keyboard key to a XdevLButton object. Doing that it does not matter anymore if a press/click is done by a button/key on a
 		mouse, keyboard or joystick etc.
-		
+
 		Here an example:
-		
+
 		@code
 			// Get the left mouse button and assign it to the fireFireworks object;
 			xdl::IPXdevLButton fireFireworks = nullptr;
 			mouse->getButton(xdl::BUTTON_LEFT, &fireFireworks);
-			
-			
+
+
 			if(fireFireworks->getPressed) == xdl::xdl_true) {
 				// Mouse BUTTON_LEFT is pressed.
 			}
-			
+
 			if(fireFireworks->getClicked) == xdl::xdl_true) {
 				// Mouse BUTTON_LEFT is clicked.
 			}
-			
+
 		@endcode
 
 		As you can see, it is not important which button is assigned to an event that shall for example fire
@@ -148,9 +148,9 @@ namespace xdl {
 		fireworks :D.
 
 		@subsection xdevl_mouse_usage_delegates Using delegates
-		
+
 		Another cool way of handling events is using delegates. We can assign a member function of a class that must have
-		a defined return value and parameters value to a delegate, register it to the module and every time an event occurs 
+		a defined return value and parameters value to a delegate, register it to the module and every time an event occurs
 		the delegate will be used to trigger the specified member function. Here we go:
 
 		@code
@@ -164,22 +164,22 @@ namespace xdl {
 				}
 			}
 		};
-		
+
 		MySuperActor mySuperActorInstance;
-		
-		// First create XdevLButtonIdDelegate object and assign the member function. 
+
+		// First create XdevLButtonIdDelegate object and assign the member function.
 		xdl::XdevLButtonIdDelegateType fireFireworks = xdl::XdevLButtonIdDelegateType::Create<MySuperActor, &MySuperActor::fireFireworksHandler>(&mySuperActorInstance);
-		
+
 		// And now we assign a specific button that shall trigger our member function when the button is pressed/release/clicked.
 		mouse->registerDelegate(xdl::XdevLString("BUTTON_0"), fireFireworks);
 		@endcode
 
 		Now everytime the mouse button xdl::BUTTON_0 is pressed/released the delegate will be used to call the MySuperActor member function fireFireworksHandler.
 		I think from here you can imagine where this goes ;).
-		The above example was just showing how to assign a specific button to a delegate. 
+		The above example was just showing how to assign a specific button to a delegate.
 
 		If we want handle all events from all buttons using delegates we do this.
-		
+
 		@code
 		class MySuperActor {
 			void fireFireworksHandler(const xdl::XdevLButtonId& button, const xdl::XdevLButtonState& state) {
@@ -196,18 +196,18 @@ namespace xdl {
 				}
 			}
 		};
-		
+
 		MySuperActor mySuperActorInstance;
-		
+
 		xdl::XdevLButtonDelegateType fireFireworks = xdl::XdevLButtonDelegateType::Create<MySuperActor, &MySuperActor::fireFireworksHandler>(&mySuperActorInstance);
-		
+
 		// And now we register the delegate to the module.
 		mouse->registerDelegate(fireFireworks);
 
 		@endcode
 
 		Now we will receive all buttons events in one member function.
-		
+
 
 		@section xdevl_mouse_xml_element XML Format.
 		You can change some properties of the mouse device via the XML file too. In this section the elements and
@@ -254,7 +254,7 @@ namespace xdl {
 	class XdevLMouse : public XdevLInputSystem, public XdevLModule {
 		public:
 			virtual ~XdevLMouse() {};
-			
+
 			/// Attach the mouse device to a window.
 			/**
 				This module must be attached to a window otherwise it will assert.
@@ -267,7 +267,7 @@ namespace xdl {
 
 			/// Returns the state of a button/key.
 			/**
-				@return Returns 
+				@return Returns
 				- @b xdl_true As long as the specified button/key is pressed.
 				- @b xdl_false Else.
 			*/
@@ -278,7 +278,7 @@ namespace xdl {
 				The default click response time (crt) is 300ms. To change the crt use the setClickResponseTime()
 				function.
 
-				@return Returns 
+				@return Returns
 				@b xdl_true Only after the specified button/key was pressed and released within the click response time (crt).
 				@b xdl_false Else.
 			*/
@@ -302,9 +302,11 @@ namespace xdl {
 			virtual xdl_float getDeltaValue(const xdl_uint axis) = 0;
 	};
 
-
 	typedef XdevLMouse	IXdevLMouse;
 	typedef XdevLMouse*	IPXdevLMouse;
+
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLMouse)
+
 }
 
 #endif

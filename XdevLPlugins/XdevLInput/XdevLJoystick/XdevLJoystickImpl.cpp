@@ -58,6 +58,8 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
+XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLJoystick, xdl::XdevLJoystickImpl, joystickModuleDesc)
+
 namespace xdl {
 
 	XdevLJoystickImpl::XdevLJoystickImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
