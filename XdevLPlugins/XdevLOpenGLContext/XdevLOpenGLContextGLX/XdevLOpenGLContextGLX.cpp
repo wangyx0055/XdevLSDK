@@ -108,6 +108,8 @@ namespace xdl {
 	int XdevLOpenGLContextGLX::create(XdevLWindow* window) {
 		XDEVL_ASSERT(m_display == nullptr, "XdevLOpenGLContextGLX already created.");
 
+		window->getDescriptor().registerDependency(this);
+
 		m_display = static_cast<Display*>(window->getInternal(XdevLInternalName("X11_DISPLAY")));
 		if(nullptr == m_display) {
 			XDEVL_MODULE_ERROR("Could not get native X11 display information.\n");
