@@ -40,6 +40,8 @@
 
 namespace xdl {
 
+	std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
+
 	XdevLVersion XdevLVersion::zero {0,0,0};
 
 	// Typedef for the command line arguments.
@@ -294,7 +296,7 @@ namespace xdl {
 		//
 		// Create the XdevLCore object.
 		//
-	//	cmdl = new xdl::XdevLCommandLineParser(argc, argv);
+		//	cmdl = new xdl::XdevLCommandLineParser(argc, argv);
 		XdevLUserData userData;
 
 		userData.id = XdevLID("XDEVL_COMMAND_LINE_PARSER");

@@ -32,10 +32,11 @@ namespace xdl {
 
 	XdevLBlankImpl::XdevLBlankImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleImpl<XdevLBlank>(parameter, descriptor) {
-		XDEVL_MODULE_INFO("Hello, World!\n");
+		XDEVL_MODULE_INFO("XdevLBlankImpl()\n");
 	}
 
 	XdevLBlankImpl::~XdevLBlankImpl() {
+		XDEVL_MODULE_INFO("~XdevLBlankImpl()\n");
 	}
 
 }
