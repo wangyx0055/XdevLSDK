@@ -336,7 +336,8 @@ namespace xdl {
 		XdevLCursorX11* getCursor() {
 			return cursor.get();
 		}
-public:
+	public:
+		XdevLCoreMediator* m_core;
 		std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
 		std::shared_ptr<XdevLCursorX11> cursor;
 	};

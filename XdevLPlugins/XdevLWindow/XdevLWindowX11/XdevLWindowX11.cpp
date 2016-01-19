@@ -135,7 +135,7 @@ namespace xdl {
 	  KDE_staysOnTop = 2048
 	};
 
-	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) {
+	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) : m_core(core) {
 		std::cout << "XdevLX11Display::XdevLX11Display()\n";
 
 		// Start X server with thread support.
@@ -161,9 +161,9 @@ namespace xdl {
 		cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorX11Desc);
 
 		// Register within the Core if this is using one.
-		if(core) {
-			core->registerModule(windowEventServer);
-			core->registerModule(cursor);
+		if(m_core) {
+			m_core->registerModule(windowEventServer);
+			m_core->registerModule(cursor);
 		}
 
 	}
@@ -172,6 +172,10 @@ namespace xdl {
 	XdevLX11Display::~XdevLX11Display() {
 		std::cout << "XdevLX11Display::~XdevLX11Display()\n";
 		if(display) {
+			if(m_core) {
+				m_core->deleteModule(windowEventServer->getID());
+				m_core->deleteModule(cursor->getID());
+			}
 			XCloseDisplay(display);
 			display = nullptr;
 		}
