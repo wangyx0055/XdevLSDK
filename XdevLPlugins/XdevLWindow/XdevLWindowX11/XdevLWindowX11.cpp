@@ -194,6 +194,7 @@ namespace xdl {
 		m_best_fit_rate(-1),
 		m_fullscreenModeActive(xdl_false),
 		m_originalScreenConfig(nullptr) {
+		XDEVL_MODULE_INFO("XdevLWindowX11()\n");
 
 		//
 		// Initialize connection to display server just once.
@@ -209,8 +210,10 @@ namespace xdl {
 	}
 
 	XdevLWindowX11::~XdevLWindowX11() {
-		if(1 == reference_counter) {
-			//globalDisplay.reset();
+		XDEVL_MODULE_INFO("~XdevLWindowX11()\n");
+
+		if(reference_counter == 1) {
+			globalDisplay.reset();
 		}
 		reference_counter--;
 	}
