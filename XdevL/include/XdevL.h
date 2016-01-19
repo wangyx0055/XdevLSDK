@@ -189,7 +189,7 @@ namespace xdl {
 #define createModuleText(CORE, INTERFACE, ID, MODULE) new xdl::INTERFACE##MODULE
 #endif
 
-	typedef std::shared_ptr<xdl::XdevLModule>(*XdevLCreateFunctionType)(const xdl::XdevLID& id);
+	typedef xdl::xdl_int (*XdevLCreateFunctionType)(const xdl::XdevLID& id, std::shared_ptr<xdl::XdevLModule>& module);
 	extern std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
 
 	template<typename T>
@@ -211,8 +211,11 @@ namespace xdl {
 			return nullptr;
 		}
 
-		auto tmp = module->second(id);
-		return std::dynamic_pointer_cast<T>(tmp);
+		std::shared_ptr<XdevLModule> tmp2;
+		if(module->second(id, tmp2) != ERR_OK) {
+			return nullptr;
+		}
+		return std::dynamic_pointer_cast<T>(tmp2);
 	}
 
 }
