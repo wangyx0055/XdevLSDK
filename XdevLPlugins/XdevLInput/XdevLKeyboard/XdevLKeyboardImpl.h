@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -93,9 +93,10 @@ namespace xdl {
 		public:
 			XdevlKeyboardBase(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor):
 				XdevLModuleImpl<T>(parameter, descriptor),
-				m_attached(false) ,
-				m_key_down(false),
-				m_threaded(false),
+				m_attached(xdl_false) ,
+				m_key_down(xdl_false),
+				m_threaded(xdl_false),
+				m_initialized(xdl_false),
 				m_sleep(0.001) {
 
 			}
@@ -108,17 +109,18 @@ namespace xdl {
 			xdl_bool		m_attached;
 
 			// Key map.
-			KeyMapType 		keyButtonId;
-			xdl_bool 		m_key_down;
-			xdl_bool		m_threaded;
+			KeyMapType keyButtonId;
+			xdl_bool m_key_down;
+			xdl_bool m_threaded;
+			xdl_bool m_initialized;
 			xdl_double		m_sleep;
 			thread::Mutex	m_mutex;
 			std::vector<XdevLButtonDelegateType> m_buttonDelegates;
 			std::multimap<XdevLButtonId, XdevLButtonIdDelegateType> m_buttonIdDelegates;
 			std::map<xdl_uint, XdevLButtonImpl*> m_Buttons;
 		protected:
-            using XdevLModuleImpl<T>::attach;
-            
+			using XdevLModuleImpl<T>::attach;
+
 			xdl_bool getAttached();
 			void setAttached(xdl_bool state);
 
@@ -132,7 +134,7 @@ namespace xdl {
 			xdl_int init();
 			xdl_int shutdown();
 			xdl_int reset();
-			
+
 			xdl_int registerDelegate(const XdevLString& id, const XdevLButtonIdDelegateType& delegate);
 			xdl_int registerDelegate(const XdevLButtonDelegateType& delegate);
 	};
@@ -171,7 +173,9 @@ namespace xdl {
 
 	template<typename T>
 	xdl_int XdevlKeyboardBase<T>::init() {
-		return initKeyMap();
+		initKeyMap();
+		m_initialized = xdl_true;
+		return ERR_OK;
 	}
 
 	template<typename T>
@@ -191,7 +195,7 @@ namespace xdl {
 		if(m_threaded) {
 			Join();
 		}
-
+		m_initialized = xdl_false;
 		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
@@ -238,20 +242,20 @@ namespace xdl {
 			m_key_down = true;
 
 			auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLButtonId>(event.key.keycode));
-			for (auto it = pp.first; it != pp.second; ++it) {
+			for(auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
 				delegate(BUTTON_PRESSED);
 			}
 
-		} 
+		}
 		//
 		// Did the user released a keyboard button?
 		//
-		else if( event.type == ButtonReleased.getHashCode()) {
+		else if(event.type == ButtonReleased.getHashCode()) {
 
 			XdevLButtonImpl* button = m_Buttons[event.key.keycode];
 			if(button == nullptr) {
-				m_Buttons[event.key.keycode] =  new XdevLButtonImpl( &m_mutex);
+				m_Buttons[event.key.keycode] =  new XdevLButtonImpl(&m_mutex);
 				button = m_Buttons[event.key.keycode];
 			}
 
@@ -263,23 +267,23 @@ namespace xdl {
 			m_key_down = false;
 
 			auto pp = m_buttonIdDelegates.equal_range(static_cast<XdevLButtonId>(event.key.keycode));
-			for (auto it = pp.first; it != pp.second; ++it) {
+			for(auto it = pp.first; it != pp.second; ++it) {
 				auto delegate = it->second;
 				delegate(BUTTON_RELEASED);
 			}
-		} 
+		}
 		//
 		// Did the core sent a message?
 		//
-		else if( event.type == XDEVL_MODULE_EVENT) {
+		else if(event.type == XDEVL_MODULE_EVENT) {
 			// Initialize this module.
 			if(event.module.event == XDEVL_MODULE_INIT) {
 				return init();
-			} 
+			}
 			// Shutdown this module.
 			else if(event.module.event == XDEVL_MODULE_SHUTDOWN) {
 				return shutdown();
-			} 
+			}
 		}
 
 		return ERR_OK;
@@ -289,12 +293,12 @@ namespace xdl {
 	XdevLButtonId XdevlKeyboardBase<T>::getButtonId(const XdevLString& str) {
 		std::string tmp(str);
 		xstd::trim(tmp);
-		
+
 		KeyMapType::iterator it = keyButtonId.find(str);
 		if(it != keyButtonId.end()) {
 			return it->second;
 		}
-		
+
 		return BUTTON_UNKOWN;
 	}
 
@@ -306,23 +310,30 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
+		if(xdl_false == m_initialized) {
+			if(init() != ERR_OK) {
+				return ERR_ERROR;
+			}
+		}
+
 		if(getAttached()) {
 			setAttached(false);
 			Join();
 		}
 
-		if(this->getMediator()->getXmlFilename() != XdevLFileName()) {
-			TiXmlDocument xmlDocument;
-			if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
-				XDEVL_MODULE_ERROR("Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl);
-				return ERR_ERROR;
+		if(nullptr != this->getMediator()) {
+			if(this->getMediator()->getXmlFilename() != XdevLFileName()) {
+				TiXmlDocument xmlDocument;
+				if(!xmlDocument.LoadFile(this->getMediator()->getXmlFilename())) {
+					XDEVL_MODULE_ERROR("Could not parse xml file: " << this->getMediator()->getXmlFilename() << std::endl);
+					return ERR_ERROR;
+				}
+				if(readKeyboardXmlInfo(&xmlDocument, moduleName) != ERR_OK)
+					return ERR_ERROR;
 			}
-			if(readKeyboardXmlInfo(&xmlDocument, moduleName) != ERR_OK)
-				return ERR_ERROR;
 		}
 
 		setAttached(true);
-
 
 		return ERR_OK;
 	}
@@ -387,7 +398,7 @@ namespace xdl {
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_BACKSPACE"),KEY_BACKSPACE));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_TAB"),KEY_TAB));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_SPACE"),KEY_SPACE));
-	
+
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_PLUS"),KEY_PLUS));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_COMMA"),KEY_COMMA));
 		keyButtonId.insert(KeyMapType::value_type(STRING("KEY_MINUS"),KEY_MINUS));

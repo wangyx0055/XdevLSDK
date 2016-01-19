@@ -64,13 +64,17 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
+XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLKeyboard, xdl::XdevLKeyboardImpl, moduleKeyboardDescriptor)
 
 namespace xdl {
 
-	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevlKeyboardBase<XdevLKeyboard>(parameter, descriptor) {
+	XdevLKeyboardImpl::XdevLKeyboardImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : 
+		XdevlKeyboardBase<XdevLKeyboard>(parameter, descriptor) {
+			XDEVL_MODULE_INFO("XdevLKeyboardImpl()\n");
 	}
 
 	XdevLKeyboardImpl::~XdevLKeyboardImpl() {
+		XDEVL_MODULE_INFO("~XdevLKeyboardImpl()\n");
 	}
 
 	xdl_int XdevLKeyboardImpl::init() {

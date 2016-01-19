@@ -50,10 +50,14 @@ namespace xdl {
 		m_glxMajorVersion(0),
 		m_glxMinorVersion(0),
 		m_visualInfo(nullptr) {
+			XDEVL_MODULE_INFO("XdevLOpenGLContextGLX()\n");
 	}
 
 	XdevLOpenGLContextGLX::~XdevLOpenGLContextGLX() {
-		XDEVL_ASSERT(m_glxContext == nullptr, "XdevLOpenGLContextGLX::shutdown wasn't called. The OpenGL context might be not destroyed.");
+		XDEVL_MODULE_INFO("~XdevLOpenGLContextGLX()\n");
+		if(nullptr != m_glxContext) {
+			shutdown();
+		}
 	}
 
 	xdl_int XdevLOpenGLContextGLX::init() {
@@ -140,15 +144,15 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLContextGLX::initOpenGL(Display* display, Window window) {
 
-		XDEVL_MODULE_INFO("Supported GLX extensions ---------------\n");
+		//
+		// Get all supported extensions.
+		//
 		std::string tmp(glXQueryExtensionsString(display, DefaultScreen(display)));
 		std::vector<std::string> exlist;
 		xstd::tokenize(tmp, exlist, " ");
 		for(auto extension : exlist) {
 			extensionsList.push_back(XdevLString(extension));
-			std::cout << extension << std::endl;
 		}
-		XDEVL_MODULE_INFO("-----------------------------------------\n");
 
 
 		std::vector<int> attribute_list;

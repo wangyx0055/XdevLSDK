@@ -51,9 +51,6 @@ namespace xdl {
 			XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowX11();
 
-			static xdl_int initX11(XdevLCoreMediator* parameter);
-			static xdl_int shutdownX11();
-
 			//
 			// XdevLModule related methods.
 			//
