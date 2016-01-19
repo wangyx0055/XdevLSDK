@@ -35,6 +35,7 @@
 #define _NET_WM_STATE_ADD       1l
 #define _NET_WM_STATE_TOGGLE    2l
 
+static xdl::xdl_int reference_counter = 0;
 static xdl::xdl_bool x11Initialized = xdl::xdl_false;
 static std::shared_ptr<xdl::XdevLX11Display> globalDisplay;
 static Display* display = nullptr;
@@ -134,7 +135,9 @@ namespace xdl {
 	  KDE_staysOnTop = 2048
 	};
 
-	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) {
+	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) : m_core(core) {
+		std::cout << "XdevLX11Display::XdevLX11Display()\n";
+
 		// Start X server with thread support.
 		XInitThreads();
 
@@ -150,33 +153,36 @@ namespace xdl {
 		std::clog << "Release             : " << XVendorRelease(display)<< "\n";
 		std::clog << "Number of Screens   : " << XScreenCount(display) 	<< std::endl;
 
-		if(nullptr != core) {
-//				initDefaultWindowInstances(core);
-//			} else {
+		XdevLModuleCreateParameter parameter;
+		parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
+		windowEventServer = std::make_shared<XdevLWindowEventServerX11>(&parameter, windowEventServerX11Desc);
 
-			XdevLModuleCreateParameter parameter;
-			parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
+		parameter.setModuleId(XdevLID("XdevLCursor"));
+		cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorX11Desc);
 
-			windowEventServer = std::make_shared<XdevLWindowEventServerX11>(&parameter, windowEventServerX11Desc);
-			core->registerModule(windowEventServer);
-
-			parameter.setModuleId(XdevLID("XdevLCursor"));
-			cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorX11Desc);
-			core->registerModule(cursor);
-
+		// Register within the Core if this is using one.
+		if(m_core) {
+			m_core->registerModule(windowEventServer);
+			m_core->registerModule(cursor);
 		}
+
 	}
 
 
 	XdevLX11Display::~XdevLX11Display() {
+		std::cout << "XdevLX11Display::~XdevLX11Display()\n";
 		if(display) {
+			if(m_core) {
+				m_core->deleteModule(windowEventServer->getID());
+				m_core->deleteModule(cursor->getID());
+			}
 			XCloseDisplay(display);
 			display = nullptr;
 		}
 	}
 
 //
-//
+// XdevLWindowX11
 //
 
 	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
@@ -192,35 +198,31 @@ namespace xdl {
 		m_best_fit_rate(-1),
 		m_fullscreenModeActive(xdl_false),
 		m_originalScreenConfig(nullptr) {
+		XDEVL_MODULE_INFO("XdevLWindowX11()\n");
 
+		//
+		// Initialize connection to display server just once.
+		//
+		if(0 == reference_counter) {
+			XdevLCoreMediator* mediator = nullptr;
+			if(nullptr != parameter) {
+				mediator = parameter->getMediator();
+			}
+			globalDisplay = std::make_shared<XdevLX11Display>(mediator);
+		}
+		reference_counter++;
 	}
 
 	XdevLWindowX11::~XdevLWindowX11() {
+		XDEVL_MODULE_INFO("~XdevLWindowX11()\n");
 
-	}
-
-	xdl_int XdevLWindowX11::initX11(XdevLCoreMediator* core) {
-		if(nullptr != globalDisplay) {
-			return ERR_OK;
-		}
-
-		globalDisplay = std::make_shared<XdevLX11Display>(core);
-
-		return xdl::ERR_OK;
-	}
-
-	xdl_int XdevLWindowX11::shutdownX11() {
-		if(nullptr != globalDisplay) {
+		if(reference_counter == 1) {
 			globalDisplay.reset();
 		}
-
-		return xdl::ERR_OK;
+		reference_counter--;
 	}
 
 	xdl_int XdevLWindowX11::init() {
-		if(nullptr == globalDisplay) {
-			globalDisplay = std::make_shared<XdevLX11Display>(getMediator());
-		}
 		return XdevLWindowImpl::init();
 	}
 

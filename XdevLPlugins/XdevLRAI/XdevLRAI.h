@@ -215,6 +215,8 @@ namespace xdl {
 
 	typedef XdevLRAI	IXdevLRAI;
 	typedef XdevLRAI*	IPXdevLRAI;
+
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLRAI)
 }
 
 

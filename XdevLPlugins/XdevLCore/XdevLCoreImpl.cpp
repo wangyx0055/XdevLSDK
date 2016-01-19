@@ -69,6 +69,7 @@ XDEVL_PLUGIN_CREATE_MODULE {
 
 XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLCore, xdl::XdevLCoreImpl, coreDescriptor)
 XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DEFINITION_DEFAULT(XdevLCore)
+XDEVL_EXPORT_PLUGIN_SHUTDOWN_FUNCTION_DEFINITION_DEFAULT(XdevLCore)
 
 namespace xdl {
 
@@ -81,7 +82,7 @@ namespace xdl {
 	XdevLCoreImpl::XdevLCoreImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLModuleImpl<XdevLCore>(parameter, desriptor),
 		m_initialized(xdl_false) {
-
+		XDEVL_MODULE_INFO("XdevLCoreImpl()\n");
 		if(nullptr != parameter) {
 			XdevLUserData* userData = parameter->getUserDefinedData();
 			if(nullptr != userData) {
@@ -112,6 +113,7 @@ namespace xdl {
 	}
 
 	XdevLCoreImpl::~XdevLCoreImpl() {
+		XDEVL_MODULE_INFO("~XdevLCoreImpl()\n");
 		if(coreInitialized()) {
 			shutdown();
 		}
@@ -604,9 +606,9 @@ namespace xdl {
 		// User parameter
 		parameter->setUserParameter(nullptr);
 		parameter->setModuleInstance(module.get());
-		
+
 		module->setMediator(this);
-		
+
 		registerListener(module.get());
 
 		XdevLEvent moduleInit;
@@ -621,7 +623,7 @@ namespace xdl {
 
 		auto di = new XdevLModuleInfo(parameter, nullptr);
 		m_modules.insert(moduleMap::value_type(parameter->getModuleId().getName(), di));
-		
+
 		XDEVL_MODULE_SUCCESS("Module: " << module->getDescriptor().getName() << " registered successul.\n");
 		return ERR_OK;
 	}

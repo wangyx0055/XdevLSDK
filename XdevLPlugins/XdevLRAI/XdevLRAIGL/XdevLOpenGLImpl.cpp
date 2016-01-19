@@ -49,6 +49,7 @@ XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
+XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLRAI, xdl::XdevLOpenGLImpl, openGLModuleDesc)
 
 namespace xdl {
 
@@ -70,9 +71,11 @@ namespace xdl {
 		m_activeFrameBuffer(nullptr),
 		m_activeVertexArray(nullptr),
 		m_activeShaderProgram(nullptr) {
+			XDEVL_MODULE_INFO("XdevLRAIGL()\n");
 	}
 
 	XdevLOpenGLImpl::~XdevLOpenGLImpl() {
+		XDEVL_MODULE_INFO("~XdevLRAIGL()\n");
 	}
 
 	xdl_int XdevLOpenGLImpl::init() {

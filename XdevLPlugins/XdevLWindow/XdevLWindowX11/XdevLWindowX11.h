@@ -51,9 +51,6 @@ namespace xdl {
 			XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowX11();
 
-			static xdl_int initX11(XdevLCoreMediator* parameter);
-			static xdl_int shutdownX11();
-
 			//
 			// XdevLModule related methods.
 			//
@@ -339,7 +336,8 @@ namespace xdl {
 		XdevLCursorX11* getCursor() {
 			return cursor.get();
 		}
-public:
+	public:
+		XdevLCoreMediator* m_core;
 		std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
 		std::shared_ptr<XdevLCursorX11> cursor;
 	};

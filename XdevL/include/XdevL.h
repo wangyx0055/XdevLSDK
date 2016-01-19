@@ -41,6 +41,8 @@
 #include <XdevLXfstring.h>
 #include <XdevLError.h>
 
+#include <map>
+
 namespace xdl {
 
 	class XdevLUserData;
@@ -186,6 +188,35 @@ namespace xdl {
 #else
 #define createModuleText(CORE, INTERFACE, ID, MODULE) new xdl::INTERFACE##MODULE
 #endif
+
+	typedef xdl::xdl_int (*XdevLCreateFunctionType)(const xdl::XdevLID& id, std::shared_ptr<xdl::XdevLModule>& module);
+	extern std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
+
+	template<typename T>
+	xdl::xdl_int plugModule(XdevLCreateFunctionType function) {
+		auto module = m_moduleMap.find(typeid(T).hash_code());
+		if(module != m_moduleMap.end()) {
+			return xdl::ERR_ERROR;
+		}
+
+		m_moduleMap[typeid(T).hash_code()] = function;
+		return xdl::ERR_OK;
+	}
+
+	template<typename T>
+	std::shared_ptr<T> createModule(const xdl::XdevLID& id) {
+
+		auto module = m_moduleMap.find(typeid(T).hash_code());
+		if(module == m_moduleMap.end()) {
+			return nullptr;
+		}
+
+		std::shared_ptr<XdevLModule> tmp2;
+		if(module->second(id, tmp2) != ERR_OK) {
+			return nullptr;
+		}
+		return std::dynamic_pointer_cast<T>(tmp2);
+	}
 
 }
 

@@ -138,7 +138,6 @@ namespace xdl {
 	typedef XdevLOpenGLContext*	IPXdevLOpenGLContext;
 
 	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLOpenGLContext)
-	XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DECLARATION(XdevLOpenGLContext)
 }
 
 
