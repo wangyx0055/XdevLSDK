@@ -71,7 +71,7 @@ namespace xdl {
 		m_activeFrameBuffer(nullptr),
 		m_activeVertexArray(nullptr),
 		m_activeShaderProgram(nullptr) {
-			XDEVL_MODULE_INFO("XdevLRAIGL()\n");
+		XDEVL_MODULE_INFO("XdevLRAIGL()\n");
 	}
 
 	XdevLOpenGLImpl::~XdevLOpenGLImpl() {
@@ -106,7 +106,7 @@ namespace xdl {
 			}
 			m_gl_context->makeCurrent(window);
 		}
-	
+
 		XDEVL_MODULE_INFO(glGetString(GL_VENDOR) << std::endl);
 		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
 		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
@@ -326,12 +326,16 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::setActiveRenderWindow(IPXdevLWindow window) {
-		m_gl_context->makeCurrent(window);
+		if(m_gl_context) {
+			m_gl_context->makeCurrent(window);
+		}
 		return ERR_OK;
 	}
 
 	xdl_int XdevLOpenGLImpl::swapBuffers() {
-		m_gl_context->swapBuffers();
+		if(m_gl_context) {
+			m_gl_context->swapBuffers();
+		}
 		return ERR_OK;
 	}
 

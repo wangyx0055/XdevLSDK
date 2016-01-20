@@ -1340,7 +1340,6 @@ namespace xdl {
 		WM_PROTOCOLS						= XInternAtom(display, "WM_PROTOCOLS", False);
 		_NET_WM_PING						= XInternAtom(display, "_NET_WM_PING", False);
 
-		XDEVL_MODULE_SUCCESS("Created successfully" << std::endl);
 		return ERR_OK;
 	}
 
@@ -1357,7 +1356,6 @@ namespace xdl {
 			m_keyboard = nullptr;
 		}
 
-		XDEVL_MODULE_SUCCESS("Shutdown process was successful.\n");
 		return ERR_OK;
 	}
 
