@@ -82,30 +82,31 @@ namespace xdl {
 		TiXmlDocument xmlDocument;
 
 		if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
-			XDEVL_MODULE_ERROR("Could not parse xml file: " << getMediator()->getXmlFilename() << std::endl);
-			return ERR_ERROR;
+			XDEVL_MODULE_WARNING("Could not parse xml file: " << getMediator()->getXmlFilename() << std::endl);
+		} else {
+
+			if(readModuleInformation(&xmlDocument) != ERR_OK) {
+				return ERR_ERROR;
+			}
 		}
 
-		if(readModuleInformation(&xmlDocument) != ERR_OK) {
-			return ERR_ERROR;
-		}
-
-		m_gl_context = static_cast<XdevLOpenGLContext*>(getMediator()->createModule(xdl::XdevLModuleName("XdevLOpenGLContext"), xdl::XdevLID("XdevLRAIOpenGLContext")));
-		if(nullptr == m_gl_context) {
-			XDEVL_MODULE_ERROR("Could not create OpenGL context.\n");
-			return ERR_ERROR;
-		}
 		return ERR_OK;
 	}
 
 	int XdevLOpenGLImpl::create(IPXdevLWindow window) {
 
-		// Create OpenGL context.
-		if(m_gl_context->create(window) != xdl::ERR_OK) {
-			return ERR_ERROR;
-		}
-		m_gl_context->makeCurrent(window);
 
+		m_gl_context = static_cast<XdevLOpenGLContext*>(getMediator()->createModule(xdl::XdevLModuleName("XdevLOpenGLContext"), xdl::XdevLID("XdevLRAIOpenGLContext")));
+		if(nullptr == m_gl_context) {
+			XDEVL_MODULE_WARNING("Could not create OpenGL context. Assuming you're using a manually created one.\n");
+		} else {
+			// Create OpenGL context.
+			if(m_gl_context->create(window) != xdl::ERR_OK) {
+				return ERR_ERROR;
+			}
+			m_gl_context->makeCurrent(window);
+		}
+	
 		XDEVL_MODULE_INFO(glGetString(GL_VENDOR) << std::endl);
 		XDEVL_MODULE_INFO(glGetString(GL_RENDERER) << std::endl);
 		XDEVL_MODULE_INFO(glGetString(GL_VERSION) << std::endl);
