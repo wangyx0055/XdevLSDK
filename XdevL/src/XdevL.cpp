@@ -40,8 +40,6 @@
 
 namespace xdl {
 
-	std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
-
 	XdevLVersion XdevLVersion::zero {0,0,0};
 
 	// Typedef for the command line arguments.

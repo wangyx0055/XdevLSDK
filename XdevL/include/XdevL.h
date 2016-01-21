@@ -189,35 +189,6 @@ namespace xdl {
 #define createModuleText(CORE, INTERFACE, ID, MODULE) new xdl::INTERFACE##MODULE
 #endif
 
-	typedef xdl::xdl_int(*XdevLCreateFunctionType)(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
-	extern std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
-
-	template<typename T>
-	xdl::xdl_int plugModule(XdevLCreateFunctionType function) {
-		auto module = m_moduleMap.find(typeid(T).hash_code());
-		if(module != m_moduleMap.end()) {
-			return xdl::ERR_ERROR;
-		}
-
-		m_moduleMap[typeid(T).hash_code()] = function;
-		return xdl::ERR_OK;
-	}
-
-	template<typename T>
-	std::shared_ptr<T> createModule(xdl::XdevLModuleCreateParameter* parameter) {
-
-		auto module = m_moduleMap.find(typeid(T).hash_code());
-		if(module == m_moduleMap.end()) {
-			return nullptr;
-		}
-
-		std::shared_ptr<XdevLModule> tmp2;
-		if(module->second(parameter, tmp2) != ERR_OK) {
-			return nullptr;
-		}
-		return std::dynamic_pointer_cast<T>(tmp2);
-	}
-
 	typedef xdl::xdl_int(*XdevLCreateModuleFunctionType)(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
 	typedef xdl::xdl_int(*XdevLDeleteModuleFunctionType)();
 
@@ -262,7 +233,7 @@ namespace xdl {
 				}
 
 				std::shared_ptr<xdl::XdevLModule> tmp;
-				if(node->second.create(nullptr, tmp) != xdl::ERR_OK) {
+				if(node->second.create(&parameter, tmp) != xdl::ERR_OK) {
 					return nullptr;
 				}
 
