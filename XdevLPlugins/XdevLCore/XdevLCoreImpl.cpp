@@ -622,9 +622,9 @@ namespace xdl {
 		}
 
 		auto di = new XdevLModuleInfo(parameter, nullptr);
-		m_modules.insert(moduleMap::value_type(parameter->getModuleId().getName(), di));
+		m_modules.insert(moduleMap::value_type(module->getID().getName(), di));
 
-		XDEVL_MODULE_SUCCESS("Module: " << module->getDescriptor().getName() << " registered successul.\n");
+		XDEVL_MODULE_SUCCESS("Module instance: " << module->getID().getName() << " registered successul.\n");
 		return ERR_OK;
 	}
 

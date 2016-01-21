@@ -215,8 +215,14 @@ namespace xdl {
 	class XdevLCoreSystem {
 		public:
 			template<typename T>
-			void plug(XdevLCreateModuleFunctionType synapseCreate) {
+			xdl_int plug(XdevLCreateModuleFunctionType synapseCreate) {
+				auto node = m_moduleNodes.find(typeid(T).hash_code());
+				if(node != m_moduleNodes.end()) {
+					return ERR_ERROR;
+				}
+
 				m_moduleNodes[typeid(T).hash_code()] = XdevLModuleNode(synapseCreate);
+				return ERR_OK;
 			}
 
 			template<typename T>
