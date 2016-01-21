@@ -189,7 +189,7 @@ namespace xdl {
 #define createModuleText(CORE, INTERFACE, ID, MODULE) new xdl::INTERFACE##MODULE
 #endif
 
-	typedef xdl::xdl_int (*XdevLCreateFunctionType)(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
+	typedef xdl::xdl_int(*XdevLCreateFunctionType)(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
 	extern std::map<size_t, XdevLCreateFunctionType> m_moduleMap;
 
 	template<typename T>
@@ -217,6 +217,60 @@ namespace xdl {
 		}
 		return std::dynamic_pointer_cast<T>(tmp2);
 	}
+
+	typedef xdl::xdl_int(*XdevLCreateModuleFunctionType)(xdl::XdevLModuleCreateParameter* parameter, std::shared_ptr<xdl::XdevLModule>& module);
+	typedef xdl::xdl_int(*XdevLDeleteModuleFunctionType)();
+
+	class XdevLModuleNode {
+		public:
+			XdevLModuleNode() :
+				create(nullptr),
+				destroy(nullptr) {
+			}
+
+			XdevLModuleNode(XdevLCreateModuleFunctionType createFunction) :
+				create(createFunction) {
+			}
+
+			XdevLModuleNode(XdevLCreateModuleFunctionType createFunction, XdevLDeleteModuleFunctionType destroyFunction) :
+				create(createFunction),
+				destroy(destroyFunction) {
+			}
+
+			XdevLCreateModuleFunctionType create;
+			XdevLDeleteModuleFunctionType destroy;
+	};
+
+	class XdevLCoreSystem {
+		public:
+			template<typename T>
+			void plug(XdevLCreateModuleFunctionType synapseCreate) {
+				m_moduleNodes[typeid(T).hash_code()] = XdevLModuleNode(synapseCreate);
+			}
+
+			template<typename T>
+			std::shared_ptr<T> create(const xdl::XdevLID& id, std::shared_ptr<xdl::XdevLCore> core = nullptr) {
+				auto node = m_moduleNodes.find(typeid(T).hash_code());
+				if(node == m_moduleNodes.end()) {
+					return nullptr;
+				}
+
+				xdl::XdevLModuleCreateParameter parameter;
+				parameter.setModuleId(id);
+				if(core != nullptr) {
+					parameter.setModuleMediator(core.get());
+				}
+
+				std::shared_ptr<xdl::XdevLModule> tmp;
+				if(node->second.create(nullptr, tmp) != xdl::ERR_OK) {
+					return nullptr;
+				}
+
+				return std::dynamic_pointer_cast<T>(tmp);
+			}
+		private:
+			std::map<std::size_t, XdevLModuleNode> m_moduleNodes;
+	};
 
 }
 
