@@ -84,10 +84,10 @@ void main(void) {                                                               
 "                                                                                       \
 in vec4 color;                                                                          \
 in vec2 tcoord;                                                                         \
-                                                                                        \
+\
 uniform sampler2D texture0;                                                             \
-                                                                                        \
-uniform float buffer 	= 0.8f;                                                         \
+\
+uniform float smooth_step_buffer 	= 0.8f;                                               \
 uniform float gamma 	= 0.4f;                                                         \
 uniform int 	dft			= 1;                                                        \
 uniform int 	effect 	= 2;                                                            \
@@ -108,7 +108,7 @@ void main(void) {                                                               
         if(dft == 1) {                                                                  \
                                                                                         \
             float dist = texture(texture0, tcoord).a;                                   \
-            basecolor = color*smoothstep(buffer - gamma, buffer + gamma, dist);         \
+            basecolor = color*smoothstep(smooth_step_buffer - gamma, smooth_step_buffer + gamma, dist);         \
                                                                                         \
             if(effect == 1) {                                                           \
                 float glowTexel 	=  texture(texture0, tcoord + shadowOffset).a;      \
@@ -123,7 +123,7 @@ void main(void) {                                                               
                 basecolor = glowc + basecolor;                                          \
                                                                                         \
             } else {                                                                    \
-                basecolor *= color*smoothstep(buffer - gamma, buffer + gamma, dist);    \
+                basecolor *= color*smoothstep(smooth_step_buffer - gamma, smooth_step_buffer + gamma, dist);    \
             }                                                                           \
         }                                                                               \
     }                                                                                   \
