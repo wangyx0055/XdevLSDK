@@ -101,7 +101,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLJoystickServerLinux} XdevL )
+target_link_libraries( ${XdevLJoystickServerLinux} XdevL udev )
 
 
 #

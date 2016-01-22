@@ -31,11 +31,7 @@ if(PLATFORM_MACOSX)
 endif()
 
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS XdevLd)
-else()
-	set(LIBS XdevL)
-endif()
+set(LIBS XdevL)
 
 if(PLATFORM_MACOSX)
 	set(LIBS ${LIBS} dl)
