@@ -170,49 +170,7 @@ include_directories(${INCLUDE_DIRECTORY})
 #
 # Add external ibraries
 
-if(APPLE)
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLWindowX11Library}
-			XdevLd
-			X11
-			Xrandr
-			Xfixes
-			Xi
-			pthread
-		)
-	else()
-		target_link_libraries(${XdevLWindowX11Library}
-			XdevL
-			X11
-			Xrandr
-			Xfixes
-			Xi
-			pthread
-		)
-	endif()
-
-elseif(UNIX)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLWindowX11Library}
-			XdevLd
-			X11
-			Xrandr
-			Xfixes
-			Xi
-			pthread
-		)
-	else()
-		target_link_libraries(${XdevLWindowX11Library}
-			XdevL
-			X11
-			Xrandr
-			Xfixes
-			Xi
-			pthread
-		)
-	endif()
-endif()
+target_link_libraries (${XdevLWindowX11Library} ${XdevLCoreLibrary} X11 Xrandr Xfixes Xi pthread )
 
 #
 # Change the outputname of the library

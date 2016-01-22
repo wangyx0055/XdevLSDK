@@ -161,49 +161,19 @@ add_library(${XdevLFileSystemLibrary} SHARED
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
+
+#
+# Add external ibraries
 
 	if(APPLE)
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevLd
-			"-framework CoreServices"
-		)
+		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} "-framework CoreServices" )
 	elseif(UNIX)
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevLd
-		)
+		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
 	elseif(WINDOWS)
-		target_link_libraries(${XdevLFileSystemLibrary}
-				XdevLd
-			)
+		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
 	else()
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevLd
-		)
+		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
 	endif()
-
-else()
-
-	if(APPLE)
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevL
-			"-framework CoreServices"
-		)
-	elseif(UNIX)
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevL
-		)
-	elseif(WINDOWS)
-			target_link_libraries(${XdevLFileSystemLibrary}
-			XdevL
-		)
-	else()
-		target_link_libraries(${XdevLFileSystemLibrary}
-			XdevL
-		)
-	endif()
-	
-endif()
 
 #
 # Change the outputname of the library

@@ -100,18 +100,8 @@ include_directories(
 
 #
 # Add external ibraries
-#
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(
-		${XdevLMouseServerLinux}
-		XdevLd
-	)
-else()
-	target_link_libraries(
-		${XdevLMouseServerLinux}
-		XdevL
-	)
-endif()
+
+target_link_libraries( ${XdevLMouseServerLinux} ${XdevLCoreLibrary} )
 
 
 #

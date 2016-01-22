@@ -101,26 +101,10 @@ include_directories(
 	${XDEVL_PLUGINS}
 )
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(
-		${XdevLKeyboardLibrary}
-		XdevLd
-	)
-else()
-	target_link_libraries(
-		${XdevLKeyboardLibrary}
-		XdevL
-	)
-endif()
-
-
 #
 # Add external ibraries
 
-if(UNIX)
-elseif(APPLE)
-elseif(WIN32)
-endif()
+target_link_libraries( ${XdevLKeyboardLibrary} ${XdevLCoreLibrary} )
 
 
 #

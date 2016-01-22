@@ -132,14 +132,7 @@ include_directories(
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS ${LIBS} XdevLd )
-else()
-	set(LIBS ${LIBS} XdevL )
-endif()
-
-
-target_link_libraries(${XdevLFontLibrary} ${LIBS})
+target_link_libraries( ${XdevLFontLibrary} ${XdevLCoreLibrary} )
 
 #
 # Change the outputname of the library

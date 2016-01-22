@@ -132,15 +132,7 @@ include_directories(
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  target_link_libraries(${XdevLSerialLibrary}
-     XdevLd
-  )
-else()
-  target_link_libraries(${XdevLSerialLibrary}
-     XdevL
-  )
-endif()
+target_link_libraries( ${XdevLSerialLibrary} ${XdevLCoreLibrary} )
 
 #
 # Change the outputname of the library

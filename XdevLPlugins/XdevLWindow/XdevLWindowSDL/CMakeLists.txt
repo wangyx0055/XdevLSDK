@@ -109,15 +109,7 @@ add_library(${XdevLWindowSDLLibrary} SHARED
 #
 # Add external ibraries
 
-set(LIBS ${SDL2_LIBRARY} )
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS ${LIBS} XdevLd ${SDL2_LIBRARY} )
-else()
-	set(LIBS ${LIBS} XdevL )
-endif()
-
-target_link_libraries(${XdevLWindowSDLLibrary} ${LIBS})
+target_link_libraries( ${XdevLWindowSDLLibrary} ${XdevLCoreLibrary} ${SDL2_LIBRARY} )
 
 #
 # Change the outputname of the library

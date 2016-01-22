@@ -99,17 +99,10 @@ include_directories(
 	${XDEVL_PLUGINS}
 )
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(
-		${XdevLJoystickLibrary}
-		XdevLd
-	)
-else()
-	target_link_libraries(
-		${XdevLJoystickLibrary}
-		XdevL
-	)
-endif()
+#
+# Add external ibraries
+
+target_link_libraries( ${XdevLJoystickLibrary} ${XdevLCoreLibrary} )
 
 
 #

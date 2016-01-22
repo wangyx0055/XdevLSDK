@@ -123,30 +123,13 @@ include_directories(
 
 #
 # Add external ibraries
-#
+
 if(UNIX)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLNetworkLibrary}
-			XdevLd
-		)
-	else()
-		target_link_libraries(${XdevLNetworkLibrary}
-			XdevL
-		)
-	endif()
+		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} )
 elseif(APPLE)
+		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} )
 elseif(WIN32)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLNetworkLibrary}
-			XdevLd
-			ws2_32
-		)
-	else()
-		target_link_libraries(${XdevLNetworkLibrary}
-			XdevL
-			ws2_32
-		)
-	endif()
+		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} ws2_32 )
 endif()
 
 #

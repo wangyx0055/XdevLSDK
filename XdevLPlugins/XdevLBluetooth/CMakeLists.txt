@@ -133,43 +133,13 @@ include_directories(
 
 #
 # Add external ibraries
-#
+
 if(APPLE)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevLd
-			"-framework IOBluetooth"
-			"-framework CoreFoundation"
-		)
-	else()
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevL
-			"-framework IOBluetooth"
-			"-framework CoreFoundation"
-		)
-	endif()
+		target_link_libraries( ${XdevLBluetoothLibrary} ${XdevLCoreLibrary} "-framework IOBluetooth" "-framework CoreFoundation" )
 elseif(UNIX)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevLd
-		)
-	else()
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevL
-		)
-	endif()
+		target_link_libraries( ${XdevLBluetoothLibrary} ${XdevLCoreLibrary} )
 elseif(WIN32)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevLd
-			ws2_32
-		)
-	else()
-		target_link_libraries(${XdevLBluetoothLibrary}
-			XdevL
-			ws2_32
-		)
-	endif()
+		target_link_libraries(${XdevLBluetoothLibrary} ${XdevLCoreLibrary} ws2_32 )
 endif()
 
 #

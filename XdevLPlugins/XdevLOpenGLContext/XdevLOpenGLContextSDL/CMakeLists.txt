@@ -108,20 +108,10 @@ add_library(${XdevLOpenGLContextSDLLibrary} SHARED
     ${SOURCE_FILES}
 )
 
-
 #
 # Add external ibraries
 
-set(LIBS ${OPENGL_gl_LIBRARY} )
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS ${LIBS} XdevLd ${SDL2_LIBRARY})
-else()
-	set(LIBS ${LIBS} XdevL ${SDL2_LIBRARY})
-endif()
-
-target_link_libraries(${XdevLOpenGLContextSDLLibrary} ${LIBS})
-
+target_link_libraries( ${XdevLOpenGLContextSDLLibrary} ${XdevLCoreLibrary} ${SDL2_LIBRARY} )
 
 #
 # Change the outputname of the library

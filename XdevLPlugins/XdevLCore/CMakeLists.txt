@@ -99,36 +99,12 @@ include_directories(
 #
 # Add libraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	if(UNIX AND NOT APPLE)
-		target_link_libraries(${XdevLCoreLibrary}
-			 XdevLd
-			 dl
-	)
-	elseif(APPLE)
-		target_link_libraries(${XdevLCoreLibrary}
-				 XdevLd
-		)
-	elseif(WIN32)
-		target_link_libraries(${XdevLCoreLibrary}
-				 XdevLd
-		)
-	endif()
-else()
-	if(UNIX AND NOT APPLE)
-		target_link_libraries(${XdevLCoreLibrary}
-			 XdevL
-			 dl
-		)
-	elseif(APPLE)
-			target_link_libraries(${XdevLCoreLibrary}
-			 XdevL
-		)
-	elseif(WIN32)
-		target_link_libraries(${XdevLCoreLibrary}
-				 XdevL
-		)
-	endif()
+if(UNIX AND NOT APPLE)
+	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} dl )
+elseif(APPLE)
+	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} )
+elseif(WIN32)
+	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} )
 endif()
 
 

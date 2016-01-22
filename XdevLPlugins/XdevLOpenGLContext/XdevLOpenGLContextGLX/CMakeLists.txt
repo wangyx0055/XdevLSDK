@@ -115,15 +115,7 @@ add_library(${XdevLOpenGLContextGLXLibrary} SHARED
 #
 # Add external ibraries
 
-set(LIBS ${OPENGL_gl_LIBRARY} )
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS ${LIBS} XdevLd )
-else()
-	set(LIBS ${LIBS} XdevL )
-endif()
-
-target_link_libraries(${XdevLOpenGLContextGLXLibrary} ${LIBS})
+target_link_libraries( ${XdevLOpenGLContextGLXLibrary} ${XdevLCoreLibrary} ${OPENGL_gl_LIBRARY} )
 
 
 #

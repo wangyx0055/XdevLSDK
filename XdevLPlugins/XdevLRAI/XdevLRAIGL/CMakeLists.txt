@@ -136,45 +136,11 @@ include_directories(
 # Add external ibraries
 
 if(APPLE)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLRAIGL}
-			XdevLd
-			${OPENGL_gl_LIBRARY}
-			"-framework AGL"
-		)
-		else()
-			target_link_libraries(${XdevLRAIGL}
-				XdevL
-				${OPENGL_gl_LIBRARY}
-				"-framework AGL"
-		)
-	endif()
+		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} ${OPENGL_gl_LIBRARY} "-framework AGL" )
 elseif(UNIX)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLRAIGL}
-			XdevLd
-			GL
-		)
-	else()
-		target_link_libraries(${XdevLRAIGL}
-			XdevL
-			GL
-		)
-	endif()
+		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} GL )
 elseif(WIN32)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLRAIGL}
-			XdevLd
-			opengl32
-			gdi32
-		)
-	else()
-		target_link_libraries(${XdevLRAIGL}
-			XdevL
-			opengl32
-			gdi32
-		)
-	endif()
+		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} opengl32 gdi32 )
 endif()
 
 #

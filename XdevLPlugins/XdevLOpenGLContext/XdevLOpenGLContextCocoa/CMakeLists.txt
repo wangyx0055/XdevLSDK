@@ -107,22 +107,7 @@ add_library(${XdevLOpenGLContextCGLLibrary} SHARED
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(${XdevLOpenGLContextCGLLibrary}
-		XdevLd
-		"-framework OpenGL"
-		"-framework AGL"
-		"-framework Cocoa"
-	)
-else()
-	target_link_libraries(${XdevLOpenGLContextCGLLibrary}
-		XdevL
-		"-framework OpenGL"
-		"-framework AGL"
-		"-framework Cocoa"
-)
-endif()
-
+target_link_libraries(${XdevLOpenGLContextCGLLibrary} ${XdevLCoreLibrary} "-framework OpenGL" "-framework AGL" "-framework Cocoa")
 
 #
 # Change the outputname of the library

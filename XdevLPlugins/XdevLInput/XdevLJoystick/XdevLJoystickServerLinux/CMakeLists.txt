@@ -100,18 +100,8 @@ include_directories(
 
 #
 # Add external ibraries
-#
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(
-		${XdevLJoystickServerLinux} pthread udev
-		XdevLd
-	)
-else()
-	target_link_libraries(
-		${XdevLJoystickServerLinux} pthread udev
-		XdevL
-	)
-endif()
+
+target_link_libraries( ${XdevLJoystickServerLinux} ${XdevLCoreLibrary} )
 
 
 #
