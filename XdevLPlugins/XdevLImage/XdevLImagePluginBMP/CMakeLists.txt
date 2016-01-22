@@ -73,13 +73,8 @@ add_library(${XdevLImagePluginBMPLibrary} SHARED
 
 
 
-if(PLATFORM_MACOSX)
-	target_link_libraries(${XdevLImagePluginBMPLibrary} XdevL dl)
-elseif(PLATFORM_LINUX)
-	target_link_libraries(${XdevLImagePluginBMPLibrary} XdevL dl)
-elseif(PLATFORM_WINDOWS)
-endif()
 
+target_link_libraries(${XdevLImagePluginBMPLibrary} XdevL dl)
 
 
 #
@@ -95,4 +90,3 @@ endif()
 
 install(FILES ${HEADER_INTERFACE_FILE} DESTINATION "${XDEVL_PLUGINS_INCLUDE_INSTALL_PATH}/${PROJECT_NAME}")
 install(TARGETS ${XdevLImagePluginBMPLibrary} DESTINATION ${XDEVL_PLUGINS_INSTALL_PATH})
-
