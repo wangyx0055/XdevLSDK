@@ -106,7 +106,6 @@ namespace xdl {
 
 			xdl_int					m_projMatrix;
 			xdl_int					m_texture0;
-			xdl_int					m_color;
 
 			xdl_int					m_gammaid;
 			xdl_int					m_bufferid;

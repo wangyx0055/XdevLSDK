@@ -255,9 +255,8 @@ void main(void) {                                                               
 
 		m_projMatrix			= m_shaderProgram->getUniformLocation("projMatrix");
 		m_texture0 				= m_shaderProgram->getUniformLocation("texture0");
-		m_color					= m_shaderProgram->getUniformLocation("color0");
 		m_gammaid				= m_shaderProgram->getUniformLocation("gamma");
-		m_bufferid				= m_shaderProgram->getUniformLocation("buffer");
+		m_bufferid				= m_shaderProgram->getUniformLocation("smooth_step_buffer");
 		m_dftid					= m_shaderProgram->getUniformLocation("dft");
 		m_effectid				= m_shaderProgram->getUniformLocation("effect");
 		m_shadowOffsetid		= m_shaderProgram->getUniformLocation("shadowOffset");
