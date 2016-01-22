@@ -109,7 +109,7 @@ add_library(${XdevLWindowSDLLibrary} SHARED
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLWindowSDLLibrary} ${XdevLCoreLibrary} ${SDL2_LIBRARY} )
+target_link_libraries( ${XdevLWindowSDLLibrary} XdevL ${SDL2_LIBRARY} )
 
 #
 # Change the outputname of the library

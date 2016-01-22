@@ -140,27 +140,8 @@ add_library(${XdevLWindowWaylandLibrary} SHARED
 #
 # Add external ibraries
 
-if(UNIX)
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		target_link_libraries(${XdevLWindowWaylandLibrary}
-			XdevLd
-			wayland-client
-			wayland-egl
-			GLESv2
-			EGL
-		)
-	else()
-		target_link_libraries(${XdevLWindowWaylandLibrary}
-			XdevL
-			wayland-client
-			wayland-egl
-			GLESv2
-			EGL
-		)
-	endif()
-elseif(APPLE)
-elseif(WIN32)
-endif()
+target_link_libraries(${XdevLWindowWaylandLibrary} XdevL wayland-client wayland-egl GLESv2 EGL )
+
 
 #
 # Change the outputname of the library

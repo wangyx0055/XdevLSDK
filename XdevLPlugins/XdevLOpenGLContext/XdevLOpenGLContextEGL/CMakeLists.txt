@@ -66,7 +66,7 @@ if(PLATFORM_MACOSX)
 	set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -F${XDEVL_EXTERNALS}/lib")
 endif()
 
-set(LIBS ${XdevLCoreLibrary} )
+set(LIBS XdevL )
 
 if(PLATFORM_MACOSX)
 	set(LIBS ${LIBS} dl)

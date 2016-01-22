@@ -128,15 +128,7 @@ include_directories(
 #
 # Add external ibraries
 
-set(LIBS ${OPENAL_LIBRARY} )
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS ${LIBS} XdevLd )
-else()
-	set(LIBS ${LIBS} XdevL )
-endif()
-
-target_link_libraries(${XdevLAudioALLibrary} ${LIBS})
+target_link_libraries( ${XdevLAudioALLibrary} XdevL ${OPENAL_LIBRARY} )
 
 #
 # Change the outputname of the library

@@ -152,8 +152,8 @@ link_directories(${LIBRARY_DIRECTORY})
 add_library(${XdevLWindowX11Library} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
-)
 
+)
 #
 # Add include directories
 
@@ -170,7 +170,7 @@ include_directories(${INCLUDE_DIRECTORY})
 #
 # Add external ibraries
 
-target_link_libraries (${XdevLWindowX11Library} ${XdevLCoreLibrary} X11 Xrandr Xfixes Xi pthread )
+target_link_libraries (${XdevLWindowX11Library} XdevL X11 Xrandr Xfixes Xi pthread )
 
 #
 # Change the outputname of the library

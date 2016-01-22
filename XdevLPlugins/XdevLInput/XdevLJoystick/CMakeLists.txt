@@ -102,7 +102,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLJoystickLibrary} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLJoystickLibrary} XdevL )
 
 
 #

@@ -101,7 +101,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLMouseServerLinux} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLMouseServerLinux} XdevL )
 
 
 #

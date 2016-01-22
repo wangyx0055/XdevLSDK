@@ -111,7 +111,7 @@ include_directories(${OGRE_INCLUDE_DIRECTORIES})
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLOgreLibrary} ${XdevLCoreLibrary} ${Boost_LIBRARIES} )
+target_link_libraries( ${XdevLOgreLibrary} XdevL ${Boost_LIBRARIES} )
 
 #
 # Change the outputname of the library

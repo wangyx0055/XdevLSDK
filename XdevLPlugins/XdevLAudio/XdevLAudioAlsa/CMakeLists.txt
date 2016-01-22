@@ -62,22 +62,16 @@ link_directories(
 	${XDEVL_HOME}/lib
 	${XDEVL_EXTERNALS}/lib
 )
-if(PLATFORM_MACOSX)
-	set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -F${XDEVL_EXTERNALS}/lib")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS XdevLd ${ALSA_LIBRARY})
-else()
-	set(LIBS XdevL ${ALSA_LIBRARY})
-endif()
 
 add_library(${XdevLAudioAlsaLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
 
-target_link_libraries(${XdevLAudioAlsaLibrary} ${LIBS})
+#
+# Add external ibraries
+
+target_link_libraries( ${XdevLAudioAlsaLibrary} XdevL ${ALSA_LIBRARY} )
 
 #
 # Change the outputname of the library

@@ -115,7 +115,7 @@ add_library(${XdevLOpenGLContextGLXLibrary} SHARED
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLOpenGLContextGLXLibrary} ${XdevLCoreLibrary} ${OPENGL_gl_LIBRARY} )
+target_link_libraries( ${XdevLOpenGLContextGLXLibrary} XdevL ${OPENGL_gl_LIBRARY} )
 
 
 #

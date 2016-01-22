@@ -108,17 +108,8 @@ include_directories(
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(${XdevLWindowLibrary}
-		XdevLd
-		"-framework Cocoa"
-	)
-else()
-	target_link_libraries(${XdevLWindowLibrary}
-		XdevL
-		"-framework Cocoa"
-)
-endif()
+target_link_libraries( ${XdevLWindowLibrary} XdevL "-framework Cocoa" )
+
 
 #
 # Change the outputname of the library

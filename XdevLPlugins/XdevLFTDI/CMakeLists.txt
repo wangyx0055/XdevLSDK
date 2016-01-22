@@ -125,18 +125,8 @@ include_directories(
 
 #
 # Add external ibraries
-#
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  target_link_libraries(${XdevLFTDILibrary}
-     XdevLd
-		 ftd2xx
-  )
-else()
-  target_link_libraries(${XdevLFTDILibrary}
-     XdevL
-		 ftd2xx
-  )
-endif()
+
+target_link_libraries( ${XdevLFTDILibrary} XdevL ftd2xx )
 
 #
 # Change the outputname of the library

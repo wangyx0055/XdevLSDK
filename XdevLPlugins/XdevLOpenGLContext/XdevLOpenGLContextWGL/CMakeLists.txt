@@ -108,7 +108,7 @@ add_library(${XdevLOpenGLContextWGLLibrary} SHARED
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLOpenGLContextWGLLibrary} ${XdevLCoreLibrary} ${OPENGL_gl_LIBRARY} )
+target_link_libraries( ${XdevLOpenGLContextWGLLibrary} XdevL ${OPENGL_gl_LIBRARY} )
 
 #
 # Change the outputname of the library

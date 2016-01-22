@@ -103,7 +103,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLMouseLibrary} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLMouseLibrary} XdevL )
 
 
 #

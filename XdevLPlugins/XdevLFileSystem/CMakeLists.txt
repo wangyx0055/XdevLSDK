@@ -161,18 +161,17 @@ add_library(${XdevLFileSystemLibrary} SHARED
 #
 # Add external ibraries
 
-
 #
 # Add external ibraries
-
+	message(STATUS ${XdevLLibrary} )
 	if(APPLE)
-		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} "-framework CoreServices" )
+		target_link_libraries(${XdevLFileSystemLibrary} XdevL "-framework CoreServices" )
 	elseif(UNIX)
-		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries(${XdevLFileSystemLibrary} XdevL )
 	elseif(WINDOWS)
-		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries(${XdevLFileSystemLibrary} XdevL )
 	else()
-		target_link_libraries(${XdevLFileSystemLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries(${XdevLFileSystemLibrary} XdevL )
 	endif()
 
 #

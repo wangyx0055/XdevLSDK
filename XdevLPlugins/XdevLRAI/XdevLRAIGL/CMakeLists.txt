@@ -136,11 +136,11 @@ include_directories(
 # Add external ibraries
 
 if(APPLE)
-		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} ${OPENGL_gl_LIBRARY} "-framework AGL" )
+		target_link_libraries( ${XdevLRAIGL} XdevL ${OPENGL_gl_LIBRARY} "-framework AGL" )
 elseif(UNIX)
-		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} GL )
+		target_link_libraries( ${XdevLRAIGL} XdevL GL )
 elseif(WIN32)
-		target_link_libraries( ${XdevLRAIGL} ${XdevLCoreLibrary} opengl32 gdi32 )
+		target_link_libraries( ${XdevLRAIGL} XdevL opengl32 gdi32 )
 endif()
 
 #

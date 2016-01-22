@@ -135,11 +135,11 @@ include_directories(
 # Add external ibraries
 
 if(APPLE)
-		target_link_libraries( ${XdevLBluetoothLibrary} ${XdevLCoreLibrary} "-framework IOBluetooth" "-framework CoreFoundation" )
+		target_link_libraries( ${XdevLBluetoothLibrary} XdevL "-framework IOBluetooth" "-framework CoreFoundation" )
 elseif(UNIX)
-		target_link_libraries( ${XdevLBluetoothLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries( ${XdevLBluetoothLibrary} XdevL )
 elseif(WIN32)
-		target_link_libraries(${XdevLBluetoothLibrary} ${XdevLCoreLibrary} ws2_32 )
+		target_link_libraries(${XdevLBluetoothLibrary} XdevL ws2_32 )
 endif()
 
 #

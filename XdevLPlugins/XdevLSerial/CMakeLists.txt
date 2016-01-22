@@ -132,7 +132,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLSerialLibrary} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLSerialLibrary} XdevL )
 
 #
 # Change the outputname of the library

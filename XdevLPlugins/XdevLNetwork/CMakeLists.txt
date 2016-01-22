@@ -125,11 +125,11 @@ include_directories(
 # Add external ibraries
 
 if(UNIX)
-		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries( ${XdevLNetworkLibrary} XdevL )
 elseif(APPLE)
-		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} )
+		target_link_libraries( ${XdevLNetworkLibrary} XdevL )
 elseif(WIN32)
-		target_link_libraries( ${XdevLNetworkLibrary} ${XdevLCoreLibrary} ws2_32 )
+		target_link_libraries( ${XdevLNetworkLibrary} XdevL ws2_32 )
 endif()
 
 #

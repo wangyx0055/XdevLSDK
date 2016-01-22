@@ -107,7 +107,7 @@ add_library(${XdevLOpenGLContextCGLLibrary} SHARED
 #
 # Add external ibraries
 
-target_link_libraries(${XdevLOpenGLContextCGLLibrary} ${XdevLCoreLibrary} "-framework OpenGL" "-framework AGL" "-framework Cocoa")
+target_link_libraries(${XdevLOpenGLContextCGLLibrary} XdevL "-framework OpenGL" "-framework AGL" "-framework Cocoa")
 
 #
 # Change the outputname of the library

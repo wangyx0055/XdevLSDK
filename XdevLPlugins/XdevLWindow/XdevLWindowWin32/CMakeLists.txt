@@ -135,15 +135,7 @@ include_directories(
 #
 # Add external ibraries
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	target_link_libraries(${XdevLWindowLibrary}
-		XdevLd
-	)
-else()
-	target_link_libraries(${XdevLWindowLibrary}
-		XdevL
-	)
-endif()
+target_link_libraries( ${XdevLWindowLibrary} XdevL )
 
 
 #

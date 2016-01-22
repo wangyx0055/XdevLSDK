@@ -104,7 +104,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLKeyboardLibrary} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLKeyboardLibrary} XdevL )
 
 
 #

@@ -108,7 +108,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLBlankLibrary} ${XdevLCoreLibrary} )
+target_link_libraries( ${XdevLBlankLibrary} XdevL )
 
 #
 # Change the outputname of the library

@@ -100,11 +100,11 @@ include_directories(
 # Add libraries
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} dl )
+	target_link_libraries( ${XdevLCoreLibrary} XdevL dl )
 elseif(APPLE)
-	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} )
+	target_link_libraries( ${XdevLCoreLibrary} XdevL )
 elseif(WIN32)
-	target_link_libraries( ${XdevLCoreLibrary} ${XdevLLibrary} )
+	target_link_libraries( ${XdevLCoreLibrary} XdevL )
 endif()
 
 

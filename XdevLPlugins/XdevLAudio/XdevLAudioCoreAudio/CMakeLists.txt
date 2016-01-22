@@ -65,19 +65,16 @@ if(PLATFORM_MACOSX)
 	set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -F${XDEVL_EXTERNALS}/lib")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(LIBS XdevLd "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreServices" "-framework CoreFoundation")
-else()
-	set(LIBS XdevL  "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreServices" "-framework CoreFoundation")
-endif()
-
 
 add_library(${XdevLAudioCoreAudioLibrary} SHARED
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
 
-target_link_libraries(${XdevLAudioCoreAudioLibrary} ${LIBS})
+#
+# Add external ibraries
+
+target_link_libraries(${XdevLAudioCoreAudioLibrary} XdevL "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreServices" "-framework CoreFoundation" )
 
 #
 # Change the outputname of the library
