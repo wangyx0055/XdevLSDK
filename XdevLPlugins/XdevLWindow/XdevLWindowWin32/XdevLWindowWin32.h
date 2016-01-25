@@ -55,7 +55,7 @@ namespace xdl {
 
 	class XdevLWindowDeviceWin32 : public XdevLWindowImpl, public thread::Thread {
 		public:
-			XdevLWindowDeviceWin32(XdevLModuleCreateParameter* parameter);
+			XdevLWindowDeviceWin32(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 
 			virtual ~XdevLWindowDeviceWin32();
 
@@ -128,7 +128,7 @@ namespace xdl {
 
 	class XdevLWindowServerWindows : public XdevLWindowServerImpl {
 		public:
-			XdevLWindowServerWindows(XdevLModuleCreateParameter* parameter);
+			XdevLWindowServerWindows(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowServerWindows();
 
 			/// Creates a new window.
@@ -141,7 +141,7 @@ namespace xdl {
 
 	class XdevLWindowWindowsEventServer : public XdevLWindowEventServerImpl {
 		public:
-			XdevLWindowWindowsEventServer(XdevLModuleCreateParameter* parameter);
+			XdevLWindowWindowsEventServer(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
@@ -163,7 +163,7 @@ namespace xdl {
 
 	class XdevLCursorWindows : public XdevLModuleImpl<XdevLCursor> {
 		public:
-			XdevLCursorWindows(XdevLModuleCreateParameter* parameter);
+			XdevLCursorWindows(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 
 			virtual ~XdevLCursorWindows();
 
@@ -179,6 +179,20 @@ namespace xdl {
 			virtual void releaseClip() override;
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
+			virtual xdl_bool isRelativeMotionEnabled() override;
+		private:
+			xdl_bool m_reltaiveModeEnabled;
+	};
+
+
+	class XdevLWindowWindowsInit {
+		public:
+			XdevLWindowWindowsInit(XdevLCoreMediator* core);
+			virtual ~XdevLWindowWindowsInit();
+private:
+			XdevLCoreMediator* m_core;
+			std::shared_ptr<XdevLWindowWindowsEventServer> windowEventServer;
+			std::shared_ptr<XdevLCursorWindows> cursor;
 	};
 }
 
