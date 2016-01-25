@@ -103,6 +103,7 @@ include_directories(
 	.
 	${XDEVL_HOME}/include
 	${XDEVL_PLUGINS}
+	${XDEVL_PLUGINS}/XdevLComputeDevice
 )
 
 #

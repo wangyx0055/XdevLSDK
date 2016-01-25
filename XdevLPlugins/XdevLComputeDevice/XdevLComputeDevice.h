@@ -44,18 +44,25 @@ namespace xdl {
 	  XDEVL_COMPUTE_DEVICE_3,
 	};
 
-
 	class XdevLComputeDeviceQueue {
 		public:
 			virtual ~XdevLComputeDeviceQueue() {}
 	};
 
+	class XdevLComputeProgram {
+		public:
+			virtual ~XdevLComputeProgram() {}
+
+			virtual xdl_int compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) = 0;
+			virtual xdl_int execute(XdevLComputeDeviceQueue* queue) = 0;
+	};
 
 	class XdevLComputeDeviceContext {
 		public:
 			virtual ~XdevLComputeDeviceContext() {}
 
 			virtual XdevLComputeDeviceQueue* createCommandBuffer() = 0;
+			virtual XdevLComputeProgram* createProgram() = 0;
 	};
 
 

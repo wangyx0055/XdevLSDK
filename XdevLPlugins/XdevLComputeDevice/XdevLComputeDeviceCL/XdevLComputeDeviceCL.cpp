@@ -27,7 +27,82 @@
 
 #include "XdevLComputeDeviceCL.h"
 
+#include <fstream>
+
 namespace xdl {
+
+
+	XdevLComputeProgramCL::XdevLComputeProgramCL(cl_device_id deviceid, cl_context context) :
+		m_deviceId(deviceid),
+		m_context(context),
+		m_program(nullptr) {
+
+	}
+
+	XdevLComputeProgramCL::~XdevLComputeProgramCL() {
+		if(nullptr != m_kernel) {
+			clReleaseKernel(m_kernel);
+		}
+		if(nullptr != m_program) {
+			clReleaseProgram(m_program);
+		}
+	}
+
+	xdl_int XdevLComputeProgramCL::compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) {
+		std::fstream file(filename.toString().c_str());
+		if(!file.is_open()) {
+			return ERR_ERROR;
+		}
+
+		std::stringstream kernel;
+		kernel << file.rdbuf();
+		file.close();
+
+		std::vector<std::string> source;
+		source.push_back(kernel.str());
+
+		std::vector<std::size_t> lengths;
+		std::vector<const xdl::xdl_char*> pointers;
+
+		std::vector<std::string>::iterator ib(source.begin());
+		while(ib != source.end()) {
+			lengths.push_back((*ib).size());
+			pointers.push_back((*ib).data());
+			ib++;
+		}
+
+		cl_int ret;
+		m_program = clCreateProgramWithSource(m_context, 1, (const char **)pointers.data(), (const size_t *)lengths.data(), &ret);
+		if(CL_SUCCESS != ret) {
+			return ERR_ERROR;
+		}
+
+		ret = clBuildProgram(m_program, 1, &m_deviceId, nullptr, nullptr, nullptr);
+		if(CL_SUCCESS != ret) {
+			return ERR_ERROR;
+		}
+
+		m_kernel = clCreateKernel(m_program, kernelName.toString().c_str(), &ret);
+		if(CL_SUCCESS != ret) {
+			return ERR_ERROR;
+		}
+
+		return ERR_OK;
+	}
+
+	xdl_int XdevLComputeProgramCL::execute(XdevLComputeDeviceQueue* queue) {
+		XdevLComputeDeviceQueueCL* tmp = static_cast<XdevLComputeDeviceQueueCL*>(queue);
+
+		cl_int ret = clEnqueueTask(tmp->getCommandQueue(), m_kernel, 0, nullptr, nullptr);
+		if(CL_SUCCESS != ret) {
+			return ERR_ERROR;
+		}
+	}
+
+//
+//
+//
+
 
 	XdevLComputeDeviceContextCL::XdevLComputeDeviceContextCL(cl_device_id id, cl_context ctx) :
 		m_deviceID(id),
@@ -42,7 +117,12 @@ namespace xdl {
 	XdevLComputeDeviceQueue* XdevLComputeDeviceContextCL::createCommandBuffer() {
 		cl_int ret;
 		cl_command_queue commandQueue = clCreateCommandQueue(m_context, m_deviceID, 0, &ret);
-		auto tmp = new XdevLComputeDeviceQueue(commandQueue);
+		auto tmp = new XdevLComputeDeviceQueueCL(commandQueue);
+		return tmp;
+	}
+
+	XdevLComputeProgram* XdevLComputeDeviceContextCL::createProgram() {
+		XdevLComputeProgramCL* tmp = new XdevLComputeProgramCL(m_deviceID, m_context);
 		return tmp;
 	}
 
@@ -50,19 +130,36 @@ namespace xdl {
 	cl_device_id XdevLComputeDeviceContextCL::getDeviceId() {
 		return m_deviceID;
 	}
+
 	cl_context XdevLComputeDeviceContextCL::getContext() {
 		return m_context;
 	}
 
+//
+//
+//
 
+	XdevLComputeDeviceQueueCL::XdevLComputeDeviceQueueCL(cl_command_queue queue) :
+		m_commandQueue(queue) {
+	}
+
+	XdevLComputeDeviceQueueCL::~XdevLComputeDeviceQueueCL() {
+
+	}
+
+	cl_command_queue XdevLComputeDeviceQueueCL::getCommandQueue() {
+		return m_commandQueue;
+	}
 
 //
 //
 //
 
 
-	XdevLComputeDeviceCL::XdevLComputeDeviceCL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
-		XdevLModuleImpl<XdevLComputeDevice>(parameter, descriptor) {
+	       XdevLComputeDeviceCL::XdevLComputeDeviceCL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		       XdevLModuleImpl<XdevLComputeDevice>(parameter, descriptor),
+		       m_platformID(nullptr),
+		       m_deviceID(nullptr) {
 		XDEVL_MODULE_INFO("XdevLComputeDeviceCL()\n");
 	}
 
@@ -150,26 +247,8 @@ namespace xdl {
 			return nullptr;
 		}
 
-		auto tmp = new XdevLComputeDeviceContext(m_devices[deviceId].id, ctx);
+		auto tmp = new XdevLComputeDeviceContextCL(m_devices[deviceId].id, ctx);
 		return tmp;
 	}
-
-	int main(int argc, char **argv) {
-		std::unique_ptr<XdevLComputeDeviceCL> cd= std::unique_ptr<XdevLComputeDeviceCL>(new XdevLComputeDeviceCL()) ;
-		cd->init();
-
-		auto ctx = cd->createContext();
-		if(nullptr == ctx) {
-			std::cerr << "Could not create context.\n";
-		}
-
-		auto queue = ctx->createCommandBuffer();
-
-
-		cd->shutdown();
-		return 0;
-	}
-
-
 
 }

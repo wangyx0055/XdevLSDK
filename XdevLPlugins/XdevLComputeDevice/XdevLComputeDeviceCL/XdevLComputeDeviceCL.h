@@ -59,15 +59,37 @@ namespace xdl {
 		char vendor[128];
 	};
 
+
+//
+//
+//
+
+	class XdevLComputeProgramCL : public XdevLComputeProgram {
+	public:
+		XdevLComputeProgramCL(cl_device_id deviceid, cl_context context);
+			virtual ~XdevLComputeProgramCL();
+
+			xdl_int compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) override;
+			xdl_int execute(XdevLComputeDeviceQueue* queue) override;
+
+	private:
+			cl_device_id m_deviceId;
+			cl_context m_context;
+			cl_program m_program;
+			cl_kernel m_kernel;
+	};
+
 //
 //
 //
 
 	class XdevLComputeDeviceQueueCL : public XdevLComputeDeviceQueue {
 		public:
-			XdevLComputeDeviceQueueCL(cl_command_queue queue) : m_CommandQueue(queue) {}
+			XdevLComputeDeviceQueueCL(cl_command_queue queue);
+			virtual ~XdevLComputeDeviceQueueCL();
+			cl_command_queue getCommandQueue();
 		private:
-			cl_command_queue m_CommandQueue;
+			cl_command_queue m_commandQueue;
 	};
 
 //
@@ -80,7 +102,8 @@ namespace xdl {
 
 			virtual ~XdevLComputeDeviceContextCL();
 
-			XdevLComputeDeviceQueue* createCommandBuffer();
+			XdevLComputeDeviceQueue* createCommandBuffer() override;
+			XdevLComputeProgram* createProgram() override;
 
 			cl_device_id getDeviceId();
 			cl_context getContext();
@@ -90,20 +113,18 @@ namespace xdl {
 			cl_context m_context;
 	};
 
-
-
 //
 //
 //
 
-	class XdevLComputeDeviceCL : public XdevLModuleImpl<XdevLComputeDeviceCL> {
+	class XdevLComputeDeviceCL : public XdevLModuleImpl<XdevLComputeDevice> {
 		public:
 			XdevLComputeDeviceCL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
 			virtual ~XdevLComputeDeviceCL();
 			virtual int init();
 			virtual int shutdown();
 
-			virtual XdevLComputeDeviceContext* createContext(const XdevLComputePlatformId platformId = XDEVL_COMPUTE_PLATFORM_DEFAULT, const XdevLComputeDeviceId& deviceId = XDEVL_COMPUTE_DEVICE_DEFAULT);
+			virtual XdevLComputeDeviceContext* createContext(const XdevLComputePlatformId platformId = XDEVL_COMPUTE_PLATFORM_DEFAULT, const XdevLComputeDeviceId& deviceId = XDEVL_COMPUTE_DEVICE_DEFAULT) override;
 
 		private:
 			cl_platform_id m_platformID;
@@ -111,16 +132,6 @@ namespace xdl {
 			std::vector<XdevLPlatformInfo> m_platforms;
 			std::vector<XdevLDeviceInfo> m_devices;
 	};
-
-	XdevLComputeDeviceCL::XdevLComputeDeviceCL() :
-		m_platformID(nullptr),
-		m_deviceID(nullptr) {
-
-	}
-
-	XdevLComputeDeviceCL::~XdevLComputeDeviceCL() {
-
-	}
 
 }
 
