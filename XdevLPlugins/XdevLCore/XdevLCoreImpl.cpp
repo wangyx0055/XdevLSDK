@@ -192,7 +192,6 @@ namespace xdl {
 		auto moduleIterator = m_modules.begin();
 		while(moduleIterator != m_modules.end()) {
 			XdevLModule* module = moduleIterator->second->getModuleCreateParameter()->getModuleInstance();
-			auto& dependency = module->getDescriptor().getDependencies();
 
 			if(module->getDescriptor().getState(XDEVL_MODULE_STATE_DISABLE_AUTO_DESTROY) == xdl_false) {
 				_deleteModule(module->getID());
