@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -56,7 +56,7 @@ xdl::XdevLModuleDescriptor moduleDescriptorCapture {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLAudioPlaybackImpl, moduleDescriptorPlayback)
@@ -91,7 +91,7 @@ namespace xdl {
 			default:
 				break;
 		}
-		return SND_PCM_FORMAT_U8;
+		return SND_PCM_FORMAT_UNKNOWN;
 	}
 
 	XdevLAudioBufferAlsa::XdevLAudioBufferAlsa(_snd_pcm_format format, XdevLAudioSamplingRate samplingRate, xdl_uint channels) :
@@ -132,6 +132,20 @@ namespace xdl {
 			case SND_PCM_FORMAT_FLOAT64:
 				return AUDIO_BUFFER_FORMAT_DOUBLE;
 				break;
+			case SND_PCM_FORMAT_S16_BE:
+			case SND_PCM_FORMAT_U16_BE:
+			case SND_PCM_FORMAT_S24_BE:
+			case SND_PCM_FORMAT_U24_BE:
+			case SND_PCM_FORMAT_S32_BE:
+			case SND_PCM_FORMAT_U32_BE:
+			case SND_PCM_FORMAT_FLOAT_BE:
+			case SND_PCM_FORMAT_IEC958_SUBFRAME_LE:
+			case SND_PCM_FORMAT_MU_LAW:
+			case SND_PCM_FORMAT_A_LAW:
+			case SND_PCM_FORMAT_IMA_ADPCM:
+			default:
+				assert(0 && "Not handled format");
+
 		}
 		return AUDIO_BUFFER_FORMAT_UNKNOWN;
 	}
@@ -278,7 +292,7 @@ namespace xdl {
 		XDEVL_MODULE_INFO("--------------------------------------------\n");
 
 		// Now make the hardware ready to use.
-		if ((err = snd_pcm_prepare (m_handle)) < 0) {
+		if((err = snd_pcm_prepare(m_handle)) < 0) {
 			return nullptr;
 		}
 
@@ -320,7 +334,7 @@ namespace xdl {
 		//
 		// Open the PCM device.
 		//
-		if ((err = snd_pcm_open(&m_handle, getDeviceName().toString().c_str(), streamType, 0)) < 0) {
+		if((err = snd_pcm_open(&m_handle, getDeviceName().toString().c_str(), streamType, 0)) < 0) {
 			XDEVL_MODULE_INFO("Could not open PCM device: " << getDeviceName() << " ->" << snd_strerror(err) << std::endl);
 			return ERR_ERROR;
 		}
@@ -337,37 +351,37 @@ namespace xdl {
 
 		// Allocate parameters object.
 		// TODO Do we have to free this allocated parameter?
-		if ((err = snd_pcm_hw_params_malloc(&m_hwParams)) < 0) {
+		if((err = snd_pcm_hw_params_malloc(&m_hwParams)) < 0) {
 			XDEVL_MODULE_INFO("Could allocate memory for hardware parameter " << "->" << snd_strerror(err) << std::endl);
 			return ERR_ERROR;
 		}
 
 		// Get the default values and put it into the structure.
-		if ((err = snd_pcm_hw_params_any(m_handle, m_hwParams)) < 0) {
+		if((err = snd_pcm_hw_params_any(m_handle, m_hwParams)) < 0) {
 			return ERR_ERROR;
 		}
 
 		// Set interleaved mode for data access. (This tells how the samples for the different channels are ordered in RAM.
 		// Interleaving means that we alternate samples for the left and right channel (LRLRLR)
-		if ((err = snd_pcm_hw_params_set_access(m_handle, m_hwParams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
+		if((err = snd_pcm_hw_params_set_access(m_handle, m_hwParams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
 			return ERR_ERROR;
 		}
 
 		// Desired buffer format ( 8, 16, 32 etc. bit)
-		if ((err = snd_pcm_hw_params_set_format(m_handle, m_hwParams, bufferformat)) < 0) {
+		if((err = snd_pcm_hw_params_set_format(m_handle, m_hwParams, bufferformat)) < 0) {
 			XDEVL_MODULE_INFO("Could set hardware format:" << snd_strerror(err) << std::endl);
 			return ERR_ERROR;
 		}
 
 		// Desired sampling rate.
-		if ((err = snd_pcm_hw_params_set_rate_near(m_handle, m_hwParams, &samplingRate, 0)) < 0) {
+		if((err = snd_pcm_hw_params_set_rate_near(m_handle, m_hwParams, &samplingRate, 0)) < 0) {
 			XDEVL_MODULE_INFO("Could not set the desired sampling rate: " << samplingRate << " : " << snd_strerror(err) << std::endl);
 			return ERR_ERROR;
 		}
 
 		// Number of channels.
-		if ((err = snd_pcm_hw_params_set_channels(m_handle, m_hwParams, numberOfChannels)) < 0) {
-			if( (err = snd_pcm_hw_params_get_channels(m_hwParams, &numberOfChannels)) < 0) {
+		if((err = snd_pcm_hw_params_set_channels(m_handle, m_hwParams, numberOfChannels)) < 0) {
+			if((err = snd_pcm_hw_params_get_channels(m_hwParams, &numberOfChannels)) < 0) {
 				XDEVL_MODULE_INFO("Could not set the number of channels: " << numberOfChannels << " : " << snd_strerror(err) << std::endl);
 				return ERR_ERROR;
 			}
@@ -379,7 +393,7 @@ namespace xdl {
 		xdl_int err;
 
 		// Write the parameters to the driver
-		if( (err = snd_pcm_hw_params(m_handle, m_hwParams)) < 0) {
+		if((err = snd_pcm_hw_params(m_handle, m_hwParams)) < 0) {
 			XDEVL_MODULE_INFO("Could write parameters to hardware: " << snd_strerror(err) << std::endl);
 			return ERR_ERROR;
 		}
@@ -416,12 +430,12 @@ namespace xdl {
 
 	xdl_int XdevLAudioAlsaBase::write(xdl_uint8* buffer) {
 		xdl_int err;
-		if( (err = snd_pcm_writei(m_handle, buffer, m_periodSize)) == EPIPE) {
+		if((err = snd_pcm_writei(m_handle, buffer, m_periodSize)) == EPIPE) {
 			snd_pcm_prepare(m_handle);
 			XDEVL_MODULE_INFO("Alsa buffer overrun ..."<< std::endl);
 		} else if(err < 0) {
 			// Another issue.
-			XDEVL_MODULE_INFO( snd_strerror(err) << std::endl);
+			XDEVL_MODULE_INFO(snd_strerror(err) << std::endl);
 		}
 		return ERR_OK;
 	}
@@ -429,15 +443,19 @@ namespace xdl {
 	xdl_int XdevLAudioAlsaBase::read(xdl_uint8* buffer) {
 		xdl_int err;
 		err = snd_pcm_readi(m_handle, buffer, m_periodSize);
-		if (err == -EPIPE) {
+		if(err == -EPIPE) {
 			/* EPIPE means overrun */
 			fprintf(stderr, "overrun occurred\n");
 			snd_pcm_prepare(m_handle);
-		} else if (err < 0) {
+			return ERR_ERROR;
+		} else if(err < 0) {
 			fprintf(stderr,"error from read: %s\n", snd_strerror(err));
-		} else if (err != (int)m_periodSize) {
+			return ERR_ERROR;
+		} else if(err != (int)m_periodSize) {
 			fprintf(stderr, "short read, read %d frames\n", err);
+			return ERR_ERROR;
 		}
+		return ERR_OK;
 	}
 
 	void XdevLAudioAlsaBase::debugDump() {
@@ -446,28 +464,28 @@ namespace xdl {
 		printf("ALSA library version: %s\n", SND_LIB_VERSION_STR);
 
 		printf("\nPCM stream types:\n");
-		for (val = 0; val <= SND_PCM_STREAM_LAST; val++) {
-			if( snd_pcm_stream_name((snd_pcm_stream_t)val) == "PLAYBACK") {
+		for(val = 0; val <= SND_PCM_STREAM_LAST; val++) {
+			if(strcmp(snd_pcm_stream_name((snd_pcm_stream_t)val), "PLAYBACK") == 0) {
 
-			} else if( snd_pcm_stream_name((snd_pcm_stream_t)val) == "CAPTURE") {
+			} else if(strcmp(snd_pcm_stream_name((snd_pcm_stream_t)val), "CAPTURE") == 0) {
 
 			}
 		}
 		printf("\nPCM access types:\n");
-		for (val = 0; val <= SND_PCM_ACCESS_LAST; val++)
+		for(val = 0; val <= SND_PCM_ACCESS_LAST; val++)
 			printf("  %s\n", snd_pcm_access_name((snd_pcm_access_t)val));
 
 		printf("\nPCM formats:\n");
-		for (val = 0; val <= SND_PCM_FORMAT_LAST; val++) {
-			if (snd_pcm_format_name((snd_pcm_format_t)val) != NULL)
-				printf("  %s (%s)\n",  snd_pcm_format_name((snd_pcm_format_t)val), snd_pcm_format_description( (snd_pcm_format_t)val));
+		for(val = 0; val <= SND_PCM_FORMAT_LAST; val++) {
+			if(snd_pcm_format_name((snd_pcm_format_t)val) != NULL)
+				printf("  %s (%s)\n",  snd_pcm_format_name((snd_pcm_format_t)val), snd_pcm_format_description((snd_pcm_format_t)val));
 		}
 		printf("\nPCM subformats:\n");
-		for (val = 0; val <= SND_PCM_SUBFORMAT_LAST; val++)
+		for(val = 0; val <= SND_PCM_SUBFORMAT_LAST; val++)
 			printf("  %s (%s)\n", snd_pcm_subformat_name((snd_pcm_subformat_t)val), snd_pcm_subformat_description((snd_pcm_subformat_t)val));
 
 		printf("\nPCM states:\n");
-		for (val = 0; val <= SND_PCM_STATE_LAST; val++)
+		for(val = 0; val <= SND_PCM_STATE_LAST; val++)
 			printf("  %s\n",
 			       snd_pcm_state_name((snd_pcm_state_t)val));
 	}
@@ -478,39 +496,39 @@ namespace xdl {
 		}
 
 		xdl_int err;
-		if ((err = snd_pcm_wait (m_handle, 1000)) < 0) {
-			fprintf (stderr, "poll failed (%s)\n", strerror (err));
+		if((err = snd_pcm_wait(m_handle, 1000)) < 0) {
+			fprintf(stderr, "poll failed (%s)\n", strerror(err));
 			return ERR_ERROR;
 		}
 
 		/* find out how much space is available for playback data */
 		snd_pcm_sframes_t frames_to_deliver;
-		if ((frames_to_deliver = snd_pcm_avail_update (m_handle)) < 0) {
-			if (frames_to_deliver == -EPIPE) {
-				fprintf (stderr, "an xrun occured\n");
+		if((frames_to_deliver = snd_pcm_avail_update(m_handle)) < 0) {
+			if(frames_to_deliver == -EPIPE) {
+				fprintf(stderr, "an xrun occured\n");
 				return ERR_ERROR;
 			} else {
-				fprintf (stderr, "unknown ALSA avail update return value (%d)\n", (xdl_uint)frames_to_deliver);
+				fprintf(stderr, "unknown ALSA avail update return value (%d)\n", (xdl_uint)frames_to_deliver);
 				return ERR_ERROR;
 			}
 		}
 
-		frames_to_deliver = frames_to_deliver > m_periodSize ? m_periodSize : frames_to_deliver;
+		frames_to_deliver = (frames_to_deliver > m_periodSize) ? m_periodSize : frames_to_deliver;
 
 		/* deliver the data */
 
 		xdl_uint frames = 0;
 		do {
 			frames += m_callbackFunction(m_buffer, frames_to_deliver, m_userData);
-		} while ( frames < frames_to_deliver);
+		} while(frames < frames_to_deliver);
 
 
-		if( (err = snd_pcm_writei(m_handle, m_buffer, frames_to_deliver)) == -EPIPE) {
+		if((err = snd_pcm_writei(m_handle, m_buffer, frames_to_deliver)) == -EPIPE) {
 			snd_pcm_prepare(m_handle);
 			XDEVL_MODULE_INFO("Alsa buffer overrun ..."<< std::endl);
 		} else if(err < 0) {
 			// Another issue.
-			XDEVL_MODULE_INFO( snd_strerror(err) << std::endl);
+			XDEVL_MODULE_INFO(snd_strerror(err) << std::endl);
 		}
 
 		return ERR_OK;
@@ -538,7 +556,7 @@ namespace xdl {
 		return m_periodSize;
 	}
 
-	xdl_int XdevLAudioAlsaBase::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
+	void XdevLAudioAlsaBase::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
 		m_callbackFunction = callbackFuntion;
 		m_userData = userData;
 	}
@@ -619,8 +637,8 @@ namespace xdl {
 		return XdevLAudioAlsaBase::getPeriodSize();
 	}
 
-	xdl_int XdevLAudioPlaybackImpl::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
-		return XdevLAudioAlsaBase::setCallbackFunction(callbackFuntion, userData);
+	void XdevLAudioPlaybackImpl::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
+		XdevLAudioAlsaBase::setCallbackFunction(callbackFuntion, userData);
 	}
 
 	void XdevLAudioPlaybackImpl::setGain(xdl_float gain) {
@@ -665,7 +683,7 @@ namespace xdl {
 	IPXdevLAudioBuffer XdevLAudioCaptureImpl::createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data) {
 		return XdevLAudioAlsaBase::create(AUDIO_STREAM_CAPTURE, format, samplingRate, channels);
 	}
-	
+
 	IPXdevLAudioSource XdevLAudioCaptureImpl::createAudioSource(IPXdevLAudioBuffer buffer) {
 		return nullptr;
 	}
@@ -700,8 +718,8 @@ namespace xdl {
 		return XdevLAudioAlsaBase::getPeriodSize();
 	}
 
-	xdl_int XdevLAudioCaptureImpl::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
-		return XdevLAudioAlsaBase::setCallbackFunction(callbackFuntion, userData);
+	void XdevLAudioCaptureImpl::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
+		XdevLAudioAlsaBase::setCallbackFunction(callbackFuntion, userData);
 	}
 
 	void XdevLAudioCaptureImpl::setGain(xdl_float gain) {

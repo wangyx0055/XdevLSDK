@@ -108,7 +108,7 @@ namespace xdl {
 		public:
 			virtual ~XdevLAudio() {};
 
-			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData = nullptr) = 0;
+			virtual void setCallbackFunction(callbackFunctionType callbackFuntion, void* userData = nullptr) = 0;
 
 			/// Create audio buffer from file.
 			/**

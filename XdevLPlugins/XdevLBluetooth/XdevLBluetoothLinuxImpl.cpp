@@ -48,7 +48,7 @@ xdl::XdevLModuleDescriptor bluetoothModuleDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(bluetoothPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(bluetoothPluginDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLBluetoothLinuxImpl, bluetoothModuleDescriptor)
@@ -60,7 +60,8 @@ namespace xdl {
 
 	XdevLBluetoothLinuxImpl::XdevLBluetoothLinuxImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleImpl<XdevLBluetooth>(parameter, descriptor),
-		m_socket(-1) {};
+		m_socket(-1) {
+	}
 
 	xdl_int XdevLBluetoothLinuxImpl::init() {
 		if(readInfoFromXMLFile() != ERR_OK) {
@@ -86,7 +87,7 @@ namespace xdl {
 
 		TiXmlHandle docHandle(&xmlDocument);
 		TiXmlElement* root = docHandle.FirstChild(XdevLCorePropertiesName.c_str()).FirstChildElement("XdevLBluetooth").ToElement();
-		if (!root) {
+		if(!root) {
 			XDEVL_MODULE_WARNING("<XdevLBluetooth> section not found. Using default values for the device.\n");
 			return ERR_OK;
 		}
@@ -94,7 +95,7 @@ namespace xdl {
 			if(root->Attribute("id")) {
 				XdevLID id(root->Attribute("id"));
 				if(getID() == id) {
-					if (root->Attribute("device")) {
+					if(root->Attribute("device")) {
 						m_deviceName = root->Attribute("device");
 					}
 				}
@@ -113,8 +114,8 @@ namespace xdl {
 		char addr[19] = { 0 };
 		char name[248] = { 0 };
 		dev_id = hci_get_route(NULL);
-		sock = hci_open_dev( dev_id );
-		if (dev_id < 0 || sock < 0) {
+		sock = hci_open_dev(dev_id);
+		if(dev_id < 0 || sock < 0) {
 			return ERR_ERROR;
 		}
 
@@ -123,14 +124,14 @@ namespace xdl {
 		flags = IREQ_CACHE_FLUSH;
 		ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
 		num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
-		if( num_rsp < 0 )
+		if(num_rsp < 0)
 			perror("hci_inquiry");
 
 
-		for (i = 0; i < num_rsp; i++) {
+		for(i = 0; i < num_rsp; i++) {
 			ba2str(&(ii+i)->bdaddr, addr);
 			memset(name, 0, sizeof(name));
-			if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), name, 0) < 0) {
+			if(hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), name, 0) < 0) {
 				strcpy(name, "[unknown]");
 			}
 			m_scanedDevices += std::string(addr) + "," + std::string(name) + ",";
@@ -138,9 +139,9 @@ namespace xdl {
 			std::cout << m_scanedDevices << std::endl;
 		}
 
-		free( ii );
+		free(ii);
 
-		if(::close( sock ) == -1)
+		if(::close(sock) == -1)
 			return ERR_ERROR;
 
 		return ERR_OK;
@@ -195,7 +196,7 @@ namespace xdl {
 
 	xdl_int XdevLBluetoothLinuxImpl::write(xdl_uint8* src, xdl_int size) {
 		xdl_int ret = 0;
-		if ((ret = ::send(m_socket, (xdl_char*)src, size, 0)) == -1) {
+		if((ret = ::send(m_socket, (xdl_char*)src, size, 0)) == -1) {
 			return -1;
 		}
 		return ret;
@@ -203,7 +204,7 @@ namespace xdl {
 
 	xdl_int XdevLBluetoothLinuxImpl::read(xdl_uint8* dst, xdl_int size) {
 		xdl_int ret = 0;
-		if ((ret =  ::recv(m_socket, (xdl_char*)dst, size, 0)) == -1) {
+		if((ret =  ::recv(m_socket, (xdl_char*)dst, size, 0)) == -1) {
 			return -1;
 		}
 		return ret;
@@ -218,7 +219,7 @@ namespace xdl {
 		addr.rc_family 	= AF_BLUETOOTH;
 		addr.rc_channel = (xdl::xdl_uint8)1;
 
-		if (::bind(m_socket, (struct sockaddr *)&addr, sizeof(sockaddr_in)) == -1) {
+		if(::bind(m_socket, (struct sockaddr *)&addr, sizeof(sockaddr_in)) == -1) {
 			return ERR_ERROR;
 		}
 		return ERR_OK;

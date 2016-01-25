@@ -55,7 +55,7 @@ xdl::XdevLPluginDescriptor serialPluginDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(serialPluginDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLSerialLinux, moduleDescriptor)
@@ -66,7 +66,8 @@ namespace xdl {
 
 	XdevLSerialLinux::XdevLSerialLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleImpl<XdevLSerial>(parameter, descriptor), 	m_fd(-1),
-		m_timeoutSpec(NULL) {};
+		m_timeoutSpec(NULL) {
+	}
 
 	xdl_int XdevLSerialLinux::shutdown() {
 		return close();
