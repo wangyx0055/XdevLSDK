@@ -50,7 +50,7 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 };
 
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor)
 
 
 #if XDEVL_USE_UDEV
@@ -85,7 +85,6 @@ namespace xdl {
 	const XdevLID JoystickButtonPressed("XDEVL_JOYSTICK_BUTTON_PRESSED");
 	const XdevLID JoystickButtonReleased("XDEVL_JOYSTICK_BUTTON_RELEASED");
 	const XdevLID JoystickMotion("XDEVL_JOYSTICK_MOTION");
-	static xdl_uint16 joystickID = 0;
 
 	xdl_uint16 wrapJoystickIdToInteger(const XdevLJoystickId& id) {
 		switch(id) {

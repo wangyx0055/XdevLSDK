@@ -51,7 +51,7 @@ xdl::XdevLPluginDescriptor pluginDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor)
 
 
 XDEVL_PLUGIN_CREATE_MODULE {
@@ -111,7 +111,7 @@ namespace xdl {
 
 	xdl_int xdl::XdevLMouseLinux::notify(XdevLEvent& event) {
 
-		return XdevLModuleImpl<XdevLMouseServer>::notify(event);
+		return XdevLModuleAutoImpl<XdevLMouseServer>::notify(event);
 
 	}
 
@@ -121,8 +121,10 @@ namespace xdl {
 
 	xdl_int XdevLMouseLinux::update() {
 		input_event event;
-		int size = read(m_fd, &event, sizeof(input_event));
-
+		ssize_t size = read(m_fd, &event, sizeof(input_event));
+		if(-1 == size) {
+			XDEVL_MODULE_ERROR("read failed: " << strerror(errno) << std::endl);
+		}
 		m_mutex.Lock();
 
 		switch(event.type) {
@@ -134,7 +136,6 @@ namespace xdl {
 					}
 					break;
 					case BTN_RIGHT: {
-						XdevLEvent ev;
 						sendButtonPressEvent(BUTTON_RIGHT);
 					}
 					break;
@@ -193,8 +194,8 @@ namespace xdl {
 			break;
 		}
 		m_mutex.Unlock();
-//		printf("type: %d, code: %d, value: %d\n", event.type, event.code,  event.value);
 
+		return XdevLModuleAutoImpl<XdevLMouseServer>::update();
 	}
 
 	xdl_int XdevLMouseLinux::RunThread(thread::ThreadArgument*) {

@@ -57,7 +57,7 @@ xdl::XdevLPluginDescriptor keyboardPluginDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(keyboardPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(keyboardPluginDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLKeyboardImpl, moduleKeyboardDescriptor)
@@ -151,8 +151,8 @@ namespace xdl {
 
 	void XdevLKeyboardImpl::setClickResponseTimeForAll(xdl_double crt) {
 		XDEVL_ASSERT(m_attached, "Keyboard device not attached!");
-		for(auto a = 0; a < m_Buttons.size(); ++a) {
-			m_Buttons[a]->setClickResponseTime(crt);
+		for(auto button : m_Buttons) {
+			button.second->setClickResponseTime(crt);
 		}
 	}
 

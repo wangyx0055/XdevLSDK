@@ -34,6 +34,7 @@
 #include <iomanip>
 
 #include <tm/tm.h>
+#include <XdevLOpenGLContext/GL/glew.h>
 
 xdl::IPXdevLCore core					= nullptr;
 xdl::IPXdevLWindow window				= nullptr;
@@ -411,9 +412,8 @@ int main(int argc, char* argv[]) {
 	xdl::xdl_float rx = 0.0f;
 	xdl::xdl_float ry = 0.0f;
 
-//	cursor->hide();
-	cursor->setPosition(400, 300);
-//	cursor->enableRelativeMotion();
+
+
 
 	// Start main loop.
 	while(running) {
@@ -436,6 +436,8 @@ int main(int argc, char* argv[]) {
 		rai->setActiveDepthTest(xdl::xdl_true);
 		rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
 		rai->clearDepthTarget(1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 		xdl::xdl_float aspect_ratio = window->getWidth()/window->getHeight();
 

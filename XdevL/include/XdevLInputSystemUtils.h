@@ -562,6 +562,7 @@ namespace xdl {
 				m_Buttons.clear();
 				m_Axes.clear();
 				m_POVs.clear();
+				return ERR_OK;
 			}
 			std::vector<XdevLButtonDelegateType>& getButtonDelegates() {
 				return m_buttonDelegates;
