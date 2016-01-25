@@ -36,7 +36,6 @@
 #define _NET_WM_STATE_TOGGLE    2l
 
 static xdl::xdl_int reference_counter = 0;
-static xdl::xdl_bool x11Initialized = xdl::xdl_false;
 static std::shared_ptr<xdl::XdevLX11Display> globalDisplay;
 static Display* display = nullptr;
 
@@ -245,9 +244,6 @@ namespace xdl {
 
 	int XdevLWindowX11::create() {
 
-		Visual* 						visual;
-		XVisualInfo*					vinfo;
-
 		m_display = display;
 
 		// Get the default screen number.
@@ -284,8 +280,6 @@ namespace xdl {
 			XDEVL_MODULE_ERROR("RandR extension missing.\n");
 			return ERR_ERROR;
 		}
-
-		Colormap colormap = m_defaultColorMap;
 
 		XRRQueryExtension(m_display, &m_event_basep, &m_error_basep);
 
@@ -1646,7 +1640,7 @@ namespace xdl {
 
 				case ClientMessage: {
 					if((event.xclient.message_type == WM_PROTOCOLS) &&
-					    (event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
+					    ((Atom)event.xclient.data.l[0] == WM_DELETE_WINDOW) &&
 					    (event.xclient.format == 32)) {
 
 						ev.type					= XDEVL_WINDOW_EVENT;
@@ -1669,7 +1663,7 @@ namespace xdl {
 					//
 					else if((event.xclient.message_type == WM_PROTOCOLS) &&
 					        (event.xclient.format == 32) &&
-					        (event.xclient.data.l[0] == _NET_WM_PING)) {
+					        ((Atom)event.xclient.data.l[0] == _NET_WM_PING)) {
 						Window root = DefaultRootWindow(display);
 						event.xclient.window = root;
 						XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);

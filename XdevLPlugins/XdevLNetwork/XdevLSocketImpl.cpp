@@ -73,7 +73,7 @@ xdl::XdevLPluginDescriptor networkPluginDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(networkPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(networkPluginDescriptor)
 
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 

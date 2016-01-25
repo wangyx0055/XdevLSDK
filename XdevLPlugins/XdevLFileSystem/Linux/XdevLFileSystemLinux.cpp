@@ -68,7 +68,7 @@ xdl::XdevLModuleDescriptor moduleDirectoryWatcherDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor)
 
 extern "C" XDEVL_EXPORT xdl::XdevLModule* _createModule(const xdl::XdevLPluginDescriptor& pluginDescriptor, const xdl::XdevLModuleDescriptor& moduleDescriptor) {
 
@@ -111,7 +111,8 @@ namespace xdl {
 
 	XdevLDirectoryWatcherLinux::XdevLDirectoryWatcherLinux(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
 		XdevLModuleImpl<XdevLDirectoryWatcher>(parameter, descriptor),
-		m_fd(-1) {};
+		m_fd(-1) {
+	}
 
 	xdl_int XdevLDirectoryWatcherLinux::init() {
 		//
@@ -185,7 +186,7 @@ namespace xdl {
 		//
 		// Add new directory watcher.
 		//
-		int wd = inotify_add_watch(m_fd, folder.toString().c_str(), IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_MODIFY );
+		int wd = inotify_add_watch(m_fd, folder.toString().c_str(), IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_MODIFY);
 		if(wd == -1) {
 			XDEVL_MODULE_INFO("Adding directory: " << folder.toString() << " to watch failed.: " << strerror(errno) << std::endl);
 			return -1;
