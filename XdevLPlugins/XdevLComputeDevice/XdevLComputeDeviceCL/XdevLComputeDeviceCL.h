@@ -59,24 +59,62 @@ namespace xdl {
 		char vendor[128];
 	};
 
+//
+//
+//
+
+	class XdevLComputeDeviceBufferCL : public XdevLComputeDeviceBuffer {
+		public:
+			XdevLComputeDeviceBufferCL(cl_mem mem);
+
+			virtual ~XdevLComputeDeviceBufferCL();
+
+			xdl_int upload(XdevLComputeDeviceQueue* queue, xdl_uint size, xdl_uint8* data) override;
+			xdl_int download(XdevLComputeDeviceQueue* queue, xdl_uint size, xdl_uint8* data) override;
+
+			cl_mem& getMemory() {
+				return m_memory;
+			}
+
+		private:
+
+			cl_mem m_memory;
+	};
+
+
+	class XdevLComputeKernelCL : public XdevLComputeKernel {
+		public:
+
+			XdevLComputeKernelCL(cl_kernel kernel);
+
+			virtual ~XdevLComputeKernelCL();
+
+			xdl_int setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) override;
+
+			cl_kernel getKernel() {
+				return m_kernel;
+			}
+		private:
+			cl_kernel m_kernel;
+	};
 
 //
 //
 //
 
 	class XdevLComputeProgramCL : public XdevLComputeProgram {
-	public:
-		XdevLComputeProgramCL(cl_device_id deviceid, cl_context context);
+		public:
+			XdevLComputeProgramCL(cl_device_id deviceid, cl_context context);
 			virtual ~XdevLComputeProgramCL();
 
-			xdl_int compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) override;
-			xdl_int execute(XdevLComputeDeviceQueue* queue) override;
+			std::shared_ptr<XdevLComputeKernel> compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) override;
+			xdl_int execute(XdevLComputeDeviceQueue* queue, XdevLComputeKernel* kernel) override;
 
-	private:
+		private:
 			cl_device_id m_deviceId;
 			cl_context m_context;
 			cl_program m_program;
-			cl_kernel m_kernel;
+//			cl_kernel m_kernel;
 	};
 
 //
@@ -102,8 +140,9 @@ namespace xdl {
 
 			virtual ~XdevLComputeDeviceContextCL();
 
-			XdevLComputeDeviceQueue* createCommandBuffer() override;
-			XdevLComputeProgram* createProgram() override;
+			std::shared_ptr<XdevLComputeDeviceQueue> createCommandQueue() override;
+			std::shared_ptr<XdevLComputeProgram> createProgram() override;
+			XdevLComputeDeviceBuffer* createBuffer(const XdevLComputeDeviceBufferAccessType& access, xdl_uint64 size) override;
 
 			cl_device_id getDeviceId();
 			cl_context getContext();

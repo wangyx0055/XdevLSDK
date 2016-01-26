@@ -45,10 +45,16 @@ namespace xdl {
 #define XDEVL_ASSERT(exp, message)	if ( !(exp) ) XdevLAssertGeneric( message, __FILE__, __LINE__ )
 
 #ifdef _LOG
-#define XDEVL_MODULE_SUCCESS(errMsg)	{std::cerr << "\033[1;32m>> " << this->getDescriptor().getName() << ": " << errMsg << "\033[0m";}
-#define XDEVL_MODULE_ERROR(errMsg)		{std::cerr << "\033[1;31m## " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__  << ": " << errMsg << "\033[0m";}
-#define XDEVL_MODULE_WARNING(errMsg)	{std::cerr << "\033[1;35m!! " << this->getDescriptor().getName() << ":" << __func__ << ":" << __LINE__ << ": " << errMsg << "\033[0m";}
-#define XDEVL_MODULE_INFO(errMsg)		{std::cerr << this->getDescriptor().getName() << ": " << errMsg;}
+	#define XDEVL_MODULEX_SUCCESS(MODULE_NAME, errMsg)	{std::cerr << "\033[1;32m>> " << #MODULE_NAME << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULEX_ERROR(MODULE_NAME, errMsg)		{std::cerr << "\033[1;31m## " << #MODULE_NAME << ": " << __func__ << ": " << __LINE__  << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULEX_WARNING(MODULE_NAME, errMsg)	{std::cerr << "\033[1;35m!! " << #MODULE_NAME << ": " << __func__ << ": " << __LINE__ << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULEX_INFO(MODULE_NAME, errMsg)		{std::cerr << #MODULE_NAME << ": " << errMsg;}
+
+	#define XDEVL_MODULE_SUCCESS(errMsg)	{std::cerr << "\033[1;32m>> " << this->getDescriptor().getName() << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULE_ERROR(errMsg)		{std::cerr << "\033[1;31m## " << this->getDescriptor().getName() << ": " << __func__ << ": " << __LINE__  << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULE_WARNING(errMsg)	{std::cerr << "\033[1;35m!! " << this->getDescriptor().getName() << ": " << __func__ << ": " << __LINE__ << ": " << errMsg << "\033[0m";}
+	#define XDEVL_MODULE_INFO(errMsg)		{std::cerr << this->getDescriptor().getName() << ": " << errMsg;}
+
 #else
 #define XDEVL_MODULE_SUCCESS(errMsg)
 #define XDEVL_MODULE_ERROR(errMsg)

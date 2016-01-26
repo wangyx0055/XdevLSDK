@@ -44,25 +44,45 @@ namespace xdl {
 	  XDEVL_COMPUTE_DEVICE_3,
 	};
 
+	enum XdevLComputeDeviceBufferAccessType {
+	  XDEVL_COMPUTE_BUFFER_READ_ONLY,
+	  XDEVL_COMPUTE_BUFFER_WRITE_ONLY,
+	  XDEVL_COMPUTE_BUFFER_READ_WRITE,
+	};
+
 	class XdevLComputeDeviceQueue {
 		public:
 			virtual ~XdevLComputeDeviceQueue() {}
+	};
+
+	class XdevLComputeDeviceBuffer {
+		public:
+			virtual ~XdevLComputeDeviceBuffer() {}
+			virtual xdl_int upload(XdevLComputeDeviceQueue* queue, xdl_uint size, xdl_uint8* data) = 0;
+			virtual xdl_int download(XdevLComputeDeviceQueue* queue, xdl_uint size, xdl_uint8* data) = 0;
+	};
+
+	class XdevLComputeKernel {
+		public:
+			virtual ~XdevLComputeKernel() {}
+			virtual xdl_int setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) = 0;
 	};
 
 	class XdevLComputeProgram {
 		public:
 			virtual ~XdevLComputeProgram() {}
 
-			virtual xdl_int compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) = 0;
-			virtual xdl_int execute(XdevLComputeDeviceQueue* queue) = 0;
+			virtual std::shared_ptr<XdevLComputeKernel> compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) = 0;
+			virtual xdl_int execute(XdevLComputeDeviceQueue* queue, XdevLComputeKernel* kernel) = 0;
 	};
 
 	class XdevLComputeDeviceContext {
 		public:
 			virtual ~XdevLComputeDeviceContext() {}
 
-			virtual XdevLComputeDeviceQueue* createCommandBuffer() = 0;
-			virtual XdevLComputeProgram* createProgram() = 0;
+			virtual std::shared_ptr<XdevLComputeDeviceQueue> createCommandQueue() = 0;
+			virtual std::shared_ptr<XdevLComputeProgram> createProgram() = 0;
+			virtual XdevLComputeDeviceBuffer* createBuffer(const XdevLComputeDeviceBufferAccessType& access, xdl_uint64 size) = 0;
 	};
 
 
