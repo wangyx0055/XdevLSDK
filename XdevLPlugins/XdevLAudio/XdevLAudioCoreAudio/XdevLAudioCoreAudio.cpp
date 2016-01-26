@@ -530,16 +530,18 @@ namespace xdl {
 	xdl_uint XdevLAudioCoreAudio::getNumberOfChannels() {
 		return m_channels;
 	}
+
 	xdl_uint XdevLAudioCoreAudio::getFormatSizeInBytes() {
 		return m_bufferFormatSize;
 	}
+
 	xdl_uint XdevLAudioCoreAudio::getPeriodTime() {
 		return m_periodTime;
 	}
-	xdl_int XdevLAudioCoreAudio::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
+
+	void XdevLAudioCoreAudio::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
 		m_callbackFunction = callbackFuntion;
 		m_userData = userData;
-		return ERR_OK;
 	}
 
 	void XdevLAudioCoreAudio::setGain(xdl_float gain) {

@@ -91,7 +91,7 @@ namespace xdl {
 			virtual xdl_int update2() override;
 
 
-			virtual xdl_int setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
+			virtual void setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) override;
 			virtual IPXdevLAudioBuffer createAudioBufferFromFile(const XdevLFileName& filename);
 			virtual IPXdevLAudioBuffer createAudioBuffer(XdevLAudioBufferFormat format, XdevLAudioSamplingRate samplingRate, xdl_uint channels, xdl_int size, void* data);
 			virtual IPXdevLAudioSource createAudioSource(IPXdevLAudioBuffer buffer) override;
