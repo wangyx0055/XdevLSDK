@@ -42,8 +42,8 @@ add_definitions(
 #
 # Set variable names for the library
 
-set(HEADERS_DIR ${XdevLComputeDevice_SOURCE_DIR})
-set(SRC_DIR ${XdevLComputeDevice_SOURCE_DIR})
+set(HEADERS_DIR ${XdevLComputeDeviceCL_SOURCE_DIR})
+set(SRC_DIR ${XdevLComputeDeviceCL_SOURCE_DIR})
 
 #
 # Set the output directories
@@ -67,7 +67,7 @@ set(HEADER_INTERFACE_FILE ${XDEVL_PLUGINS}/XdevLComputeDevice/XdevLComputeDevice
 
 set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
-	${HEADERS_DIR}/XdevLComputeDeviceCL.h
+	${SRC_DIR}/XdevLComputeDeviceCL.h
 )
 
 #
@@ -89,6 +89,17 @@ link_directories(
 )
 	
 #
+# Add include directories
+#
+include_directories( 
+	.
+	${XDEVL_HOME}/include
+	${XDEVL_PLUGINS}/XdevLComputeDevice
+	${XDEVL_PLUGINS}
+	${OPENCL_INCLUDE_DIRS}
+)	
+	
+#
 # Create the library
 
 add_library(${XdevLComputeDeviceCLibrary} SHARED
@@ -97,19 +108,9 @@ add_library(${XdevLComputeDeviceCLibrary} SHARED
 )
 
 #
-# Add include directories
-#
-include_directories( 
-	.
-	${XDEVL_HOME}/include
-	${XDEVL_PLUGINS}
-	${XDEVL_PLUGINS}/XdevLComputeDevice
-)
-
-#
 # Add external ibraries
 
-target_link_libraries( ${XdevLComputeDeviceCLibrary} XdevL )
+target_link_libraries( ${XdevLComputeDeviceCLibrary} XdevL ${OPENCL_LIBRARIES})
 
 #
 # Change the outputname of the library

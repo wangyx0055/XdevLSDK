@@ -97,6 +97,8 @@ namespace xdl {
 		if(CL_SUCCESS != ret) {
 			return ERR_ERROR;
 		}
+		
+		return ERR_OK;
 	}
 
 //
