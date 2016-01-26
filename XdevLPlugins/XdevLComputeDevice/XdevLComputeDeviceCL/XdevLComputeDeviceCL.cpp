@@ -31,11 +31,26 @@
 
 namespace xdl {
 
+	const xdl_char* clErrorAsString(cl_int error) {
+		switch(error) {
+			case CL_INVALID_PROGRAM: return "CL_INVALID_PROGRAM";
+			case CL_INVALID_VALUE: return "CL_INVALID_VALUE";
+			case CL_INVALID_DEVICE: return "CL_INVALID_DEVICE";
+			case CL_INVALID_BINARY: return "CL_INVALID_BINARY";
+			case CL_INVALID_BUILD_OPTIONS: return "CL_INVALID_BUILD_OPTIONS";
+			case CL_INVALID_OPERATION: return "CL_INVALID_OPERATION";
+			case CL_COMPILER_NOT_AVAILABLE : return "CL_COMPILER_NOT_AVAILABLE ";
+		}
+		
+		return "CL_UNKOWN_ERROR";
+	}
+	
 
 	XdevLComputeProgramCL::XdevLComputeProgramCL(cl_device_id deviceid, cl_context context) :
 		m_deviceId(deviceid),
 		m_context(context),
-		m_program(nullptr) {
+		m_program(nullptr),
+		m_kernel(nullptr) {
 
 	}
 
@@ -79,11 +94,13 @@ namespace xdl {
 
 		ret = clBuildProgram(m_program, 1, &m_deviceId, nullptr, nullptr, nullptr);
 		if(CL_SUCCESS != ret) {
+			std::cerr << clErrorAsString(ret) << std::endl;
 			return ERR_ERROR;
 		}
 
 		m_kernel = clCreateKernel(m_program, kernelName.toString().c_str(), &ret);
 		if(CL_SUCCESS != ret) {
+			std::cerr << clErrorAsString(ret) << std::endl;
 			return ERR_ERROR;
 		}
 
@@ -97,7 +114,7 @@ namespace xdl {
 		if(CL_SUCCESS != ret) {
 			return ERR_ERROR;
 		}
-		
+
 		return ERR_OK;
 	}
 
@@ -158,10 +175,10 @@ namespace xdl {
 //
 
 
-	       XdevLComputeDeviceCL::XdevLComputeDeviceCL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
-		       XdevLModuleImpl<XdevLComputeDevice>(parameter, descriptor),
-		       m_platformID(nullptr),
-		       m_deviceID(nullptr) {
+	XdevLComputeDeviceCL::XdevLComputeDeviceCL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) :
+		XdevLModuleImpl<XdevLComputeDevice>(parameter, descriptor),
+		m_platformID(nullptr),
+		m_deviceID(nullptr) {
 		XDEVL_MODULE_INFO("XdevLComputeDeviceCL()\n");
 	}
 
