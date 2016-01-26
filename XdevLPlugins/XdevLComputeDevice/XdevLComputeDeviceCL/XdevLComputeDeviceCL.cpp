@@ -51,7 +51,7 @@ namespace xdl {
 	xdl_int XdevLComputeProgramCL::compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) {
 		std::fstream file(filename.toString().c_str());
 		if(!file.is_open()) {
-			return ERR_ERROR;
+			return ERR_FILE_NOT_FOUND;
 		}
 
 		std::stringstream kernel;

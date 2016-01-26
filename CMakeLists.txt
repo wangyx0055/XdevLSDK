@@ -9,7 +9,7 @@ project(XdevLSDK)
 #
 
 
-set(XDEVL_BUILD_MODULAR On)
+set(XDEVL_BUILD_MODULAR Off)
 set(XDEVL_BUILD_STATIC Off)
 
 set(CMAKE_MODULE_PATH "${XdevLSDK_SOURCE_DIR}/cmake")
