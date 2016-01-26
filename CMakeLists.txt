@@ -9,7 +9,7 @@ project(XdevLSDK)
 #
 
 
-set(XDEVL_BUILD_MODULAR On)
+set(XDEVL_BUILD_MODULAR Off)
 set(XDEVL_BUILD_STATIC Off)
 
 set(CMAKE_MODULE_PATH "${XdevLSDK_SOURCE_DIR}/cmake")
@@ -132,7 +132,7 @@ option(BUILD_FILESYSTEM "Builds the Directory module" ON)
 option(BUILD_NATIVE_WINDOWS "Build native window support" ON)
 option(BUILD_DEMOS "Builds all demos" ON)
 option(BUILD_EGL "Builds the EGL OpenGL context" ON)
-
+option(BUILD_COMPUTE_DEVICE "Build the OpenCL plugins" ON)
 
 if(NOT PLATFORM_LINUX)
 	set(BUILD_X11 OFF)
@@ -310,6 +310,17 @@ endif()
 # Build the FTDI Serial Port plugin.
 if(BUILD_FTDI)
 	add_subdirectory(XdevLPlugins/XdevLFTDI)
+endif()
+
+# Build Compute device plugin.
+if(BUILD_COMPUTE_DEVICE)
+	find_package(OpenCL)
+	if(OPENCL_FOUND)
+		message(STATUS "XdevLComputeDeviceCL will be build.")
+		add_subdirectory(XdevLPlugins/XdevLComputeDevice/XdevLComputeDeviceCL)
+	else()
+		message(STATUS "XdevLComputeDeviceCL will not be build.")
+	endif()
 endif()
 
 

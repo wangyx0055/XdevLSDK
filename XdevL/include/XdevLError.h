@@ -98,6 +98,9 @@ namespace xdl {
 	  /// A buffer underflow happened.
 	  ERR_BUFFER_UNDERFLOW,
 
+		/// The specified file was not found.
+		ERR_FILE_NOT_FOUND,
+
 	  /// Unknown error.
 	  ERR_UNKNOWN
 
