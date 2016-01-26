@@ -108,7 +108,7 @@ namespace xdl {
 			virtual ~XdevLComputeProgramCL();
 
 			std::shared_ptr<XdevLComputeKernel> compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) override;
-			xdl_int execute(XdevLComputeDeviceQueue* queue, XdevLComputeKernel* kernel) override;
+			xdl_int execute(const XdevLComputeExecuteParameter& parameter) override;
 
 		private:
 			cl_device_id m_deviceId;

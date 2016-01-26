@@ -68,12 +68,25 @@ namespace xdl {
 			virtual xdl_int setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) = 0;
 	};
 
+	class XdevLComputeExecuteParameter {
+		public:
+			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, xdl_int* g, xdl_int* l) :
+				queue(q),
+				kernel(k),
+				global(g),
+				local(l) {}
+			XdevLComputeDeviceQueue* queue;
+			XdevLComputeKernel* kernel;
+			xdl_int* global;
+			xdl_int* local;
+	};
+
 	class XdevLComputeProgram {
 		public:
 			virtual ~XdevLComputeProgram() {}
 
 			virtual std::shared_ptr<XdevLComputeKernel> compileFromFile(const XdevLFileName& filename, const XdevLString& kernelName) = 0;
-			virtual xdl_int execute(XdevLComputeDeviceQueue* queue, XdevLComputeKernel* kernel) = 0;
+			virtual xdl_int execute(const XdevLComputeExecuteParameter& parameter) = 0;
 	};
 
 	class XdevLComputeDeviceContext {

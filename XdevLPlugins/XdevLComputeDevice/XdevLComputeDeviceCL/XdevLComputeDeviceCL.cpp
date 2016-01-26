@@ -222,15 +222,15 @@ namespace xdl {
 		return kernel;
 	}
 
-	xdl_int XdevLComputeProgramCL::execute(XdevLComputeDeviceQueue* queue, XdevLComputeKernel* kernel) {
-		auto queueCL = static_cast<XdevLComputeDeviceQueueCL*>(queue);
-		auto kernelCL = static_cast<XdevLComputeKernelCL*>(kernel);
+	xdl_int XdevLComputeProgramCL::execute(const XdevLComputeExecuteParameter& parameter) {
+		auto queueCL = static_cast<XdevLComputeDeviceQueueCL*>(parameter.queue);
+		auto kernelCL = static_cast<XdevLComputeKernelCL*>(parameter.kernel);
 
-		cl_int ret = clEnqueueTask(queueCL->getCommandQueue(), kernelCL->getKernel(), 0, nullptr, nullptr);
-		if(CL_SUCCESS != ret) {
-			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueTask failed: " << clErrorAsString(ret) << std::endl);
-			return ERR_ERROR;
-		}
+//		cl_int ret = clEnqueueTask(queueCL->getCommandQueue(), kernelCL->getKernel(), 0, nullptr, nullptr);
+//		if(CL_SUCCESS != ret) {
+//			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueTask failed: " << clErrorAsString(ret) << std::endl);
+//			return ERR_ERROR;
+//		}
 
 //		size_t workgroup_size;
 //		cl_int ret = clGetKernelWorkGroupInfo(m_kernel, m_deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &workgroup_size, nullptr);
@@ -238,12 +238,12 @@ namespace xdl {
 //			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clGetKernelWorkGroupInfo failed: " << clErrorAsString(ret) << std::endl);
 //			return ERR_ERROR;
 //		}
-//
-//		size_t global[1] = {32};
-//		size_t local[1]  = {32};
-//
-//		ret = clEnqueueNDRangeKernel(tmp->getCommandQueue(), m_kernel, 1, nullptr, global, local, 0, nullptr, nullptr);
 
+		cl_int ret = clEnqueueNDRangeKernel(queueCL->getCommandQueue(),  kernelCL->getKernel(), 1, nullptr, (const size_t*)parameter.global, (const size_t*)parameter.local, 0, nullptr, nullptr);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueNDRangeKernel failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
 		return ERR_OK;
 	}
 
