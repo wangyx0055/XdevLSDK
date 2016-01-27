@@ -436,7 +436,6 @@ int main(int argc, char* argv[]) {
 		rai->setActiveDepthTest(xdl::xdl_true);
 		rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
 		rai->clearDepthTarget(1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 		xdl::xdl_float aspect_ratio = window->getWidth()/window->getHeight();

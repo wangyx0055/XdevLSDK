@@ -50,11 +50,19 @@ namespace xdl {
 	  XDEVL_COMPUTE_BUFFER_READ_WRITE,
 	};
 
+	/**
+		@class XdevLComputeDeviceQueue
+		@brief Command queue.
+	*/
 	class XdevLComputeDeviceQueue {
 		public:
 			virtual ~XdevLComputeDeviceQueue() {}
 	};
 
+	/**
+		@class XdevLComputeDeviceBuffer
+		@brief Buffer that holds data.
+	*/
 	class XdevLComputeDeviceBuffer {
 		public:
 			virtual ~XdevLComputeDeviceBuffer() {}
@@ -62,25 +70,49 @@ namespace xdl {
 			virtual xdl_int download(XdevLComputeDeviceQueue* queue, xdl_uint size, xdl_uint8* data) = 0;
 	};
 
+	/**
+		@class XdevLComputeKernel
+		@brief A kernel that can be executed on compute device.
+	*/
 	class XdevLComputeKernel {
 		public:
 			virtual ~XdevLComputeKernel() {}
-			virtual xdl_int setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) = 0;
+			virtual xdl_int setArgumentBuffer(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) = 0;
+			virtual xdl_int setArgumentUInt(xdl_int argumentID, xdl_uint value) = 0;
+			virtual xdl_int setArgumentInt(xdl_int argumentID, xdl_int value) = 0;
+			virtual xdl_int setArgumentFloat(xdl_int argumentID, xdl_float value) = 0;
+			virtual xdl_int setArgumentDouble(xdl_int argumentID, xdl_double value) = 0;
 	};
 
+	/**
+		@class XdevLComputeExecuteParameter
+		@brief Parameter for the execute method of the XdevLComputeProgram class.
+	*/
 	class XdevLComputeExecuteParameter {
 		public:
-			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, xdl_int* g, xdl_int* l) :
+			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, std::vector<std::size_t> g) :
 				queue(q),
 				kernel(k),
-				global(g),
-				local(l) {}
+				global(std::move(g)) {
+			}
+
+			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, std::vector<std::size_t> g, std::vector<std::size_t> l) :
+				queue(q),
+				kernel(k),
+				global(std::move(g)),
+				local(std::move(l)) {
+			}
+
 			XdevLComputeDeviceQueue* queue;
 			XdevLComputeKernel* kernel;
-			xdl_int* global;
-			xdl_int* local;
+			std::vector<std::size_t> global;
+			std::vector<std::size_t> local;
 	};
 
+	/**
+		@class XdevLComputeProgram
+		@brief Holds multiple kernels. (Like a library)
+	*/
 	class XdevLComputeProgram {
 		public:
 			virtual ~XdevLComputeProgram() {}
@@ -101,6 +133,7 @@ namespace xdl {
 
 	/**
 		@class XdevLComputeDevice
+		@class A compute device.
 	*/
 	class XdevLComputeDevice : public XdevLModule {
 		public:

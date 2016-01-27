@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -161,7 +161,7 @@ namespace xdl {
 	class XdevLString {
 		public:
 			typedef std::string type;
-			
+
 			XdevLString() : m_value("Not Specified") {}
 
 			explicit XdevLString(const char* t) : m_value(t) {}
@@ -340,7 +340,7 @@ namespace xdl {
 				If the filename does not have any extension a empty XdevLString will
 				be returned.
 			*/
-			XdevLString getExtension() {
+			XdevLFileName getExtension() const {
 
 				//
 				// Extract extions of the filename.
@@ -348,47 +348,67 @@ namespace xdl {
 				size_t ext_pos = m_value.find_last_of(".");
 				if(ext_pos != std::string::npos) {
 					// Extract the extension of the file.
-					return XdevLString(m_value.substr(ext_pos + 1, std::string::npos));
+					return std::move(XdevLFileName(m_value.substr(ext_pos + 1, std::string::npos)));
 				}
-				return XdevLString();
+				return std::move(XdevLFileName());
 			}
-			
+
 			/// Removes the file extension if it has one.
 			XdevLFileName& removeExtension() {
 				size_t pos = m_value.find_last_of(".");
-				if(pos == XdevLString::type::npos) {
+				if(pos == XdevLFileName::type::npos) {
 					return *this;
 				}
 				m_value = m_value.substr(0, pos);
 				return *this;
 			}
 
+			/// Removes the file extension if it has one.
+			XdevLFileName getWithoutExtension() const {
+				size_t pos = m_value.find_last_of(".");
+				if(pos == XdevLFileName::type::npos) {
+					return std::move(XdevLFileName());
+				}
+				auto tmp = XdevLFileName(m_value.substr(0, pos));
+				return tmp;
+			}
+
 			/// Returns the path of the filename.
 			/**
-				If the filename does not have a file, it will return the current path
-				'.'.
+				If the filename does not have a file, it will return the current path '.'.
 			*/
-			XdevLString getPath() {
+			XdevLFileName getPath() const {
 
 				//
 				// Extract path of the filename.
 				//
 				size_t path_pos = m_value.find_last_of("/\\");
-				if(path_pos != XdevLString::type::npos) {
+				if(path_pos != XdevLFileName::type::npos) {
 					// Extract the path of the file.
-					return XdevLString(m_value.substr(0, ++path_pos));
+					return std::move(XdevLFileName(m_value.substr(0, ++path_pos)));
 				}
 
-				return XdevLString(".");
+				return std::move(XdevLFileName("."));
 			}
-			
+
+			/// Returns a filename without a path.
+			XdevLFileName getWithoutPath() const {
+				size_t pos = m_value.find_last_of("/\\");
+				if(pos == XdevLFileName::type::npos) {
+					return *this;
+				}
+
+				XdevLFileName tmp(m_value.substr(pos + 1, m_value.size()));
+				return std::move(tmp);
+			}
+
 			/// Removes the path from the filename
 			XdevLFileName& removePath() {
 				size_t pos = m_value.find_last_of("/\\");
-				if(pos == XdevLString::type::npos) {
+				if(pos == XdevLFileName::type::npos) {
 					return *this;
 				}
-				
+
 				m_value = m_value.substr(pos + 1, m_value.size());
 				return *this;
 			}
@@ -398,7 +418,7 @@ namespace xdl {
 				This function will return a string that represents the filename
 				without path and exntension information.
 			*/
-			XdevLString getFilename() {
+			XdevLFileName getFilename() {
 
 				//
 				// Extract extions of the filename.
@@ -421,7 +441,7 @@ namespace xdl {
 				// Extract the filename.
 				size_t number_to_read = ext_pos - path_pos ;
 
-				return XdevLString(m_value.substr(path_pos, number_to_read));
+				return std::move(XdevLFileName(m_value.substr(path_pos, number_to_read)));
 			}
 	};
 

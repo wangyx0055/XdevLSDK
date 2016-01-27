@@ -33,12 +33,12 @@
   <Environment>
     <![CDATA[]]>
   </Environment>
-  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="No"/>
+  <Project Name="rai_demo" Path="rai_demo/rai_demo.project" Active="Yes"/>
   <Project Name="audio_capture_demo" Path="audio_capture_demo/audio_capture_demo.project" Active="No"/>
   <Project Name="audio_synthesizer_demo" Path="audio_synthesizer_demo/audio_synthesizer_demo.project" Active="No"/>
   <Project Name="joystick_demo" Path="joystick_demo/joystick_demo.project" Active="No"/>
   <Project Name="mouse_demo" Path="mouse_demo/mouse_demo.project" Active="No"/>
-  <Project Name="compute_device_demo" Path="compute_device_demo/compute_device_demo.project" Active="Yes"/>
+  <Project Name="compute_device_demo" Path="compute_device_demo/compute_device_demo.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release_Linux32" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux32"/>
@@ -94,7 +94,7 @@
       <Project Name="compute_device_demo" ConfigName="Debug"/>
       <Project Name="compute_device_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_Linux64" Selected="no">
+    <WorkspaceConfiguration Name="Debug_Linux64" Selected="yes">
       <Project Name="xml_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Debug_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Debug_Linux64"/>
@@ -116,7 +116,7 @@
       <Project Name="compute_device_demo" ConfigName="Debug"/>
       <Project Name="compute_device_demo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_Linux64" Selected="yes">
+    <WorkspaceConfiguration Name="Release_Linux64" Selected="no">
       <Project Name="xml_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_demo" ConfigName="Release_Linux64"/>
       <Project Name="udp_server_array_demo" ConfigName="Release_Linux64"/>
