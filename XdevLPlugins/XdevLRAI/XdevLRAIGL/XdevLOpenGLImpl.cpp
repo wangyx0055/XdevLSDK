@@ -433,10 +433,10 @@ namespace xdl {
 			glEnableVertexAttribArray(shader_attrib);
 		}
 
-		if(m_activeVertexArray->getIndexBuffer() == NULL) {
+		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
 			glDrawArrays(primitiveType, 0, numberOfElements);
 		} else {
-			glDrawElements(primitiveType, numberOfElements, GL_UNSIGNED_INT, (void*)0);
+			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), (void*)0);
 		}
 
 		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {

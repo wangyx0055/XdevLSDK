@@ -54,7 +54,8 @@ namespace xdl {
 	  XDEVL_PRIMITIVE_TRIANGLE_FAN	= 0x0006,
 	  XDEVL_PRIMITIVE_QUADS			= 0x0007,
 	  XDEVL_PRIMITIVE_QUAD_STRIP		= 0x0008,
-	  XDEVL_PRIMITIVE_POLYGON			= 0x0009
+	  XDEVL_PRIMITIVE_POLYGON			= 0x0009,
+		XDEVL_PRIMITIVE_UNKNOWN
 	};
 
 	enum XdevLBlendModes {
@@ -211,6 +212,23 @@ namespace xdl {
 			                                 IPXdevLVertexBuffer vertexBuffer,
 			                                 IPXdevLVertexDeclaration vertexDeclaration,
 			                                 IPXdevLIndexBuffer indexBuffer) = 0;
+	};
+
+	/**
+	  @class XdevLRAIRenderScope
+		@brief Handles automatic render scopes.
+	 */
+	class XdevLRAIRenderScope {
+		public:
+			XdevLRAIRenderScope(XdevLRAI* rai, XdevLWindow* window) :
+				m_rai(rai) {
+				m_rai->setActiveRenderWindow(window);
+			}
+			virtual ~XdevLRAIRenderScope() {
+				m_rai->swapBuffers();
+			}
+		private:
+			XdevLRAI* m_rai;
 	};
 
 	typedef XdevLRAI	IXdevLRAI;

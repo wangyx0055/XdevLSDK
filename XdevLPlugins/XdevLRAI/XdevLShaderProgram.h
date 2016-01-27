@@ -90,8 +90,27 @@ namespace xdl {
 			virtual xdl_uint id() = 0;
 	};
 
+
 	typedef XdevLShaderProgram IXdevLShaderProgram;
 	typedef std::shared_ptr<XdevLShaderProgram> IPXdevLShaderProgram;
+
+	/**
+	  @class XdevLShaderProgramActiveScope
+		@brief Handles automatic render scopes.
+	 */
+	class XdevLShaderProgramActiveScope {
+		public:
+			XdevLShaderProgramActiveScope(IPXdevLShaderProgram& shaderProgram) :
+				m_shaderProgram(shaderProgram) {
+				m_shaderProgram->activate();
+			}
+			virtual ~XdevLShaderProgramActiveScope() {
+				m_shaderProgram->deactivate();
+			}
+		private:
+			IPXdevLShaderProgram m_shaderProgram;
+	};
+
 
 }
 
