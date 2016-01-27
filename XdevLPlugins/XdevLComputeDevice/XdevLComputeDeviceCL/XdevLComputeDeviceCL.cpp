@@ -106,17 +106,57 @@ namespace xdl {
 		}
 	}
 
-	xdl_int XdevLComputeKernelCL::setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) {
+	xdl_int XdevLComputeKernelCL::setArgumentBuffer(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) {
 		XdevLComputeDeviceBufferCL* buffer = static_cast<XdevLComputeDeviceBufferCL*>(argument);
 
 		cl_int ret = clSetKernelArg(m_kernel, argumentID, sizeof(cl_mem), &buffer->getMemory());
 		if(CL_SUCCESS != ret) {
-			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueTask failed: " << clErrorAsString(ret) << std::endl);
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clSetKernelArg failed: " << clErrorAsString(ret) << std::endl);
 			return ERR_ERROR;
 		}
 		return ERR_OK;
 	}
 
+
+	xdl_int XdevLComputeKernelCL::setArgumentUInt(xdl_int argumentID, xdl_uint value) {
+
+		cl_int ret = clSetKernelArg(m_kernel, argumentID, sizeof(xdl_uint), &value);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clSetKernelArg failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
+		return ERR_OK;
+	}
+
+	xdl_int XdevLComputeKernelCL::setArgumentInt(xdl_int argumentID, xdl_int value) {
+
+		cl_int ret = clSetKernelArg(m_kernel, argumentID, sizeof(xdl_int), &value);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clSetKernelArg failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
+		return ERR_OK;
+	}
+
+	xdl_int XdevLComputeKernelCL::setArgumentFloat(xdl_int argumentID, xdl_float value) {
+
+		cl_int ret = clSetKernelArg(m_kernel, argumentID, sizeof(xdl_float), &value);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clSetKernelArg failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
+		return ERR_OK;
+	}
+
+	xdl_int XdevLComputeKernelCL::setArgumentDouble(xdl_int argumentID, xdl_double value) {
+
+		cl_int ret = clSetKernelArg(m_kernel, argumentID, sizeof(xdl_double), &value);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clSetKernelArg failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
+		return ERR_OK;
+	}
 //
 //
 //
@@ -234,12 +274,12 @@ namespace xdl {
 //			return ERR_ERROR;
 //		}
 
-		std::size_t workgroup_size;
-		ret = clGetKernelWorkGroupInfo(kernelCL->getKernel(), m_deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(std::size_t), &workgroup_size, nullptr);
-		if(CL_SUCCESS != ret) {
-			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clGetKernelWorkGroupInfo failed: " << clErrorAsString(ret) << std::endl);
-			return ERR_ERROR;
-		}
+//		std::size_t workgroup_size;
+//		ret = clGetKernelWorkGroupInfo(kernelCL->getKernel(), m_deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(std::size_t), &workgroup_size, nullptr);
+//		if(CL_SUCCESS != ret) {
+//			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clGetKernelWorkGroupInfo failed: " << clErrorAsString(ret) << std::endl);
+//			return ERR_ERROR;
+//		}
 
 		ret = clEnqueueNDRangeKernel(queueCL->getCommandQueue(),  kernelCL->getKernel(), parameter.global.size(), nullptr, parameter.global.data(), nullptr, 0, nullptr, nullptr);
 		if(CL_SUCCESS != ret) {

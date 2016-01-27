@@ -89,12 +89,18 @@ namespace xdl {
 
 			virtual ~XdevLComputeKernelCL();
 
-			xdl_int setArgument(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) override;
+			xdl_int setArgumentBuffer(xdl_int argumentID, XdevLComputeDeviceBuffer* argument) override;
+			xdl_int setArgumentUInt(xdl_int argumentID, xdl_uint value) override;
+			xdl_int setArgumentInt(xdl_int argumentID, xdl_int value) override;
+			xdl_int setArgumentFloat(xdl_int argumentID, xdl_float value) override;
+			xdl_int setArgumentDouble(xdl_int argumentID, xdl_double value) override;
 
 			cl_kernel getKernel() {
 				return m_kernel;
 			}
+
 		private:
+
 			cl_kernel m_kernel;
 	};
 
@@ -114,7 +120,6 @@ namespace xdl {
 			cl_device_id m_deviceId;
 			cl_context m_context;
 			cl_program m_program;
-//			cl_kernel m_kernel;
 	};
 
 //
