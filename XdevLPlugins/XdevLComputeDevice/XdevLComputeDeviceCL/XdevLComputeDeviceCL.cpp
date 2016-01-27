@@ -226,20 +226,22 @@ namespace xdl {
 		auto queueCL = static_cast<XdevLComputeDeviceQueueCL*>(parameter.queue);
 		auto kernelCL = static_cast<XdevLComputeKernelCL*>(parameter.kernel);
 
-//		cl_int ret = clEnqueueTask(queueCL->getCommandQueue(), kernelCL->getKernel(), 0, nullptr, nullptr);
+		cl_int ret;
+
+//		ret = clEnqueueTask(queueCL->getCommandQueue(), kernelCL->getKernel(), 0, nullptr, nullptr);
 //		if(CL_SUCCESS != ret) {
 //			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueTask failed: " << clErrorAsString(ret) << std::endl);
 //			return ERR_ERROR;
 //		}
 
-//		size_t workgroup_size;
-//		cl_int ret = clGetKernelWorkGroupInfo(m_kernel, m_deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &workgroup_size, nullptr);
-//		if(CL_SUCCESS != ret) {
-//			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clGetKernelWorkGroupInfo failed: " << clErrorAsString(ret) << std::endl);
-//			return ERR_ERROR;
-//		}
+		std::size_t workgroup_size;
+		ret = clGetKernelWorkGroupInfo(kernelCL->getKernel(), m_deviceId, CL_KERNEL_WORK_GROUP_SIZE, sizeof(std::size_t), &workgroup_size, nullptr);
+		if(CL_SUCCESS != ret) {
+			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clGetKernelWorkGroupInfo failed: " << clErrorAsString(ret) << std::endl);
+			return ERR_ERROR;
+		}
 
-		cl_int ret = clEnqueueNDRangeKernel(queueCL->getCommandQueue(),  kernelCL->getKernel(), 1, nullptr, (const size_t*)parameter.global, (const size_t*)parameter.local, 0, nullptr, nullptr);
+		ret = clEnqueueNDRangeKernel(queueCL->getCommandQueue(),  kernelCL->getKernel(), parameter.global.size(), nullptr, parameter.global.data(), nullptr, 0, nullptr, nullptr);
 		if(CL_SUCCESS != ret) {
 			XDEVL_MODULEX_ERROR(XdevLComputeProgramCL, "clEnqueueNDRangeKernel failed: " << clErrorAsString(ret) << std::endl);
 			return ERR_ERROR;

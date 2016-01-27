@@ -30,10 +30,7 @@ int main(int argc, char** argv) {
 
 	inBuffer->upload(commandQueue.get(), sizeof(float) * 10, (xdl::xdl_uint8*)data);
 
-	xdl::xdl_int global[] = {10,1,1};
-	xdl::xdl_int local[] = {32,32,32};
-	
-	xdl::XdevLComputeExecuteParameter para(commandQueue.get(), kernel.get(), global, local );
+	xdl::XdevLComputeExecuteParameter para(commandQueue.get(), kernel.get(), {10,1,1}, {32,32,32} );
 	program->execute(para);
 
 

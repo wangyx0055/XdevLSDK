@@ -70,15 +70,15 @@ namespace xdl {
 
 	class XdevLComputeExecuteParameter {
 		public:
-			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, xdl_int* g, xdl_int* l) :
+			XdevLComputeExecuteParameter(XdevLComputeDeviceQueue* q, XdevLComputeKernel* k, std::vector<std::size_t> g, std::vector<std::size_t> l) :
 				queue(q),
 				kernel(k),
-				global(g),
-				local(l) {}
+				global(std::move(g)),
+				local(std::move(l)) {}
 			XdevLComputeDeviceQueue* queue;
 			XdevLComputeKernel* kernel;
-			xdl_int* global;
-			xdl_int* local;
+			std::vector<std::size_t> global;
+			std::vector<std::size_t> local;
 	};
 
 	class XdevLComputeProgram {
