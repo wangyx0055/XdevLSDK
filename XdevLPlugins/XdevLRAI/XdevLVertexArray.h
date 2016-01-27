@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -54,17 +54,17 @@ namespace xdl {
 
 			/// Initialize with a list of stream buffers.
 			virtual xdl_int init(	xdl_uint8 numberOfStreamBuffers,
-			                        xdl_uint8* srcOfSreamBuffers[],
-			                        xdl_uint numberOfVertex,
-			                        IPXdevLVertexDeclaration vd) = 0;
+			                      xdl_uint8* srcOfSreamBuffers[],
+			                      xdl_uint numberOfVertex,
+			                      IPXdevLVertexDeclaration vd) = 0;
 
 			/// Initialize with a list of stream buffers and a index buffer.
 			virtual xdl_int init(	xdl_uint32 numberIndices,
-			                        xdl_uint8* srcOfIndices,
-			                        xdl_uint8 numberOfStreamBuffers,
-			                        xdl_uint8* srcOfSreamBuffers[],
-			                        xdl_uint numberOfVertex,
-			                        IPXdevLVertexDeclaration vd) = 0;
+			                      xdl_uint8* srcOfIndices,
+			                      xdl_uint8 numberOfStreamBuffers,
+			                      xdl_uint8* srcOfSreamBuffers[],
+			                      xdl_uint numberOfVertex,
+			                      IPXdevLVertexDeclaration vd) = 0;
 
 			/// Activate.
 			virtual void activate() = 0;
@@ -81,19 +81,28 @@ namespace xdl {
 			/// Sets the index buffer.
 			virtual xdl_int setIndexBuffer(IPXdevLIndexBuffer indexBuffer) = 0;
 
+			/// Returns the reference of the the specified vertex buffer.
+			virtual IPXdevLVertexBuffer getVertexBufferRef(xdl_uint indexNumber) = 0;
+
 			/// Returns the specified vertex buffer.
-			virtual IPXdevLVertexBuffer getVertexBuffer(xdl_uint indexNumber) = 0;
+			virtual XdevLVertexBuffer* getVertexBuffer(xdl_uint indexNumber) = 0;
+
+			/// Returns the reference of the index buffer.
+			virtual IPXdevLIndexBuffer getIndexBufferRef() = 0;
 
 			/// Returns the index buffer.
-			virtual IPXdevLIndexBuffer getIndexBuffer() = 0;
+			virtual XdevLIndexBuffer* getIndexBuffer() = 0;
+
+			/// Returns the reference of the vertex declaration.
+			virtual IPXdevLVertexDeclaration getVertexDeclarationRef() = 0;
 
 			/// Returns the vertex declaration.
-			virtual IPXdevLVertexDeclaration getVertexDeclaration() = 0;
+			virtual XdevLVertexDeclaration* getVertexDeclaration() = 0;
 
 			/// Returns the identification code.
 			virtual xdl_uint id() = 0;
 	};
-	
+
 	typedef XdevLVertexArray IXdevLVertexArray;
 	typedef std::shared_ptr<XdevLVertexArray> IPXdevLVertexArray;
 

@@ -68,9 +68,12 @@ namespace xdl {
 			                                      XdevLBufferElementTypes itemSizeType,
 			                                      IPXdevLVertexBuffer vertexBuffer);
 			virtual xdl_int setIndexBuffer(IPXdevLIndexBuffer indexBuffer);
-			virtual IPXdevLVertexBuffer getVertexBuffer(xdl_uint indexNumber);
-			virtual IPXdevLIndexBuffer getIndexBuffer();
-			virtual IPXdevLVertexDeclaration getVertexDeclaration();
+			virtual IPXdevLVertexBuffer getVertexBufferRef(xdl_uint indexNumber);
+			virtual IPXdevLIndexBuffer getIndexBufferRef();
+			virtual XdevLVertexBuffer* getVertexBuffer(xdl_uint indexNumber);
+			virtual XdevLIndexBuffer* getIndexBuffer();
+			virtual IPXdevLVertexDeclaration getVertexDeclarationRef();
+			virtual XdevLVertexDeclaration* getVertexDeclaration();
 			virtual xdl_uint id();
 		private:
 			GLuint 														m_id;

@@ -423,8 +423,7 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLImpl::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
 
-		IPXdevLVertexDeclaration vd = m_activeVertexArray->getVertexDeclaration();
-		assert(vd && "XdevLOpenGLImpl::drawVertexArray: Vertex Declaration not found in XdevLVertexArray object.");
+		auto vd = m_activeVertexArray->getVertexDeclaration();
 
 		glBindVertexArray(m_activeVertexArray->id());
 
@@ -452,8 +451,7 @@ namespace xdl {
 
 		glBindVertexArray(m_activeVertexArray->id());
 
-		IPXdevLVertexDeclaration vd = m_activeVertexArray->getVertexDeclaration();
-		assert(vd && "XdevLOpenGLImpl::drawVertexArray: Vertex Declaration not found in XdevLVertexArray object.");
+		auto vd = m_activeVertexArray->getVertexDeclaration();
 
 		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
 			GLuint shader_attrib = vd->get(idx)->shaderAttribute;

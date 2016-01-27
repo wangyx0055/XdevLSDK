@@ -241,21 +241,32 @@ namespace xdl {
 	}
 
 
-	IPXdevLVertexDeclaration XdevLVertexArrayImpl::getVertexDeclaration() {
+	IPXdevLVertexDeclaration XdevLVertexArrayImpl::getVertexDeclarationRef() {
 		return m_vd;
+	}
+
+	XdevLVertexDeclaration* XdevLVertexArrayImpl::getVertexDeclaration() {
+		return m_vd.get();
 	}
 
 	xdl_uint XdevLVertexArrayImpl::id() {
 		return m_id;
 	}
 
-	IPXdevLVertexBuffer XdevLVertexArrayImpl::getVertexBuffer(xdl_uint indexNumber) {
-
+	IPXdevLVertexBuffer XdevLVertexArrayImpl::getVertexBufferRef(xdl_uint indexNumber) {
 		return m_vertexBufferList[indexNumber];
 	}
 
-	IPXdevLIndexBuffer XdevLVertexArrayImpl::getIndexBuffer() {
+	IPXdevLIndexBuffer XdevLVertexArrayImpl::getIndexBufferRef() {
 		return m_indexBuffer;
+	}
+
+	XdevLVertexBuffer* XdevLVertexArrayImpl::getVertexBuffer(xdl_uint indexNumber) {
+		return m_vertexBufferList[indexNumber].get();
+	}
+
+	XdevLIndexBuffer* XdevLVertexArrayImpl::getIndexBuffer() {
+		return m_indexBuffer.get();
 	}
 
 }
