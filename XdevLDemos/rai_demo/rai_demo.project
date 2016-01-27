@@ -189,10 +189,8 @@
       <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0"/>
       <Linker Options="" Required="yes">
         <LibraryPath Value="$(XDEVL_HOME)/lib"/>
-        <LibraryPath Value="/usr/lib/nvidia-361"/>
         <Library Value="XdevLd"/>
         <Library Value="dl"/>
-        <Library Value="GL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../bin/$(ProjectName)d" IntermediateDirectory="$(ConfigurationName)" Command="./$(ProjectName)d" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
