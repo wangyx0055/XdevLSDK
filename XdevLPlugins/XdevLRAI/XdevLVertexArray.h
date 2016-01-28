@@ -52,6 +52,9 @@ namespace xdl {
 			/// Initialize with a provided vertex buffer.
 			virtual xdl_int init(IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vd) = 0;
 
+			/// Initialize with a provided vertex and index buffer.
+			virtual xdl_int init(IPXdevLVertexBuffer vertexBuffer, IPXdevLIndexBuffer indexBuffer, IPXdevLVertexDeclaration vd) = 0;
+
 			/// Initialize with a list of stream buffers.
 			virtual xdl_int init(	xdl_uint8 numberOfStreamBuffers,
 			                      xdl_uint8* srcOfSreamBuffers[],
