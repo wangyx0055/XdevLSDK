@@ -289,7 +289,7 @@ namespace xdl {
 		}
 
 		xdl_int borderwith = 0;
-		xdl_int hasNotDecoration = xdl_false;
+		xdl_int hasNoDecoration = xdl_false;
 		XSetWindowAttributes WindowAttributes;
 		WindowAttributes.override_redirect	= False;
 
@@ -300,7 +300,7 @@ namespace xdl {
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
-			hasNotDecoration = xdl_true;
+			hasNoDecoration = xdl_true;
 //			WindowAttributes.override_redirect	= True;
 		} else {
 //			WindowAttributes.override_redirect	= False;
@@ -377,13 +377,9 @@ namespace xdl {
 		XChangeProperty(m_display, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
 
 		// Tell the Window Manager to show or hide the decorations.
-		if(hasNotDecoration) {
-			disableDecoration();
-		}
-
-		XFlush(m_display);
-
-		//	initKeyboardKeyCodes();
+//		if(hasNoDecoration) {
+//			disableDecoration();
+//		}
 
 		m_id = m_window;
 
@@ -690,10 +686,8 @@ namespace xdl {
 			attributes.override_redirect = True;
 			XChangeWindowAttributes(m_display, m_window, CWOverrideRedirect, &attributes);
 		}
-		XFlush(m_display);
-
 		XRRSelectInput(m_display, m_window, RRScreenChangeNotifyMask);
-
+		XFlush(m_display);
 		return ERR_OK;
 	}
 
