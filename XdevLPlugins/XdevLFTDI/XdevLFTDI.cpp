@@ -27,7 +27,7 @@ xdl::XdevLModuleDescriptor moduleDescriptor {
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(pluginDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
 	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLFTDI, moduleDescriptor)
@@ -105,7 +105,7 @@ namespace xdl {
 		m_usbInSize(2048),
 		m_usbOutSize(2048),
 		m_latencyTimer(16) {
-	};
+	}
 
 	XdevLFTDI::~XdevLFTDI() {
 	}
