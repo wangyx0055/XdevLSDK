@@ -3,13 +3,12 @@
 
 namespace xdl {
 
-
 	XdevLFrameBufferImpl::XdevLFrameBufferImpl() :
 		m_id(0),
 		m_width(0),
 		m_height(0),
 		m_size(0),
-		m_inUse(xdl_false){
+		m_inUse(xdl_false) {
 		m_colorTargetTextures.reserve(4);
 		m_colorTargetTextures.resize(4);
 		m_activeColorTargetList.reserve(4);
@@ -23,11 +22,12 @@ namespace xdl {
 	}
 
 	XdevLFrameBufferImpl::~XdevLFrameBufferImpl() {
-		glDeleteFramebuffers(1, &m_id);
+		if(glIsFramebuffer(m_id)) {
+			glDeleteFramebuffers(1, &m_id);
+		}
 	}
 
-	xdl_int XdevLFrameBufferImpl::init(xdl_uint width,
-	                                   xdl_uint height) {
+	xdl_int XdevLFrameBufferImpl::init(xdl_uint width, xdl_uint height) {
 		m_width 	= width;
 		m_height 	= height;
 
@@ -39,10 +39,8 @@ namespace xdl {
 		xdl::xdl_uint list[] = {GL_NONE};
 		glDrawBuffers(1, (const GLenum*)list);
 
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, false);
-
+		// Unbind this framebuffer object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
 		return ERR_OK;
 	}
@@ -52,23 +50,27 @@ namespace xdl {
 		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
+		// Create the texture that is going to be used a color target.
 		GLuint id;
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_RED,  GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_RED,  GL_UNSIGNED_BYTE, nullptr);
+
+		// Attach the created texture to the framebuffer.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_2D, id, 0);
 
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
+			return ERR_ERROR;
+		}
+
+		// Unbind framebuffer and texture object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_colorTargetTextures[target_index] = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(id, m_width, m_height));
-
-		// Check if the Framebuffer was build correct.
-		GLenum status;
-		status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if(status != GL_FRAMEBUFFER_COMPLETE) {
-			return ERR_ERROR;
-		}
 
 		m_size++;
 		return ERR_OK;
@@ -76,21 +78,23 @@ namespace xdl {
 
 	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, IPXdevLTexture texture) {
 
-
+		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
-		glBindTexture(GL_TEXTURE_2D, texture->id());
+
+		// We use glFramebufferTexture2D wich means we don't have to bind the texture object itself.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_2D, texture->id(), 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 
-		m_colorTargetTextures[target_index] = texture;
-
-		// Check if the Framebuffer was build correct.
-		GLenum status;
-		status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if(status != GL_FRAMEBUFFER_COMPLETE) {
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
 			return ERR_ERROR;
 		}
+
+		// Unbind framebuffer object to make sure that nothing will be done accidentally.
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		m_colorTargetTextures[target_index] = texture;
 
 		m_size++;
 		return ERR_OK;
@@ -98,35 +102,50 @@ namespace xdl {
 
 	xdl_int  XdevLFrameBufferImpl::addColorTarget(xdl_uint target_index, IPXdevLTextureCube textureCube) {
 
+		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureCube->id());
+
+		// We use glFramebufferTexture2D wich means we don't have to bind the texture object itself.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, textureCube->id(), 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-		m_textureCube = textureCube;
-
-		// Check if the Framebuffer was build correct.
-		GLenum status;
-		status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if(status != GL_FRAMEBUFFER_COMPLETE) {
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
 			return ERR_ERROR;
 		}
+
+		// Unbind framebuffer object to make sure that nothing will be done accidentally.
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		m_textureCube = textureCube;
 
 		m_size++;
 		return ERR_OK;
 	}
 
 	xdl_int XdevLFrameBufferImpl::addDepthTarget(XdevLFrameBufferDepthFormat internal_format) {
+
+		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
+		// Create depth texture.
 		GLuint id;
 		glGenTextures(1, &id);
-
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_DEPTH_COMPONENT,  GL_UNSIGNED_BYTE, NULL);
+
+		// Attach it to the framebuffer.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, id, 0);
 
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
+			return ERR_ERROR;
+		}
+
+		// Unbind framebuffer and texture object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -136,13 +155,21 @@ namespace xdl {
 	}
 
 	xdl_int XdevLFrameBufferImpl::addDepthTarget(IPXdevLTexture texture) {
+
+		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
-		glBindTexture(GL_TEXTURE_2D, texture->id());
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->id(), 0);
 
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
+			return ERR_ERROR;
+		}
+
+		// Unbind framebuffer object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_depthTexture = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl(texture->id(), texture->getWidth(), texture->getHeight()));
 
@@ -150,15 +177,26 @@ namespace xdl {
 	}
 
 	xdl_int XdevLFrameBufferImpl::addDepthStencilTarget(XdevLFrameBufferDepthStencilFormat internal_format) {
+
+		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
+		// Create the depth/stencil texture.
 		GLuint id;
 		glGenTextures(1, &id);
-
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, m_width, m_height, 0, GL_DEPTH_STENCIL,  GL_UNSIGNED_BYTE, NULL);
+
+		// Attach them to the framebuffer.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 		id, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 	id, 0);
+
+		// Check if the framebuffer was build correct.
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(GL_FRAMEBUFFER_COMPLETE != status) {
+			framebufferErrorAsString(status);
+			return ERR_ERROR;
+		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -260,4 +298,24 @@ namespace xdl {
 		return m_depthTexture;
 	}
 
+	void XdevLFrameBufferImpl::framebufferErrorAsString(GLenum status) {
+		switch(status) {
+			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
+				XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: Not all framebuffer attachment points are framebuffer attachment complete" << std::endl);
+			}
+			break;
+//				case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS: {
+//					XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:Not all attached images have the same width and height." << std::endl);
+//				}
+//				break;
+			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
+				XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: No images are attached to the framebuffer." << std::endl);
+			}
+			break;
+			case GL_FRAMEBUFFER_UNSUPPORTED: {
+				XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_UNSUPPORTED: The combination of internal formats of the attached images violates an implementation-dependent set of restrictions." << std::endl);
+			}
+			break;
+		}
+	}
 }

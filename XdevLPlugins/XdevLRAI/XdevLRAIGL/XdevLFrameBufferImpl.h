@@ -60,6 +60,10 @@ namespace xdl {
 
 		private:
 
+			void framebufferErrorAsString(GLenum status);
+
+		private:
+
 			xdl_uint m_id;
 			xdl_uint m_width;
 			xdl_uint m_height;
@@ -70,6 +74,7 @@ namespace xdl {
 			IPXdevLTexture m_depthTexture;
 			std::vector<IPXdevLTexture>		m_colorTargetTextures;
 			std::vector<xdl::xdl_uint>		m_activeColorTargetList;
+
 	};
 
 }
