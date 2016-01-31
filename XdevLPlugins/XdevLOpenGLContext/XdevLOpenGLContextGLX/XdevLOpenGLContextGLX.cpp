@@ -50,7 +50,7 @@ namespace xdl {
 		m_glxMajorVersion(0),
 		m_glxMinorVersion(0),
 		m_visualInfo(nullptr) {
-			XDEVL_MODULE_INFO("XdevLOpenGLContextGLX()\n");
+		XDEVL_MODULE_INFO("XdevLOpenGLContextGLX()\n");
 	}
 
 	XdevLOpenGLContextGLX::~XdevLOpenGLContextGLX() {
@@ -319,6 +319,15 @@ namespace xdl {
 			XDEVL_MODULE_ERROR("glXCreateContext failed.\n");
 			return ERR_ERROR;
 		}
+
+		if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_CORE_PROFILE) {
+			XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "OpenGL Profile: Core Profile\n");
+		} else if(m_attributes.context_profile_mask == XDEVL_OPENGL_CONTEXT_COMPATIBILITY) {
+			XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "OpenGL Profile: Compatibility\n");
+		} else {
+			XDEVL_MODULEX_WARNING(XdevLOpenGLContextGLX, "OpenGL profile: Unkown\n");
+		}
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "OpenGL: " << m_attributes.context_major_version << "." << m_attributes.context_minor_version << std::endl);
 
 		XSync(display, False);
 		XSetErrorHandler(oldErrorHandler);
