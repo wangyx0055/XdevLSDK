@@ -298,6 +298,10 @@ namespace xdl {
 		return m_depthTexture;
 	}
 
+	void XdevLFrameBufferImpl::blit(xdl_int x, xdl_int y, xdl_uint width, xdl_uint height) {
+		glBlitFramebuffer(0, 0, m_width, m_height, x, y, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+
 	void XdevLFrameBufferImpl::framebufferErrorAsString(GLenum status) {
 		switch(status) {
 			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {

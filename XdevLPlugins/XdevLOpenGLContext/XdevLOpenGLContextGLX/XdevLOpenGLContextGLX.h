@@ -70,6 +70,8 @@ namespace xdl {
 			xdl_bool initMultisample();
 			xdl_int initOpenGL(Display* display, Window window);
 			virtual xdl_int setEnableFSAA(xdl_bool enableFSAA);
+			void dumpConfigInfo(const GLXFBConfig& config);
+
 		private:
 			//
 			// X11 related variables.

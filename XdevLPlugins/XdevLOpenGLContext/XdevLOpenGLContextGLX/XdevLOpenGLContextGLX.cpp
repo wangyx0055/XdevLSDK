@@ -162,7 +162,7 @@ namespace xdl {
 		// Prepare the attribute values for the glXChooseVisual function
 		//
 
-		// We are going to use the normal RGBA color type, not the color indext type.
+		// We are going to use the normal RGBA color type, not the color index type.
 		attribute_list.push_back(GLX_RENDER_TYPE);
 		attribute_list.push_back(GLX_RGBA_BIT);
 
@@ -170,10 +170,6 @@ namespace xdl {
 		// Valid values are GLX WINDOW BIT, GLX PIXMAP BIT, GLX PBUFFER BIT. All can be used at the same time.
 		attribute_list.push_back(GLX_DRAWABLE_TYPE);
 		attribute_list.push_back(GLX_WINDOW_BIT);
-
-		if(m_attributes.double_buffer > 0) {
-			attribute_list.push_back(GLX_DOUBLEBUFFER);
-		}
 
 		attribute_list.push_back(GLX_RED_SIZE);
 		attribute_list.push_back(m_attributes.red_size);
@@ -184,23 +180,11 @@ namespace xdl {
 		attribute_list.push_back(GLX_BLUE_SIZE);
 		attribute_list.push_back(m_attributes.blue_size);
 
-		attribute_list.push_back(GLX_ALPHA_SIZE);
-		attribute_list.push_back(m_attributes.alpha_size);
+//		attribute_list.push_back(GLX_ALPHA_SIZE);
+//		attribute_list.push_back(m_attributes.alpha_size);
 
-		attribute_list.push_back(GLX_ACCUM_RED_SIZE);
-		attribute_list.push_back(m_attributes.accum_red_size);
-
-		attribute_list.push_back(GLX_ACCUM_GREEN_SIZE);
-		attribute_list.push_back(m_attributes.accum_green_size);
-
-		attribute_list.push_back(GLX_ACCUM_BLUE_SIZE);
-		attribute_list.push_back(m_attributes.accum_blue_size);
-
-		attribute_list.push_back(GLX_ACCUM_ALPHA_SIZE);
-		attribute_list.push_back(m_attributes.accum_alpha_size);
-
-		attribute_list.push_back(GLX_BUFFER_SIZE);
-		attribute_list.push_back(m_attributes.color_buffer_size);
+//		attribute_list.push_back(GLX_BUFFER_SIZE);
+//		attribute_list.push_back(m_attributes.color_buffer_size);
 
 		attribute_list.push_back(GLX_DEPTH_SIZE);
 		attribute_list.push_back(m_attributes.depth_size);
@@ -208,6 +192,17 @@ namespace xdl {
 		attribute_list.push_back(GLX_STENCIL_SIZE);
 		attribute_list.push_back(m_attributes.stencil_size);
 
+//		attribute_list.push_back(GLX_ACCUM_RED_SIZE);
+//		attribute_list.push_back(m_attributes.accum_red_size);
+//
+//		attribute_list.push_back(GLX_ACCUM_GREEN_SIZE);
+//		attribute_list.push_back(m_attributes.accum_green_size);
+//
+//		attribute_list.push_back(GLX_ACCUM_BLUE_SIZE);
+//		attribute_list.push_back(m_attributes.accum_blue_size);
+//
+//		attribute_list.push_back(GLX_ACCUM_ALPHA_SIZE);
+//		attribute_list.push_back(m_attributes.accum_alpha_size);
 
 		if(m_attributes.stereo > 0) {
 			attribute_list.push_back(GLX_STEREO);
@@ -215,20 +210,24 @@ namespace xdl {
 		}
 
 		if(m_attributes.multisample_buffers > 0) {
-			attribute_list.push_back(GLX_SAMPLE_BUFFERS_ARB);
+			attribute_list.push_back(GLX_SAMPLE_BUFFERS);
 			attribute_list.push_back(GL_TRUE);
-			attribute_list.push_back(GLX_SAMPLES_ARB);
+			attribute_list.push_back(GLX_SAMPLES);
 			attribute_list.push_back(m_attributes.multisample_samples);
 		}
 
-		attribute_list.push_back(None);
+		if(m_attributes.double_buffer > 0) {
+			attribute_list.push_back(GLX_DOUBLEBUFFER);
+			attribute_list.push_back(GL_TRUE);
+		}
 
+		attribute_list.push_back(None);
 
 		//
 		// Get all supported visual configurations.
 		//
 		xdl_int elemc;
-		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), nullptr, &elemc);
+		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), attribute_list.data(), &elemc);
 		if(!fbcfg) {
 			XDEVL_MODULE_ERROR("glXChooseFBConfig failed\n");
 			return ERR_ERROR;
@@ -245,9 +244,11 @@ namespace xdl {
 		for(auto i = 0; i < elemc; i++) {
 			XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbcfg[i]);
 			if(nullptr != vi) {
+
 				int sample_buffer, samples;
 				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLE_BUFFERS, &sample_buffer);
 				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLES, &samples);
+
 				if(best_fbc < 0 || sample_buffer && samples > best_num_samples) {
 					best_fbc = i;
 					best_num_samples = samples;
@@ -263,9 +264,17 @@ namespace xdl {
 		GLXFBConfig bestFbc = fbcfg[best_fbc];
 		XFree(fbcfg);
 
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "Using the following configuration.\n");
+		dumpConfigInfo(bestFbc);
+
 		m_visualInfo = glXGetVisualFromFBConfig(display, bestFbc);
 
-//		// TODO: This is the easiest way to create a visual for X11. You should do that in a better way cengiz.
+		// Change the windows color map.
+		XSetWindowAttributes swa;
+		swa.colormap = XCreateColormap(display, RootWindow(display, m_visualInfo->screen), m_visualInfo->visual, AllocNone);
+		XChangeWindowAttributes(display, window, CWColormap, &swa);
+		
+		// TODO: This is the easiest way to create a visual for X11. You should do that in a better way cengiz.
 //		m_visualInfo = glXChooseVisual(display, DefaultScreen(display), attribute_list.data());
 //		if(nullptr == m_visualInfo) {
 //			XDEVL_MODULE_ERROR("glXChooseVisual failed. Please try different framebuffer, depthbuffer, stencilbuffer values.\n");
@@ -306,7 +315,7 @@ namespace xdl {
 		int (*oldErrorHandler)(Display*, XErrorEvent*) = XSetErrorHandler(&contextErrorHanlder);
 
 		if(nullptr != glXCreateContextAttribs) {
-			m_glxContext = glXCreateContextAttribs(display, bestFbc, nullptr, true, opengl_profile_attribute_list.data());
+			m_glxContext = glXCreateContextAttribs(display, bestFbc, nullptr, GL_TRUE, opengl_profile_attribute_list.data());
 		} else {
 			m_glxContext = glXCreateContext(display, m_visualInfo, nullptr, GL_TRUE);
 		}
@@ -332,11 +341,15 @@ namespace xdl {
 		XSync(display, False);
 		XSetErrorHandler(oldErrorHandler);
 
-		setEnableFSAA(xdl_true);
+//		setEnableFSAA(xdl_true);
 
 		//
 		// Make it current.
 		//
+//		GLXWindow glxWindow = glXCreateWindow(display, bestFbc, window, nullptr);
+//		GLXDrawable drawable = glxWindow;
+//		glXMakeContextCurrent(display, drawable, drawable, m_glxContext);
+		
 		if(glXMakeCurrent(display, window, m_glxContext) == False) {
 			return ERR_ERROR;
 		}
@@ -394,6 +407,33 @@ namespace xdl {
 	xdl_int XdevLOpenGLContextGLX::setEnableFSAA(xdl_bool enableFSAA) {
 		enableFSAA ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
 		return ERR_OK;
+	}
+
+	void XdevLOpenGLContextGLX::dumpConfigInfo(const GLXFBConfig& config) {
+		int color_buffer_size, alpha_size, red_size, green_size, blue_size, depth_size, stencil_size, samples;
+		glXGetFBConfigAttrib(m_display, config, GLX_BUFFER_SIZE, &color_buffer_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_ALPHA_SIZE, &alpha_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_RED_SIZE, &red_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_GREEN_SIZE, &green_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_BLUE_SIZE, &blue_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_DEPTH_SIZE, &depth_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_STENCIL_SIZE, &stencil_size);
+		glXGetFBConfigAttrib(m_display, config, GLX_SAMPLES, &samples);
+
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "Configuration  -----------------------\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_BUFFER_SIZE   : " << color_buffer_size << "\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_ALPHA_SIZE    : " << alpha_size << "\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_RED_SIZE      : " << red_size << "\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_GREEN_SIZE    : " << green_size << "\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_BLUE_SIZE     : " << blue_size << "\n");
+
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_DEPTH_SIZE    : " << depth_size << "\n");
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_STENCIL_SIZE  : " << stencil_size << "\n");
+
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "GLX_SAMPLES       : " << samples << "\n");
+
+		XDEVL_MODULEX_INFO(XdevLOpenGLContextGLX, "----------------------------------------\n");
+
 	}
 
 }

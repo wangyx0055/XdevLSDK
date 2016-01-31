@@ -46,10 +46,10 @@ namespace xdl {
 	class XdevLOpenGLContextAttributes {
 		public:
 			XdevLOpenGLContextAttributes() :
-				red_size(8),
-				green_size(8),
-				blue_size(8),
-				alpha_size(8),
+				red_size(1),
+				green_size(1),
+				blue_size(1),
+				alpha_size(1),
 				color_buffer_size(32),
 				double_buffer(1),
 				depth_size(24),

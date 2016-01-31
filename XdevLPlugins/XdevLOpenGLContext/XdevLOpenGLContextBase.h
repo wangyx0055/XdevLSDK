@@ -121,6 +121,10 @@ namespace xdl {
 								m_debugMode = xstd::from_string<xdl_bool>(root->Attribute("debug"));
 								XDEVL_MODULE_INFO("Debug Mode                    : " << (m_debugMode ? "On" : "Off") << std::endl);
 							}
+							if(root->Attribute("multisamples")) {
+								m_attributes.multisample_buffers = xstd::from_string<xdl_int>(root->Attribute("multisamples"));
+								XDEVL_MODULE_INFO("Multisamples                  : " << m_attributes.multisample_buffers << std::endl);
+							}
 						}
 					} else {
 						XDEVL_MODULE_ERROR("No 'id' attribute specified. Using default values for the device\n");
