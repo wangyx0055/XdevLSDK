@@ -99,7 +99,7 @@ namespace xdl {
 			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements);
 			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number);
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration);
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration, IPXdevLIndexBuffer indexBuffer);
+			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vertexDeclaration, XdevLIndexBuffer* indexBuffer);
 
 			void shaderLog(xdl_uint shaderID);
 			xdl_int initExtensions();

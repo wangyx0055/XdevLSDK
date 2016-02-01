@@ -260,10 +260,16 @@ namespace xdl {
 
 			glEnableVertexAttribArray(shaderAttribute);
 			glVertexAttribPointer(shaderAttribute, m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, GL_FALSE, 0, (void*)(0));
-
 		}
 
+		//
+		// Let's unbind all objects so that nothing can get messed up by other OpenGL code fragments.
+		// 
 		glBindVertexArray(0);
+		for(auto vertexBuffer : m_vertexBufferList) {
+			vertexBuffer->deactivate();
+		}
+		m_indexBuffer->deactivate();
 
 		return ERR_OK;
 	}

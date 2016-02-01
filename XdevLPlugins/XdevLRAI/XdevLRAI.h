@@ -209,9 +209,9 @@ namespace xdl {
 			/// Draw indexed Vertex Buffer.
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType,
 			                                 xdl_uint numberOfElements,
-			                                 IPXdevLVertexBuffer vertexBuffer,
-			                                 IPXdevLVertexDeclaration vertexDeclaration,
-			                                 IPXdevLIndexBuffer indexBuffer) = 0;
+			                                 XdevLVertexBuffer* vertexBuffer,
+			                                 XdevLVertexDeclaration* vertexDeclaration,
+			                                 XdevLIndexBuffer* indexBuffer) = 0;
 	};
 
 	/**

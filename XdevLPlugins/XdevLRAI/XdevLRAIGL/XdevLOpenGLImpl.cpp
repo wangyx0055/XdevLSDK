@@ -503,9 +503,9 @@ namespace xdl {
 
 	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
 	    xdl_uint numberOfElements,
-	    IPXdevLVertexBuffer vertexBuffer,
-	    IPXdevLVertexDeclaration vertexDeclaration,
-	    IPXdevLIndexBuffer indexBuffer) {
+	    XdevLVertexBuffer* vertexBuffer,
+	    XdevLVertexDeclaration* vertexDeclaration,
+	    XdevLIndexBuffer* indexBuffer) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
