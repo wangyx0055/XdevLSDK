@@ -212,7 +212,7 @@ namespace xdl {
 		return ERR_OK;
 	}
 
-	xdl_int  XdevLFrameBufferImpl::activateDepthTarget(xdl_bool state) {
+	xdl_int  XdevLFrameBufferImpl::setActiveDepthTest(xdl_bool state) {
 		if(state == xdl_true) {
 			glEnable(GL_DEPTH_TEST);
 		} else {
@@ -257,18 +257,20 @@ namespace xdl {
 	}
 
 	xdl_int XdevLFrameBufferImpl::activate()  {
+		// Save previous viewport.
+		glGetIntegerv(GL_VIEWPORT, m_previousViewport);
+
 		// Activate for read and write.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 		glViewport(0, 0, m_width, m_height);
+
 		m_inUse = xdl_true;
 		return ERR_OK;
 	}
 
 	xdl_int XdevLFrameBufferImpl::deactivate()  {
+		glViewport(m_previousViewport[0], m_previousViewport[1], m_previousViewport[2], m_previousViewport[3]);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
-		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
 		m_inUse = xdl_false;
 		return ERR_OK;
 	}
@@ -300,9 +302,9 @@ namespace xdl {
 
 	void XdevLFrameBufferImpl::blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget) {
 		glReadBuffer(colortarget);
-		GLuint id = framebuffer ? framebuffer->id() : 0;
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
-		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, framebuffer->getWidth(), framebuffer->getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, 512, 512, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void XdevLFrameBufferImpl::framebufferErrorAsString(GLenum status) {

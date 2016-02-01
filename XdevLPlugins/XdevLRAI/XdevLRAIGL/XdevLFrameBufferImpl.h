@@ -46,7 +46,7 @@ namespace xdl {
 			virtual xdl_int deactivate() override;
 			virtual xdl_int activateColorTargets(xdl_uint numberOfTargets, xdl_uint* targetList) override;
 			virtual xdl_int activateColorTargetCubePosition(xdl_uint target_index, XdevLCubemapPosition cubemapPosition) override;
-			virtual xdl_int activateDepthTarget(xdl_bool state) override;
+			virtual xdl_int setActiveDepthTest(xdl_bool state) override;
 			virtual xdl_int activateStencilTarget(xdl_bool state) override;
 			virtual xdl_int clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) override;
 			virtual xdl_int clearDepthTarget(xdl_float clear_value) override;
@@ -70,7 +70,7 @@ namespace xdl {
 			xdl_uint m_height;
 			xdl_uint m_size;
 			xdl_bool m_inUse;
-
+			GLint m_previousViewport[4];
 			IPXdevLTextureCube m_textureCube;
 			IPXdevLTexture m_depthTexture;
 			std::vector<IPXdevLTexture>		m_colorTargetTextures;

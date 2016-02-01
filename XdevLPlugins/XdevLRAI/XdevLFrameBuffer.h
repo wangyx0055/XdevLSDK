@@ -171,7 +171,7 @@ namespace xdl {
 			virtual xdl_int activateColorTargetCubePosition(xdl_uint target_index, XdevLCubemapPosition cubemapPosition) = 0;
 
 			/// Activates or deactivates the Depth target.
-			virtual xdl_int activateDepthTarget(xdl_bool state) = 0;
+			virtual xdl_int setActiveDepthTest(xdl_bool state) = 0;
 
 			/// Activates or deactivates the Stencil target.
 			virtual xdl_int activateStencilTarget(xdl_bool state) = 0;

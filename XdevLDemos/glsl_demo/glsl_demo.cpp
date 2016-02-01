@@ -271,7 +271,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_frameBuffer->activateColorTargets(1, list);
 
 			m_frameBuffer->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
-			m_frameBuffer->activateDepthTarget(xdl::xdl_true);
+			m_frameBuffer->setActiveDepthTest(xdl::xdl_true);
 			m_frameBuffer->clearDepthTarget(1.0f);
 
 			xdl::xdl_float aspect_ratio = getWindow()->getWidth()/getWindow()->getHeight();
@@ -314,9 +314,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
 			m_rai->clearDepthTarget(1.0);
 
-			m_sp->activate();
 			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
-			m_sp->deactivate();
+
 
 
 			//
@@ -344,8 +343,6 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_rai->setActiveVertexArray(m_frameBufferArray);
 
 			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
-
-//			m_frameBuffer->blit(m_rai->getDefaultFrameBuffer());
 
 			m_rai->setViewport(0, 0, getWindow()->getWidth(), getWindow()->getHeight());
 

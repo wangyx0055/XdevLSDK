@@ -124,17 +124,22 @@ namespace xdl {
 		//
 		m_defaultFrameBuffer = createFrameBuffer();
 		m_defaultFrameBuffer->init(320, 200);
-		m_defaultFrameBuffer->addColorTarget(0, xdl::XDEVL_FB_COLOR_RGBA);
-		auto texture = m_defaultFrameBuffer->getTexture(0);
-		texture->lock();
-		texture->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
-		texture->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_LINEAR);
-		texture->unlock();
-		m_defaultFrameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24);
-	
-		// Assign the new framebuffer as the active one.
-		m_activeFrameBuffer = m_defaultFrameBuffer;
-		
+		if(m_defaultFrameBuffer->addColorTarget(0, xdl::XDEVL_FB_COLOR_RGBA) != ERR_OK) {
+			XDEVL_MODULE_ERROR("Could't create color target for default framebuffer.\n")
+		} else {
+			auto texture = m_defaultFrameBuffer->getTexture(0);
+			texture->lock();
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_LINEAR);
+			texture->unlock();
+			if(m_defaultFrameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24) != ERR_OK) {
+				XDEVL_MODULE_ERROR("Could't create depth target for default framebuffer.\n")
+			}
+
+			// Assign the new framebuffer as the active one.
+			m_activeFrameBuffer = m_defaultFrameBuffer;
+		}
+
 		m_window = window;
 
 		XDEVL_MODULE_SUCCESS("OpenGL successfully initialized.\n")
@@ -268,7 +273,7 @@ namespace xdl {
 	const xdl_char* XdevLOpenGLImpl::getShaderVersion() {
 		return (xdl_char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 	}
-	
+
 	XdevLFrameBuffer* XdevLOpenGLImpl::getDefaultFrameBuffer() {
 		return m_defaultFrameBuffer.get();
 	}
@@ -358,7 +363,13 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::swapBuffers() {
-//m_defaultFrameBuffer->blit(0, 0, m_window->getWidth(), m_window->getHeight());
+//
+//		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultFrameBuffer->id());
+//		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//		glBlitFramebuffer(0, 0, m_defaultFrameBuffer->getWidth(), m_defaultFrameBuffer->getHeight(),
+//		                  0, 0, m_window->getWidth(), m_window->getHeight(),
+//		                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		if(m_gl_context) {
 			m_gl_context->swapBuffers();
