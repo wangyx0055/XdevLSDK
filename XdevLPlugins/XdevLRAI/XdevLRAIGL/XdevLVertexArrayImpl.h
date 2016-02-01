@@ -62,8 +62,8 @@ namespace xdl {
 			                     xdl_uint8* srcOfSreamBuffers[],
 			                     xdl_uint numberOfVertex,
 			                     IPXdevLVertexDeclaration vd);
-			virtual void activate();
-			virtual void deactivate();
+			virtual xdl_int activate();
+			virtual xdl_int deactivate();
 			virtual xdl_int setVertexStreamBuffer(xdl_uint shaderAttribute,
 			                                      xdl_uint numberOfComponents,
 			                                      XdevLBufferElementTypes itemSizeType,

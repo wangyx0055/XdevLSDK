@@ -57,7 +57,7 @@ namespace xdl {
 			virtual IPXdevLTexture getTexture(xdl_uint idx) override;
 			virtual IPXdevLTexture getDepthTexture() override;
 			virtual xdl_uint id() override;
-			virtual void blit(xdl_int x, xdl_int y, xdl_uint width, xdl_uint height) override;
+			virtual void blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget = XDEVL_COLOR_TARGET0) override;
 
 		private:
 

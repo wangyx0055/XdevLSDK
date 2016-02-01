@@ -8,39 +8,48 @@
 
 namespace xdl {
 
-	XdevLVertexArrayImpl::XdevLVertexArrayImpl() : 	m_id(-1),
+	XdevLVertexArrayImpl::XdevLVertexArrayImpl() :
+		m_id(0),
 		m_vd(nullptr),
 		m_indexBuffer(nullptr),
 		m_activated(xdl_false) {
 	}
 
 	XdevLVertexArrayImpl::~XdevLVertexArrayImpl() {
-		if(m_id != -1) {
+		if(0 != m_id) {
 			glDeleteVertexArrays(1, &m_id);
-			m_id = -1;
-			m_vd = nullptr;
 		}
 	}
 
 	xdl_int XdevLVertexArrayImpl::init() {
 		glGenVertexArrays(1, &m_id);
-		if(m_id == -1) {
+		if(0 == m_id) {
 			return ERR_ERROR;
 		}
 		return ERR_OK;
 	}
 
-	void  XdevLVertexArrayImpl::activate() {
-		assert((m_id != -1) && "XdevLVertexArrayImpl::activate: Array not initialized.");
+	xdl_int XdevLVertexArrayImpl::activate() {
+		assert(!m_activated && "XdevLVertexArrayImpl::activate: Array initialized already.");
 
 		glBindVertexArray(m_id);
+		if(!glIsVertexArray(m_id)) {
+			return ERR_ERROR;
+		}
+
 		m_activated = xdl_true;
+
+		return ERR_OK;
 	}
 
-	void  XdevLVertexArrayImpl::deactivate() {
+	xdl_int  XdevLVertexArrayImpl::deactivate() {
 		assert(m_activated && "XdevLVertexArrayImpl::activate: Not activated.");
 
 		glBindVertexArray(0);
+		if(!glIsVertexArray(m_id)) {
+			return ERR_ERROR;
+		}
+
 		m_activated = xdl_false;
 	}
 
@@ -264,7 +273,7 @@ namespace xdl {
 
 		//
 		// Let's unbind all objects so that nothing can get messed up by other OpenGL code fragments.
-		// 
+		//
 		glBindVertexArray(0);
 		for(auto vertexBuffer : m_vertexBufferList) {
 			vertexBuffer->deactivate();

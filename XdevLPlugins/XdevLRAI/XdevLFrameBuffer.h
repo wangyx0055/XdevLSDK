@@ -206,7 +206,7 @@ namespace xdl {
 			/// Returns the id of the framebuffer.
 			virtual xdl_uint id() = 0;
 			
-			virtual void blit(xdl_int x, xdl_int y, xdl_uint width, xdl_uint height) = 0;
+			virtual void blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget = XDEVL_COLOR_TARGET0) = 0;
 	};
 
 	typedef XdevLFrameBuffer IXdevLFrameBuffer;

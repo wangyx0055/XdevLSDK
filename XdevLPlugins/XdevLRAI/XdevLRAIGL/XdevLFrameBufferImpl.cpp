@@ -298,8 +298,11 @@ namespace xdl {
 		return m_depthTexture;
 	}
 
-	void XdevLFrameBufferImpl::blit(xdl_int x, xdl_int y, xdl_uint width, xdl_uint height) {
-		glBlitFramebuffer(0, 0, m_width, m_height, x, y, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	void XdevLFrameBufferImpl::blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget) {
+		glReadBuffer(colortarget);
+		GLuint id = framebuffer ? framebuffer->id() : 0;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, framebuffer->getWidth(), framebuffer->getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void XdevLFrameBufferImpl::framebufferErrorAsString(GLenum status) {
@@ -308,10 +311,6 @@ namespace xdl {
 				XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: Not all framebuffer attachment points are framebuffer attachment complete" << std::endl);
 			}
 			break;
-//				case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS: {
-//					XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:Not all attached images have the same width and height." << std::endl);
-//				}
-//				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
 				XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: No images are attached to the framebuffer." << std::endl);
 			}

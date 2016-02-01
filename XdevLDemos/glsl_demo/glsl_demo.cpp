@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -24,6 +24,9 @@
 #include <XdevL.h>
 #include <XdevLApplication.h>
 #include <XdevLRAI/XdevLRAI.h>
+#include <XdevLFont/XdevLFont.h>
+#include <XdevLFont/XdevLFontSystem.h>
+#include <XdevLFont/XdevLTextLayout.h>
 
 #include <cmath>
 #include <tm/tm.h>
@@ -342,6 +345,16 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
 
+//			m_frameBuffer->blit(m_rai->getDefaultFrameBuffer());
+
+			m_rai->setViewport(0, 0, getWindow()->getWidth(), getWindow()->getHeight());
+
+			std::wstringstream tmp;
+			tmp << L"OpenGL Demo using XdevLFont: FPS: " <<  (1.0/getCore()->getDT());
+
+
+			textLayoutSystem->setColor(255, 255, 255, 255);
+			textLayoutSystem->printText(tmp.str(), -1, 0.95);
 
 			m_rai->swapBuffers();
 		}
@@ -358,6 +371,18 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 			// We must attach the OpenGL context to a render m_window.
 			if(m_rai->create(getWindow()) != xdl::ERR_OK) {
+				return xdl::ERR_ERROR;
+			}
+
+			// Get the FontSystem
+			fontSystem = xdl::getModule<xdl::XdevLFontSystem*>(getCore(), xdl::XdevLID("MyFontSystem"));
+			if(!fontSystem) {
+				return xdl::ERR_ERROR;
+			}
+
+			// Get the Text Layout System.
+			textLayoutSystem = xdl::getModule<xdl::XdevLTextLayout*>(getCore(), xdl::XdevLID("MyTextLayout"));
+			if(!textLayoutSystem) {
 				return xdl::ERR_ERROR;
 			}
 
@@ -478,6 +503,23 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_modelMatrix		= m_sp->getUniformLocation("modelMatrix");
 			m_projViewMatrix	= m_sp->getUniformLocation("projViewMatrix");
 
+			//
+			// Initialize font system.
+			//
+
+			fontSystem->init(getWindow()->getWidth(), getWindow()->getHeight(), m_rai);
+
+			auto font = fontSystem->createFromFontFile(xdl::XdevLFileName("fonts/default_info.txt"));
+			if(nullptr == font) {
+				return xdl::ERR_ERROR;
+			}
+
+			textLayoutSystem->init(getWindow(), m_rai);
+			textLayoutSystem->setScale(1.0f);
+			textLayoutSystem->setDFT(0);
+			textLayoutSystem->setEffect(0);
+			textLayoutSystem->useFont(font);
+
 			return xdl::ERR_OK;
 		}
 
@@ -531,7 +573,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 		xdl::IPXdevLVertexShader		m_frameBufferVS;
 		xdl::IPXdevLFragmentShader	m_frameBufferFS;
 		xdl::IPXdevLShaderProgram	m_frameBufferSP;
-
+		xdl::IPXdevLFontSystem fontSystem;
+		xdl::IPXdevLTextLayout textLayoutSystem;
 
 		xdl::IPXdevLVertexArray			m_va;
 		xdl::IPXdevLVertexDeclaration	m_vd;

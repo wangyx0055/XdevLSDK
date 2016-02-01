@@ -64,7 +64,7 @@ namespace xdl {
 
 
 			virtual const xdl_char* getShaderVersion();
-
+			virtual XdevLFrameBuffer* getDefaultFrameBuffer();
 
 			virtual void setPointSize(xdl_float size) override;
 			virtual void setLineSize(xdl_float size) override;
@@ -143,6 +143,7 @@ namespace xdl {
 			// Supported geometry shader
 			xdl_int m_geometry_shader_version;
 
+			IPXdevLFrameBuffer m_defaultFrameBuffer;
 			IPXdevLFrameBuffer	m_activeFrameBuffer;
 			IPXdevLVertexArray 	m_activeVertexArray;
 			IPXdevLShaderProgram	m_activeShaderProgram;

@@ -93,6 +93,9 @@ namespace xdl {
 			//
 			virtual xdl_int create(IPXdevLWindow window) = 0;
 
+			/// Returns the default framebuffer.
+			virtual XdevLFrameBuffer* getDefaultFrameBuffer() = 0;
+
 			//
 			// Change Point and Line size.
 			//

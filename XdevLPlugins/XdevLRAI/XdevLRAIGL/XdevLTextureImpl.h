@@ -102,9 +102,6 @@ namespace xdl {
 				case XDEVL_DEPTH24_STENCIL8:
 					format = GL_DEPTH_STENCIL;
 					break;
-				default:
-					format = GL_RED;
-					break;
 				}
 
 				glTexImage2D(GL_TEXTURE_2D,
@@ -113,7 +110,7 @@ namespace xdl {
 				             width,
 				             height,
 				             0,
-				             imageFormat,
+				             format,
 				             GL_UNSIGNED_BYTE,
 				             (GLvoid*)data);
 

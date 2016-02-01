@@ -70,10 +70,10 @@ namespace xdl {
 			                      IPXdevLVertexDeclaration vd) = 0;
 
 			/// Activate.
-			virtual void activate() = 0;
+			virtual xdl_int activate() = 0;
 
 			/// Deactivate.
-			virtual void deactivate() = 0;
+			virtual xdl_int deactivate() = 0;
 
 			/// Sets a stream buffer.
 			virtual xdl_int setVertexStreamBuffer(xdl_uint shaderAttribute,
