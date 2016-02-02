@@ -304,8 +304,8 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			//
 			m_frameBuffer->deactivate();
 
-
-
+//			m_frameBuffer->blit(m_rai->getDefaultFrameBuffer());
+			
 			//
 			// Render into the second half of the normal framebuffer.
 			//
@@ -315,8 +315,6 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_rai->clearDepthTarget(1.0);
 
 			m_rai->drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES,36);
-
-
 
 			//
 			// Use the renderd texture from the framebuffer object to render into a squad.

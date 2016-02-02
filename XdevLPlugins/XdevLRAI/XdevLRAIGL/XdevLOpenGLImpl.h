@@ -55,28 +55,32 @@ namespace xdl {
 
 			virtual xdl_int create(IPXdevLWindow window) override;
 			virtual xdl_int init();
-			virtual xdl_int initGLEW();
+
 			virtual const xdl_char* getVersion();
 			virtual const xdl_char* getVendor();
 			virtual xdl_int getNumExtensions() const;
 			virtual const xdl_char* getExtension(xdl_int idx);
 			virtual xdl_bool extensionSupported(const xdl_char* extensionName);
-
-
 			virtual const xdl_char* getShaderVersion();
-			virtual XdevLFrameBuffer* getDefaultFrameBuffer();
+
+
+			virtual XdevLFrameBuffer* getDefaultFrameBuffer() override;
+			virtual XdevLFrameBuffer* get2DFrameBuffer() override;
+
+			virtual xdl_int setActiveInternalFrameBuffer(xdl_bool state) override;
+			virtual xdl_int setActive2DFrameBuffer(xdl_bool state) override;
+			virtual xdl_int setActiveRenderWindow(XdevLWindow* window) override;
+			virtual void setActiveDepthTest(xdl_bool enableDepthTest) override;
+			virtual void setActiveBlendMode(xdl_bool enableBlendMode) override;
 
 			virtual void setPointSize(xdl_float size) override;
 			virtual void setLineSize(xdl_float size) override;
-
-			virtual void setActiveDepthTest(xdl_bool enableDepthTest) override;
-			virtual void setActiveBlendMode(xdl_bool enableBlendMode) override;
 			virtual xdl_int setBlendMode(XdevLBlendModes src, XdevLBlendModes dst) override;
 			virtual xdl_int clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) override;
 			virtual xdl_int clearDepthTarget(xdl_float clear_value) override;
 			virtual xdl_int setViewport(xdl_float x, xdl_float y, xdl_float width, xdl_float height) override;
 
-			virtual xdl_int setActiveRenderWindow(XdevLWindow* window);
+
 			virtual xdl_int swapBuffers();
 
 			virtual IPXdevLVertexDeclaration createVertexDeclaration() override;
@@ -92,6 +96,7 @@ namespace xdl {
 			virtual IPXdevLIndexBuffer createIndexBuffer() override;
 			virtual IPXdevLVertexArray createVertexArray() override;
 
+
 			virtual xdl_int setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer);
 			virtual xdl_int setActiveVertexArray(IPXdevLVertexArray vertexArray);
 			virtual xdl_int setActiveShaderProgram(IPXdevLShaderProgram shaderProgram);
@@ -101,9 +106,12 @@ namespace xdl {
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration);
 			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vertexDeclaration, XdevLIndexBuffer* indexBuffer);
 
+			virtual xdl_int initGLEW();
 			void shaderLog(xdl_uint shaderID);
 			xdl_int initExtensions();
-
+			xdl_int createScreenVertexArray();
+			xdl_int renderFrameBufferPlane();
+			xdl::xdl_int m_frameBufferTextureShaderId;
 		protected:
 			XdevLWindow* m_window;
 			XdevLOpenGLContext* m_gl_context;
@@ -142,11 +150,19 @@ namespace xdl {
 			xdl_int m_fragment_shader_version;
 			// Supported geometry shader
 			xdl_int m_geometry_shader_version;
-
+			xdl_bool m_useInternalBuffer;
 			IPXdevLFrameBuffer m_defaultFrameBuffer;
 			IPXdevLFrameBuffer	m_activeFrameBuffer;
 			IPXdevLVertexArray 	m_activeVertexArray;
 			IPXdevLShaderProgram	m_activeShaderProgram;
+			
+			xdl_bool m_use2DFrameBuffer;
+			IPXdevLFrameBuffer m_2DFrameBuffer;
+			IPXdevLVertexDeclaration m_vertexDeclaration;
+			IPXdevLVertexArray m_frameBufferArray;
+			IPXdevLShaderProgram m_frameBufferShaderProgram;
+			IPXdevLVertexShader m_frameBufferVertexShader;
+			IPXdevLFragmentShader m_frameBufferFragmentShader;
 	};
 
 }

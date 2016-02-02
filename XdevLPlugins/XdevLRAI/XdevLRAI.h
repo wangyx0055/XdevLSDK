@@ -55,7 +55,7 @@ namespace xdl {
 	  XDEVL_PRIMITIVE_QUADS			= 0x0007,
 	  XDEVL_PRIMITIVE_QUAD_STRIP		= 0x0008,
 	  XDEVL_PRIMITIVE_POLYGON			= 0x0009,
-		XDEVL_PRIMITIVE_UNKNOWN
+	  XDEVL_PRIMITIVE_UNKNOWN
 	};
 
 	enum XdevLBlendModes {
@@ -95,6 +95,15 @@ namespace xdl {
 
 			/// Returns the default framebuffer.
 			virtual XdevLFrameBuffer* getDefaultFrameBuffer() = 0;
+
+			/// Returns the 2d framebuffer.
+			virtual XdevLFrameBuffer* get2DFrameBuffer() = 0;
+
+			/// Activates/Deactivates the internal framebuffer.
+			virtual xdl_int setActiveInternalFrameBuffer(xdl_bool state) = 0;
+
+			/// Activates/Deactivates the 2d framebuffer.
+			virtual xdl_int setActive2DFrameBuffer(xdl_bool state) = 0;
 
 			//
 			// Change Point and Line size.

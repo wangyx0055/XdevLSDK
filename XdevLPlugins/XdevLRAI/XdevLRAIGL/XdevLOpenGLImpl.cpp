@@ -56,6 +56,31 @@ XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLRAI, xdl::XdevLOpenGLImpl, o
 
 namespace xdl {
 
+	std::string vertex_shader_source = {
+		"\
+layout(location = 0) in vec3 iposition;\
+layout(location = 1) in vec2 itexcoord;\
+\
+out vec2 texcoord;\
+\
+void main() {\
+ texcoord = itexcoord;\
+ gl_Position = vec4(iposition * 0.5, 1.0);\
+}"
+	};
+
+	std::string fragment_shader_source = {
+		"\
+layout(location = 0) out vec4 ocolor;\
+in vec2 texcoord;\
+uniform sampler2D tex;\
+\
+void main() {\
+\
+ ocolor = texture(tex, texcoord);\
+}"
+	};
+
 	XdevLOpenGLImpl::XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevLModuleImpl<XdevLRAI>(parameter, descriptor),
 		m_window(nullptr),
 		m_gl_context(nullptr),
@@ -71,9 +96,18 @@ namespace xdl {
 		m_vertex_shader_version(330),
 		m_fragment_shader_version(330),
 		m_geometry_shader_version(330),
+		m_useInternalBuffer(xdl_false),
+		m_defaultFrameBuffer(nullptr),
 		m_activeFrameBuffer(nullptr),
 		m_activeVertexArray(nullptr),
-		m_activeShaderProgram(nullptr) {
+		m_activeShaderProgram(nullptr),
+		m_use2DFrameBuffer(xdl_false),
+		m_2DFrameBuffer(nullptr),
+		m_vertexDeclaration(nullptr),
+		m_frameBufferArray(nullptr),
+		m_frameBufferShaderProgram(nullptr),
+		m_frameBufferVertexShader(nullptr),
+		m_frameBufferFragmentShader(nullptr) {
 		XDEVL_MODULE_INFO("XdevLRAIGL()\n");
 	}
 
@@ -140,10 +174,57 @@ namespace xdl {
 			m_activeFrameBuffer = m_defaultFrameBuffer;
 		}
 
+		//
+		// Initialize the default framebuffer.
+		//
+		m_2DFrameBuffer = createFrameBuffer();
+		m_2DFrameBuffer->init(window->getWidth(), window->getHeight());
+		if(m_2DFrameBuffer->addColorTarget(0, xdl::XDEVL_FB_COLOR_RGBA) != ERR_OK) {
+			XDEVL_MODULE_ERROR("Could't create color target for default framebuffer.\n")
+		} else {
+			auto texture = m_2DFrameBuffer->getTexture(0);
+			texture->lock();
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MAG_FILTER, xdl::XDEVL_LINEAR);
+			texture->setTextureFilter(xdl::XDEVL_TEXTURE_MIN_FILTER, xdl::XDEVL_LINEAR);
+			texture->unlock();
+		}
+		if(m_2DFrameBuffer->addDepthTarget(xdl::XDEVL_FB_DEPTH_COMPONENT24) != ERR_OK) {
+			XDEVL_MODULE_ERROR("Could't create depth target for default framebuffer.\n")
+		}
 		m_window = window;
+
+		createScreenVertexArray();
 
 		XDEVL_MODULE_SUCCESS("OpenGL successfully initialized.\n")
 
+		return ERR_OK;
+	}
+
+	xdl_int XdevLOpenGLImpl::setActiveInternalFrameBuffer(xdl_bool state) {
+		m_useInternalBuffer = state;
+		if(state) {
+			m_defaultFrameBuffer->activate();
+
+			xdl::xdl_uint list[] = {xdl::XDEVL_COLOR_TARGET0};
+			m_defaultFrameBuffer->activateColorTargets(1, list);
+		} else {
+			m_defaultFrameBuffer->deactivate();
+		}
+		return ERR_OK;
+	}
+
+	xdl_int XdevLOpenGLImpl::setActive2DFrameBuffer(xdl_bool state) {
+		m_use2DFrameBuffer = state;
+
+		if(state) {
+			m_defaultFrameBuffer->deactivate();
+			m_2DFrameBuffer->activate();
+
+			xdl::xdl_uint list[] = {xdl::XDEVL_COLOR_TARGET0};
+			m_2DFrameBuffer->activateColorTargets(1, list);
+		} else {
+			m_2DFrameBuffer->deactivate();
+		}
 		return ERR_OK;
 	}
 
@@ -199,10 +280,6 @@ namespace xdl {
 			XDEVL_MODULE_ERROR(glewGetErrorString(err) << std::endl);
 			return ERR_ERROR;
 		}
-
-//		setVSync(m_VSync);
-
-//		getOpenGLInfos();
 
 		// Only use if the extenstion is available. In some cases this is not
 		// supported so we will use this as a hack.
@@ -276,6 +353,10 @@ namespace xdl {
 
 	XdevLFrameBuffer* XdevLOpenGLImpl::getDefaultFrameBuffer() {
 		return m_defaultFrameBuffer.get();
+	}
+
+	XdevLFrameBuffer* XdevLOpenGLImpl::get2DFrameBuffer() {
+		return m_2DFrameBuffer.get();
 	}
 
 	void XdevLOpenGLImpl::setPointSize(xdl_float size) {
@@ -363,13 +444,31 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLImpl::swapBuffers() {
-//
-//		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultFrameBuffer->id());
-//		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//		glBlitFramebuffer(0, 0, m_defaultFrameBuffer->getWidth(), m_defaultFrameBuffer->getHeight(),
-//		                  0, 0, m_window->getWidth(), m_window->getHeight(),
-//		                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if(m_useInternalBuffer) {
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultFrameBuffer->id());
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+			glDrawBuffer(GL_BACK);
+			glBlitFramebuffer(0, 0, m_defaultFrameBuffer->getWidth(), m_defaultFrameBuffer->getHeight(),
+			                  0, 0, m_window->getWidth(), m_window->getHeight(),
+			                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		}
+
+		if(m_use2DFrameBuffer) {
+			// Activate the windows default framebuffer (context one).
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// Render the stuff.
+			renderFrameBufferPlane();
+
+//			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_2DFrameBuffer->id());
+//			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+//			glDrawBuffer(GL_BACK);
+//			glBlitFramebuffer(0, 0, m_2DFrameBuffer->getWidth(), m_2DFrameBuffer->getHeight(),
+//			                  0, 0, m_window->getWidth(), m_window->getHeight(),
+//			                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		}
 
 		if(m_gl_context) {
 			m_gl_context->swapBuffers();
@@ -624,5 +723,92 @@ namespace xdl {
 		glGetShaderInfoLog(shaderId, Len, &ActualLen, Log);
 		XDEVL_MODULE_ERROR(Log << "\n");
 		delete [] Log;
+	}
+
+	xdl_int XdevLOpenGLImpl::createScreenVertexArray() {
+
+		xdl::xdl_float screen_vertex [] = {
+			-1.0f, -1.0f,
+			-1.0f, 1.0f,
+			1.0f, 1.0f,
+
+			1.0f, 1.0f,
+			1.0f, -1.0f,
+			-1.0f, -1.0f
+		};
+
+		xdl::xdl_float screen_uv [] = {
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+
+			1.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 0.0f
+		};
+
+		m_vertexDeclaration = createVertexDeclaration();
+		m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 0);
+		m_vertexDeclaration->add(2, xdl::XDEVL_BUFFER_ELEMENT_FLOAT, 9);
+
+		std::vector<xdl::xdl_uint8*> list;
+		list.push_back((xdl::xdl_uint8*)screen_vertex);
+		list.push_back((xdl::xdl_uint8*)screen_uv);
+
+		m_frameBufferArray = createVertexArray();
+		m_frameBufferArray->init(list.size(), list.data(), 6, m_vertexDeclaration);
+
+		// Create the shader program.
+		m_frameBufferShaderProgram = createShaderProgram();
+		m_frameBufferVertexShader = createVertexShader();
+		m_frameBufferFragmentShader = createFragmentShader();
+		m_frameBufferVertexShader->addShaderCode(vertex_shader_source.c_str());
+		m_frameBufferFragmentShader->addShaderCode(fragment_shader_source.c_str());
+		m_frameBufferVertexShader->compile();
+		m_frameBufferFragmentShader->compile();
+
+		m_frameBufferShaderProgram->attach(m_frameBufferVertexShader);
+		m_frameBufferShaderProgram->attach(m_frameBufferFragmentShader);
+		m_frameBufferShaderProgram->link();
+
+		m_frameBufferTextureShaderId = m_frameBufferShaderProgram->getUniformLocation("tex");
+
+		return ERR_OK;
+	}
+
+	xdl_int XdevLOpenGLImpl::renderFrameBufferPlane() {
+
+		setActiveBlendMode(xdl_true);
+		setBlendMode(XDEVL_BLEND_SRC_ALPHA, XDEVL_BLEND_ONE_MINUS_SRC_ALPHA);
+		setActiveDepthTest(xdl_false);
+		
+		m_frameBufferShaderProgram->activate();
+		m_frameBufferShaderProgram->setUniformi(m_frameBufferTextureShaderId, 0);
+		m_2DFrameBuffer->getTexture(0)->activate(0);
+		m_frameBufferShaderProgram->deactivate();
+
+//		auto vd = m_vertexDeclaration;
+//
+//		glBindVertexArray(m_frameBufferArray->id());
+//		glUseProgram(m_frameBufferShaderProgram->id());
+//
+//		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
+//			GLuint shader_attrib = vd->get(idx)->shaderAttribute;
+//			glEnableVertexAttribArray(shader_attrib);
+//		}
+//
+//		glDrawArrays(xdl::XDEVL_PRIMITIVE_TRIANGLES, 0, 6);
+//		
+//		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
+//			glDisableVertexAttribArray(vd->get(idx)->shaderAttribute);
+//		}
+
+
+		setActiveVertexArray(m_frameBufferArray);
+		setActiveShaderProgram(m_frameBufferShaderProgram);
+
+		drawVertexArray(xdl::XDEVL_PRIMITIVE_TRIANGLES, 6);
+
+		return ERR_OK;
 	}
 }

@@ -433,17 +433,14 @@ int main(int argc, char* argv[]) {
 			ry += static_cast<float>(x_axis->getDeltaValue()) * 0.01;
 		}
 
-		rai->getDefaultFrameBuffer()->activate();
-		xdl::xdl_uint list[] = {xdl::XDEVL_COLOR_TARGET0};
-		rai->getDefaultFrameBuffer()->activateColorTargets(1, list);
-		rai->getDefaultFrameBuffer()->clearColorTargets(0.5f, 0.305f, 0.596f, 1.0f);
-		rai->getDefaultFrameBuffer()->setActiveDepthTest(xdl::xdl_true);
-		rai->getDefaultFrameBuffer()->deactivate();
 
-		rai->setViewport(0, 0, window->getWidth(), window->getHeight());
+//		rai->setActive2DFrameBuffer(xdl::xdl_true);
+//		rai->setActiveInternalFrameBuffer(xdl::xdl_true);
+
 		rai->setActiveDepthTest(xdl::xdl_true);
 		rai->clearColorTargets(0.0f, 0.305f, 0.596f, 1.0f);
 		rai->clearDepthTarget(1.0f);
+
 
 
 		xdl::xdl_float aspect_ratio = window->getWidth()/window->getHeight();
@@ -475,7 +472,7 @@ int main(int argc, char* argv[]) {
 		textLayoutSystem->setColor(255, 255, 255, 255);
 		textLayoutSystem->printText(tmp.str(), -1, 0.95);
 
-		rai->getDefaultFrameBuffer()->blit(nullptr);
+
 		rai->swapBuffers();
 
 	}

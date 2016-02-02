@@ -1,5 +1,5 @@
 #include "XdevLFrameBufferImpl.h"
-
+#include "XdevLOpenGLUtils.h"
 
 namespace xdl {
 
@@ -41,6 +41,9 @@ namespace xdl {
 
 		// Unbind this framebuffer object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Save previous viewport.
+		glGetIntegerv(GL_VIEWPORT, m_previousViewport);
 
 		return ERR_OK;
 	}
@@ -270,6 +273,10 @@ namespace xdl {
 
 	xdl_int XdevLFrameBufferImpl::deactivate()  {
 		glViewport(m_previousViewport[0], m_previousViewport[1], m_previousViewport[2], m_previousViewport[3]);
+
+		GLuint targets [] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+		glDrawBuffers(sizeof(targets), targets);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		m_inUse = xdl_false;
 		return ERR_OK;
@@ -301,10 +308,16 @@ namespace xdl {
 	}
 
 	void XdevLFrameBufferImpl::blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget) {
-		glReadBuffer(colortarget);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, 512, 512, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id());
+
+		glBlitFramebuffer(0, 0,m_width, m_height,
+		                  0, 0, framebuffer->getWidth(), framebuffer->getHeight(),
+		                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		GLint ret = glGetError();
+		if(ret != GL_NO_ERROR) {
+			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "OpenGL error: " << glGetErrorAsString(ret) << std::endl );
+		}
 	}
 
 	void XdevLFrameBufferImpl::framebufferErrorAsString(GLenum status) {
