@@ -570,7 +570,7 @@ void main() {\
 		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
 			glDrawArrays(primitiveType, 0, numberOfElements);
 		} else {
-			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), (void*)0);
+			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), nullptr);
 		}
 
 		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
@@ -663,7 +663,7 @@ void main() {\
 			pos += vertexDeclaration->get(idx)->numberOfComponents*vertexDeclaration->get(idx)->elementTypeSizeInBytes;
 		}
 
-		glDrawElements(primitiveType, numberOfElements, indexBuffer->getElementType(), 0);
+		glDrawElements(primitiveType, numberOfElements, indexBuffer->getElementType(), nullptr);
 
 		for(xdl_uint idx = 0; idx < vertexDeclaration->getNumber(); idx++) {
 			glDisableVertexAttribArray(vertexDeclaration->get(idx)->shaderAttribute);

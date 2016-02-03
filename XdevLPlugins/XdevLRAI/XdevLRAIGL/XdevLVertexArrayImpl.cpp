@@ -51,6 +51,7 @@ namespace xdl {
 		}
 
 		m_activated = xdl_false;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLVertexArrayImpl::setVertexStreamBuffer(xdl_uint shaderAttribute, xdl_uint numberOfComponents, XdevLBufferElementTypes itemSizeType, IPXdevLVertexBuffer vertexBuffer) {
@@ -111,10 +112,7 @@ namespace xdl {
 			m_vertexBufferList[idx]->init(srcOfSreamBuffers[idx],  m_vd->vertexSize()*numberOfVertex);
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferList[idx]->id());
-
-			glEnableVertexAttribArray(shaderAttribute);
 			glVertexAttribPointer(shaderAttribute, m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, GL_FALSE, 0, (void*)(0));
-
 		}
 
 		glBindVertexArray(0);
@@ -142,7 +140,6 @@ namespace xdl {
 		for(xdl_uint idx = 0; idx < m_vd->getNumber(); idx++) {
 
 			GLuint shader_attrib = m_vd->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
 			glVertexAttribPointer(shader_attrib,
 			                      m_vd->get(idx)->numberOfComponents,
 			                      m_vd->get(idx)->elementType,
@@ -176,7 +173,6 @@ namespace xdl {
 		for(xdl_uint idx = 0; idx < m_vd->getNumber(); idx++) {
 
 			GLuint shader_attrib = m_vd->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
 			glVertexAttribPointer(shader_attrib,
 			                      m_vd->get(idx)->numberOfComponents,
 			                      m_vd->get(idx)->elementType,
@@ -199,20 +195,16 @@ namespace xdl {
 		// Create array object.
 		glGenVertexArrays(1, &m_id);
 		glBindVertexArray(m_id);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexBuffer->id());
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
 
 		// Create vertex buffer object.
-		m_vertexBufferList.reserve(1);
-		m_vertexBufferList.resize(1);
-
 		m_vertexBufferList.push_back(vertexBuffer);
 
 		xdl_uint64 pos = 0;
 		for(xdl_uint idx = 0; idx < m_vd->getNumber(); idx++) {
 
 			GLuint shader_attrib = m_vd->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
 			glVertexAttribPointer(shader_attrib,
 			                      m_vd->get(idx)->numberOfComponents,
 			                      m_vd->get(idx)->elementType,
@@ -224,7 +216,9 @@ namespace xdl {
 		}
 
 		glBindVertexArray(0);
-
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		
 		return ERR_OK;
 	}
 
@@ -267,7 +261,6 @@ namespace xdl {
 			m_vertexBufferList[idx]->init(srcOfSreamBuffers[idx], vdecl->vertexSize()*numberOfVertex);
 			m_vertexBufferList[idx]->activate();
 
-			glEnableVertexAttribArray(shaderAttribute);
 			glVertexAttribPointer(shaderAttribute, m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, GL_FALSE, 0, (void*)(0));
 		}
 
