@@ -68,7 +68,7 @@ set(HEADER_INTERFACE_FILE
 	${HEADERS_DIR}/XdevLIndexBuffer.h
 	${HEADERS_DIR}/XdevLVertexArray.h
 	${HEADERS_DIR}/XdevLVertexDeclaration.h
-	${HEADERS_DIR}/XdevLStreamBuffer.h	
+	${HEADERS_DIR}/XdevLStreamBuffer.h
 	${HEADERS_DIR}/XdevLShader.h
 	${HEADERS_DIR}/XdevLShaderProgram.h
 )
@@ -83,7 +83,7 @@ set(HEADER_FILES
 	${HEADERS_DIR}/XdevLRAIGL/XdevLTextureCubeImpl.h
 	${HEADERS_DIR}/XdevLRAIGL/XdevLTexture3DImpl.h
 	${HEADERS_DIR}/XdevLRAIGL/XdevLFrameBufferImpl.h
-	${HEADERS_DIR}/XdevLRAIGL/XdevLOpenGLImpl.h
+	${HEADERS_DIR}/XdevLRAIGL/XdevLRAIGL.h
 	${HEADERS_DIR}/XdevLRAIGL/XdevLVertexBufferImpl.h
 	${HEADERS_DIR}/XdevLRAIGL/XdevLIndexBufferImpl.h
 	${HEADERS_DIR}/XdevLRAIGL/XdevLVertexArrayImpl.h
@@ -95,7 +95,7 @@ set(HEADER_FILES
 # Set the source files for the library.
 
 set(SOURCE_FILES
-	${SRC_DIR}/XdevLRAIGL/XdevLOpenGLImpl.cpp
+	${SRC_DIR}/XdevLRAIGL/XdevLRAIGL.cpp
 	${SRC_DIR}/XdevLRAIGL/XdevLVertexArrayImpl.cpp
 	${SRC_DIR}/XdevLRAIGL/XdevLFrameBufferImpl.cpp
 	${SRC_DIR}/XdevLRAIGL/XdevLShaderProgramImpl.cpp

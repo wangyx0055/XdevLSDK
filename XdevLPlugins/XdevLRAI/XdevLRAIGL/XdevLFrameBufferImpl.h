@@ -24,7 +24,7 @@
 #ifndef XDEVL_FRAMEBUFFER_OBJECT_IMPL_H
 #define XDEVL_FRAMEBUFFER_OBJECT_IMPL_H
 
-#include "XdevLOpenGLImpl.h"
+#include "XdevLRAIGL.h"
 #include <XdevLRAI/XdevLFrameBuffer.h>
 #include "XdevLTextureImpl.h"
 #include "XdevLTextureCubeImpl.h"

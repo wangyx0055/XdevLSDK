@@ -101,6 +101,9 @@ namespace xdl {
 
 			}
 			virtual	~XdevlKeyboardBase() {
+				for(auto keybutton : m_Buttons) {
+					delete keybutton.second;
+				}
 				keyButtonId.clear();
 			}
 			typedef std::map<const XdevLString, XdevLButtonId> KeyMapType;

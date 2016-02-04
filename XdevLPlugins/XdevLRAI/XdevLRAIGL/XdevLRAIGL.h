@@ -43,14 +43,14 @@ namespace xdl {
 	};
 
 	/**
-		@class XdevLOpenGLImpl
-		@brief Base class for OpenGL support.
+		@class XdevLRAIGL
+		@brief OpenGL implementation of XdevLRAI.
 		@author Cengiz Terzibas
 	*/
-	class XdevLOpenGLImpl : public XdevLModuleImpl<XdevLRAI> {
+	class XdevLRAIGL : public XdevLModuleImpl<XdevLRAI> {
 		public:
-			XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
-			virtual ~XdevLOpenGLImpl();
+			XdevLRAIGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor);
+			virtual ~XdevLRAIGL();
 
 
 			virtual xdl_int create(IPXdevLWindow window) override;
@@ -103,8 +103,6 @@ namespace xdl {
 
 			virtual xdl_int drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements);
 			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number);
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, IPXdevLVertexBuffer vertexBuffer, IPXdevLVertexDeclaration vertexDeclaration);
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, XdevLVertexBuffer* vertexBuffer, XdevLVertexDeclaration* vertexDeclaration, XdevLIndexBuffer* indexBuffer);
 
 			virtual xdl_int initGLEW();
 			void shaderLog(xdl_uint shaderID);

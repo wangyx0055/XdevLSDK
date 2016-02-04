@@ -7,7 +7,7 @@
 #include <XdevLXstring.h>
 
 #include "XdevLFrameBufferImpl.h"
-#include "XdevLOpenGLImpl.h"
+#include "XdevLRAIGL.h"
 #include "XdevLVertexBufferImpl.h"
 #include "XdevLIndexBufferImpl.h"
 #include "XdevLVertexArrayImpl.h"
@@ -48,11 +48,11 @@ XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
 XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(openglDescriptor)
 
 XDEVL_PLUGIN_CREATE_MODULE {
-	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLOpenGLImpl, openGLModuleDesc);
+	XDEVL_PLUGIN_CREATE_MODULE_INSTANCE(xdl::XdevLRAIGL, openGLModuleDesc);
 	XDEVL_PLUGIN_CREATE_MODULE_NOT_FOUND
 }
 
-XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLRAI, xdl::XdevLOpenGLImpl, openGLModuleDesc)
+XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLRAI, xdl::XdevLRAIGL, openGLModuleDesc)
 
 namespace xdl {
 
@@ -81,7 +81,7 @@ void main() {\
 }"
 	};
 
-	XdevLOpenGLImpl::XdevLOpenGLImpl(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevLModuleImpl<XdevLRAI>(parameter, descriptor),
+	XdevLRAIGL::XdevLRAIGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevLModuleImpl<XdevLRAI>(parameter, descriptor),
 		m_window(nullptr),
 		m_gl_context(nullptr),
 		m_StencilDepth(8),
@@ -111,11 +111,11 @@ void main() {\
 		XDEVL_MODULE_INFO("XdevLRAIGL()\n");
 	}
 
-	XdevLOpenGLImpl::~XdevLOpenGLImpl() {
+	XdevLRAIGL::~XdevLRAIGL() {
 		XDEVL_MODULE_INFO("~XdevLRAIGL()\n");
 	}
 
-	xdl_int XdevLOpenGLImpl::init() {
+	xdl_int XdevLRAIGL::init() {
 		TiXmlDocument xmlDocument;
 
 		if(!xmlDocument.LoadFile(getMediator()->getXmlFilename())) {
@@ -130,7 +130,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	int XdevLOpenGLImpl::create(IPXdevLWindow window) {
+	int XdevLRAIGL::create(IPXdevLWindow window) {
 
 
 		m_gl_context = static_cast<XdevLOpenGLContext*>(getMediator()->createModule(xdl::XdevLModuleName("XdevLOpenGLContext"), xdl::XdevLID("XdevLRAIOpenGLContext")));
@@ -200,7 +200,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveInternalFrameBuffer(xdl_bool state) {
+	xdl_int XdevLRAIGL::setActiveInternalFrameBuffer(xdl_bool state) {
 		m_useInternalBuffer = state;
 		if(state) {
 			m_defaultFrameBuffer->activate();
@@ -213,7 +213,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActive2DFrameBuffer(xdl_bool state) {
+	xdl_int XdevLRAIGL::setActive2DFrameBuffer(xdl_bool state) {
 		m_use2DFrameBuffer = state;
 
 		if(state) {
@@ -228,7 +228,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::readModuleInformation(TiXmlDocument* document) {
+	xdl_int XdevLRAIGL::readModuleInformation(TiXmlDocument* document) {
 		TiXmlHandle docHandle(document);
 		TiXmlElement* root = docHandle.FirstChild(XdevLCorePropertiesName.c_str()).FirstChildElement("XdevLOpenGL").ToElement();
 
@@ -273,7 +273,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::initGLEW() {
+	xdl_int XdevLRAIGL::initGLEW() {
 		glewExperimental= GL_TRUE;
 		GLenum err = glewInit();
 		if(GLEW_OK != err) {
@@ -292,7 +292,7 @@ void main() {\
 	}
 
 
-	void XdevLOpenGLImpl::getOpenGLInfos() {
+	void XdevLRAIGL::getOpenGLInfos() {
 		std::string tmp;
 
 		// The WGL_CONTEXT_CORE_PROFILE_BIT_ARB context profile doesn't support
@@ -317,19 +317,19 @@ void main() {\
 		m_vendor			=(xdl_char*)glGetString(GL_VENDOR);
 	}
 
-	const xdl_char* XdevLOpenGLImpl::getVersion() {
+	const xdl_char* XdevLRAIGL::getVersion() {
 		return m_version.c_str();
 	}
 
-	const xdl_char* XdevLOpenGLImpl::getVendor() {
+	const xdl_char* XdevLRAIGL::getVendor() {
 		return m_vendor.c_str();
 	}
 
-	xdl_int XdevLOpenGLImpl::getNumExtensions() const {
+	xdl_int XdevLRAIGL::getNumExtensions() const {
 		return m_numExtensions;
 	}
 
-	const xdl_char* XdevLOpenGLImpl::getExtension(xdl_int idx) {
+	const xdl_char* XdevLRAIGL::getExtension(xdl_int idx) {
 		const char* tmp = "";
 		try {
 			return m_extensions.at(idx).c_str();
@@ -339,7 +339,7 @@ void main() {\
 		}
 	}
 
-	xdl_bool XdevLOpenGLImpl::extensionSupported(const xdl_char* extensionName) {
+	xdl_bool XdevLRAIGL::extensionSupported(const xdl_char* extensionName) {
 		for(xdl_int a = 0; a < getNumExtensions(); ++a) {
 			if(m_extensions[a] == extensionName)
 				return true;
@@ -347,31 +347,31 @@ void main() {\
 		return false;
 	}
 
-	const xdl_char* XdevLOpenGLImpl::getShaderVersion() {
+	const xdl_char* XdevLRAIGL::getShaderVersion() {
 		return (xdl_char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 	}
 
-	XdevLFrameBuffer* XdevLOpenGLImpl::getDefaultFrameBuffer() {
+	XdevLFrameBuffer* XdevLRAIGL::getDefaultFrameBuffer() {
 		return m_defaultFrameBuffer.get();
 	}
 
-	XdevLFrameBuffer* XdevLOpenGLImpl::get2DFrameBuffer() {
+	XdevLFrameBuffer* XdevLRAIGL::get2DFrameBuffer() {
 		return m_2DFrameBuffer.get();
 	}
 
-	void XdevLOpenGLImpl::setPointSize(xdl_float size) {
+	void XdevLRAIGL::setPointSize(xdl_float size) {
 		glPointSize(size);
 	}
 
-	void XdevLOpenGLImpl::setLineSize(xdl_float size) {
+	void XdevLRAIGL::setLineSize(xdl_float size) {
 		glLineWidth(size);
 	}
 
-	void XdevLOpenGLImpl::setActiveDepthTest(xdl_bool enableDepthTest) {
+	void XdevLRAIGL::setActiveDepthTest(xdl_bool enableDepthTest) {
 		enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 	}
 
-	void XdevLOpenGLImpl::setActiveBlendMode(xdl_bool enableBlendMode) {
+	void XdevLRAIGL::setActiveBlendMode(xdl_bool enableBlendMode) {
 		enableBlendMode ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 	}
 
@@ -412,38 +412,38 @@ void main() {\
 		};
 	}
 
-	xdl_int XdevLOpenGLImpl::setBlendMode(XdevLBlendModes src, XdevLBlendModes dst) {
+	xdl_int XdevLRAIGL::setBlendMode(XdevLBlendModes src, XdevLBlendModes dst) {
 		GLint blend_src = XdevLBlendModeToGLBlendMode(src);
 		GLint blend_dst = XdevLBlendModeToGLBlendMode(dst);
 		glBlendFunc(blend_src, blend_dst);
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) {
+	xdl_int XdevLRAIGL::clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) {
 		glClearColor(r,g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT);
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::clearDepthTarget(xdl_float clear_value) {
+	xdl_int XdevLRAIGL::clearDepthTarget(xdl_float clear_value) {
 		glClearDepth(clear_value);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setViewport(xdl_float x, xdl_float y, xdl_float width, xdl_float height) {
+	xdl_int XdevLRAIGL::setViewport(xdl_float x, xdl_float y, xdl_float width, xdl_float height) {
 		glViewport(x, y, width, height);
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveRenderWindow(IPXdevLWindow window) {
+	xdl_int XdevLRAIGL::setActiveRenderWindow(IPXdevLWindow window) {
 		if(m_gl_context) {
 			m_gl_context->makeCurrent(window);
 		}
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::swapBuffers() {
+	xdl_int XdevLRAIGL::swapBuffers() {
 		if(m_useInternalBuffer) {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultFrameBuffer->id());
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -476,96 +476,89 @@ void main() {\
 		return ERR_OK;
 	}
 
-	IPXdevLVertexDeclaration XdevLOpenGLImpl::createVertexDeclaration() {
+	IPXdevLVertexDeclaration XdevLRAIGL::createVertexDeclaration() {
 		auto tmp = std::shared_ptr<XdevLVertexDeclaration>(new XdevLVertexDeclaration());
 		return tmp;
 	}
 
-	IPXdevLVertexShader XdevLOpenGLImpl::createVertexShader() {
+	IPXdevLVertexShader XdevLRAIGL::createVertexShader() {
 		auto tmp = std::shared_ptr<XdevLOpenGLVertexShaderImpl>(new XdevLOpenGLVertexShaderImpl());
 		return tmp;
 	}
 
-	IPXdevLFragmentShader XdevLOpenGLImpl::createFragmentShader() {
+	IPXdevLFragmentShader XdevLRAIGL::createFragmentShader() {
 		auto tmp = std::shared_ptr<XdevLOpenGLFragmentShaderImpl>(new XdevLOpenGLFragmentShaderImpl());
 		return tmp;
 	}
 
-	IPXdevLGeometryShader XdevLOpenGLImpl::createGeometryShader() {
+	IPXdevLGeometryShader XdevLRAIGL::createGeometryShader() {
 		auto tmp = std::shared_ptr<XdevLOpenGLGeometryShaderImpl>(new XdevLOpenGLGeometryShaderImpl());
 		return tmp;;
 	}
 
-	IPXdevLShaderProgram XdevLOpenGLImpl::createShaderProgram() {
+	IPXdevLShaderProgram XdevLRAIGL::createShaderProgram() {
 		auto tmp = std::shared_ptr<XdevLOpenGLProgramImpl>(new XdevLOpenGLProgramImpl());
 		return tmp;
 	}
 
-	IPXdevLTexture XdevLOpenGLImpl::createTexture() {
+	IPXdevLTexture XdevLRAIGL::createTexture() {
 		auto tmp = std::shared_ptr<XdevLTextureImpl>(new XdevLTextureImpl());
 		return tmp;
 	}
 
-	IPXdevLTextureCube XdevLOpenGLImpl::createTextureCube() {
+	IPXdevLTextureCube XdevLRAIGL::createTextureCube() {
 		auto tmp = std::shared_ptr<XdevLTextureCubeImpl>(new XdevLTextureCubeImpl());
 		return tmp;
 	}
 
-	IPXdevLTexture3D XdevLOpenGLImpl::createTexture3D() {
+	IPXdevLTexture3D XdevLRAIGL::createTexture3D() {
 		auto tmp = std::shared_ptr<XdevLTexture3DImpl>(new XdevLTexture3DImpl());
 		return tmp;
 	}
 
-	IPXdevLFrameBuffer XdevLOpenGLImpl::createFrameBuffer() {
+	IPXdevLFrameBuffer XdevLRAIGL::createFrameBuffer() {
 		auto tmp = std::shared_ptr<XdevLFrameBufferImpl>(new XdevLFrameBufferImpl());
 		return tmp;
 	}
 
-	IPXdevLVertexArray XdevLOpenGLImpl::createVertexArray() {
+	IPXdevLVertexArray XdevLRAIGL::createVertexArray() {
 		auto tmp = std::shared_ptr<XdevLVertexArrayImpl>(new XdevLVertexArrayImpl());
 		return tmp;
 	}
 
-	IPXdevLVertexBuffer XdevLOpenGLImpl::createVertexBuffer() {
+	IPXdevLVertexBuffer XdevLRAIGL::createVertexBuffer() {
 		auto tmp = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
 		return tmp;
 	}
 
-	IPXdevLIndexBuffer XdevLOpenGLImpl::createIndexBuffer() {
+	IPXdevLIndexBuffer XdevLRAIGL::createIndexBuffer() {
 		auto tmp = std::shared_ptr<XdevLIndexBufferImpl>(new XdevLIndexBufferImpl());
 		return tmp;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer) {
+	xdl_int XdevLRAIGL::setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer) {
 		assert(frambuffer && "XdevLOpenGLImpl::setActiveFrameBuffer: No valid Framebuffer specified.");
 		m_activeFrameBuffer = frambuffer;
 		return ERR_OK;
 	}
 
 
-	xdl_int XdevLOpenGLImpl::setActiveVertexArray(IPXdevLVertexArray vertexArray) {
+	xdl_int XdevLRAIGL::setActiveVertexArray(IPXdevLVertexArray vertexArray) {
 		assert(vertexArray && "XdevLOpenGLImpl::setActiveVertexArray: No valid Vertex Array specified.");
 		m_activeVertexArray = vertexArray;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::setActiveShaderProgram(IPXdevLShaderProgram shaderProgram) {
+	xdl_int XdevLRAIGL::setActiveShaderProgram(IPXdevLShaderProgram shaderProgram) {
 		assert(shaderProgram && "XdevLOpenGLImpl::setActiveShaderProgram: No valid Shader Program specified.");
 		m_activeShaderProgram = shaderProgram;
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
-
-		auto vd = m_activeVertexArray->getVertexDeclaration();
+	xdl_int XdevLRAIGL::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
 
 		glBindVertexArray(m_activeVertexArray->id());
 		glUseProgram(m_activeShaderProgram->id());
-
-		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
-			GLuint shader_attrib = vd->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
-		}
 
 		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
 			glDrawArrays(primitiveType, 0, numberOfElements);
@@ -573,106 +566,22 @@ void main() {\
 			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), nullptr);
 		}
 
-		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
-			glDisableVertexAttribArray(vd->get(idx)->shaderAttribute);
-		}
-
-
 		return ERR_OK;
 
 	}
 
-	xdl_int XdevLOpenGLImpl::drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number) {
+	xdl_int XdevLRAIGL::drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number) {
 
 		glBindVertexArray(m_activeVertexArray->id());
 		glUseProgram(m_activeShaderProgram->id());
-
-		auto vd = m_activeVertexArray->getVertexDeclaration();
-
-		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
-			GLuint shader_attrib = vd->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
-		}
 
 		glDrawArraysInstanced(primitiveType, 0, numberOfElements, number);
 
-		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
-			glDisableVertexAttribArray(vd->get(idx)->shaderAttribute);
-		}
-
 		return ERR_OK;
 
 	}
 
-
-	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	    xdl_uint numberOfElements,
-	    IPXdevLVertexBuffer vertexBuffer,
-	    IPXdevLVertexDeclaration vertexDeclaration) {
-
-		glBindVertexArray(m_activeVertexArray->id());
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
-		glUseProgram(m_activeShaderProgram->id());
-
-		xdl_uint64 pos = 0;
-		for(xdl_uint idx = 0; idx < vertexDeclaration->getNumber(); idx++) {
-
-			GLuint shader_attrib = vertexDeclaration->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
-			glVertexAttribPointer(shader_attrib,
-			                      vertexDeclaration->get(idx)->numberOfComponents,
-			                      vertexDeclaration->get(idx)->elementType,
-			                      GL_FALSE,
-			                      vertexDeclaration->vertexStride(),
-			                      BUFFER_OFFSET(pos));
-
-			pos += vertexDeclaration->get(idx)->numberOfComponents*vertexDeclaration->get(idx)->elementTypeSizeInBytes;
-		}
-
-		glDrawArrays(primitiveType, 0, numberOfElements);
-
-		for(xdl_uint idx = 0; idx < vertexDeclaration->getNumber(); idx++) {
-			glDisableVertexAttribArray(vertexDeclaration->get(idx)->shaderAttribute);
-		}
-
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::drawVertexBuffer(XdevLPrimitiveType primitiveType,
-	    xdl_uint numberOfElements,
-	    XdevLVertexBuffer* vertexBuffer,
-	    XdevLVertexDeclaration* vertexDeclaration,
-	    XdevLIndexBuffer* indexBuffer) {
-
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id());
-		glUseProgram(m_activeShaderProgram->id());
-
-		xdl_uint64 pos = 0;
-		for(xdl_uint idx = 0; idx < vertexDeclaration->getNumber(); idx++) {
-
-			GLuint shader_attrib = vertexDeclaration->get(idx)->shaderAttribute;
-			glEnableVertexAttribArray(shader_attrib);
-			glVertexAttribPointer(shader_attrib,
-			                      vertexDeclaration->get(idx)->numberOfComponents,
-			                      vertexDeclaration->get(idx)->elementType,
-			                      GL_FALSE,
-			                      vertexDeclaration->vertexStride(),
-			                      BUFFER_OFFSET(pos));
-
-			pos += vertexDeclaration->get(idx)->numberOfComponents*vertexDeclaration->get(idx)->elementTypeSizeInBytes;
-		}
-
-		glDrawElements(primitiveType, numberOfElements, indexBuffer->getElementType(), nullptr);
-
-		for(xdl_uint idx = 0; idx < vertexDeclaration->getNumber(); idx++) {
-			glDisableVertexAttribArray(vertexDeclaration->get(idx)->shaderAttribute);
-		}
-
-		return ERR_OK;
-	}
-
-	xdl_int XdevLOpenGLImpl::initExtensions() {
+	xdl_int XdevLRAIGL::initExtensions() {
 //		glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)m_gl_context->getProcAddress("glGenVertexArrays");
 //		glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)m_gl_context->getProcAddress("glDeleteVertexArrays");
 //		glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)m_gl_context->getProcAddress("glBindVertexArray");
@@ -713,7 +622,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	void XdevLOpenGLImpl::shaderLog(xdl_uint shaderId) {
+	void XdevLRAIGL::shaderLog(xdl_uint shaderId) {
 		// Get the length of the message.
 		GLint Len;
 		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &Len);
@@ -725,7 +634,7 @@ void main() {\
 		delete [] Log;
 	}
 
-	xdl_int XdevLOpenGLImpl::createScreenVertexArray() {
+	xdl_int XdevLRAIGL::createScreenVertexArray() {
 
 		xdl::xdl_float screen_vertex [] = {
 			-1.0f, -1.0f,
@@ -776,7 +685,7 @@ void main() {\
 		return ERR_OK;
 	}
 
-	xdl_int XdevLOpenGLImpl::renderFrameBufferPlane() {
+	xdl_int XdevLRAIGL::renderFrameBufferPlane() {
 
 		setActiveBlendMode(xdl_true);
 		setBlendMode(XDEVL_BLEND_SRC_ALPHA, XDEVL_BLEND_ONE_MINUS_SRC_ALPHA);

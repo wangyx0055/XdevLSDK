@@ -211,19 +211,6 @@ namespace xdl {
 
 			/// Draw a Instanced Vertex Array.
 			virtual xdl_int drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number) = 0;
-
-			/// Draw Vertex Buffer.
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType,
-			                                 xdl_uint numberOfElements,
-			                                 IPXdevLVertexBuffer vertexBuffer,
-			                                 IPXdevLVertexDeclaration vertexDeclaration) = 0;
-
-			/// Draw indexed Vertex Buffer.
-			virtual xdl_int drawVertexBuffer(XdevLPrimitiveType primitiveType,
-			                                 xdl_uint numberOfElements,
-			                                 XdevLVertexBuffer* vertexBuffer,
-			                                 XdevLVertexDeclaration* vertexDeclaration,
-			                                 XdevLIndexBuffer* indexBuffer) = 0;
 	};
 
 	/**

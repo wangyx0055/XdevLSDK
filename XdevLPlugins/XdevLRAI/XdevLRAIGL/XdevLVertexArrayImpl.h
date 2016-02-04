@@ -28,22 +28,6 @@
 
 namespace xdl {
 
-	struct XdevLVertexStreamItem {
-			XdevLVertexStreamItem(xdl_uint numberOfComponents,
-			                      XdevLBufferElementTypes bufferElementType,
-			                      xdl_uint shaderAttribute,
-			                      XdevLVertexBuffer* vertexBuffer) :
-				m_numberOfComponents(numberOfComponents),
-				m_bufferElementType(bufferElementType),
-				m_shaderAttribute(shaderAttribute),
-				m_vertexBuffer(vertexBuffer) {}
-		private:
-			xdl_uint 				m_numberOfComponents;
-			XdevLBufferElementTypes	m_bufferElementType;
-			xdl_uint				m_shaderAttribute;
-			XdevLVertexBuffer*		m_vertexBuffer;
-	};
-
 	class XdevLVertexArrayImpl : public XdevLVertexArray {
 		public:
 			XdevLVertexArrayImpl();
