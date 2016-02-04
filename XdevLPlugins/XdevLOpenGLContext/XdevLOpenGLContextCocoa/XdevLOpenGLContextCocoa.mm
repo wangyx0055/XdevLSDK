@@ -199,16 +199,17 @@ namespace xdl {
 		CGLChoosePixelFormat(attribs.data(), &pix, &npix);
 		CGLCreateContext(pix, NULL, &m_context);
 		CGLSetCurrentContext(m_context);
-m_openGLContext = [[NXdevLOpenGLContext alloc] initWithCGLContextObj:m_context];
+		m_openGLContext = [[NXdevLOpenGLContext alloc] initWithCGLContextObj:m_context];
 		if(m_openGLContext == nil) {
 			XDEVL_MODULE_ERROR("initWithCGLContextObj failed\n");
+			return ERR_ERROR;
 		}
 
 
 		//
 		// Make OpenGL context current.
 		//
-[m_openGLContext setView:wnd];
+		[m_openGLContext setView:wnd];
 		[m_openGLContext makeCurrentContext];
 
 
