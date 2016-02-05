@@ -3,22 +3,31 @@
 
 namespace xdl {
 
-  void openGLDebugOutput(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length, const GLchar* message, const void* userParam) {
-    std::cout << message << std::endl;
-  }
+	void openGLDebugOutput(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length, const GLchar* message, const void* userParam) {
+		std::cout << message << std::endl;
+	}
 
 	const char* glGetErrorAsString(GLint error) {
-			switch(error) {
-				case GL_NO_ERROR: return "GL_NO_ERROR";
-				case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
-				case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
-				case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
-				case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
-				case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
-				case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
-				case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
-				default: break;
-			}
+		switch(error) {
+			case GL_NO_ERROR:
+				return "GL_NO_ERROR";
+			case GL_INVALID_ENUM:
+				return "GL_INVALID_ENUM";
+			case GL_INVALID_VALUE:
+				return "GL_INVALID_VALUE";
+			case GL_INVALID_OPERATION:
+				return "GL_INVALID_OPERATION";
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				return "GL_INVALID_FRAMEBUFFER_OPERATION";
+			case GL_OUT_OF_MEMORY:
+				return "GL_OUT_OF_MEMORY";
+			case GL_STACK_UNDERFLOW:
+				return "GL_STACK_UNDERFLOW";
+			case GL_STACK_OVERFLOW:
+				return "GL_STACK_OVERFLOW";
+			default:
+				break;
+		}
 		return "GL_UNKOWN_ERROR";
 	}
 
@@ -70,4 +79,13 @@ namespace xdl {
 		std::cout << "Shader ID: " << shaderId << ", Message: " << Log << "\n";
 		delete [] Log;
 	}
+
+	void glExitOnVertexArrayBound(const xdl_char* message) {
+		GLint vao = 0;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vao);
+		if(0 != vao) {
+			XDEVL_ASSERT(0, message);
+		}
+	}
+
 }

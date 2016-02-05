@@ -25,6 +25,7 @@
 #define XDEVL_VERTEXBUFFER_IMPL_H
 
 #include <XdevLRAI/XdevLVertexBuffer.h>
+#include "XdevLOpenGLUtils.h"
 #include <cassert>
 #include <string.h>
 #include <iostream>
@@ -63,7 +64,7 @@ namespace xdl {
 				}
 
 				// Created and initialize the data store of the VBO.
-				glBufferData(GL_ARRAY_BUFFER, size, src, GL_DYNAMIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, size, src, GL_STATIC_DRAW);
 
 				// Unbind to prevent override in other OpenGL code fragments.
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -74,6 +75,8 @@ namespace xdl {
 
 			virtual xdl_int lock() {
 				assert(!m_locked && "XdevLVertexBufferImpl::lock: Was locked already.");
+
+				GL_CHECK_VAO_BOUND("A VAO is bound. Locking this VBO will cause to be bound to the VAO.");
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_id);
 				if(!glIsBuffer(m_id)) {
@@ -87,6 +90,8 @@ namespace xdl {
 
 			virtual xdl_int unlock() {
 				assert(m_locked && "XdevLVertexBufferImpl::unlock: Was not locked.");
+
+				GL_CHECK_VAO_BOUND("A VAO is bound. Unlocking this VBO will cause to be unbound from the VAO.");
 
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				xdl_int ret = ERR_OK;
@@ -141,8 +146,12 @@ namespace xdl {
 			virtual xdl_int activate() {
 				assert(!m_activated && "XdevLVertexBufferImpl::activate: Was activated already.");
 
+				GL_CHECK_VAO_BOUND("A VAO is bound. Activating this VBO will cause to be bound to the VAO.");
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_id);
+				if(!glIsBuffer(m_id)) {
+					return ERR_ERROR;
+				}
 
 				m_activated = xdl_true;
 
@@ -152,10 +161,16 @@ namespace xdl {
 			virtual xdl_int deactivate() {
 				assert(m_activated && "XdevLVertexBufferImpl::deactivate: Was not activated.");
 
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				m_activated = xdl_false;
+				GL_CHECK_VAO_BOUND("A VAO is bound. Deactivating this VBO will cause to be unbound from the VAO.");
 
-				return ERR_OK;
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				xdl_int ret = ERR_OK;
+				if(glIsBuffer(m_id)) {
+					ret = ERR_ERROR;
+				} else {
+					m_activated = xdl_false;
+				}
+				return ret;
 			}
 
 			virtual xdl_uint id() {

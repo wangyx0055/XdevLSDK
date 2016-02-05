@@ -104,7 +104,7 @@ set(SOURCE_FILES
 )
 
 
-add_definitions(-DGLEW_STATIC)
+add_definitions(-DGLEW_STATIC -DXDEVL_RAIGL_CHECK_VAO_BOUND)
 
 #
 # Add external libraries folder

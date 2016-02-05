@@ -169,7 +169,7 @@ namespace xdl {
 		m_vertexBufferList.resize(1);
 
 		m_vertexBufferList.push_back(vertexBuffer);
-		vertexBuffer->activate();
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id());
 
 		xdl_uint64 pos = 0;
 		for(xdl_uint idx = 0; idx < m_vd->getNumber(); idx++) {
@@ -187,6 +187,7 @@ namespace xdl {
 		}
 
 		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		return ERR_OK;
 	}
@@ -237,14 +238,16 @@ namespace xdl {
 
 		m_vd = vd;
 
-		glGenVertexArrays(1, &m_id);
-		glBindVertexArray(m_id);
-
 		m_indexBuffer = std::shared_ptr<XdevLIndexBufferImpl>(new XdevLIndexBufferImpl());
 		m_indexBuffer->init();
-		m_indexBuffer->activate();
 
+		m_indexBuffer->lock();
 		m_indexBuffer->upload(srcOfIndices, sizeof(xdl_uint)*numberIndices);
+		m_indexBuffer->unlock();
+
+		glGenVertexArrays(1, &m_id);
+		glBindVertexArray(m_id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer->id());
 
 		m_vertexBufferList.reserve(numberOfStreamBuffers);
 		m_vertexBufferList.resize(numberOfStreamBuffers);
@@ -263,7 +266,7 @@ namespace xdl {
 			vdecl->add(m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, shaderAttribute);
 
 			m_vertexBufferList[idx]->init(srcOfSreamBuffers[idx], vdecl->vertexSize()*numberOfVertex);
-			m_vertexBufferList[idx]->activate();
+			glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferList[idx]->id());
 
 			glEnableVertexAttribArray(shaderAttribute);
 			glVertexAttribPointer(shaderAttribute, m_vd->get(idx)->numberOfComponents, m_vd->get(idx)->elementType, GL_FALSE, 0, (void*)(0));
@@ -273,10 +276,8 @@ namespace xdl {
 		// Let's unbind all objects so that nothing can get messed up by other OpenGL code fragments.
 		//
 		glBindVertexArray(0);
-		for(auto vertexBuffer : m_vertexBufferList) {
-			vertexBuffer->deactivate();
-		}
-		m_indexBuffer->deactivate();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		return ERR_OK;
 	}

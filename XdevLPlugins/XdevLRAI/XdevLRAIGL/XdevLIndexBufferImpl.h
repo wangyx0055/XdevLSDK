@@ -25,6 +25,7 @@
 #define XDEVL_INDEXBUFFER_IMPL_H
 
 #include <XdevLRAI/XdevLIndexBuffer.h>
+#include "XdevLOpenGLUtils.h"
 
 namespace xdl {
 
@@ -97,6 +98,8 @@ namespace xdl {
 			virtual xdl_int lock() {
 				assert(!m_locked && "XdevLIndexBufferImpl::lock: Was locked already.");
 
+				GL_CHECK_VAO_BOUND("A VAO is bound. Locking this IBO will cause to be bound to the VAO.");
+
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
 				if(!glIsBuffer(m_id)) {
 					return ERR_ERROR;
@@ -109,6 +112,8 @@ namespace xdl {
 
 			virtual xdl_int unlock() {
 				assert(m_locked && "XdevLIndexBufferImpl::unlock: Was not locked.");
+
+				GL_CHECK_VAO_BOUND("A VAO is bound. Unlocking this IBO will cause to be unbound from the VAO.");
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				xdl_int ret = ERR_OK;
@@ -160,6 +165,8 @@ namespace xdl {
 			virtual xdl_int activate() {
 				assert(!m_activated && "XdevLIndexBufferImpl::activate: Was activated already.");
 
+				GL_CHECK_VAO_BOUND("A VAO is bound. Activating this IBO will cause to be bound to the VAO.");
+
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
 				m_activated = xdl_true;
 				m_locked 		= xdl_true;
@@ -168,6 +175,8 @@ namespace xdl {
 
 			virtual xdl_int deactivate() {
 				assert(m_activated && "XdevLIndexBufferImpl::deactivate: Was not activated.");
+
+				GL_CHECK_VAO_BOUND("A VAO is bound. Deactivating this IBO will cause to be unbound from the VAO.");
 
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				m_activated = xdl_false;

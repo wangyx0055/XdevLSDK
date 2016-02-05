@@ -24,7 +24,10 @@
 #ifndef XDEVL_OPENGL_UTILS_H
 #define XDEVL_OPENGL_UTILS_H
 
+#include <XdevLUtils.h>
+
 namespace xdl {
+
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 #define glExitAndPrintError(ERROR) {std::cout << __func__ << ":" << __LINE__ << ": " << glGetErrorAsString(ERROR) << std::endl; exit(0);}
@@ -40,6 +43,14 @@ namespace xdl {
 	const char* glGetErrorAsString(GLint error);
 	void shaderLog(xdl_uint shaderId);
 	void checkOpenGLError(const char* funcName);
+	void glExitOnVertexArrayBound(const xdl_char* message);
+
+#ifdef XDEVL_RAIGL_CHECK_VAO_BOUND
+	#define GL_CHECK_VAO_BOUND(MESSAGE) glExitOnVertexArrayBound(MESSAGE)
+#else
+	#define GL_CHECK_VAO_BOUND(MESSAGE)
+#endif
+	
 }
 
 #endif

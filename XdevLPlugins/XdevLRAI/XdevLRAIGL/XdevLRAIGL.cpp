@@ -566,6 +566,9 @@ void main() {\
 			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), nullptr);
 		}
 
+		glBindVertexArray(0);
+//		glUseProgram(0);
+
 		return ERR_OK;
 
 	}
@@ -576,6 +579,9 @@ void main() {\
 		glUseProgram(m_activeShaderProgram->id());
 
 		glDrawArraysInstanced(primitiveType, 0, numberOfElements, number);
+
+		glBindVertexArray(0);
+//		glUseProgram(0);
 
 		return ERR_OK;
 
@@ -690,7 +696,7 @@ void main() {\
 		setActiveBlendMode(xdl_true);
 		setBlendMode(XDEVL_BLEND_SRC_ALPHA, XDEVL_BLEND_ONE_MINUS_SRC_ALPHA);
 		setActiveDepthTest(xdl_false);
-		
+
 		m_frameBufferShaderProgram->activate();
 		m_frameBufferShaderProgram->setUniformi(m_frameBufferTextureShaderId, 0);
 		m_2DFrameBuffer->getTexture(0)->activate(0);
@@ -707,7 +713,7 @@ void main() {\
 //		}
 //
 //		glDrawArrays(xdl::XDEVL_PRIMITIVE_TRIANGLES, 0, 6);
-//		
+//
 //		for(xdl_uint idx = 0; idx < vd->getNumber(); idx++) {
 //			glDisableVertexAttribArray(vd->get(idx)->shaderAttribute);
 //		}
