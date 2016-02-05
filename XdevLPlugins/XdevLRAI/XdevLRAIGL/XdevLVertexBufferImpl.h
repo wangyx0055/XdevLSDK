@@ -36,7 +36,6 @@ namespace xdl {
 		public:
 			XdevLVertexBufferImpl() : m_id(0),
 				m_size(0),
-				m_activated(xdl_false),
 				m_locked(xdl_false),
 				m_mapped(xdl_false) {}
 
@@ -143,36 +142,6 @@ namespace xdl {
 				return ERR_ERROR;
 			}
 
-			virtual xdl_int activate() {
-				assert(!m_activated && "XdevLVertexBufferImpl::activate: Was activated already.");
-
-				GL_CHECK_VAO_BOUND("A VAO is bound. Activating this VBO will cause to be bound to the VAO.");
-
-				glBindBuffer(GL_ARRAY_BUFFER, m_id);
-				if(!glIsBuffer(m_id)) {
-					return ERR_ERROR;
-				}
-
-				m_activated = xdl_true;
-
-				return ERR_OK;
-			}
-
-			virtual xdl_int deactivate() {
-				assert(m_activated && "XdevLVertexBufferImpl::deactivate: Was not activated.");
-
-				GL_CHECK_VAO_BOUND("A VAO is bound. Deactivating this VBO will cause to be unbound from the VAO.");
-
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				xdl_int ret = ERR_OK;
-				if(glIsBuffer(m_id)) {
-					ret = ERR_ERROR;
-				} else {
-					m_activated = xdl_false;
-				}
-				return ret;
-			}
-
 			virtual xdl_uint id() {
 				return m_id;
 			}
@@ -184,7 +153,6 @@ namespace xdl {
 
 			GLuint 									m_id;
 			xdl_uint 								m_size;
-			xdl_bool								m_activated;
 			xdl_bool								m_locked;
 			xdl_bool								m_mapped;
 	};

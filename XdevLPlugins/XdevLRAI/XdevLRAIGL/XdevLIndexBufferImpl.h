@@ -35,7 +35,6 @@ namespace xdl {
 				m_id(0),
 				m_size(0),
 				m_elementType(XDEVL_BUFFER_ELEMENT_UNSIGNED_INT),
-				m_activated(xdl_false),
 				m_locked(xdl_false),
 				m_mapped(xdl_false) {}
 
@@ -162,28 +161,6 @@ namespace xdl {
 				return ERR_ERROR;
 			}
 
-			virtual xdl_int activate() {
-				assert(!m_activated && "XdevLIndexBufferImpl::activate: Was activated already.");
-
-				GL_CHECK_VAO_BOUND("A VAO is bound. Activating this IBO will cause to be bound to the VAO.");
-
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-				m_activated = xdl_true;
-				m_locked 		= xdl_true;
-				return ERR_OK;
-			}
-
-			virtual xdl_int deactivate() {
-				assert(m_activated && "XdevLIndexBufferImpl::deactivate: Was not activated.");
-
-				GL_CHECK_VAO_BOUND("A VAO is bound. Deactivating this IBO will cause to be unbound from the VAO.");
-
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-				m_activated = xdl_false;
-				m_locked 		= xdl_false;
-				return ERR_OK;
-			}
-
 			virtual xdl_uint id() {
 				return m_id;
 			}
@@ -219,7 +196,6 @@ namespace xdl {
 			GLuint 											m_id;
 			xdl_uint 										m_size;
 			XdevLBufferElementTypes			m_elementType;
-			xdl_bool										m_activated;
 			xdl_bool										m_locked;
 			xdl_bool										m_mapped;
 	};
