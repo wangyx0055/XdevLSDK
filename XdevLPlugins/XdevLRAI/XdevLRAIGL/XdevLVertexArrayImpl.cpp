@@ -135,7 +135,7 @@ namespace xdl {
 		IPXdevLVertexBuffer vb = std::shared_ptr<XdevLVertexBufferImpl>(new XdevLVertexBufferImpl());
 		vb->init(src,  vd->vertexSize()*numberOfVertex);
 		m_vertexBufferList.push_back(vb);
-		vb->activate();
+		glBindBuffer(GL_ARRAY_BUFFER, vb->id());
 
 		xdl_uint64 pos = 0;
 		for(xdl_uint idx = 0; idx < m_vd->getNumber(); idx++) {
@@ -152,8 +152,9 @@ namespace xdl {
 			pos += m_vd->get(idx)->numberOfComponents*m_vd->get(idx)->elementTypeSizeInBytes;
 		}
 
-		vb->deactivate();
 		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 		return ERR_OK;
 	}
 

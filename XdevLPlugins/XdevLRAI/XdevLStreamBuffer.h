@@ -86,12 +86,6 @@ namespace xdl {
 			*/
 			virtual xdl_int upload(xdl_uint8* src, xdl_uint size) = 0;
 
-			/// Activates the buffer for usage.
-			virtual xdl_int activate() = 0;
-
-			/// Deactivates the buffer.
-			virtual xdl_int deactivate() = 0;
-
 			/// Returns the identification code.
 			virtual xdl_uint id() = 0;
 
