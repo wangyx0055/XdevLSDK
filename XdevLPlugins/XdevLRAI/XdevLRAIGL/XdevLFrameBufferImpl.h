@@ -57,7 +57,7 @@ namespace xdl {
 			virtual IPXdevLTexture getTexture(xdl_uint idx) override;
 			virtual IPXdevLTexture getDepthTexture() override;
 			virtual xdl_uint id() override;
-			virtual void blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget = XDEVL_COLOR_TARGET0) override;
+			virtual void blit(XdevLFrameBuffer* framebuffer, xdl_uint targets = XDEVL_COLOR_TARGET) override;
 
 		private:
 
@@ -74,8 +74,6 @@ namespace xdl {
 			IPXdevLTextureCube m_textureCube;
 			IPXdevLTexture m_depthTexture;
 			std::vector<IPXdevLTexture>		m_colorTargetTextures;
-			std::vector<xdl::xdl_uint>		m_activeColorTargetList;
-
 	};
 
 }

@@ -30,6 +30,12 @@
 namespace xdl {
 
 	class XdevLTexture;
+	
+	enum XdevLFrameBufferRenderTarget {
+		XDEVL_COLOR_TARGET,
+		XDEVL_DEPTH_TARGET,
+		XDEVL_STENCIL_TARGET
+	};
 
 	enum XdevLFrameBufferColorTargets {
 	    XDEVL_COLOR_NONE = 0,
@@ -206,7 +212,7 @@ namespace xdl {
 			/// Returns the id of the framebuffer.
 			virtual xdl_uint id() = 0;
 			
-			virtual void blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget = XDEVL_COLOR_TARGET0) = 0;
+			virtual void blit(XdevLFrameBuffer* framebuffer, xdl_uint targets = XDEVL_COLOR_TARGET) = 0;
 	};
 
 	typedef XdevLFrameBuffer IXdevLFrameBuffer;

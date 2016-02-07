@@ -11,14 +11,7 @@ namespace xdl {
 		m_inUse(xdl_false) {
 		m_colorTargetTextures.reserve(4);
 		m_colorTargetTextures.resize(4);
-		m_activeColorTargetList.reserve(4);
-		m_activeColorTargetList.resize(4);
 
-		std::vector<xdl_uint>::iterator ib(m_activeColorTargetList.begin());
-		while(ib != m_activeColorTargetList.end()) {
-			(*ib) = GL_NONE;
-			ib++;
-		}
 	}
 
 	XdevLFrameBufferImpl::~XdevLFrameBufferImpl() {
@@ -34,10 +27,14 @@ namespace xdl {
 		// Create the framebuffer object and make it current.
 		glGenFramebuffers(1, &m_id);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+		if(!glIsFramebuffer(m_id)) {
+			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "glBindFramebuffer failed.\n");
+			return ERR_ERROR;
+		}
 
 		// Switch off all color targets.
-		xdl::xdl_uint list[] = {GL_NONE};
-		glDrawBuffers(1, (const GLenum*)list);
+		std::vector<GLint> colorTargets = {GL_NONE, GL_NONE, GL_NONE, GL_NONE };
+		glDrawBuffers(colorTargets.size(), (const GLenum*)colorTargets.data());
 
 		// Unbind this framebuffer object to make sure that nothing will be done accidentally.
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -52,6 +49,10 @@ namespace xdl {
 
 		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+		if(!glIsFramebuffer(m_id)) {
+			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "glBindFramebuffer failed.\n");
+			return ERR_ERROR;
+		}
 
 		// Create the texture that is going to be used a color target.
 		GLuint id;
@@ -83,6 +84,10 @@ namespace xdl {
 
 		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+		if(!glIsFramebuffer(m_id)) {
+			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "glBindFramebuffer failed.\n");
+			return ERR_ERROR;
+		}
 
 		// We use glFramebufferTexture2D wich means we don't have to bind the texture object itself.
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + target_index, GL_TEXTURE_2D, texture->id(), 0);
@@ -131,6 +136,10 @@ namespace xdl {
 
 		// Bind the framebuffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+		if(!glIsFramebuffer(m_id)) {
+			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "glBindFramebuffer failed.\n");
+			return ERR_ERROR;
+		}
 
 		// Create depth texture.
 		GLuint id;
@@ -274,8 +283,8 @@ namespace xdl {
 	xdl_int XdevLFrameBufferImpl::deactivate()  {
 		glViewport(m_previousViewport[0], m_previousViewport[1], m_previousViewport[2], m_previousViewport[3]);
 
-		GLuint targets [] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-		glDrawBuffers(sizeof(targets), targets);
+		std::vector<GLint> colorTargets = {GL_NONE, GL_NONE, GL_NONE, GL_NONE };
+		glDrawBuffers(colorTargets.size(), (const GLenum*)colorTargets.data());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		m_inUse = xdl_false;
@@ -307,13 +316,32 @@ namespace xdl {
 		return m_depthTexture;
 	}
 
-	void XdevLFrameBufferImpl::blit(XdevLFrameBuffer* framebuffer, XdevLFrameBufferColorTargets colortarget) {
+	void XdevLFrameBufferImpl::blit(XdevLFrameBuffer* framebuffer, xdl_uint targets) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id());
+		GLuint fbo = 0;
+		GLuint width = m_previousViewport[2];
+		GLuint height = m_previousViewport[3];
+		
+		if(nullptr != framebuffer) {
+			fbo = framebuffer->id();
+			width =  framebuffer->getWidth();
+			height = framebuffer->getHeight();
+		}
+		GLint target = 0;
+		if(targets & XDEVL_COLOR_TARGET) {
+			target |= GL_COLOR_BUFFER_BIT;
+		}
+		if(targets & XDEVL_DEPTH_TARGET) {
+			target |= GL_DEPTH_BUFFER_BIT;
+		}
+		if(targets & XDEVL_STENCIL_TARGET) {
+			target |= GL_STENCIL_BUFFER_BIT;
+		}
 
-		glBlitFramebuffer(0, 0,m_width, m_height,
-		                  0, 0, framebuffer->getWidth(), framebuffer->getHeight(),
-		                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		glBlitFramebuffer(0, 0, m_width, m_height,
+		                  0, 0, width, height,
+		                  target, GL_NEAREST);
 		GLint ret = glGetError();
 		if(ret != GL_NO_ERROR) {
 			XDEVL_MODULEX_ERROR(XdevLFrameBufferImpl, "OpenGL error: " << glGetErrorAsString(ret) << std::endl );
