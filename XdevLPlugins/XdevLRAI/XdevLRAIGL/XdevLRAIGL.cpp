@@ -18,6 +18,7 @@
 #include "XdevLOpenGLUtils.h"
 
 
+class m_activeVertexArray;
 class vertexArray;
 class wrappPrimitiveType;
 
@@ -80,6 +81,17 @@ void main() {\
  ocolor = texture(tex, texcoord);\
 }"
 	};
+
+	GLenum wrappToGLElementType(const XdevLBufferElementTypes& elementType) {
+		switch(elementType) {
+			case XDEVL_BUFFER_ELEMENT_UNSIGNED_BYTE: return GL_UNSIGNED_BYTE;
+			case XDEVL_BUFFER_ELEMENT_UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
+			case XDEVL_BUFFER_ELEMENT_UNSIGNED_INT: return GL_UNSIGNED_INT;
+			default:break;
+		}
+		XDEVL_ASSERT(0, "Not supported element type");
+		return XDEVL_BUFFER_ELEMENT_TYPE_UNKNOWN;
+	}
 
 	XdevLRAIGL::XdevLRAIGL(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& descriptor) : XdevLModuleImpl<XdevLRAI>(parameter, descriptor),
 		m_window(nullptr),
@@ -556,14 +568,17 @@ void main() {\
 	}
 
 	xdl_int XdevLRAIGL::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
-
 		glBindVertexArray(m_activeVertexArray->id());
 		glUseProgram(m_activeShaderProgram->id());
 
 		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
 			glDrawArrays(primitiveType, 0, numberOfElements);
 		} else {
-			glDrawElements(primitiveType, numberOfElements, m_activeVertexArray->getIndexBuffer()->getElementType(), nullptr);
+			glDrawElements(primitiveType, numberOfElements, wrappToGLElementType(m_activeVertexArray->getIndexBuffer()->getElementType()), nullptr);
+		}
+		GLint ret = glGetError();
+		if(GL_NO_ERROR != ret) {
+			XDEVL_MODULEX_WARNING(XdevLRAIGL, "glDrawElements/glDrawArrays failed:" << glGetErrorAsString(ret) << std::endl);
 		}
 
 		glBindVertexArray(0);

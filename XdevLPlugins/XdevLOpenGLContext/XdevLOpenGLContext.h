@@ -38,9 +38,9 @@ namespace xdl {
 	};
 
 	enum XdevLOpenGLContextFlags {
-	  XDEVL_OPENGL_CONTEXT_FLAGS_NONE						= 0,
-	  XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT				= 0x00000001,
-	  XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT	= 0x00000002
+	  XDEVL_OPENGL_CONTEXT_FLAGS_NONE = 0,
+	  XDEVL_OPENGL_CONTEXT_FLAGS_DEBUG_BIT = 0x00000001,
+	  XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT = 0x00000002
 	};
 
 	class XdevLOpenGLContextAttributes {
@@ -64,7 +64,7 @@ namespace xdl {
 				context_major_version(3),
 				context_minor_version(2),
 				context_profile_mask(XDEVL_OPENGL_CONTEXT_CORE_PROFILE),
-				context_flags(XDEVL_OPENGL_CONTEXT_FLAGS_NONE) {
+				context_flags(XDEVL_OPENGL_CONTEXT_FLAGS_FORWARD_COMPATIBLE_BIT) {
 
 			}
 

@@ -44,7 +44,8 @@ namespace xdl {
 	void shaderLog(xdl_uint shaderId);
 	void checkOpenGLError(const char* funcName);
 	void glExitOnVertexArrayBound(const xdl_char* message);
-
+	void glFlushErrorQueue();
+	
 #ifdef XDEVL_RAIGL_CHECK_VAO_BOUND
 	#define GL_CHECK_VAO_BOUND(MESSAGE) glExitOnVertexArrayBound(MESSAGE)
 #else

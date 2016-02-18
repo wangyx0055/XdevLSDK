@@ -88,4 +88,12 @@ namespace xdl {
 		}
 	}
 
+	void glFlushErrorQueue() {
+		for(;;) {
+			GLint ret = glGetError();
+			if(GL_NO_ERROR == ret) {
+				break;
+			}
+		}
+	}
 }
