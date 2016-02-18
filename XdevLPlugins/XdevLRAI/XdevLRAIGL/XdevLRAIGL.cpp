@@ -82,14 +82,29 @@ void main() {\
 }"
 	};
 
-	GLenum wrappToGLElementType(const XdevLBufferElementTypes& elementType) {
+	GLenum wrapToGLPrimitive(const XdevLPrimitiveType& type) {
+		switch(type) {
+			case XDEVL_PRIMITIVE_POINTS: return GL_POINTS;
+			case XDEVL_PRIMITIVE_LINES: return GL_LINES;
+			case XDEVL_PRIMITIVE_LINE_LOOP: return GL_LINE_LOOP;
+			case XDEVL_PRIMITIVE_LINE_STRIP: return GL_LINE_STRIP;
+			case XDEVL_PRIMITIVE_TRIANGLES: return GL_TRIANGLES;
+			case XDEVL_PRIMITIVE_TRIANGLE_STRIP: return GL_TRIANGLE_STRIP;
+			case XDEVL_PRIMITIVE_TRIANGLE_FAN: return GL_TRIANGLE_FAN;
+			default: break;
+		}
+		XDEVL_ASSERT(0, "Not supported XdevLPrimitiveType.");
+		return XDEVL_PRIMITIVE_UNKNOWN;
+	}
+
+	GLenum wrapToGLElementType(const XdevLBufferElementTypes& elementType) {
 		switch(elementType) {
 			case XDEVL_BUFFER_ELEMENT_UNSIGNED_BYTE: return GL_UNSIGNED_BYTE;
 			case XDEVL_BUFFER_ELEMENT_UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
 			case XDEVL_BUFFER_ELEMENT_UNSIGNED_INT: return GL_UNSIGNED_INT;
 			default:break;
 		}
-		XDEVL_ASSERT(0, "Not supported element type");
+		XDEVL_ASSERT(0, "Not supported XdevLBufferElementTypes");
 		return XDEVL_BUFFER_ELEMENT_TYPE_UNKNOWN;
 	}
 
@@ -572,9 +587,9 @@ void main() {\
 		glUseProgram(m_activeShaderProgram->id());
 
 		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
-			glDrawArrays(primitiveType, 0, numberOfElements);
+			glDrawArrays(wrapToGLPrimitive(primitiveType), 0, numberOfElements);
 		} else {
-			glDrawElements(primitiveType, numberOfElements, wrappToGLElementType(m_activeVertexArray->getIndexBuffer()->getElementType()), nullptr);
+			glDrawElements(wrapToGLPrimitive(primitiveType), numberOfElements, wrapToGLElementType(m_activeVertexArray->getIndexBuffer()->getElementType()), nullptr);
 		}
 		GLint ret = glGetError();
 		if(GL_NO_ERROR != ret) {
@@ -593,7 +608,11 @@ void main() {\
 		glBindVertexArray(m_activeVertexArray->id());
 		glUseProgram(m_activeShaderProgram->id());
 
-		glDrawArraysInstanced(primitiveType, 0, numberOfElements, number);
+		if(m_activeVertexArray->getIndexBuffer() == nullptr) {
+			glDrawArraysInstanced(wrapToGLPrimitive(primitiveType), 0, numberOfElements, number);
+		} else {
+			glDrawElementsInstanced(wrapToGLPrimitive(primitiveType), numberOfElements, wrapToGLElementType(m_activeVertexArray->getIndexBuffer()->getElementType()), nullptr, number);
+		}
 
 		glBindVertexArray(0);
 //		glUseProgram(0);
