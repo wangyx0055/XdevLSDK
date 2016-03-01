@@ -30,6 +30,9 @@
 namespace xdl {
 
 	XdevLVertexBufferVulkan::XdevLVertexBufferVulkan() :
+		m_device(nullptr),
+		m_buffer(nullptr),
+		m_deviceMemory(nullptr),
 		m_locked(xdl_false),
 		m_mapped(xdl_false),
 		m_size(0) {
@@ -37,6 +40,14 @@ namespace xdl {
 	}
 
 	XdevLVertexBufferVulkan::~XdevLVertexBufferVulkan() {
+		if(m_deviceMemory) {
+			vkFreeMemory(m_device, m_deviceMemory, nullptr);
+			m_deviceMemory = nullptr;
+		}		
+		if(m_buffer) {
+			vkDestroyBuffer(m_device, m_buffer, nullptr);
+			m_buffer = nullptr;
+		}
 	}
 
 	xdl_int XdevLVertexBufferVulkan::init() {
@@ -83,6 +94,11 @@ namespace xdl {
 		memcpy(pData, src, size);
 
 		vkUnmapMemory(m_device, m_deviceMemory);
+		result = vkBindBufferMemory(m_device, m_buffer, m_deviceMemory, 0);
+		if(VK_SUCCESS != result) {
+			return ERR_ERROR;
+		}
+
 		m_size = size;
 		return ERR_OK;
 	}
