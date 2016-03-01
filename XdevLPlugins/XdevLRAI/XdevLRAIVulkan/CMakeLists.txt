@@ -121,9 +121,9 @@ include_directories(
 # Add external ibraries
 
 if(UNIX)
-		target_link_libraries( ${XdevLRAIVULKAN} XdevL )
+		target_link_libraries( ${XdevLRAIVULKAN} XdevL vulkan)
 elseif(WIN32)
-		target_link_libraries( ${XdevLRAIVULKAN} XdevL )
+		target_link_libraries( ${XdevLRAIVULKAN} XdevL vulkan)
 endif()
 
 #

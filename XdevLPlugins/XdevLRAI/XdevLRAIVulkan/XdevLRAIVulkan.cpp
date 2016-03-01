@@ -24,9 +24,15 @@
 
 
 #include "XdevLRAIVulkan.h"
+#include "XdevLVertexBufferVulkan.h"
 
 namespace xdl {
-	XdevLRAIVulkan::XdevLRAIVulkan() {
+	XdevLRAIVulkan::XdevLRAIVulkan() :
+		m_activeFrameBuffer(nullptr),
+		m_activeVertexArray(nullptr),
+		m_activeShaderProgram(nullptr),
+		m_defaultFrameBuffer(nullptr),
+		m_default2DFrameBuffer(nullptr) {
 
 	}
 
@@ -35,18 +41,23 @@ namespace xdl {
 	}
 
 	xdl_int XdevLRAIVulkan::create(IPXdevLWindow window) {
+        return ERR_ERROR;
 	}
 
 	XdevLFrameBuffer* XdevLRAIVulkan::getDefaultFrameBuffer() {
+		return m_defaultFrameBuffer;
 	}
 
 	XdevLFrameBuffer* XdevLRAIVulkan::get2DFrameBuffer() {
+		return m_default2DFrameBuffer;
 	}
 
 	xdl_int XdevLRAIVulkan::setActiveInternalFrameBuffer(xdl_bool state) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::setActive2DFrameBuffer(xdl_bool state) {
+		return ERR_ERROR;
 	}
 
 	void XdevLRAIVulkan::setPointSize(xdl_float size) {
@@ -62,72 +73,99 @@ namespace xdl {
 	}
 
 	xdl_int XdevLRAIVulkan::setBlendMode(XdevLBlendModes src, XdevLBlendModes dst) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::clearColorTargets(xdl_float r, xdl_float g, xdl_float b, xdl_float a) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::clearDepthTarget(xdl_float clear_value) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::setViewport(xdl_float x, xdl_float y, xdl_float width, xdl_float height) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::setActiveRenderWindow(IPXdevLWindow window) {
+		m_activeWindow = window;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLRAIVulkan::swapBuffers() {
+		return ERR_ERROR;
 	}
 
 	IPXdevLVertexDeclaration XdevLRAIVulkan::createVertexDeclaration() {
+		return std::make_shared<XdevLVertexDeclaration>();
 	}
 
 	IPXdevLVertexShader XdevLRAIVulkan::createVertexShader() {
+		return nullptr;
 	}
 
 	IPXdevLFragmentShader XdevLRAIVulkan::createFragmentShader() {
+		return nullptr;
 	}
 
 	IPXdevLGeometryShader XdevLRAIVulkan::createGeometryShader() {
+		return nullptr;
 	}
 
 	IPXdevLShaderProgram XdevLRAIVulkan::createShaderProgram() {
+		return nullptr;
 	}
 
 	IPXdevLTexture XdevLRAIVulkan::createTexture() {
+		return nullptr;
 	}
 
 	IPXdevLTextureCube XdevLRAIVulkan::createTextureCube() {
+		return nullptr;
 	}
 
 	IPXdevLTexture3D XdevLRAIVulkan::createTexture3D() {
+		return nullptr;
 	}
 
 	IPXdevLFrameBuffer XdevLRAIVulkan::createFrameBuffer() {
+		return nullptr;
 	}
 
 	IPXdevLVertexBuffer XdevLRAIVulkan::createVertexBuffer() {
+		return std::make_shared<XdevLVertexBufferVulkan>();
 	}
 
 	IPXdevLIndexBuffer XdevLRAIVulkan::createIndexBuffer() {
+		return nullptr;
 	}
 
 	IPXdevLVertexArray XdevLRAIVulkan::createVertexArray() {
+		return nullptr;
 	}
 
-	xdl_int XdevLRAIVulkan::setActiveFrameBuffer(IPXdevLFrameBuffer frambuffer) {
+	xdl_int XdevLRAIVulkan::setActiveFrameBuffer(IPXdevLFrameBuffer framebuffer) {
+		m_activeFrameBuffer = framebuffer;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLRAIVulkan::setActiveVertexArray(IPXdevLVertexArray vertexArray) {
+		m_activeVertexArray = vertexArray;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLRAIVulkan::setActiveShaderProgram(IPXdevLShaderProgram shaderProgram) {
+		m_activeShaderProgram = shaderProgram;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLRAIVulkan::drawVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements) {
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLRAIVulkan::drawInstancedVertexArray(XdevLPrimitiveType primitiveType, xdl_uint numberOfElements, xdl_uint number) {
+		return ERR_ERROR;
 	}
 
 }
