@@ -78,6 +78,7 @@ set(HEADER_INTERFACE_FILE
 
 set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
+	${SRC_DIR}/XdevLRAIVulkan/XdevLRAIVulkan.h
 	${SRC_DIR}/XdevLRAIVulkan/XdevLVertexBufferVulkan.h
 )
 
@@ -85,6 +86,7 @@ set(HEADER_FILES
 # Set the source files for the library.
 
 set(SOURCE_FILES
+	${SRC_DIR}/XdevLRAIVulkan/XdevLRAIVulkan.cpp
 	${SRC_DIR}/XdevLRAIVulkan/XdevLVertexBufferVulkan.cpp
 )
 
