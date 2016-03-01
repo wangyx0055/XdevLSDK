@@ -21,13 +21,20 @@
 	cengiz@terzibas.de
 */
 
-#ifndef XDEVL_VERTEX_BUFFER_VULKAN_H
-#define XDEVL_VERTEX_BUFFER_VULKAN_H
-
-#include <vulkan/vulkan.h>
+#include <XdevLTypes.h>
+#include <XdevLError.h>
 #include "XdevLVertexBufferVulkan.h"
 
+#include <cstring>
+
 namespace xdl {
+
+	XdevLVertexBufferVulkan::XdevLVertexBufferVulkan() :
+		m_locked(xdl_false),
+		m_mapped(xdl_false),
+		m_size(0) {
+	
+	}
 
 	XdevLVertexBufferVulkan::~XdevLVertexBufferVulkan() {
 	}
@@ -48,7 +55,7 @@ namespace xdl {
 		m_bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		m_bufferCreateInfo.flags = 0;
 
-		VKresult result = vkCreateBuffer(m_device, &m_bufferCreateInfo, nullptr, &m_buffer);
+		VkResult result = vkCreateBuffer(m_device, &m_bufferCreateInfo, nullptr, &m_buffer);
 		if(VK_SUCCESS != result) {
 			return ERR_ERROR;
 		}
@@ -75,40 +82,68 @@ namespace xdl {
 
 		memcpy(pData, src, size);
 
-		vkUnmapMemory(info.device, info.vertex_buffer.mem);
-
+		vkUnmapMemory(m_device, m_deviceMemory);
+		m_size = size;
 		return ERR_OK;
 	}
 
 	xdl_int XdevLVertexBufferVulkan::lock() {
-
+		assert(!m_locked && "XdevLVertexBufferVulkan::lock: Was locked already.");
+		m_locked = xdl_true;
+		return ERR_ERROR;
 	}
 
 	xdl_int XdevLVertexBufferVulkan::unlock() {
-
+		assert(m_locked && "XdevLVertexBufferVulkan::unlock: Was not locked.");
+		m_locked = xdl_false;
+		return ERR_ERROR;
 	}
 
 	xdl_uint8* XdevLVertexBufferVulkan::map(XdevLBufferAccessType bufferAccessType) {
+		assert(m_locked && "XdevLVertexBufferVulkan::map: Was not locked.");
+		assert(!m_mapped && "XdevLVertexBufferVulkan::map: Was mapped already.");
 
+		xdl_uint8* pData;
+		VkResult result = vkMapMemory(m_device, m_deviceMemory, 0, m_memReqs.size, 0, (void **)&pData);
+		if(VK_SUCCESS != result) {
+			return nullptr;
+		}
+		m_mapped = xdl_true;
+		return pData;
 	}
 
 	xdl_int XdevLVertexBufferVulkan::unmap() {
+		assert(m_mapped && "XdevLVertexBufferVulkan::map: Was not mapped.");
 
+		vkUnmapMemory(m_device, m_deviceMemory);
+		m_mapped = xdl_false;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLVertexBufferVulkan::upload(xdl_uint8* src, xdl_uint size) {
+		if(m_memReqs.size > size) {
+			return ERR_ERROR;
+		}
 
+		xdl_uint8* pData;
+		VkResult result = vkMapMemory(m_device, m_deviceMemory, 0, m_memReqs.size, 0, (void **)&pData);
+		if(VK_SUCCESS != result) {
+			return ERR_ERROR;
+		}
+
+		memcpy(pData, src, size);
+
+		vkUnmapMemory(m_device, m_deviceMemory);
+		return ERR_ERROR;
 	}
 
 	xdl_uint XdevLVertexBufferVulkan::id() {
-
+		return 0;
 	}
 
 	xdl_uint XdevLVertexBufferVulkan::getSize() {
-
+		return 0;
 	}
-};
 
 }
 
-#endif

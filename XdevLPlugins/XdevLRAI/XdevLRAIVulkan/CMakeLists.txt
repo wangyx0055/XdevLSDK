@@ -5,14 +5,14 @@ project(XdevLRAIVulkan)
 #
 # Set the names for the stuff we are going to create
 
-set(XdevLRAIGL XdevLRAIVulkan)
+set(XdevLRAIVULKAN XdevLRAIVulkan)
 
 #
 # Set the Plugin version
 #
 
-set(XDEVLRAIVULKAN_MAJOR_VERSION 1)
-set(XDEVLRAIVULKAN_MINOR_VERSION 0)
+set(XDEVLRAIVULKAN_MAJOR_VERSION 0)
+set(XDEVLRAIVULKAN_MINOR_VERSION 1)
 set(XDEVLRAIVULKAN_PATCH_VERSION 0)
 set(XDEVLRAIVULKAN_VERSION "${XDEVLRAIVULKAN_MAJOR_VERSION}.${XDEVLRAIVULKAN_MINOR_VERSION}.${XDEVLRAIVULKAN_PATCH_VERSION}")
 
@@ -78,12 +78,14 @@ set(HEADER_INTERFACE_FILE
 
 set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
+	${SRC_DIR}/XdevLRAIVulkan/XdevLVertexBufferVulkan.h
 )
 
 #
 # Set the source files for the library.
 
 set(SOURCE_FILES
+	${SRC_DIR}/XdevLRAIVulkan/XdevLVertexBufferVulkan.cpp
 )
 
 
@@ -109,7 +111,7 @@ include_directories(
 	.
 	${XDEVL_HOME}/include
 	${XDEVL_PLUGINS}
-	${OPENGL_INCLUDE_DIR}
+	${XDEVL_PLUGINS}/XdevLRAI
 	${HEADERS_DIR}
 )
 
@@ -117,9 +119,9 @@ include_directories(
 # Add external ibraries
 
 if(UNIX)
-		target_link_libraries( ${XdevLRAIVULKAN} XdevL vulkan )
+		target_link_libraries( ${XdevLRAIVULKAN} XdevL )
 elseif(WIN32)
-		target_link_libraries( ${XdevLRAIVULKAN} XdevL vulkan)
+		target_link_libraries( ${XdevLRAIVULKAN} XdevL )
 endif()
 
 #

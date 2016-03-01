@@ -24,29 +24,36 @@
 #ifndef XDEVL_VERTEX_BUFFER_VULKAN_H
 #define XDEVL_VERTEX_BUFFER_VULKAN_H
 
+#include <vulkan/vulkan.h>
+
+#include <XdevLTypes.h>
 #include <XdevLRAI/XdevLVertexBuffer.h>
 
 namespace xdl {
 
 	class XdevLVertexBufferVulkan : public XdevLVertexBuffer {
 		public:
+			XdevLVertexBufferVulkan();
 			virtual ~XdevLVertexBufferVulkan();
-			virtual xdl_int init() override;
-			virtual xdl_int init(xdl_uint8* src, xdl_uint size) override;
-			virtual xdl_int lock() override;
-			virtual xdl_int unlock() override;
-			virtual xdl_uint8* map(XdevLBufferAccessType bufferAccessType) override;
-			virtual xdl_int unmap() override;
-			virtual xdl_int upload(xdl_uint8* src, xdl_uint size) override;
-			virtual xdl_uint id() override;
-			virtual xdl_uint getSize() override;
+			xdl_int init() override;
+			xdl_int init(xdl_uint8* src, xdl_uint size) override;
+			xdl_int lock() override;
+			xdl_int unlock() override;
+			xdl_uint8* map(XdevLBufferAccessType bufferAccessType) override;
+			xdl_int unmap() override;
+			xdl_int upload(xdl_uint8* src, xdl_uint size) override;
+			xdl_uint id() override;
+			xdl_uint getSize() override;
 		private:
 			VkDevice m_device;
 			VkBufferCreateInfo m_bufferCreateInfo;
 			VkDescriptorBufferInfo m_descriptorBufferInfo;
-			VKBuffer m_buffer;
+			VkBuffer m_buffer;
 			VkDeviceMemory m_deviceMemory;
 			VkMemoryRequirements m_memReqs;
+			xdl_bool m_locked;
+			xdl_bool m_mapped;
+			xdl_uint m_size;
 	};
 
 }

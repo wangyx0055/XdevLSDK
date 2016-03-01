@@ -121,6 +121,7 @@ option(BUILD_BLUETOOTH "Builds the bluetooth plugin" ON)
 option(BUILD_FTDI "Builds the FTDI Serial Port plugin" OFF)
 option(BUILD_NATIVE_AUDIO "Builds the audio plugin" ON)
 option(BUILD_OPENGL "Builds the OpenGL plugin" ON)
+option(BUILD_VULKAN "Builds the Vulkan implementation of XdevLRAI" On)
 option(BUILD_FONT "Builds the Font plugin" ON)
 option(BUILD_SDL "Builds the SDL plugin" ON)
 option(BUILD_OGRE "Builds the ogre plugin" ON)
@@ -244,6 +245,10 @@ else()
 		message(STATUS "XdevLAudioOpenAL will not be build.")
 	endif()
 endif()
+
+if(BUILD_VULKAN)
+	add_subdirectory(XdevLPlugins/XdevLRAI/XdevLRAIVulkan)
+endif(BUILD_VULKAN)
 
 # Build the OpenGL plugin.
 if(BUILD_OPENGL)
