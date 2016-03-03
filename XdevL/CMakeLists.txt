@@ -99,6 +99,7 @@ set(XDEVL_HEADER_FILES
 	${HEADERS_DIR}/XdevLXfstring.h
 	${HEADERS_DIR}/XdevLXstring.h
 	${HEADERS_DIR}/XdevLSignalSlot.h
+	${HEADERS_DIR}/XdevLProfiler.h
 )
 
 #
@@ -117,6 +118,7 @@ set(XDEVL_SOURCE_FILES
 	${SRC_DIR}/XdevLThread.cpp
 	${SRC_DIR}/XdevLTimer.cpp
 	${SRC_DIR}/XdevLUtils.cpp
+	${SRC_DIR}/XdevLProfiler.cpp
 )
 
 
