@@ -82,8 +82,8 @@ elseif(APPLE)
 endif()
 
 if(XDEVL_BUILD_MODULAR)
-		set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".xdp")
-		set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "")
+	set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ".xdp")
+	set(XDEVL_SHARED_LIBRARY_FILE_PREFIX "")
 else(XDEVL_BUILD_MODULAR)
 	set(XDEVL_SHARED_LIBRARY_FILE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX})
 	set(XDEVL_SHARED_LIBRARY_FILE_PREFIX ${CMAKE_SHARED_LIBRARY_PREFIX})
@@ -103,10 +103,7 @@ endif()
 
 if(APPLE)
 	set(CMAKE_MACOSX_RPATH OFF)
-elseif(WIN32)
-	set(DirectX_INCLUDEDIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Include")
-	set(DirectX_LIBRARYDIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64")
-endif()
+endif(APPLE)
 
 #
 # Select plugins to compile.
@@ -159,7 +156,7 @@ endif()
 # This definition we need for the XdevL library
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-	add_definitions(-D_LOG -DXDEVL_DEBUG -DXDEVL_SHARED_LIBRARY_FILE_EXTENSION)
+	add_definitions(-D_LOG -DXDEVL_DEBUG -DXDEVL_SHARED_LIBRARY_FILE_EXTENSION -DXDEVL_PROFILER)
 else()
 	add_definitions(-D_LOG -DXDEVL_SHARED_LIBRARY_FILE_EXTENSION)
 endif()
