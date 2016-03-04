@@ -54,6 +54,10 @@ namespace xdl {
 	};
 }
 
+#ifdef XDEVL_PROFILER
 #define PROFILE_SCOPE(NAME) xdl::XdevLProfilerScope scope(NAME);
+#else
+#define PROFILE_SCOPE(NAME)
+	#endif
 
 #endif
