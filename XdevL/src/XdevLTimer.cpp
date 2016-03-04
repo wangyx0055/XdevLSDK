@@ -59,7 +59,7 @@ static const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL)
 //#include <time.h>
 //#include <XdevLTypes.h>
 
-xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
+extern "C" xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
 
 	LARGE_INTEGER Frequency;
 	LARGE_INTEGER CurClock;
@@ -108,7 +108,7 @@ int gettimeofday(struct timeval * tp, struct timezone * tzp)
 //#include <unistd.h>
 //#include <pthread.h>
 
-xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
+extern "C" xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
 	
 	#ifndef __LINUX__
 		timeval tp;

@@ -32,32 +32,56 @@
 
 namespace xdl {
 
-	class XdevLProfiler {
-		private:
-		XdevLProfiler();
-		public:
-			static XdevLProfiler* getInstance();
-			void dump();
-			void add(const XdevLString& scopeName, xdl_uint64 timestamp);
-		private:
-			std::map<xdl::XdevLString, xdl::xdl_uint64> scopes;
-			static XdevLProfiler* instance;
-	};
-
+	/**
+		@class XdevLProfilerScope
+		@brief The profiling scope class that creates timestamps for specified scope areas.
+		@author Cengiz Terzibas
+	*/
 	class XdevLProfilerScope {
 		public:
 			XdevLProfilerScope(const xdl::XdevLString& name);
 			~XdevLProfilerScope();
 		private:
 			xdl::XdevLString scopeName;
-			xdl::XdevLTimer timer;
+			xdl_uint64 m_start;
 	};
+
+	/**
+	@class XdevLProfiler
+	@brief A class that helps profiling scopes.
+	@author Cengiz Terzibas
+
+	@todo This is a super basic simple implementation.
+
+	The XdevLProfiler is a singleton class. The instance can be retrieved using the
+	XdevLProfiler::getInstance() method.
+
+	Adding new scopes are done using the XdevLProfiler::add() method.
+
+	*/
+	class XdevLProfiler {
+		private:
+			XdevLProfiler();
+		public:
+			static XdevLProfiler* getInstance();
+			
+			/// Dump all values on the console.
+			void dump();
+			
+			/// Add new profile scope.
+			void add(const XdevLString& scopeName, xdl_uint64 timestamp);
+
+		private:
+			std::map<xdl::XdevLString, xdl::xdl_uint64> scopes;
+			static XdevLProfiler* instance;
+	};
+
 }
 
 #ifdef XDEVL_PROFILER
 #define PROFILE_SCOPE(NAME) xdl::XdevLProfilerScope scope(NAME);
 #else
 #define PROFILE_SCOPE(NAME)
-	#endif
+#endif
 
 #endif
