@@ -33,26 +33,27 @@
 namespace xdl {
 
 	class XdevLProfiler {
+		private:
+		XdevLProfiler();
 		public:
-			static void dump();
-			static std::map<xdl::XdevLString, xdl::xdl_uint64> scopes;
+			static XdevLProfiler* getInstance();
+			void dump();
+			void add(const XdevLString& scopeName, xdl_uint64 timestamp);
+		private:
+			std::map<xdl::XdevLString, xdl::xdl_uint64> scopes;
+			static XdevLProfiler* instance;
 	};
 
 	class XdevLProfilerScope {
 		public:
-			XdevLProfilerScope(const xdl::XdevLString& name) :
-				scopeName(name) {
-				timer.reset();
-			}
-			~XdevLProfilerScope() {
-				XdevLProfiler::scopes[scopeName] = timer.getTime64();
-			}
+			XdevLProfilerScope(const xdl::XdevLString& name);
+			~XdevLProfilerScope();
+		private:
 			xdl::XdevLString scopeName;
 			xdl::XdevLTimer timer;
 	};
-
 }
 
-#define PROFILE_SCOPE(NAME) XdevLProfilerScope scope(NAME);
+#define PROFILE_SCOPE(NAME) xdl::XdevLProfilerScope scope(NAME);
 
 #endif
