@@ -30,3 +30,23 @@ Only that plugin needs to be compiled.
 * OpenGL context using native version as GLX, WGL, CGL and EGL.
 * Support for font rendering using XdevLFont and XdevLRAI
 * Image import support for Jpeg, Png, Bmp and TGA files.
+
+# Build
+
+The whole XdevLSDK can be build using CMake. In the root folder of XdevLSDK type:
+
+cmake -DCMAKE_BUILD_TYPE=Debug 
+
+### Note
+Do not use a subfolder building XdevLSDK. At the moment it is important to run the CMake script within
+the root folder where XdevLSDK is located.
+The static library of XdevL will be located in ../XdevLSDK/XdevL/lib and the plugins
+will be located in the ../XdevLSDK/XdevLPlugins/lib
+
+# Setup
+
+I recommend adding an evnironment variable to your system. This helps your XdevL app to find the
+plugins easier. In your shipping (release) version you can copy the plugins wherever you want.
+
+Add this: XDEVL_PLUGINS=../XdevLSDK/XdevLPlugins
+
