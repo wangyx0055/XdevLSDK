@@ -97,6 +97,7 @@ namespace xdl {
 			case EGL_CONTEXT_LOST:
 				return XdevLString("EGL_CONTEXT_LOST");
 		}
+		return XdevLString("EGL_UNKNOWN");
 	}
 
 
@@ -120,9 +121,6 @@ namespace xdl {
 	}
 
 	xdl_int XdevLOpenGLContextEGL::create(XdevLWindow* window) {
-
-		EGLint major, minor, n, count;
-
 
 		EGLNativeDisplayType nativeDisplay;
 		EGLNativeWindowType nativeWindow;
@@ -210,6 +208,7 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
+		EGLint count;
 		if(!eglGetConfigs(m_eglDisplay, nullptr, 0, &count) || count < 1) {
 			return ERR_ERROR;
 		}
