@@ -698,11 +698,6 @@ namespace xdl {
 		}
 	}
 
-	void XdevLWindowDeviceWin32::setPointerPosition(xdl_uint x, xdl_uint y) {
-		::SetCursorPos(x, y);
-	}
-
-
 	void XdevLWindowDeviceWin32::setSize(const XdevLWindowSize& size) {
 		XdevLWindowImpl::setSize(size);
 

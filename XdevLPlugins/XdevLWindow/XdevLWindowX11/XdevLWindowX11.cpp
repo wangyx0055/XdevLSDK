@@ -976,14 +976,6 @@ namespace xdl {
 		//XFlush(m_display);
 	}
 
-	void XdevLWindowX11::setPointerPosition(xdl_uint x, xdl_uint y) {
-
-		XWindowAttributes wa;
-		XGetWindowAttributes(m_display, m_window, &wa);
-		// (display, src window, dst windiw, src x, src y, src width, src height, dst x, dst y)
-		XWarpPointer(m_display, m_window, m_window, 0, 0, wa.width, wa.height, x, y);
-	}
-
 	xdl_bool XdevLWindowX11::isHidden() {
 		Atom actualType;
 		int actualFormat;

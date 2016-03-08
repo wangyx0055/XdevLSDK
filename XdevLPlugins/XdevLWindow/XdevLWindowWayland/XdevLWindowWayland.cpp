@@ -549,10 +549,6 @@ namespace xdl {
 		return xdl_false;
 	}
 
-	void XdevLWindowWayland::setPointerPosition(xdl_uint x, xdl_uint y) {
-
-	}
-
 	void XdevLWindowWayland::setInputFocus() {
 
 	}

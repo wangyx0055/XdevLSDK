@@ -187,7 +187,7 @@ namespace xdl {
 			virtual void raise() = 0;
 
 			/// Set pointer position on the screen.
-			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
+//			virtual void setPointerPosition(xdl_uint x, xdl_uint y) = 0;
 
 			/// Sets the input focus.
 			virtual void setInputFocus() = 0;

@@ -614,10 +614,6 @@ namespace xdl {
 		SDL_RaiseWindow(m_window);
 	}
 
-	void  XdevLWindowSDL::setPointerPosition(xdl_uint x, xdl_uint y) {
-		SDL_WarpMouseInWindow(m_window, x,y);
-	}
-
 	void XdevLWindowSDL::setInputFocus() {
 
 	}
