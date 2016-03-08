@@ -73,8 +73,14 @@ add_library(${XdevLImagePluginBMPLibrary} SHARED
 
 
 
+set(LINK_LIBRARIES ${XdevLImagePluginBMPLibrary} XdevL)
+if(PLATFORM_LINUX OR PLATFORM_MACOSX)
+	set(${LINK_LIBRARIES} ${XdevLImagePluginBMPLibrary} dl)
+elseif(PLATFORM_WINDOWS)
+	
+endif()
 
-target_link_libraries(${XdevLImagePluginBMPLibrary} XdevL dl)
+target_link_libraries(${LINK_LIBRARIES})
 
 
 #
