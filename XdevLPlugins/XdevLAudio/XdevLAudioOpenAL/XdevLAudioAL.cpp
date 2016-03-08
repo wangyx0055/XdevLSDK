@@ -190,7 +190,7 @@ namespace xdl {
 	XdevLAudioPlaybackAL::~XdevLAudioPlaybackAL() {
 	}
 
-	xdl_int XdevLAudioPlaybackAL::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
+	void XdevLAudioPlaybackAL::setCallbackFunction(callbackFunctionType callbackFuntion, void* userData) {
 		m_callbackFunction = callbackFuntion;
 		m_userData = userData;
 	}
