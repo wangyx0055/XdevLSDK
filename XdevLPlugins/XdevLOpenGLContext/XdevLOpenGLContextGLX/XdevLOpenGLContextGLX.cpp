@@ -226,8 +226,8 @@ namespace xdl {
 		//
 		// Get all supported visual configurations.
 		//
-		xdl_int elemc;
-		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), attribute_list.data(), &elemc);
+		xdl_int numberOfConfigs;
+		GLXFBConfig *fbcfg = glXChooseFBConfig(display, DefaultScreen(display), attribute_list.data(), &numberOfConfigs);
 		if(!fbcfg) {
 			XDEVL_MODULE_ERROR("glXChooseFBConfig failed\n");
 			return ERR_ERROR;
@@ -241,7 +241,7 @@ namespace xdl {
 		int best_num_samples = -1;
 		int worst_num_samples = 999;
 
-		for(auto i = 0; i < elemc; i++) {
+		for(auto i = 0; i < numberOfConfigs; i++) {
 			XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbcfg[i]);
 			if(nullptr != vi) {
 
@@ -249,11 +249,11 @@ namespace xdl {
 				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLE_BUFFERS, &sample_buffer);
 				glXGetFBConfigAttrib(display, fbcfg[i], GLX_SAMPLES, &samples);
 
-				if(best_fbc < 0 || sample_buffer && samples > best_num_samples) {
+				if(best_fbc < 0 || (sample_buffer && samples) > best_num_samples) {
 					best_fbc = i;
 					best_num_samples = samples;
 				}
-				if(worst_fbc < 0 || !sample_buffer && samples < worst_num_samples) {
+				if(worst_fbc < 0 || (!sample_buffer && samples) < worst_num_samples) {
 					worst_fbc = i;
 					worst_num_samples = samples;
 				}

@@ -31,10 +31,6 @@
 #include <climits>
 #include <vector>
 
-#define _NET_WM_STATE_REMOVE    0l
-#define _NET_WM_STATE_ADD       1l
-#define _NET_WM_STATE_TOGGLE    2l
-
 static xdl::xdl_int reference_counter = 0;
 static std::shared_ptr<xdl::XdevLX11Display> globalDisplay;
 static Display* display = nullptr;
@@ -122,6 +118,9 @@ namespace xdl {
 	const XdevLID WindowEvent("XDEVL_WINDOW_EVENT");
 
 
+#define _NET_WM_STATE_REMOVE    0l
+#define _NET_WM_STATE_ADD       1l
+#define _NET_WM_STATE_TOGGLE    2l
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
 	enum {
@@ -140,7 +139,8 @@ namespace xdl {
 		// Start X server with thread support.
 		XInitThreads();
 
-		// Connect to X server.
+		// Connect to X server. TODO We are using the default display. Needs to be changed later to
+		// make it more flexible.
 		display = XOpenDisplay(nullptr);
 		if(display == nullptr) {
 			return;
@@ -187,8 +187,8 @@ namespace xdl {
 	XdevLWindowX11::XdevLWindowX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLWindowImpl(XdevLWindowImpl::getWindowsCounter(), parameter, desriptor),
 		m_display(nullptr),
-		m_rootWindow(0),
-		m_window(0),
+		m_rootWindow(None),
+		m_window(None),
 		m_screenNumber(0),
 		m_screenWidth(0),
 		m_screenHeight(0),
@@ -289,7 +289,6 @@ namespace xdl {
 		}
 
 		xdl_int borderwith = 0;
-		xdl_int hasNoDecoration = xdl_false;
 		XSetWindowAttributes WindowAttributes;
 		WindowAttributes.override_redirect	= False;
 
@@ -300,7 +299,6 @@ namespace xdl {
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_POPUP) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_SPLASH) ||
 		    (m_attribute.type == XDEVL_WINDOW_TYPE_NOTIFICATION)) {
-			hasNoDecoration = xdl_true;
 //			WindowAttributes.override_redirect	= True;
 		} else {
 //			WindowAttributes.override_redirect	= False;
@@ -375,11 +373,6 @@ namespace xdl {
 
 		const long _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1;
 		XChangeProperty(m_display, m_window, _NET_WM_BYPASS_COMPOSITOR, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&_NET_WM_BYPASS_COMPOSITOR_HINT_ON, 1);
-
-		// Tell the Window Manager to show or hide the decorations.
-//		if(hasNoDecoration) {
-//			disableDecoration();
-//		}
 
 		m_id = m_window;
 
