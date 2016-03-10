@@ -108,7 +108,7 @@ include_directories(
 #
 # Add external ibraries
 
-target_link_libraries( ${XdevLWindowLibrary} XdevL "-framework Cocoa" )
+target_link_libraries( ${XdevLWindowLibrary} XdevL "-framework Cocoa" "-framework IOKit" )
 
 
 #
