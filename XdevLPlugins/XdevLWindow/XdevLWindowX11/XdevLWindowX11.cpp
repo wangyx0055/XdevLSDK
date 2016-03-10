@@ -316,12 +316,6 @@ namespace xdl {
 		                          m_originalRotation,
 		                          m_originalScreenRate,
 		                          CurrentTime);
-
-		// If we have changed the screen configuration, let's switch back.
-		if(m_originalScreenConfig) {
-			XRRFreeScreenConfigInfo(m_originalScreenConfig);
-		}
-
 		return ERR_OK;
 	}
 
