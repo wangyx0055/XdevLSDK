@@ -112,6 +112,13 @@ namespace xdl {
 		XdevLSize() : width(0), height(0) {}
 		XdevLSize(type w, type h) : width(w), height(h) {}
 
+		const type& getWidth() const { return width; }
+		const type& getHeight() const { return height; }
+
+		friend bool operator==(const XdevLSize& s1, const XdevLSize& s2) {
+			return ( (s1.width == s2.width) and (s1.height == s2.height));
+		}
+
 		type width;
 		type height;
 	};

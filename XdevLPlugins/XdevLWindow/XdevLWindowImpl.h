@@ -41,6 +41,7 @@ namespace xdl {
 		@brief ID to get the correct modules names for the XdevLWindow plugins.
 	*/
 	enum XdevLWindowModuleName {
+		XDEVL_WINDOW_DISPLAY_MODULE_NAME,
 	  XDEVL_WINDOW_MODULE_NAME,
 	  XDEVL_WINDOW_SERVER_MODULE_NAME,
 	  XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME,
@@ -61,6 +62,7 @@ namespace xdl {
 	};
 
 	static const std::vector<XdevLModuleName>	window_moduleNames	{
+		XdevLModuleName("XdevLDisplay"),
 		XdevLModuleName("XdevLWindow"),
 		XdevLModuleName("XdevLWindowServer"),
 		XdevLModuleName("XdevLWindowEventServer"),

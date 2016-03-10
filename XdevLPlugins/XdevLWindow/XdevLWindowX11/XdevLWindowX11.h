@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -44,6 +44,59 @@
 #include <X11/XKBlib.h>
 
 namespace xdl {
+
+	class XdevLDisplayModeX11 : public XdevLDisplayMode {
+			SizeID getSizeId() {
+				return sizeId;
+			}
+			friend bool operator==(const XdevLDisplayModeX11& m1, const XdevLDisplayMode& m2) {
+				return ((m1.size == m2.size) and (m1.rate == m2.rate));
+			}
+		public:
+			XRRScreenConfiguration* screenConfig;
+			Rotation rotation;
+			SizeID sizeId;
+	};
+
+	class XdevLDisplayX11 : public XdevLModuleImpl<XdevLDisplay> {
+		public:
+			XdevLDisplayX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
+			virtual ~XdevLDisplayX11();
+
+			xdl_int init() override;
+			xdl_int shutdown() override;
+
+			XdevLDisplayModes getDisplayModes() override;
+			XdevLDisplayModeId getDisplayModeId(const XdevLDisplayMode& mode) override;
+			XdevLDisplayModeId getClosestDisplayModeId(const XdevLDisplayMode& mode) override;
+			xdl_int setDisplayMode(const XdevLDisplayModeId& mode) override;
+			xdl_int restore() override;
+
+		private:
+
+			std::vector<XdevLDisplayModeX11> m_displayModes;
+
+		private:
+			Display* m_display;
+			Window m_rootWindow;
+
+			xdl_int m_randrMajor;
+			xdl_int m_randrMinor;
+
+			xdl_int m_event_basep;
+			xdl_int m_error_basep;
+			xdl_int m_bestFitWidth;
+			xdl_int m_bestFitHeight;
+			xdl_int m_bestFitRate;
+			xdl_int m_screenWidth;
+			xdl_int m_screenHeight;
+
+			SizeID m_bestSizeId;
+			SizeID m_originalSizeId;
+			XRRScreenConfiguration* m_originalScreenConfig;
+			short int m_originalScreenRate;
+			Rotation m_originalRotation;
+	};
 
 	class XdevLWindowX11 :  public XdevLWindowImpl {
 		public:
@@ -117,66 +170,36 @@ namespace xdl {
 			/// Holds the height of the default screen.
 			xdl_int m_screenHeight;
 
-			/// Holds the major version number of the xrandr extension.
-			xdl_int m_randrMajor;
-
-			/// Holds the minor version number of the xrandr extension.
-			xdl_int m_randrMinor;
-
-
-			xdl_int m_event_basep;
-			xdl_int m_error_basep;
-			xdl_int m_best_fit_width;
-			xdl_int m_best_fit_height;
-			xdl_int m_best_fit_rate;
 			xdl_bool m_fullscreenModeActive;
 
 			// Stores the default color map.
-			Colormap 								m_defaultColorMap;
-
-			// Original id.
-			SizeID 									m_originalSizeId;
-
-			// Original screen resolution.
-			XRRScreenConfiguration*	m_originalScreenConfig;
-
-			/// Holds the screen rate.
-			short int								m_originalScreenRate;
-
-			// Original rotation.
-			Rotation								m_originalRotation;
-
-
+			Colormap m_defaultColorMap;
 
 		protected:
 
 			xdl_uint32 getNetWMState();
-			void setWindowBordered(xdl_bool state);
-			xdl_int initializeEWMH();
-		protected:
-			bool m_modeChanged;
-			xdl_int m_old_screen_width;
-			xdl_int m_old_screen_height;
-			Rotation m_oldRotation;
-			SizeID m_bestSizeId;
 
-			Cursor m_hideCursor;
+			xdl_int initializeEWMH();
+
+		protected:
+
+			// Holds screensaver info.
 			xdl_int timeout_return;
 			xdl_int interval_return;
 			xdl_int prefer_blanking_return;
 			xdl_int allow_exposures_return;
 			xdl_long m_event_mask;
-	protected:
-			void displayFromNormalToFullscreen();
-			void displayFromFullscreenToNormal();
-			xdl_int getGetClosestVideoMode();
-			void setFullscreenVideoMode();
-			void restoreFullscreenVideoMode();
+
+		protected:
+
+			void enableFullscreenMode();
+			void disableFullscreenMode();
 			xdl_int disableDecoration();
 			xdl_int enableDecoration();
 			void setResizeable(xdl_bool state);
+
 		protected:
-			XdevLWindowX11Keyboard* m_keyboard;
+
 			XConfigureEvent m_prevConfigureEvent;
 
 			Atom _MOTIF_WM_HINTS;
@@ -230,6 +253,7 @@ namespace xdl {
 
 			Atom _KDE_NET_WM_WINDOW_TYPE_OVERRIDE;
 
+			std::vector<Atom> m_atoms;
 	};
 
 	class XdevLWindowServerX11 : public XdevLWindowServerImpl {
@@ -324,21 +348,21 @@ namespace xdl {
 
 			xdl_bool m_reltaiveModeEnabled;
 	};
-	
+
 	class XdevLX11Display {
-	public:
-		XdevLX11Display(XdevLCoreMediator* core);
-		~XdevLX11Display();
-		XdevLWindowEventServerX11* getWindowEventServer() {
-			return windowEventServer.get();
-		}
-		XdevLCursorX11* getCursor() {
-			return cursor.get();
-		}
-	public:
-		XdevLCoreMediator* m_core;
-		std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
-		std::shared_ptr<XdevLCursorX11> cursor;
+		public:
+			XdevLX11Display(XdevLCoreMediator* core);
+			~XdevLX11Display();
+			XdevLWindowEventServerX11* getWindowEventServer() {
+				return windowEventServer.get();
+			}
+			XdevLCursorX11* getCursor() {
+				return cursor.get();
+			}
+		public:
+			XdevLCoreMediator* m_core;
+			std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
+			std::shared_ptr<XdevLCursorX11> cursor;
 	};
 }
 

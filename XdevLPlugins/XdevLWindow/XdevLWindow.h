@@ -64,10 +64,41 @@ namespace xdl {
 
 
 	typedef XdevLPosition XdevLWindowPosition;
-
 	typedef XdevLSize XdevLWindowSize;
-
 	typedef XdevLString XdevLWindowTitle;
+
+	typedef XdevLPosition XdevLDisplayPosition;
+	typedef XdevLSize XdevLDisplaySize;
+	typedef XdevLString XdevLDisplayTitle;
+
+	class XdevLDisplayMode {
+		public:
+
+			XdevLDisplayMode() :
+				rate(60) {
+
+			}
+
+			/// Return the size of the display.
+			const XdevLDisplaySize& getSize() const {
+				return size;
+			}
+
+			/// Return the refresh rate of the display.
+			const xdl_int16& getRate() const {
+				return rate;
+			}
+
+		public:
+
+			XdevLDisplaySize size;
+			xdl_int16 rate;
+	};
+	typedef std::vector<XdevLDisplayMode> XdevLDisplayModes;
+
+	// Must be signed value because -1 is used for invalid id's.
+	typedef xdl_int XdevLDisplayModeId;
+
 
 	/**
 		@class XdevLWindowAttribute
@@ -85,6 +116,26 @@ namespace xdl {
 			XdevLWindowPosition position;
 			XdevLWindowSize size;
 			XdevLWindowTypes type;
+	};
+
+	class XdevLDisplay : public XdevLModule {
+		public:
+			virtual ~XdevLDisplay() {}
+
+			/// Returns a list of supported display modes.
+			virtual XdevLDisplayModes getDisplayModes() = 0;
+
+			/// Returns the id of the display mode.
+			virtual XdevLDisplayModeId getDisplayModeId(const XdevLDisplayMode& mode) = 0;
+
+			/// Returns the id of the the closest display mode of the specified mode.
+			virtual XdevLDisplayModeId getClosestDisplayModeId(const XdevLDisplayMode& mode) = 0;
+
+			/// Set display resolution.
+			virtual xdl_int setDisplayMode(const XdevLDisplayModeId& mode) = 0;
+
+			/// Restore the previous size of the display.
+			virtual xdl_int restore() = 0;
 	};
 
 	/**
@@ -269,6 +320,9 @@ namespace xdl {
 			virtual xdl_bool isRelativeMotionEnabled() = 0;
 	};
 
+	typedef XdevLDisplay*		IPXdevLDisplay;
+	typedef XdevLDisplay		IXdevLDisplay;
+
 	typedef XdevLWindow*		IPXdevLWindow;
 	typedef XdevLWindow			IXdevLWindow;
 
@@ -281,11 +335,12 @@ namespace xdl {
 	typedef XdevLCursor*		IPXdevLCursor;
 	typedef XdevLCursor			IXdevLCursor;
 
+	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLDisplay)
 	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLWindow)
 	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLWindowEventServer)
 	XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DECLARATION(XdevLCursor)
-	
-	XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DECLARATION(XdevLWindow)	
+
+	XDEVL_EXPORT_PLUGIN_INIT_FUNCTION_DECLARATION(XdevLWindow)
 	XDEVL_EXPORT_PLUGIN_SHUTDOWN_FUNCTION_DECLARATION(XdevLWindow)
 
 }
