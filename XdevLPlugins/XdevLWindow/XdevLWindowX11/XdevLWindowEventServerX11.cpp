@@ -63,7 +63,6 @@ namespace xdl {
 
 	}
 
-
 	xdl_int XdevLWindowEventServerX11::registerWindowForEvents(XdevLWindow* window) {
 		return XdevLWindowEventServerImpl::registerWindowForEvents(window);
 	}

@@ -61,14 +61,19 @@ namespace xdl {
 
 		m_window = static_cast<XdevLWindowX11*>(window);
 
-		m_screenNumber 		= DefaultScreen(m_window->getNativeDisplay());
-		m_defaultColorMap 	= DefaultColormap(m_window->getNativeDisplay(), DefaultScreen(m_window->getNativeDisplay()));
-		m_screenWidth 		= DisplayWidth(m_window->getNativeDisplay(), DefaultScreen(m_window->getNativeDisplay()));
-		m_screenHeight 		= DisplayHeight(m_window->getNativeDisplay(),DefaultScreen(m_window->getNativeDisplay()));
+		m_screenNumber 		= m_window->getNativeScreenNumber();
+		m_defaultColorMap = m_window->getNativeDefaultColorMap();
+		
+		//
+		// We use the display width and height for the barriers.
+		// TODO This might be a problem later. Not sure how to handle when different displays
+		// has to be managed.
+		//
+		m_screenWidth = DisplayWidth(m_window->getNativeDisplay(), m_screenNumber);
+		m_screenHeight = DisplayHeight(m_window->getNativeDisplay(), m_screenNumber);
 
 		// Lets first create black color for the specific color map we use.
 		XAllocNamedColor(m_window->getNativeDisplay(), m_defaultColorMap, "black", &m_black, &m_dummy);
-
 
 		// Check for pointer barrier support.
 		if(XQueryExtension(m_window->getNativeDisplay(), "XFIXES", &m_fixes_opcode, &m_fixes_event, &m_fixes_error)) {
@@ -249,8 +254,10 @@ namespace xdl {
 
 		int i = 0,z = 0;
 		int top = mask_len * 8;
-		if(top > MAX_AXIS)
+
+		if(top > MAX_AXIS) {
 			top = MAX_AXIS;
+		}
 
 		memset(output_values, 0, output_values_len * sizeof(double));
 		for(; i < top && z < output_values_len; i++) {

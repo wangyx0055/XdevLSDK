@@ -82,7 +82,7 @@ namespace xdl {
 
 	xdl_int reference_counter = 0;
 	extern std::shared_ptr<XdevLX11Display> globalDisplay;
-	Display* display = nullptr;
+
 
 #define _NET_WM_STATE_REMOVE    0l
 #define _NET_WM_STATE_ADD       1l
@@ -115,9 +115,6 @@ namespace xdl {
 			m_core->registerModule(windowEventServer);
 			m_core->registerModule(cursor);
 		}
-
-		// This has to be done here because the windowEventServer get's initialized above.
-		display = windowEventServer->getNativeDisplay();
 	}
 
 
@@ -139,8 +136,6 @@ namespace xdl {
 		m_rootWindow(None),
 		m_window(None),
 		m_screenNumber(0),
-		m_screenWidth(0),
-		m_screenHeight(0),
 		m_fullscreenModeActive(xdl_false) {
 		XDEVL_MODULE_INFO("XdevLWindowX11()\n");
 
@@ -189,28 +184,23 @@ namespace xdl {
 
 	int XdevLWindowX11::create() {
 
-		m_display = display;
+		// Get the connection to the display server.
+		m_display = globalDisplay->getWindowEventServer()->getNativeDisplay();
+
+		// Get the root window.
+		m_rootWindow = globalDisplay->getWindowEventServer()->getNativeRootWindow();
 
 		// Get the default screen number.
 		m_screenNumber = DefaultScreen(m_display);
-
-		// Get the default screen with.
-		m_screenWidth = DisplayWidth(m_display, m_screenNumber);
-
-		// Get the default screen height.
-		m_screenHeight = DisplayHeight(m_display,m_screenNumber);
-
-		// Get the root window.
-		m_rootWindow = RootWindow(m_display, m_screenNumber);
 
 		// Get the default color map.
 		m_defaultColorMap = DefaultColormap(m_display, m_screenNumber);
 
 		XColor color;
-		color.red 	= 0;
+		color.red = 0;
 		color.green = 0;
-		color.blue 	= 0;
-		color.pixel	= ((xdl_int)m_backgroundColor[0] << 16) | ((xdl_int)m_backgroundColor[1] << 8) | (xdl_int)m_backgroundColor[2];
+		color.blue = 0;
+		color.pixel = ((xdl_int)m_backgroundColor[0] << 16) | ((xdl_int)m_backgroundColor[1] << 8) | (xdl_int)m_backgroundColor[2];
 
 //		char green[] = "#00FF00";
 //		XParseColor(globalDisplay, m_defaultColorMap, green, &color);
@@ -249,7 +239,7 @@ namespace xdl {
 		m_window = XCreateWindow(m_display,
 		                         m_rootWindow,
 		                         m_attribute.position.x,
-		                         m_screenHeight - (m_attribute.size.height + m_attribute.position.y),
+		                         m_attribute.position.y,
 		                         m_attribute.size.width,
 		                         m_attribute.size.height,
 		                         borderwith,
@@ -310,6 +300,7 @@ namespace xdl {
 
 		m_id = m_window;
 
+		// This we might want to change later
 		globalDisplay->getWindowEventServer()->registerWindowForEvents(this);
 
 		XMapRaised(m_display, m_window);
@@ -711,7 +702,7 @@ namespace xdl {
 	void XdevLWindowX11::setY(XdevLWindowPosition::type y) {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
-		XdevLWindowImpl::setY(m_screenHeight - (m_attribute.size.height + y));
+		XdevLWindowImpl::setY(y);
 		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(m_display, m_window);
 	}
@@ -764,7 +755,7 @@ namespace xdl {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
 		m_attribute.position.x = position.x;
-		m_attribute.position.y = m_screenHeight - (m_attribute.size.height + position.y);
+		m_attribute.position.y = position.y;
 		XMoveWindow(m_display, m_window, m_attribute.position.x, m_attribute.position.y);
 		XMapWindow(m_display, m_window);
 	}
@@ -1273,6 +1264,14 @@ namespace xdl {
 
 	Window XdevLWindowX11::getNativeRootWindow() {
 		return m_rootWindow;
+	}
+
+	xdl_int XdevLWindowX11::getNativeScreenNumber() {
+		return m_screenNumber;
+	}
+
+	Colormap XdevLWindowX11::getNativeDefaultColorMap() {
+		return m_defaultColorMap;
 	}
 
 //

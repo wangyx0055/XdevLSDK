@@ -31,19 +31,25 @@
 #include <XdevLWindow/XdevLWindowImpl.h>
 
 namespace xdl {
-	
+
 	class XdevLWindowX11;
-	
+
 	class XdevLCursorX11 : public XdevLModuleImpl<XdevLCursor>  {
 		public:
 			virtual ~XdevLCursorX11() {}
 
+			//
+			// Contructor for the XdevL plugin system.
+			//
 			XdevLCursorX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 
 			virtual xdl_int init() override;
 			virtual xdl_int shutdown() override;
 			virtual void* getInternal(const XdevLInternalName& id) override;
 
+			//
+			// XdevLCursor interface methods.
+			//
 			virtual xdl_int attach(XdevLWindow* window) override;
 			virtual void show() override;
 			virtual void hide() override;
@@ -53,10 +59,15 @@ namespace xdl {
 			virtual xdl_int enableRelativeMotion() override;
 			virtual void disableRelativeMotion() override;
 			virtual xdl_bool isRelativeMotionEnabled() override;
+
+			//
+			// XdevLCursorX11 related methods.
+			//
 			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
-		private:
 			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
+
 		private:
+
 			XdevLWindowX11* m_window;
 			Cursor		m_invisibleCursor;
 			Pixmap		m_invisibleCursorPixmap;

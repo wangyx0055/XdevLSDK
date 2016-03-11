@@ -32,7 +32,7 @@
 namespace xdl {
 
 	class XdevLWindowX11;
-	
+
 	class XdevLDisplayModeX11 : public XdevLDisplayMode {
 			SizeID getSizeId() {
 				return sizeId;
@@ -51,22 +51,28 @@ namespace xdl {
 			XdevLDisplayX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLDisplayX11();
 
+			//
+			// Contructor for the XdevL plugin system.
+			//
 			xdl_int init() override;
 			xdl_int shutdown() override;
 
+			//
+			// XdevLCursor interface methods.
+			//
 			XdevLDisplayModes getDisplayModes() override;
 			XdevLDisplayModeId getDisplayModeId(const XdevLDisplayMode& mode) override;
 			XdevLDisplayModeId getClosestDisplayModeId(const XdevLDisplayMode& mode) override;
 			xdl_int setDisplayMode(const XdevLDisplayModeId& mode) override;
 			xdl_int restore() override;
 
+			//
+			// XdevLCursorX11 related methods.
+			//
 			xdl_int attach(XdevLWindowX11* window);
 
 		private:
 
-			std::vector<XdevLDisplayModeX11> m_displayModes;
-
-		private:
 			Display* m_display;
 			Window m_rootWindow;
 
@@ -86,8 +92,10 @@ namespace xdl {
 			XRRScreenConfiguration* m_originalScreenConfig;
 			short int m_originalScreenRate;
 			Rotation m_originalRotation;
+
+			std::vector<XdevLDisplayModeX11> m_displayModes;
 	};
-	
+
 }
 
 #endif

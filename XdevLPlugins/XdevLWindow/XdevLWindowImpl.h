@@ -41,22 +41,25 @@ namespace xdl {
 		@brief ID to get the correct modules names for the XdevLWindow plugins.
 	*/
 	enum XdevLWindowModuleName {
-		XDEVL_WINDOW_DISPLAY_MODULE_NAME,
+	  XDEVL_WINDOW_DISPLAY_MODULE_NAME,
 	  XDEVL_WINDOW_MODULE_NAME,
 	  XDEVL_WINDOW_SERVER_MODULE_NAME,
 	  XDEVL_WINDOW_EVENT_SERVER_MODULE_NAME,
 	  XDEVL_CURSOR_MODULE_NAME
 	};
 
-	static const XdevLString window_vendor 				{
+	static const XdevLString window_vendor {
 		"www.codeposer.net"
 	};
-	static const XdevLString window_author				{
+
+	static const XdevLString window_author {
 		"Cengiz Terzibas"
 	};
-	static const XdevLString window_copyright			{
+
+	static const XdevLString window_copyright {
 		"(c) 2005 - 2016 Cengiz Terzibas."
 	};
+
 	static const XdevLString windowServerDescription	{
 		"Window Server that manages windows."
 	};
@@ -68,15 +71,6 @@ namespace xdl {
 		XdevLModuleName("XdevLWindowEventServer"),
 		XdevLModuleName("XdevLCursor"),
 	};
-
-	// Holds the Major version number.
-	const xdl_uint XdevLWindowServerMajorVersion = 1;
-
-	// Holds the Minor version number.
-	const xdl_uint XdevLWindowServerMinorVersion = 0;
-
-	// Holds the Patch version number.
-	const xdl_uint XdevLWindowServerPatchVersion = 0;
 
 	struct XdevLWindowThreadArgument : public thread::ThreadArgument {
 		xdl::XdevLCoreMediator* core;

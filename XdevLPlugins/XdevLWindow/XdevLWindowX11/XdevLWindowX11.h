@@ -95,27 +95,25 @@ namespace xdl {
 			Display* getNativeDisplay();
 			Window getNativeWindow();
 			Window getNativeRootWindow();
+			xdl_int getNativeScreenNumber();
+			Colormap getNativeDefaultColorMap();
+
 			xdl_int create(const XdevLWindowTitle& title, const XdevLWindowPosition& position, const XdevLWindowSize& size, const XdevLWindowTypes& type);
 
 		protected:
 
 			Display* m_display;
 
-			/// Holds the default root window. Mostly it is the desktop.
+			// Holds the default root window. Mostly it is the desktop.
 			Window m_rootWindow;
 
-			/// Holds our window id.
+			// Holds our window id.
 			Window m_window;
 
-			/// Holds the default screen number.
+			// Holds the default screen number.
 			xdl_int m_screenNumber;
 
-			/// Holds the width of the default screen.
-			xdl_int m_screenWidth;
-
-			/// Holds the height of the default screen.
-			xdl_int m_screenHeight;
-
+			// Is the window in fullscreen mode or not?
 			xdl_bool m_fullscreenModeActive;
 
 			// Stores the default color map.

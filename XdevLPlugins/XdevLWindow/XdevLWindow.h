@@ -288,6 +288,12 @@ namespace xdl {
 			virtual void flush() = 0;
 	};
 
+	/**
+		@class XdevLCursor
+		@brief Manages cursors
+
+		If you want to change the look and behaviour of the cursor use this class.
+	*/
 	class XdevLCursor : public XdevLModule {
 		public:
 			virtual ~XdevLCursor() {}
@@ -304,7 +310,7 @@ namespace xdl {
 			/// Sets the pointer position.
 			virtual void setPosition(xdl_uint x, xdl_uint y) = 0;
 
-			/// Clips the position.
+			/// Clips the position in screen coordinates.
 			virtual xdl_int clip(xdl_uint x, xdl_uint y, xdl_uint width, xdl_uint height) = 0;
 
 			/// Release clipping position.
