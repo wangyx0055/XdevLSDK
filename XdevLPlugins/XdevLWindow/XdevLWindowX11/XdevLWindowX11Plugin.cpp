@@ -1,4 +1,7 @@
 #include "XdevLWindowX11.h"
+#include "XdevLWindowEventServerX11.h"
+#include "XdevLDisplayX11.h"
+#include "XdevLCursorX11.h"
 
 extern xdl::XdevLPluginDescriptor windowX11PluginDescriptor;
 extern xdl::XdevLModuleDescriptor windowX11DisplayDesc;

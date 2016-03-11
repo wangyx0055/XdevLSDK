@@ -28,75 +28,21 @@
 #include <XdevLPlatform.h>
 #include <XdevLPlugin.h>
 #include <XdevLWindow/XdevLWindowImpl.h>
-#include <XdevLWindowX11Keyboard.h>
 #include <XdevLTypes.h>
 #include <XdevLCoreMediator.h>
 #include <XdevLThread.h>
 #include <XdevLMutex.h>
 
+#include "XdevLCursorX11.h"
+#include "XdevLWindowEventServerX11.h"
+
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <X11/extensions/XInput2.h>
-#include <X11/extensions/Xfixes.h>
-#include <X11/extensions/Xrandr.h>
 #include <X11/XKBlib.h>
 
 namespace xdl {
-
-	class XdevLDisplayModeX11 : public XdevLDisplayMode {
-			SizeID getSizeId() {
-				return sizeId;
-			}
-			friend bool operator==(const XdevLDisplayModeX11& m1, const XdevLDisplayMode& m2) {
-				return ((m1.size == m2.size) and (m1.rate == m2.rate));
-			}
-		public:
-			XRRScreenConfiguration* screenConfig;
-			Rotation rotation;
-			SizeID sizeId;
-	};
-
-	class XdevLDisplayX11 : public XdevLModuleImpl<XdevLDisplay> {
-		public:
-			XdevLDisplayX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
-			virtual ~XdevLDisplayX11();
-
-			xdl_int init() override;
-			xdl_int shutdown() override;
-
-			XdevLDisplayModes getDisplayModes() override;
-			XdevLDisplayModeId getDisplayModeId(const XdevLDisplayMode& mode) override;
-			XdevLDisplayModeId getClosestDisplayModeId(const XdevLDisplayMode& mode) override;
-			xdl_int setDisplayMode(const XdevLDisplayModeId& mode) override;
-			xdl_int restore() override;
-
-		private:
-
-			std::vector<XdevLDisplayModeX11> m_displayModes;
-
-		private:
-			Display* m_display;
-			Window m_rootWindow;
-
-			xdl_int m_randrMajor;
-			xdl_int m_randrMinor;
-
-			xdl_int m_event_basep;
-			xdl_int m_error_basep;
-			xdl_int m_bestFitWidth;
-			xdl_int m_bestFitHeight;
-			xdl_int m_bestFitRate;
-			xdl_int m_screenWidth;
-			xdl_int m_screenHeight;
-
-			SizeID m_bestSizeId;
-			SizeID m_originalSizeId;
-			XRRScreenConfiguration* m_originalScreenConfig;
-			short int m_originalScreenRate;
-			Rotation m_originalRotation;
-	};
 
 	class XdevLWindowX11 :  public XdevLWindowImpl {
 		public:
@@ -270,95 +216,20 @@ namespace xdl {
 			                            );
 	};
 
-	class XdevLWindowEventServerX11 : public XdevLWindowEventServerImpl {
-		public:
-			XdevLWindowEventServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
-			virtual ~XdevLWindowEventServerX11();
-			virtual xdl_int init() override;
-			virtual xdl_int shutdown() override;
-			virtual void* getInternal(const XdevLInternalName& id) override;
-			virtual xdl_int update() override;
-
-			virtual xdl_int registerWindowForEvents(XdevLWindow* window) override;
-			virtual xdl_int unregisterWindowFromEvents(XdevLWindow* window) override;
-			void flush() override;
-
-		private:
-			int pollEvents();
-			XdevLWindow* m_focusWindow;
-			XdevLWindowX11Keyboard* m_keyboard;
-			xdl_int m_event_basep;
-			xdl_int m_error_basep;
-
-			Atom WM_PROTOCOLS;
-			Atom WM_DELETE_WINDOW;
-			Atom _NET_WM_PING;
-
-			XConfigureEvent m_prevConfigureEvent;
-	};
-
-
-	class XdevLCursorX11 : public XdevLModuleImpl<XdevLCursor>  {
-		public:
-			virtual ~XdevLCursorX11() {}
-
-			XdevLCursorX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
-
-			virtual xdl_int init() override;
-			virtual xdl_int shutdown() override;
-			virtual void* getInternal(const XdevLInternalName& id) override;
-
-			virtual xdl_int attach(XdevLWindow* window) override;
-			virtual void show() override;
-			virtual void hide() override;
-			virtual void setPosition(xdl_uint x, xdl_uint y) override;
-			virtual xdl_int clip(xdl_uint x1, xdl_uint y1, xdl_uint x2, xdl_uint y2) override;
-			virtual void releaseClip() override;
-			virtual xdl_int enableRelativeMotion() override;
-			virtual void disableRelativeMotion() override;
-			virtual xdl_bool isRelativeMotionEnabled() override;
-			void onHandleXinputEvent(XGenericEventCookie* cookie, XdevLWindow* window) ;
-		private:
-			void parseValuators(const double *input_values,unsigned char *mask,int mask_len, double *output_values,int output_values_len);
-		private:
-			XdevLWindowX11* m_window;
-			Cursor		m_invisibleCursor;
-			Pixmap		m_invisibleCursorPixmap;
-			XColor		m_black;
-			XColor		m_dummy;
-			Colormap	m_defaultColorMap;
-			xdl_int		m_screenNumber;
-
-			//
-			// Pointer barrier stuff.
-			//
-			xdl_bool	m_barriersSupported;
-			xdl_int		m_fixes_opcode;
-			xdl_int		m_fixes_event;
-			xdl_int		m_fixes_error;
-			PointerBarrier m_barriers[4];
-
-			xdl_bool	m_xinput2Supported;
-			xdl_int		m_xinput2_opcode;
-			xdl_int		m_xinput2_event;
-			xdl_int		m_xinput2_error;
-
-			xdl_int m_screenWidth;
-			xdl_int m_screenHeight;
-
-			xdl_bool m_reltaiveModeEnabled;
-	};
 
 	class XdevLX11Display {
 		public:
 			XdevLX11Display(XdevLCoreMediator* core);
 			~XdevLX11Display();
+
 			XdevLWindowEventServerX11* getWindowEventServer() {
 				return windowEventServer.get();
 			}
+
 			XdevLCursorX11* getCursor() {
 				return cursor.get();
 			}
+
 		public:
 			XdevLCoreMediator* m_core;
 			std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
