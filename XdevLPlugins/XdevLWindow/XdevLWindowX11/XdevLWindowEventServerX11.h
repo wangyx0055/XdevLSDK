@@ -33,6 +33,7 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
+#include <X11/extensions/Xrandr.h>
 
 namespace xdl {
 

@@ -32,7 +32,7 @@ xdl::XdevLModuleDescriptor windowX11DisplayDesc {
 	xdl::window_author,
 	xdl::window_moduleNames[xdl::XDEVL_WINDOW_DISPLAY_MODULE_NAME],
 	xdl::window_copyright,
-	xdl::XdevLString("Display module for the X11 system."),
+	STRING("Display module for the X11 system."),
 	XDEVLX11_DISPLAY_MODULE_MAJOR_VERSION,
 	XDEVLX11_DISPLAY_MODULE_MINOR_VERSION,
 	XDEVLX11_DISPLAY_MODULE_PATCH_VERSION
@@ -69,19 +69,19 @@ namespace xdl {
 		m_rootWindow = RootWindow(m_display, DefaultScreen(m_display));
 
 		if(!XRRQueryExtension(m_display, &m_event_basep, &m_error_basep)) {
-			XDEVL_MODULE_ERROR("RandR extension missing.\n");
+			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "RandR extension missing.\n");
 			return ERR_ERROR;
 		}
 
 		// Check if the RandR extension is avaible.
 		if(!XRRQueryVersion(m_display, &m_randrMajor, &m_randrMinor)) {
-			XDEVL_MODULE_ERROR("RandR extension missing.\n");
+			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "RandR extension missing.\n");
 			return ERR_ERROR;
 		}
 
 		m_originalScreenConfig = XRRGetScreenInfo(m_display, m_rootWindow);
 		if(nullptr == m_originalScreenConfig) {
-			XDEVL_MODULE_ERROR("XRRGetScreenInfo failed.\n");
+			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "XRRGetScreenInfo failed.\n");
 			return ERR_ERROR;
 		}
 
@@ -108,6 +108,8 @@ namespace xdl {
 				}
 			}
 		}
+
+		XRRSelectInput(m_display, m_rootWindow, RROutputChangeNotifyMask);
 
 		return ERR_OK;
 	}
@@ -155,8 +157,8 @@ namespace xdl {
 		                             m_displayModes[mode].sizeId,
 		                             m_displayModes[mode].rotation,
 		                             m_displayModes[mode].rate,
-		                             CurrentTime) != Success) {
-			XDEVL_MODULE_ERROR("XRRSetScreenConfigAndRate failed. That means the specified size, rotation or rate couldn't be changed.\n");
+		                             CurrentTime) != RRSetConfigSuccess) {
+			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "XRRSetScreenConfigAndRate failed. That means the specified size, rotation or rate couldn't be changed.\n");
 			return ERR_ERROR;
 		}
 
@@ -187,10 +189,10 @@ namespace xdl {
 			}
 		}
 
-		XDEVL_MODULE_INFO("Found matching screen size: " << closestDisplayMode.size.width
-		                  << "x" << closestDisplayMode.size.height
-		                  << " " << closestDisplayMode.rate
-		                  << " Hz" << std::endl);
+		XDEVL_MODULEX_INFO(XdevLDisplayX11, "Found matching screen size: " << closestDisplayMode.size.width
+		                   << "x" << closestDisplayMode.size.height
+		                   << " " << closestDisplayMode.rate
+		                   << " Hz" << std::endl);
 
 		auto find = std::find(m_displayModes.begin(), m_displayModes.end(), closestDisplayMode);
 		if(find == m_displayModes.end()) {
@@ -201,19 +203,44 @@ namespace xdl {
 
 	xdl_int XdevLDisplayX11::restore() {
 		// Change screen mode into it's original form.
-		XRRSetScreenConfigAndRate(m_display,
-		                          m_originalScreenConfig,
-		                          m_rootWindow,
-		                          m_originalSizeId,
-		                          m_originalRotation,
-		                          m_originalScreenRate,
-		                          CurrentTime);
+		if(XRRSetScreenConfigAndRate(m_display,
+		                              m_originalScreenConfig,
+		                              m_rootWindow,
+		                              m_originalSizeId,
+		                              m_originalRotation,
+		                              m_originalScreenRate,
+		                              CurrentTime) != RRSetConfigSuccess) {
+			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "XRRSetScreenConfigAndRate failed. Couldn't restore the previous display settings.\n");
+			return ERR_ERROR;
+		}
 		return ERR_OK;
 	}
 
 	xdl_int XdevLDisplayX11::attach(XdevLWindowX11* window) {
 		XRRSelectInput(window->getNativeDisplay(), window->getNativeWindow(), RRScreenChangeNotifyMask);
-		
+
 		return ERR_OK;
 	}
+
+	xdl_bool XdevLDisplayX11::onHandleDisplayEvent(XEvent& event) {
+
+		// Check if this is a RRNotify event.
+		if(event.type != RRNotify + m_event_basep) {
+			return xdl_false;
+		}
+
+		XRRUpdateConfiguration(&event);
+
+		switch(event.type - m_event_basep) {
+			case RRScreenChangeNotify: {
+				std::cout << "RRScreenChangeNotify" << std::endl;
+			}break;
+		}
+		return xdl_true;
+	}
+
+	void XdevLDisplayX11::update(XEvent& event) {
+		XRRUpdateConfiguration(&event);
+	}
+
 }

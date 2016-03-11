@@ -71,6 +71,10 @@ namespace xdl {
 			//
 			xdl_int attach(XdevLWindowX11* window);
 
+			xdl_bool onHandleDisplayEvent(XEvent& event);
+
+			void update(XEvent& event);
+
 		private:
 
 			Display* m_display;

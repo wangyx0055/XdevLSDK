@@ -36,6 +36,7 @@ static const xdl::XdevLString windowX11PluginName {
 };
 
 
+extern xdl::XdevLModuleDescriptor windowX11DisplayDesc;
 extern xdl::XdevLModuleDescriptor cursorX11Desc;
 extern xdl::XdevLModuleDescriptor windowEventServerX11Desc;
 
@@ -81,7 +82,7 @@ xdl::XdevLModuleDescriptor windowServerX11Desc {
 namespace xdl {
 
 	xdl_int reference_counter = 0;
-	extern std::shared_ptr<XdevLX11Display> globalDisplay;
+	extern std::shared_ptr<XdevLX11Display> globalX11Display;
 
 
 #define _NET_WM_STATE_REMOVE    0l
@@ -104,6 +105,10 @@ namespace xdl {
 		std::cout << "XdevLX11Display::XdevLX11Display()\n";
 
 		XdevLModuleCreateParameter parameter;
+
+		parameter.setModuleId(XdevLID("XdevLDisplay"));
+		display = std::make_shared<XdevLDisplayX11>(&parameter, windowX11DisplayDesc);
+
 		parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
 		windowEventServer = std::make_shared<XdevLWindowEventServerX11>(&parameter, windowEventServerX11Desc);
 
@@ -112,6 +117,7 @@ namespace xdl {
 
 		// Register within the Core if this is using one.
 		if(m_core) {
+			m_core->registerModule(display);
 			m_core->registerModule(windowEventServer);
 			m_core->registerModule(cursor);
 		}
@@ -121,6 +127,7 @@ namespace xdl {
 	XdevLX11Display::~XdevLX11Display() {
 		std::cout << "XdevLX11Display::~XdevLX11Display()\n";
 		if(m_core) {
+			m_core->deleteModule(display->getID());
 			m_core->deleteModule(windowEventServer->getID());
 			m_core->deleteModule(cursor->getID());
 		}
@@ -147,7 +154,7 @@ namespace xdl {
 			if(nullptr != parameter) {
 				mediator = parameter->getMediator();
 			}
-			globalDisplay = std::make_shared<XdevLX11Display>(mediator);
+			globalX11Display = std::make_shared<XdevLX11Display>(mediator);
 		}
 		reference_counter++;
 	}
@@ -156,7 +163,7 @@ namespace xdl {
 		XDEVL_MODULE_INFO("~XdevLWindowX11()\n");
 
 		if(reference_counter == 1) {
-			globalDisplay.reset();
+			globalX11Display.reset();
 		}
 		reference_counter--;
 	}
@@ -185,10 +192,10 @@ namespace xdl {
 	int XdevLWindowX11::create() {
 
 		// Get the connection to the display server.
-		m_display = globalDisplay->getWindowEventServer()->getNativeDisplay();
+		m_display = globalX11Display->getWindowEventServer()->getNativeDisplay();
 
 		// Get the root window.
-		m_rootWindow = globalDisplay->getWindowEventServer()->getNativeRootWindow();
+		m_rootWindow = globalX11Display->getWindowEventServer()->getNativeRootWindow();
 
 		// Get the default screen number.
 		m_screenNumber = DefaultScreen(m_display);
@@ -203,12 +210,12 @@ namespace xdl {
 		color.pixel = ((xdl_int)m_backgroundColor[0] << 16) | ((xdl_int)m_backgroundColor[1] << 8) | (xdl_int)m_backgroundColor[2];
 
 //		char green[] = "#00FF00";
-//		XParseColor(globalDisplay, m_defaultColorMap, green, &color);
-//		XAllocColor(globalDisplay, m_defaultColorMap, &color);
+//		XParseColor(globalX11Display, m_defaultColorMap, green, &color);
+//		XAllocColor(globalX11Display, m_defaultColorMap, &color);
 
 //    windowAttributes.background_pixmap 	= None;
 //    windowAttributes.border_pixel 			= 0;
-//		windowAttributes.colormap 					= XCreateColormap(globalDisplay, m_rootWindow, visual, AllocNone);
+//		windowAttributes.colormap 					= XCreateColormap(globalX11Display, m_rootWindow, visual, AllocNone);
 
 		if(m_rootTitle.toString().size() > 0) {
 			XdevLWindow* rootWindow = static_cast<XdevLWindow*>(getMediator()->getModule(XdevLID(m_rootTitle.toString().c_str())));
@@ -301,7 +308,7 @@ namespace xdl {
 		m_id = m_window;
 
 		// This we might want to change later
-		globalDisplay->getWindowEventServer()->registerWindowForEvents(this);
+		globalX11Display->getWindowEventServer()->registerWindowForEvents(this);
 
 		XMapRaised(m_display, m_window);
 		XSync(m_display, False);

@@ -42,7 +42,7 @@ xdl::XdevLModuleDescriptor windowEventServerX11Desc {
 
 namespace xdl {
 
-	std::shared_ptr<XdevLX11Display> globalDisplay;
+	std::shared_ptr<XdevLX11Display> globalX11Display;
 
 	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
 	const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");
@@ -133,6 +133,9 @@ namespace xdl {
 			// Get next event.
 			XNextEvent(m_display, &event);
 
+			globalX11Display->getDisplay()->onHandleDisplayEvent(event);
+
+
 			//
 			// Handle generic events like xinput2, xfixes etc.
 			//
@@ -140,9 +143,9 @@ namespace xdl {
 				XGenericEventCookie* cookie = &event.xcookie;
 				XGetEventData(m_display, cookie);
 
-				if(globalDisplay->getCursor()) {
+				if(globalX11Display->getCursor()) {
 					// TODO Don't cast here. Find another way.
-					globalDisplay->getCursor()->onHandleXinputEvent(cookie, m_focusWindow);
+					globalX11Display->getCursor()->onHandleXinputEvent(cookie, m_focusWindow);
 				}
 
 				XFreeEventData(m_display, cookie);
@@ -163,9 +166,14 @@ namespace xdl {
 			// Check which event type we've got.
 			switch(event.type) {
 
-					//
-					// Will be send if window was created.
-					//
+				case RRScreenChangeNotify: {
+					std::cout << "RRScreenChangeNotify" << std::endl;
+				}
+				break;
+
+				//
+				// Will be send if window was created.
+				//
 				case CreateNotify: {
 
 					ev.type				= XDEVL_WINDOW_EVENT;
@@ -210,7 +218,7 @@ namespace xdl {
 				// Mouse pointer moved.
 				//
 				case MotionNotify: {
-					if(globalDisplay->getCursor()->isRelativeMotionEnabled() == xdl_false) {
+					if(globalX11Display->getCursor()->isRelativeMotionEnabled() == xdl_false) {
 						ev.type 						= MouseMotion.getHashCode();
 						ev.motion.x					= (2.0 / window->getWidth()*event.xmotion.x - 1.0f) * 32768.0f;
 						ev.motion.y					= -(2.0 / window->getHeight() * event.xmotion.y - 1.0f) * 32768.0f;

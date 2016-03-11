@@ -33,6 +33,7 @@
 #include <XdevLThread.h>
 #include <XdevLMutex.h>
 
+#include "XdevLDisplayX11.h"
 #include "XdevLCursorX11.h"
 #include "XdevLWindowEventServerX11.h"
 
@@ -220,6 +221,10 @@ namespace xdl {
 			XdevLX11Display(XdevLCoreMediator* core);
 			~XdevLX11Display();
 
+			XdevLDisplayX11* getDisplay() {
+				return display.get();
+			}
+
 			XdevLWindowEventServerX11* getWindowEventServer() {
 				return windowEventServer.get();
 			}
@@ -230,6 +235,7 @@ namespace xdl {
 
 		public:
 			XdevLCoreMediator* m_core;
+			std::shared_ptr<XdevLDisplayX11> display;
 			std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
 			std::shared_ptr<XdevLCursorX11> cursor;
 	};
