@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -54,7 +54,9 @@ namespace xdl {
 
 			}
 			virtual ~XdevLShaderBase() {
-				glDeleteShader(m_id);
+				if(0 != m_id) {
+					glDeleteShader(m_id);
+				}
 			}
 
 			void addShaderCode(const xdl_char* shadercode) {
@@ -72,7 +74,7 @@ namespace xdl {
 					std::stringstream shader;
 					shader << fs.rdbuf();
 
-				//	m_shaderSource.push_back("#line __LINE__\n");
+					//	m_shaderSource.push_back("#line __LINE__\n");
 					m_shaderSource.push_back(shader.str());
 
 					return ERR_OK;
@@ -135,11 +137,11 @@ namespace xdl {
 				return m_shaderType;
 			}
 
-			GLuint 														m_id;
-			xdl_uint 													m_shaderVersion;
-			XdevLShaderType 									m_shaderType;
-			std::vector<std::string> 					m_shaderSource;
-			std::string 											m_shaderVersionDefinition;
+			GLuint m_id;
+			xdl_uint m_shaderVersion;
+			XdevLShaderType m_shaderType;
+			std::vector<std::string> m_shaderSource;
+			std::string m_shaderVersionDefinition;
 	};
 
 	class XdevLOpenGLVertexShaderImpl : public XdevLShaderBase<XdevLVertexShader> {
