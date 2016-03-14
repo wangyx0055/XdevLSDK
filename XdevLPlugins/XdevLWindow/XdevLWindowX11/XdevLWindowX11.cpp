@@ -127,9 +127,9 @@ namespace xdl {
 	XdevLX11Display::~XdevLX11Display() {
 		std::cout << "XdevLX11Display::~XdevLX11Display()\n";
 		if(m_core) {
-			m_core->deleteModule(display->getID());
 			m_core->deleteModule(windowEventServer->getID());
 			m_core->deleteModule(cursor->getID());
+			m_core->deleteModule(display->getID());
 		}
 	}
 

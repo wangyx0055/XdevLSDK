@@ -43,10 +43,7 @@ namespace xdl {
 	XdevLDisplayX11::XdevLDisplayX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
 		XdevLModuleImpl<XdevLDisplay>(parameter, desriptor),
 		m_display(nullptr),
-		m_rootWindow(None),
-		m_bestFitWidth(-1),
-		m_bestFitHeight(-1),
-		m_bestFitRate(-1) {
+		m_rootWindow(None) {
 
 	}
 
@@ -66,6 +63,7 @@ namespace xdl {
 			return ERR_ERROR;;
 		}
 
+		// Get the root window of the X11 display.
 		m_rootWindow = RootWindow(m_display, DefaultScreen(m_display));
 
 		if(!XRRQueryExtension(m_display, &m_event_basep, &m_error_basep)) {
@@ -79,18 +77,65 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
-		m_originalScreenConfig = XRRGetScreenInfo(m_display, m_rootWindow);
-		if(nullptr == m_originalScreenConfig) {
+		m_screenResources = XRRGetScreenResources(m_display, m_rootWindow);
+		m_primaryOutput = XRRGetOutputPrimary(m_display, m_rootWindow);
+
+		for(xdl_int i = 0;  i < m_screenResources->ncrtc;  i++) {
+			XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(m_display, m_screenResources, m_screenResources->crtcs[i]);
+
+			for (xdl_int j = 0;  j < crtcInfo->noutput;  j++) {
+				XRROutputInfo* outputInfo = XRRGetOutputInfo(m_display, m_screenResources, crtcInfo->outputs[j]);
+
+				if (outputInfo->connection != RR_Connected) {
+					XRRFreeOutputInfo(outputInfo);
+					continue;
+				}
+
+				XdevLMonitor monitor;
+
+				// Is the monitor content rotated?
+				if (crtcInfo->rotation == RR_Rotate_90 || crtcInfo->rotation == RR_Rotate_270) {
+					monitor.m_widthMM  = outputInfo->mm_height;
+					monitor.m_heightMM = outputInfo->mm_width;
+				} else {
+					monitor.m_widthMM  = outputInfo->mm_width;
+					monitor.m_heightMM = outputInfo->mm_height;
+				}
+
+				monitor.m_output = crtcInfo->outputs[j];
+				monitor.m_crtc   = outputInfo->crtc;
+
+				m_monitors.push_back(monitor);
+
+				XRRFreeOutputInfo(outputInfo);
+			}
+
+			XRRFreeCrtcInfo(crtcInfo);
+		}
+
+		// Get the current screen info so we can revert back how the user had it.
+		m_originalDisplayMode.screenConfig = XRRGetScreenInfo(m_display, m_rootWindow);
+		if(nullptr == m_originalDisplayMode.screenConfig) {
 			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "XRRGetScreenInfo failed.\n");
 			return ERR_ERROR;
 		}
 
-		m_originalScreenRate = XRRConfigCurrentRate(m_originalScreenConfig);
-		m_originalSizeId = XRRConfigCurrentConfiguration(m_originalScreenConfig, &m_originalRotation);
+		// Get the current screen rate. (Hz)
+		m_originalDisplayMode.rate = XRRConfigCurrentRate(m_originalDisplayMode.screenConfig);
 
-		// Get all supported screen sizes
+		// Get the current screen resolution and it's rotation info.
+		m_originalDisplayMode.sizeId = XRRConfigCurrentConfiguration(m_originalDisplayMode.screenConfig, &m_originalDisplayMode.rotation);
+
+		xdl_int numSizes;
+		XRRScreenSize* screenSizes = XRRSizes(m_display, 0, &numSizes);
+		m_originalDisplayMode.size.width = screenSizes[m_originalDisplayMode.sizeId].width;
+		m_originalDisplayMode.size.height = screenSizes[m_originalDisplayMode.sizeId].height;
+
+		//
+		// Now let's get all supported screen sizes and store it.
+		//
 		xdl_int numberOfScreenSizes;
-		XRRScreenSize* sizelist = XRRConfigSizes(m_originalScreenConfig, &numberOfScreenSizes);
+		XRRScreenSize* sizelist = XRRConfigSizes(m_originalDisplayMode.screenConfig, &numberOfScreenSizes);
 		if (sizelist && (numberOfScreenSizes > 0)) {
 			for(xdl_int i = 0; i < numberOfScreenSizes; i++) {
 				XdevLDisplayModeX11 mode;
@@ -98,10 +143,10 @@ namespace xdl {
 				mode.size.width = sizelist[i].width;
 				mode.size.height = sizelist[i].height;
 				mode.screenConfig = XRRGetScreenInfo(m_display, m_rootWindow);
-				XRRConfigCurrentConfiguration(m_originalScreenConfig, &mode.rotation);
+				XRRConfigCurrentConfiguration(m_originalDisplayMode.screenConfig, &mode.rotation);
 
 				xdl_int ratecount;
-				short* ratelist = XRRConfigRates(m_originalScreenConfig, mode.sizeId, &ratecount);
+				short* ratelist = XRRConfigRates(m_originalDisplayMode.screenConfig, mode.sizeId, &ratecount);
 				for(xdl_int i = 0; i < ratecount; i++) {
 					mode.rate = ratelist[i];
 					m_displayModes.push_back(mode);
@@ -109,13 +154,16 @@ namespace xdl {
 			}
 		}
 
+		// We tell the X11 display server that we are interessted in display change events.
 		XRRSelectInput(m_display, m_rootWindow, RROutputChangeNotifyMask);
 
 		return ERR_OK;
 	}
 
 	xdl_int XdevLDisplayX11::shutdown() {
-		XRRFreeScreenConfigInfo(m_originalScreenConfig);
+
+		// Let's free resources we allocated.
+		XRRFreeScreenConfigInfo(m_originalDisplayMode.screenConfig);
 
 		if(nullptr != m_display) {
 			XCloseDisplay(m_display);
@@ -150,9 +198,11 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
+		m_currentDisplayMode = m_displayModes[mode];
+
 		// Change screen mode.
 		if(XRRSetScreenConfigAndRate(m_display,
-		                             m_originalScreenConfig,
+		                             m_currentDisplayMode.screenConfig,
 		                             m_rootWindow,
 		                             m_displayModes[mode].sizeId,
 		                             m_displayModes[mode].rotation,
@@ -182,7 +232,7 @@ namespace xdl {
 		bestmatch = 999999;
 		XdevLDisplayModeX11 closestDisplayMode;
 		for(auto tmp : closestDisplayModes) {
-			match = abs(tmp.rate - m_originalScreenRate);
+			match = abs(tmp.rate - m_originalDisplayMode.rate);
 			if(match < bestmatch) {
 				bestmatch = match;
 				closestDisplayMode = tmp;
@@ -204,12 +254,12 @@ namespace xdl {
 	xdl_int XdevLDisplayX11::restore() {
 		// Change screen mode into it's original form.
 		if(XRRSetScreenConfigAndRate(m_display,
-		                              m_originalScreenConfig,
-		                              m_rootWindow,
-		                              m_originalSizeId,
-		                              m_originalRotation,
-		                              m_originalScreenRate,
-		                              CurrentTime) != RRSetConfigSuccess) {
+		                             m_originalDisplayMode.screenConfig,
+		                             m_rootWindow,
+		                             m_originalDisplayMode.sizeId,
+		                             m_originalDisplayMode.rotation,
+		                             m_originalDisplayMode.rate,
+		                             CurrentTime) != RRSetConfigSuccess) {
 			XDEVL_MODULEX_ERROR(XdevLDisplayX11, "XRRSetScreenConfigAndRate failed. Couldn't restore the previous display settings.\n");
 			return ERR_ERROR;
 		}
@@ -234,7 +284,7 @@ namespace xdl {
 		switch(event.type - m_event_basep) {
 			case RRScreenChangeNotify: {
 				std::cout << "RRScreenChangeNotify" << std::endl;
-			}break;
+			} break;
 		}
 		return xdl_true;
 	}

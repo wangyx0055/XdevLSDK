@@ -33,6 +33,14 @@ namespace xdl {
 
 	class XdevLWindowX11;
 
+	class XdevLMonitor {
+		public:
+			RRCrtc m_crtc;
+			RROutput m_output;
+			xdl_int m_widthMM;
+			xdl_int m_heightMM;
+	};
+
 	class XdevLDisplayModeX11 : public XdevLDisplayMode {
 			SizeID getSizeId() {
 				return sizeId;
@@ -85,19 +93,25 @@ namespace xdl {
 
 			xdl_int m_event_basep;
 			xdl_int m_error_basep;
-			xdl_int m_bestFitWidth;
-			xdl_int m_bestFitHeight;
-			xdl_int m_bestFitRate;
+
 			xdl_int m_screenWidth;
 			xdl_int m_screenHeight;
 
-			SizeID m_bestSizeId;
-			SizeID m_originalSizeId;
-			XRRScreenConfiguration* m_originalScreenConfig;
-			short int m_originalScreenRate;
-			Rotation m_originalRotation;
+			// Holds the display mode at the time when changing to the new display mode.
+			XdevLDisplayModeX11 m_originalDisplayMode;
 
+			// Current display mode.
+			XdevLDisplayModeX11 m_currentDisplayMode;
+
+			// Holds infos about monitors.
+			std::vector<XdevLMonitor> m_monitors;
+
+			// Holds all supported display modes.
 			std::vector<XdevLDisplayModeX11> m_displayModes;
+
+			XRRScreenResources* m_screenResources;
+			XRRCrtcInfo* m_crtInfo;
+			RROutput m_primaryOutput;
 	};
 
 }
