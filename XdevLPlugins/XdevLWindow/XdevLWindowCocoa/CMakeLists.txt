@@ -69,6 +69,7 @@ set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
 	${HEADERS_DIR}/XdevLWindowCocoa.h
+	${HEADERS_DIR}/XdevLCursorCocoa.h
 )
 
 #
@@ -77,6 +78,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.cpp
 	${SRC_DIR}/XdevLWindowCocoa.mm
+	${SRC_DIR}/XdevLCursorCocoa.mm
 )
 
 if(NOT XDEVL_BUILD_STATIC)
