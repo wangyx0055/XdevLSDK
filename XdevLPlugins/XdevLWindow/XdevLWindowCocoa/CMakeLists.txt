@@ -115,6 +115,7 @@ set(HEADER_FILES
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
 	${HEADERS_DIR}/XdevLWindowCocoa.h
 	${HEADERS_DIR}/XdevLWindowEventServerCocoa.h
+	${HEADERS_DIR}/XdevLWindowServerCocoa.h
 	${HEADERS_DIR}/XdevLCursorCocoa.h
 )
 
@@ -125,6 +126,7 @@ set(SOURCE_FILES
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.cpp
 	${SRC_DIR}/XdevLWindowCocoa.mm
 	${SRC_DIR}/XdevLWindowEventServerCocoa.mm
+	${SRC_DIR}/XdevLWindowServerCocoa.mm
 	${SRC_DIR}/XdevLCursorCocoa.mm
 )
 
