@@ -407,7 +407,6 @@ namespace xdl {
 		SDL_RenderPresent(renderer);
 		SDL_DestroyRenderer(renderer);
 
-		setHidePointer(XdevLWindowImpl::getHidePointer());
 		setFullscreen(XdevLWindowImpl::getFullscreen());
 
 
@@ -594,8 +593,8 @@ namespace xdl {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_bool  XdevLWindowSDL::getHidePointer() {
-		return XdevLWindowImpl::getHidePointer();
+	xdl_bool  XdevLWindowSDL::isPointerHidden() {
+		return XdevLWindowImpl::isPointerHidden();
 	}
 
 	void  XdevLWindowSDL::show() {

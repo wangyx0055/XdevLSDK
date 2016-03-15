@@ -90,16 +90,16 @@ namespace xdl {
 			virtual XdevLWindowPosition::type getY() override;
 			virtual XdevLWindowSize::type getWidth() override;
 			virtual XdevLWindowSize::type getHeight() override;
-			virtual const XdevLWindowTitle& getTitle();
-			virtual const XdevLWindowSize& getSize();
-			virtual const XdevLWindowPosition& getPosition();
+			virtual const XdevLWindowTitle& getTitle() override;
+			virtual const XdevLWindowSize& getSize() override;
+			virtual const XdevLWindowPosition& getPosition() override;
 			virtual xdl_bool getFullscreen() override;
 			virtual xdl_int getColorDepth() const;
-			virtual xdl_bool getHidePointer() override;
-			virtual void setX(XdevLWindowPosition::type x);
-			virtual void setY(XdevLWindowPosition::type y);
-			virtual void setWidth(XdevLWindowSize::type width);
-			virtual void setHeight(XdevLWindowSize::type height);
+			virtual xdl_bool isPointerHidden() override;
+			virtual void setX(XdevLWindowPosition::type x) override;
+			virtual void setY(XdevLWindowPosition::type y) override;
+			virtual void setWidth(XdevLWindowSize::type width) override;
+			virtual void setHeight(XdevLWindowSize::type height) override;
 			void setColorDepth(int depth);
 			virtual void setTitle(const XdevLWindowTitle& title);
 			virtual void setPosition(const XdevLWindowPosition& position);
@@ -135,7 +135,7 @@ namespace xdl {
 			xdl_int m_colorDepth;
 
 			// Should the mouse pointer be hided?
-			xdl_bool m_hideMouse;
+			xdl_bool m_isPointerHidden;
 
 			// Holds the background color.
 			xdl_uint m_backgroundColor[4];

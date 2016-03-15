@@ -193,7 +193,7 @@ namespace xdl {
 			virtual xdl_bool getFullscreen() = 0;
 
 			/// Return if the mouse pointer is hidden.
-			virtual xdl_bool getHidePointer() = 0;
+			virtual xdl_bool isPointerHidden() = 0;
 
 			/// Sets the title of the window.
 			virtual void setTitle(const XdevLWindowTitle& title) = 0;

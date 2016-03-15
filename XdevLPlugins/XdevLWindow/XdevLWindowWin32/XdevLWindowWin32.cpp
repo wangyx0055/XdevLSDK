@@ -656,8 +656,8 @@ namespace xdl {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_bool  XdevLWindowDeviceWin32::getHidePointer() {
-		return XdevLWindowImpl::getHidePointer();
+	xdl_bool  XdevLWindowDeviceWin32::isPointerHidden() {
+		return XdevLWindowImpl::isPointerHidden();
 	}
 
 	void XdevLWindowDeviceWin32::setFullscreen(xdl_bool state) {

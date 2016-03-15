@@ -692,10 +692,10 @@ namespace xdl {
 		return XdevLWindowImpl::getFullscreen();
 	}
 
-	xdl_bool XdevLWindowX11::getHidePointer() {
+	xdl_bool XdevLWindowX11::isPointerHidden() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
-		return XdevLWindowImpl::getHidePointer();
+		return XdevLWindowImpl::isPointerHidden();
 	}
 
 	void XdevLWindowX11::setX(XdevLWindowPosition::type x) {

@@ -81,7 +81,7 @@ namespace xdl {
 		m_rootTitle(""),
 		m_fullScreen(xdl_false),
 		m_colorDepth(32),
-		m_hideMouse(xdl_false) {
+		m_isPointerHidden(xdl_false) {
 
 		// Set background color.
 		m_backgroundColor[0] = 0;
@@ -195,12 +195,12 @@ namespace xdl {
 		m_attribute.title = title;
 	}
 
-	xdl_bool XdevLWindowImpl::getHidePointer() {
-		return m_hideMouse;
+	xdl_bool XdevLWindowImpl::isPointerHidden() {
+		return m_isPointerHidden;
 	}
 
 	void XdevLWindowImpl::setHidePointer(xdl_bool state) {
-		m_hideMouse = state;
+		m_isPointerHidden = state;
 	}
 
 	void XdevLWindowImpl::setParent(XdevLWindow* window) {
@@ -248,8 +248,6 @@ namespace xdl {
 							m_attribute.size.width = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "Height")
 							m_attribute.size.height = xstd::from_string<int>(child->GetText());
-						if(child->ValueTStr() == "HidePointer")
-							m_hideMouse = xstd::from_string<xdl_bool>(child->GetText());
 						if(child->ValueTStr() == "BackgroundColor") {
 							std::vector<std::string> list;
 							xstd::tokenize(child->GetText(), list);
