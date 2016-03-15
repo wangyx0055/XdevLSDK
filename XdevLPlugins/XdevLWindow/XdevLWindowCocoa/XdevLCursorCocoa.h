@@ -36,7 +36,7 @@
 namespace xdl {
 
 	class XdevLWindowCocoa;
-	
+
 	class XdevLCursorCocoa : public XdevLModuleImpl<XdevLCursor>  {
 		public:
 			XdevLCursorCocoa(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
