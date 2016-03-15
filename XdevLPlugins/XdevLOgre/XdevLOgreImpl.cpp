@@ -158,7 +158,7 @@ namespace xdl {
 			m_window = m_root->createRenderWindow(m_xdlWindow->getTitle().toString(),
 			                                      m_xdlWindow->getWidth(),
 			                                      m_xdlWindow->getHeight(),
-			                                      m_xdlWindow->getFullscreen(), &StartInfo);
+			                                      m_xdlWindow->isFullscreen(), &StartInfo);
 		} catch(Ogre::Exception& e) {
 			XDEVL_MODULE_ERROR(e.getFullDescription());
 			return ERR_ERROR;
