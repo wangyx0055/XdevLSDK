@@ -179,7 +179,6 @@ void main(void) {                                                               
 		m_scale(1.0f),
 		m_rescale(1.0f),
 		m_effectNumber(1),
-		m_staticVertexListUploaded(xdl_false),
 		m_usePixelUnits(xdl_false) {
 		m_shadowOffset[0] = 0.0f;
 		m_shadowOffset[1] = 0.0f;
@@ -223,6 +222,10 @@ void main(void) {                                                               
 	void XdevLTextLayoutImpl::setShadowOffset(xdl_float xOffset, xdl_float yOffset) {
 		m_shadowOffset[0] = xOffset;
 		m_shadowOffset[1] = yOffset;
+	}
+
+	xdl_int XdevLTextLayoutImpl::init() {
+		return ERR_OK;
 	}
 
 	xdl_int XdevLTextLayoutImpl::init(IPXdevLWindow window, IPXdevLRAI rai) {

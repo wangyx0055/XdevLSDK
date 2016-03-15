@@ -49,6 +49,8 @@ namespace xdl {
 
 			virtual ~XdevLTextLayoutImpl() {}
 
+			virtual xdl_int init() override;
+
 			virtual xdl_int init(IPXdevLWindow window, IPXdevLRAI rai) override;
 
 			virtual xdl_int shutdown() override;
@@ -125,7 +127,7 @@ namespace xdl {
 
 			std::vector<XdevLTextLayoutText> m_textList;
 			std::vector<XdevLTextLayoutText> m_staticTextList;
-			xdl_bool					m_staticVertexListUploaded;
+
 
 			std::map<xdl_uint, std::vector<XdevLGlyphVertex>> 	m_simpleTextVertexMap;
 			std::map<xdl_uint, std::vector<XdevLGlyphVertex>> 	m_dynamicVertexMap;
