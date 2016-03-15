@@ -91,21 +91,26 @@ namespace xdl {
 
 	xdl_int XdevLAudioBufferAL::lock() {
 		m_locked = xdl_true;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLAudioBufferAL::unlock() {
 		m_locked = xdl_false;
+		return ERR_OK;
 	}
 
 	xdl_int XdevLAudioBufferAL::upload(xdl_int8* src, xdl_uint size) {
 		XDEVL_ASSERT( (m_locked == xdl_true), "You must use lock() before you can upload data into the buffer");
 
+		// Initialize AL buffer and upload data.
 		alBufferData(m_id, m_format, (ALvoid*)src, size, m_freq);
 		ALenum error = alGetError();
 		if(error != AL_NO_ERROR) {
 			std::cerr << getALErrorString(error) << std::endl;
 			return ERR_ERROR;
 		}
+		m_size = size;
+		return ERR_OK;
 	}
 
 }
