@@ -135,19 +135,19 @@ namespace xdl {
 		return m_id;
 	}
 
-	XdevLWindowSize::type XdevLWindowImpl::getWidth() const {
+	XdevLWindowSize::type XdevLWindowImpl::getWidth() {
 		return m_attribute.size.width;
 	}
 
-	XdevLWindowSize::type XdevLWindowImpl::getHeight() const {
+	XdevLWindowSize::type XdevLWindowImpl::getHeight() {
 		return m_attribute.size.height;
 	}
 
-	XdevLWindowPosition::type XdevLWindowImpl::getX() const {
+	XdevLWindowPosition::type XdevLWindowImpl::getX() {
 		return m_attribute.position.x;
 	}
 
-	XdevLWindowPosition::type XdevLWindowImpl::getY() const {
+	XdevLWindowPosition::type XdevLWindowImpl::getY() {
 		return m_attribute.position.y;
 	}
 
@@ -163,7 +163,7 @@ namespace xdl {
 		return m_attribute.size;
 	}
 
-	xdl_bool XdevLWindowImpl::getFullscreen() const {
+	xdl_bool XdevLWindowImpl::getFullscreen() {
 		return m_fullScreen;
 	}
 
@@ -195,7 +195,7 @@ namespace xdl {
 		m_attribute.title = title;
 	}
 
-	xdl_bool XdevLWindowImpl::getHidePointer() const {
+	xdl_bool XdevLWindowImpl::getHidePointer() {
 		return m_hideMouse;
 	}
 

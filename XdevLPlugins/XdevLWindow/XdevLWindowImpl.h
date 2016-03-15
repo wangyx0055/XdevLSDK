@@ -82,20 +82,20 @@ namespace xdl {
 			XdevLWindowImpl(xdl_uint id, XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowImpl() {}
 
-			virtual xdl_int init();
-			virtual xdl_int shutdown();
-			virtual xdl_int create(const XdevLWindowAttribute& attribute);
+			virtual xdl_int init() override;
+			virtual xdl_int shutdown() override;
+			virtual xdl_int create(const XdevLWindowAttribute& attribute) override;
 			virtual xdl_uint64 getWindowID();
-			virtual XdevLWindowPosition::type getX() const;
-			virtual XdevLWindowPosition::type getY() const;
-			virtual XdevLWindowSize::type getWidth() const;
-			virtual XdevLWindowSize::type getHeight() const;
+			virtual XdevLWindowPosition::type getX() override;
+			virtual XdevLWindowPosition::type getY() override;
+			virtual XdevLWindowSize::type getWidth() override;
+			virtual XdevLWindowSize::type getHeight() override;
 			virtual const XdevLWindowTitle& getTitle();
 			virtual const XdevLWindowSize& getSize();
 			virtual const XdevLWindowPosition& getPosition();
-			virtual xdl_bool getFullscreen() const;
+			virtual xdl_bool getFullscreen() override;
 			virtual xdl_int getColorDepth() const;
-			virtual xdl_bool getHidePointer() const;
+			virtual xdl_bool getHidePointer() override;
 			virtual void setX(XdevLWindowPosition::type x);
 			virtual void setY(XdevLWindowPosition::type y);
 			virtual void setWidth(XdevLWindowSize::type width);
