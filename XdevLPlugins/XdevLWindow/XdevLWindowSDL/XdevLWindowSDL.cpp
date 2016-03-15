@@ -407,7 +407,7 @@ namespace xdl {
 		SDL_RenderPresent(renderer);
 		SDL_DestroyRenderer(renderer);
 
-		setFullscreen(XdevLWindowImpl::getFullscreen());
+		setFullscreen(XdevLWindowImpl::isFullscreen());
 
 
 		SDL_VERSION(&m_wmInfo.version);
@@ -589,8 +589,8 @@ namespace xdl {
 		return getTitle();
 	}
 
-	xdl_bool  XdevLWindowSDL::getFullscreen() {
-		return XdevLWindowImpl::getFullscreen();
+	xdl_bool  XdevLWindowSDL::isFullscreen() {
+		return XdevLWindowImpl::isFullscreen();
 	}
 
 	xdl_bool  XdevLWindowSDL::isPointerHidden() {

@@ -301,7 +301,7 @@ namespace xdl {
 		setType(m_attribute.type);
 
 		// Check if the user specified fullscreen mode.
-		if(getFullscreen()) {
+		if(isFullscreen()) {
 			enableFullscreenMode();
 		}
 
@@ -686,10 +686,10 @@ namespace xdl {
 		return XdevLWindowImpl::getTitle();
 	}
 
-	xdl_bool XdevLWindowX11::getFullscreen() {
+	xdl_bool XdevLWindowX11::isFullscreen() {
 		XDEVL_ASSERT(None != m_window, "XdevLWindowX11 not created.");
 
-		return XdevLWindowImpl::getFullscreen();
+		return XdevLWindowImpl::isFullscreen();
 	}
 
 	xdl_bool XdevLWindowX11::isPointerHidden() {

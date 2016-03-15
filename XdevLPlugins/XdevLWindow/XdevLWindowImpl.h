@@ -93,7 +93,7 @@ namespace xdl {
 			virtual const XdevLWindowTitle& getTitle() override;
 			virtual const XdevLWindowSize& getSize() override;
 			virtual const XdevLWindowPosition& getPosition() override;
-			virtual xdl_bool getFullscreen() override;
+			virtual xdl_bool isFullscreen() override;
 			virtual xdl_int getColorDepth() const;
 			virtual xdl_bool isPointerHidden() override;
 			virtual void setX(XdevLWindowPosition::type x) override;
@@ -129,7 +129,7 @@ namespace xdl {
 			XdevLWindowTitle m_rootTitle;
 
 			/// Full screen yes or no
-			xdl_bool m_fullScreen;
+			xdl_bool m_isfullScreen;
 
 			/// color depth of the framebuffer
 			xdl_int m_colorDepth;

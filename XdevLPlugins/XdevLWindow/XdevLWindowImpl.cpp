@@ -79,7 +79,7 @@ namespace xdl {
 		m_rootWindow(NULL),
 		m_id(id),
 		m_rootTitle(""),
-		m_fullScreen(xdl_false),
+		m_isfullScreen(xdl_false),
 		m_colorDepth(32),
 		m_isPointerHidden(xdl_false) {
 
@@ -163,8 +163,8 @@ namespace xdl {
 		return m_attribute.size;
 	}
 
-	xdl_bool XdevLWindowImpl::getFullscreen() {
-		return m_fullScreen;
+	xdl_bool XdevLWindowImpl::isFullscreen() {
+		return m_isfullScreen;
 	}
 
 	xdl_int XdevLWindowImpl::getColorDepth() const {
@@ -239,7 +239,7 @@ namespace xdl {
 						if(child->ValueTStr() == "Title")
 							m_attribute.title = XdevLString(child->GetText());
 						if(child->ValueTStr() == "Fullscreen")
-							m_fullScreen = xstd::from_string<bool>(child->GetText());
+							m_isfullScreen = xstd::from_string<bool>(child->GetText());
 						if(child->ValueTStr() == "X")
 							m_attribute.position.x = xstd::from_string<int>(child->GetText());
 						if(child->ValueTStr() == "Y")

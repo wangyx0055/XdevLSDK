@@ -521,8 +521,8 @@ namespace xdl {
 		return XdevLWindowImpl::getTitle();
 	}
 
-	xdl_bool  XdevLWindowWayland::getFullscreen() {
-		return XdevLWindowImpl::getFullscreen();
+	xdl_bool  XdevLWindowWayland::isFullscreen() {
+		return XdevLWindowImpl::isFullscreen();
 	}
 
 	xdl_bool  XdevLWindowWayland::isPointerHidden() {

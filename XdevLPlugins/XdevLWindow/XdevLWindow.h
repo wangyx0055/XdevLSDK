@@ -190,7 +190,7 @@ namespace xdl {
 			virtual XdevLWindowSize::type getHeight() = 0;
 
 			/// Returns the screen mode state.
-			virtual xdl_bool getFullscreen() = 0;
+			virtual xdl_bool isFullscreen() = 0;
 
 			/// Return if the mouse pointer is hidden.
 			virtual xdl_bool isPointerHidden() = 0;
