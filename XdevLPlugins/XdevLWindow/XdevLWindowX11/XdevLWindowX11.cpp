@@ -22,14 +22,16 @@
 */
 
 #include <iostream>
-#include <XdevLTypes.h>
-#include <XdevLWindowX11.h>
-#include <XdevLXstring.h>
-#include <XdevLUtils.h>
 #include <sstream>
 #include <cstddef>
 #include <climits>
 #include <vector>
+
+#include <XdevLTypes.h>
+#include <XdevLXstring.h>
+#include <XdevLUtils.h>
+#include "XdevLWindowX11.h"
+#include "XdevLX11Environment.h"
 
 extern xdl::XdevLModuleDescriptor windowX11DisplayDesc;
 extern xdl::XdevLModuleDescriptor cursorX11Desc;
@@ -51,9 +53,8 @@ xdl::XdevLModuleDescriptor windowX11Desc {
 
 namespace xdl {
 
-	xdl_int reference_counter = 0;
-	extern std::shared_ptr<XdevLX11Environment> globalX11Display;
 
+	xdl_int reference_counter = 0;
 
 #define _NET_WM_STATE_REMOVE    0l
 #define _NET_WM_STATE_ADD       1l
@@ -69,39 +70,6 @@ namespace xdl {
 	  KDE_desktopIcon = 1024 ,
 	  KDE_staysOnTop = 2048
 	};
-
-
-	XdevLX11Environment::XdevLX11Environment(XdevLCoreMediator* core) : m_core(core) {
-		std::cout << "XdevLX11Environment::XdevLX11Environment()\n";
-
-		XdevLModuleCreateParameter parameter;
-
-		parameter.setModuleId(XdevLID("XdevLDisplay"));
-		display = std::make_shared<XdevLDisplayX11>(&parameter, windowX11DisplayDesc);
-
-		parameter.setModuleId(XdevLID("XdevLWindowEventServer"));
-		windowEventServer = std::make_shared<XdevLWindowEventServerX11>(&parameter, windowEventServerX11Desc);
-
-		parameter.setModuleId(XdevLID("XdevLCursor"));
-		cursor = std::make_shared<XdevLCursorX11>(&parameter, cursorX11Desc);
-
-		// Register within the Core if this is using one.
-		if(m_core) {
-			m_core->registerModule(display);
-			m_core->registerModule(windowEventServer);
-			m_core->registerModule(cursor);
-		}
-	}
-
-
-	XdevLX11Environment::~XdevLX11Environment() {
-		std::cout << "XdevLX11Environment::~XdevLX11Environment()\n";
-		if(m_core) {
-			m_core->deleteModule(windowEventServer->getID());
-			m_core->deleteModule(cursor->getID());
-			m_core->deleteModule(display->getID());
-		}
-	}
 
 //
 // XdevLWindowX11

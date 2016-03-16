@@ -25,6 +25,7 @@
 
 #include "XdevLWindowEventServerX11.h"
 #include "XdevLWindowX11.h"
+#include "XdevLX11Environment.h"
 
 //
 // The XdevLWindowEventServer module descriptor.
@@ -41,8 +42,6 @@ xdl::XdevLModuleDescriptor windowEventServerX11Desc {
 };
 
 namespace xdl {
-
-	std::shared_ptr<XdevLX11Environment> globalX11Display;
 
 	const XdevLID ButtonPressed("XDEVL_BUTTON_PRESSED");
 	const XdevLID ButtonReleased("XDEVL_BUTTON_RELEASED");

@@ -69,6 +69,7 @@ namespace xdl {
 
 			XConfigureEvent m_prevConfigureEvent;
 	};
+
 }
 
 #endif

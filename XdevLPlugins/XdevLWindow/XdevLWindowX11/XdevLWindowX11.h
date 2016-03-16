@@ -203,29 +203,6 @@ namespace xdl {
 			std::vector<Atom> m_atoms;
 	};
 
-	class XdevLX11Environment {
-		public:
-			XdevLX11Environment(XdevLCoreMediator* core);
-			~XdevLX11Environment();
-
-			XdevLDisplayX11* getDisplay() {
-				return display.get();
-			}
-
-			XdevLWindowEventServerX11* getWindowEventServer() {
-				return windowEventServer.get();
-			}
-
-			XdevLCursorX11* getCursor() {
-				return cursor.get();
-			}
-
-		public:
-			XdevLCoreMediator* m_core;
-			std::shared_ptr<XdevLDisplayX11> display;
-			std::shared_ptr<XdevLWindowEventServerX11> windowEventServer;
-			std::shared_ptr<XdevLCursorX11> cursor;
-	};
 }
 
 

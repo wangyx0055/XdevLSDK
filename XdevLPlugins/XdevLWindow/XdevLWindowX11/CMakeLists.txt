@@ -134,6 +134,7 @@ set(HEADER_FILES
 	${HEADERS_DIR}/XdevLWindowEventServerX11.h
 	${HEADERS_DIR}/XdevLDisplayX11.h
 	${HEADERS_DIR}/XdevLCursorX11.h
+	${HEADERS_DIR}/XdevLX11Environment.h
 	${HEADERS_DIR}/XdevLWindowX11Keyboard.h
 	${HEADERS_DIR}/imKStoUCS.h
 )
@@ -148,6 +149,7 @@ set(SOURCE_FILES
 	${SRC_DIR}/XdevLWindowEventServerX11.cpp
 	${SRC_DIR}/XdevLDisplayX11.cpp
 	${SRC_DIR}/XdevLCursorX11.cpp
+	${SRC_DIR}/XdevLX11Environment.cpp
 	${SRC_DIR}/XdevLWindowX11Keyboard.cpp
 	${SRC_DIR}/XdevLWindowX11Plugin.cpp
 	${SRC_DIR}/imKStoUCS.c
