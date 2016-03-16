@@ -32,8 +32,6 @@
 
 namespace xdl {
 
-	class XdevLWindowX11;
-
 	class XdevLCursorX11 : public XdevLModuleImpl<XdevLCursor>  {
 		public:
 			virtual ~XdevLCursorX11() {}

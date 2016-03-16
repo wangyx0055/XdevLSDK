@@ -53,12 +53,12 @@ namespace xdl {
 
 
 	enum XdevLWindowTypes {
-	  XDEVL_WINDOW_TYPE_NORMAL,
-	  XDEVL_WINDOW_TYPE_TOOLTIP,
-	  XDEVL_WINDOW_TYPE_POPUP,
-	  XDEVL_WINDOW_TYPE_DROPDOWN_MENU,
-	  XDEVL_WINDOW_TYPE_SPLASH,
-	  XDEVL_WINDOW_TYPE_NOTIFICATION,
+	  XDEVL_WINDOW_TYPE_NORMAL,				// Normal window with a titlebar and borders.
+	  XDEVL_WINDOW_TYPE_TOOLTIP,			// A window without any titlebar and borders.
+	  XDEVL_WINDOW_TYPE_POPUP,				// A window without any titlebar and borders.
+	  XDEVL_WINDOW_TYPE_DROPDOWN_MENU,// A window without any titlebar and borders.
+	  XDEVL_WINDOW_TYPE_SPLASH,				// A window without titlebar and borders and will be placed in the center.
+	  XDEVL_WINDOW_TYPE_NOTIFICATION,	// A window that will be displayed in the notification system of the OS.
 	  XDEVL_WINDOW_TYPE_UNKNOWN
 	};
 
@@ -103,6 +103,12 @@ namespace xdl {
 	/**
 		@class XdevLWindowAttribute
 		@brief Structure that holds Window information.
+		
+		In this structure one can define the title, position and size of a window.
+		Furthermore you can decide the type. The type decides how the window will
+		look like and where it will be positioned.
+		For example, a window with the type XDEVL_WINDOW_TYPE_SPLASH will have no
+		borders and will be centered in the middle of the window.
 	*/
 	class XdevLWindowAttribute {
 		public:
