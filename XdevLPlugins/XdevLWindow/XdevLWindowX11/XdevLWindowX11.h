@@ -35,6 +35,7 @@
 
 #include "XdevLDisplayX11.h"
 #include "XdevLCursorX11.h"
+#include "XdevLWindowServerX11.h"
 #include "XdevLWindowEventServerX11.h"
 
 #include <X11/Xlib.h>
@@ -200,16 +201,6 @@ namespace xdl {
 
 			std::vector<Atom> m_atoms;
 	};
-
-	class XdevLWindowServerX11 : public XdevLWindowServerImpl {
-		public:
-			XdevLWindowServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
-			virtual ~XdevLWindowServerX11();
-
-			/// Creates a new window.
-			xdl_int create(XdevLWindow** window, const XdevLWindowAttribute& attribute) override;
-	};
-
 
 	class XdevLX11Display {
 		public:

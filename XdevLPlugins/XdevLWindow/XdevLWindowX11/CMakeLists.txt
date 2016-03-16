@@ -130,6 +130,7 @@ set(HEADER_FILES
 	${HEADER_INTERFACE_FILE}
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.h
 	${HEADERS_DIR}/XdevLWindowX11.h
+	${HEADERS_DIR}/XdevLWindowServerX11.h
 	${HEADERS_DIR}/XdevLWindowEventServerX11.h
 	${HEADERS_DIR}/XdevLDisplayX11.h
 	${HEADERS_DIR}/XdevLCursorX11.h
@@ -143,6 +144,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	${XDEVL_PLUGINS}/XdevLWindow/XdevLWindowImpl.cpp
 	${SRC_DIR}/XdevLWindowX11.cpp
+	${SRC_DIR}/XdevLWindowServerX11.cpp
 	${SRC_DIR}/XdevLWindowEventServerX11.cpp
 	${SRC_DIR}/XdevLDisplayX11.cpp
 	${SRC_DIR}/XdevLCursorX11.cpp

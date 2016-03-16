@@ -65,20 +65,6 @@ xdl::XdevLModuleDescriptor windowX11Desc {
 	XDEVLX11_MODULE_PATCH_VERSION
 };
 
-//
-// The XdevLWindowEventServer module descriptor.
-//
-xdl::XdevLModuleDescriptor windowServerX11Desc {
-	xdl::window_vendor,
-	xdl::window_author,
-	xdl::window_moduleNames[xdl::XDEVL_WINDOW_SERVER_MODULE_NAME],
-	xdl::window_copyright,
-	xdl::windowServerDescription,
-	XDEVLX11_SERVER_MODULE_MAJOR_VERSION,
-	XDEVLX11_SERVER_MODULE_MINOR_VERSION,
-	XDEVLX11_SERVER_MODULE_PATCH_VERSION
-};
-
 namespace xdl {
 
 	xdl_int reference_counter = 0;
@@ -1281,26 +1267,5 @@ namespace xdl {
 		return m_defaultColorMap;
 	}
 
-//
-// -------------------------------------------------------------------------
-//
-
-	XdevLWindowServerX11::XdevLWindowServerX11(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :
-		XdevLWindowServerImpl(parameter, desriptor) {
-
-	}
-
-	XdevLWindowServerX11::~XdevLWindowServerX11() {
-
-	}
-
-	xdl_int XdevLWindowServerX11::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
-
-		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr, getDescriptor());
-		wnd->create(attribute);
-		*window = wnd;
-		m_windowList[wnd->getWindowID()] = wnd;
-		return ERR_OK;
-	}
 
 }
