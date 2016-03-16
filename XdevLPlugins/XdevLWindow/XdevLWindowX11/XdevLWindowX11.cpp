@@ -31,25 +31,9 @@
 #include <climits>
 #include <vector>
 
-static const xdl::XdevLString windowX11PluginName {
-	"XdevLWindowX11"
-};
-
-
 extern xdl::XdevLModuleDescriptor windowX11DisplayDesc;
 extern xdl::XdevLModuleDescriptor cursorX11Desc;
 extern xdl::XdevLModuleDescriptor windowEventServerX11Desc;
-
-//
-// The XdevLWindow plugin descriptor.
-//
-xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
-	windowX11PluginName,
-	xdl::window_moduleNames,
-	XDEVLX11_MAJOR_VERSION,
-	XDEVLX11_MINOR_VERSION,
-	XDEVLX11_PATCH_VERSION
-};
 
 //
 // The XdevLWindow module descriptor.
@@ -68,7 +52,7 @@ xdl::XdevLModuleDescriptor windowX11Desc {
 namespace xdl {
 
 	xdl_int reference_counter = 0;
-	extern std::shared_ptr<XdevLX11Display> globalX11Display;
+	extern std::shared_ptr<XdevLX11Environment> globalX11Display;
 
 
 #define _NET_WM_STATE_REMOVE    0l
@@ -87,8 +71,8 @@ namespace xdl {
 	};
 
 
-	XdevLX11Display::XdevLX11Display(XdevLCoreMediator* core) : m_core(core) {
-		std::cout << "XdevLX11Display::XdevLX11Display()\n";
+	XdevLX11Environment::XdevLX11Environment(XdevLCoreMediator* core) : m_core(core) {
+		std::cout << "XdevLX11Environment::XdevLX11Environment()\n";
 
 		XdevLModuleCreateParameter parameter;
 
@@ -110,8 +94,8 @@ namespace xdl {
 	}
 
 
-	XdevLX11Display::~XdevLX11Display() {
-		std::cout << "XdevLX11Display::~XdevLX11Display()\n";
+	XdevLX11Environment::~XdevLX11Environment() {
+		std::cout << "XdevLX11Environment::~XdevLX11Environment()\n";
 		if(m_core) {
 			m_core->deleteModule(windowEventServer->getID());
 			m_core->deleteModule(cursor->getID());
@@ -130,6 +114,7 @@ namespace xdl {
 		m_window(None),
 		m_screenNumber(0),
 		m_fullscreenModeActive(xdl_false) {
+
 		XDEVL_MODULE_INFO("XdevLWindowX11()\n");
 
 		//
@@ -140,12 +125,13 @@ namespace xdl {
 			if(nullptr != parameter) {
 				mediator = parameter->getMediator();
 			}
-			globalX11Display = std::make_shared<XdevLX11Display>(mediator);
+			globalX11Display = std::make_shared<XdevLX11Environment>(mediator);
 		}
 		reference_counter++;
 	}
 
 	XdevLWindowX11::~XdevLWindowX11() {
+
 		XDEVL_MODULE_INFO("~XdevLWindowX11()\n");
 
 		if(reference_counter == 1) {

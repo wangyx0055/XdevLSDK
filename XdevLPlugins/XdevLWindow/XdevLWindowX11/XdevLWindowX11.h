@@ -102,8 +102,9 @@ namespace xdl {
 
 			xdl_int create(const XdevLWindowTitle& title, const XdevLWindowPosition& position, const XdevLWindowSize& size, const XdevLWindowTypes& type);
 
-		protected:
+	protected:
 
+			// Holds the connection to the display server.
 			Display* m_display;
 
 			// Holds the default root window. Mostly it is the desktop.
@@ -202,10 +203,10 @@ namespace xdl {
 			std::vector<Atom> m_atoms;
 	};
 
-	class XdevLX11Display {
+	class XdevLX11Environment {
 		public:
-			XdevLX11Display(XdevLCoreMediator* core);
-			~XdevLX11Display();
+			XdevLX11Environment(XdevLCoreMediator* core);
+			~XdevLX11Environment();
 
 			XdevLDisplayX11* getDisplay() {
 				return display.get();

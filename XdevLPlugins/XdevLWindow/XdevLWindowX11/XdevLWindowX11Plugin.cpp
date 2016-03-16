@@ -10,6 +10,22 @@ extern xdl::XdevLModuleDescriptor windowServerX11Desc;
 extern xdl::XdevLModuleDescriptor windowEventServerX11Desc;
 extern xdl::XdevLModuleDescriptor cursorX11Desc;
 
+//
+// The XdevLWindow plugin descriptor.
+//
+
+static const xdl::XdevLString windowX11PluginName {
+	"XdevLWindowX11"
+};
+
+xdl::XdevLPluginDescriptor windowX11PluginDescriptor {
+	windowX11PluginName,
+	xdl::window_moduleNames,
+	XDEVLX11_PLUGIN_MAJOR_VERSION,
+	XDEVLX11_PLUGIN_MINOR_VERSION,
+	XDEVLX11_PLUGIN_PATCH_VERSION
+};
+
 XDEVL_PLUGIN_INIT_DEFAULT
 XDEVL_PLUGIN_SHUTDOWN_DEFAULT
 XDEVL_PLUGIN_CREATE_MODULE  {
