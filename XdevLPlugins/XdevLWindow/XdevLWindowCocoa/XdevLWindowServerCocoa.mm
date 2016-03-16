@@ -16,11 +16,7 @@ namespace xdl {
 
 	}
 
-	xdl_int XdevLWindowServerCocoa::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size,
-	    const XdevLWindowTypes& type) {
+	xdl_int XdevLWindowServerCocoa::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
 
 //		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr);
 //		sdlWindow->setTitle(title);

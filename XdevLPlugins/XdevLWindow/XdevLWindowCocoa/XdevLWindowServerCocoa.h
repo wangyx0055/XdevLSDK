@@ -40,11 +40,7 @@ namespace xdl {
 			XdevLWindowServerCocoa(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor);
 			virtual ~XdevLWindowServerCocoa();
 
-			virtual xdl_int createWindow(XdevLWindow** window,
-			                             const XdevLWindowTitle& title,
-			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size,
-			                             const XdevLWindowTypes& type);
+			xdl_int create(XdevLWindow** window, const XdevLWindowAttribute& attribute) override;
 	};
 
 }

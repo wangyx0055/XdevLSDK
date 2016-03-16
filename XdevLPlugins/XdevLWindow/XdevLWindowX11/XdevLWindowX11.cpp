@@ -1294,14 +1294,10 @@ namespace xdl {
 
 	}
 
-	xdl_int XdevLWindowServerX11::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size,
-	    const XdevLWindowTypes& type) {
+	xdl_int XdevLWindowServerX11::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
 
 		XdevLWindowX11* wnd = new XdevLWindowX11(nullptr, getDescriptor());
-		wnd->create(title, position, size, type);
+		wnd->create(attribute);
 		*window = wnd;
 		m_windowList[wnd->getWindowID()] = wnd;
 		return ERR_OK;

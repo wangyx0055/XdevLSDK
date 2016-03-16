@@ -770,14 +770,7 @@ namespace xdl {
 
 	}
 
-	xdl_int XdevLWindowServerWindows::createWindow(XdevLWindow** window,
-	        const XdevLWindowTitle& title,
-	        const XdevLWindowPosition& position,
-	        const XdevLWindowSize& size,
-	        const XdevLWindowTypes& type) {
-
-//		*window = new XdevLWindowDeviceWin32(nullptr);
-
+	xdl_int XdevLWindowServerWindows::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
 		return ERR_OK;
 	}
 

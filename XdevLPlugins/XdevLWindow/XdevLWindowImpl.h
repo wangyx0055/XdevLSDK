@@ -86,6 +86,7 @@ namespace xdl {
 			virtual xdl_int shutdown() override;
 			virtual xdl_int create(const XdevLWindowAttribute& attribute) override;
 			virtual xdl_uint64 getWindowID();
+			virtual XdevLWindow* getParent() override;
 			virtual XdevLWindowPosition::type getX() override;
 			virtual XdevLWindowPosition::type getY() override;
 			virtual XdevLWindowSize::type getWidth() override;
@@ -153,7 +154,7 @@ namespace xdl {
 			virtual ~XdevLWindowServerImpl();
 
 			/// Creates a new window.
-			using XdevLWindowServer::createWindow;
+			using XdevLWindowServer::create;
 
 			/// Destroys the specified window.
 			virtual xdl_int destroy(XdevLWindow* window);

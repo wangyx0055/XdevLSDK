@@ -185,11 +185,7 @@ namespace xdl {
 			virtual ~XdevLWindowServerWayland();
 
 			/// Creates a new window.
-			virtual xdl_int createWindow(XdevLWindow** window,
-			                             const XdevLWindowTitle& title,
-			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size
-			                            );
+			virtual xdl_int create(XdevLWindow** window, const XdevLWindowAttribute& attribute);
 	};
 
 	class XdevLWindowEventServerWayland : public XdevLWindowEventServerImpl {

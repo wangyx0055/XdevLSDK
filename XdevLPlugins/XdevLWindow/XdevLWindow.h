@@ -165,6 +165,9 @@ namespace xdl {
 			/// Returns the ID of the windows in the window server.
 			virtual xdl_uint64 getWindowID() = 0;
 
+			/// Returns the parent window of this window.
+			virtual XdevLWindow* getParent() = 0;
+
 			/// Returns the title of the window
 			virtual const XdevLWindowTitle& getTitle() = 0;
 
@@ -189,11 +192,8 @@ namespace xdl {
 			/// Returns the height of the window.
 			virtual XdevLWindowSize::type getHeight() = 0;
 
-			/// Returns the screen mode state.
-			virtual xdl_bool isFullscreen() = 0;
-
-			/// Return if the mouse pointer is hidden.
-			virtual xdl_bool isPointerHidden() = 0;
+			/// Sets the parent window.
+			virtual void setParent(XdevLWindow* window) = 0;
 
 			/// Sets the title of the window.
 			virtual void setTitle(const XdevLWindowTitle& title) = 0;
@@ -222,14 +222,14 @@ namespace xdl {
 			/// Sets the fullscreen mode.
 			virtual void setFullscreen(xdl_bool state) = 0;
 
+			/// Sets the keyboard input focus.
+			virtual void setInputFocus() = 0;
+
 			/// Show the window.
 			virtual void show() = 0;
 
 			/// Hide the window.
 			virtual void hide() = 0;
-
-			/// Returns the hidden state of the window.
-			virtual xdl_bool isHidden() = 0;
 
 			/// Raise window above others.
 			/**
@@ -237,17 +237,20 @@ namespace xdl {
 			*/
 			virtual void raise() = 0;
 
-			/// Sets the input focus.
-			virtual void setInputFocus() = 0;
-
 			/// Checks if the window has focus.
 			virtual xdl_bool hasFocus() = 0;
 
-			/// Sets the parent window.
-			virtual void setParent(XdevLWindow* window) = 0;
-
 			/// Checks if the cursor is inside the window.
 			virtual xdl_bool isPointerInside() = 0;
+
+			/// Returns if the window is hidden or not.
+			virtual xdl_bool isHidden() = 0;
+
+			/// Returns if the window is in fullscreen mode.
+			virtual xdl_bool isFullscreen() = 0;
+
+			/// Returns if the mouse pointer is hidden or not.
+			virtual xdl_bool isPointerHidden() = 0;
 
 	};
 
@@ -266,11 +269,7 @@ namespace xdl {
 			virtual ~XdevLWindowServer() {}
 
 			/// Creates a new window.
-			virtual xdl_int createWindow(XdevLWindow** window,
-			                             const XdevLWindowTitle& title,
-			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size,
-			                             const XdevLWindowTypes& type) = 0;
+			virtual xdl_int create(XdevLWindow** window, const XdevLWindowAttribute& attribute) = 0;
 
 			/// Destroys the specified window.
 			virtual xdl_int destroy(XdevLWindow* window) = 0;

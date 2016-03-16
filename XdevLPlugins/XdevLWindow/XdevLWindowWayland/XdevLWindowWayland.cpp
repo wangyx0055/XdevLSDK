@@ -804,13 +804,13 @@ err:
 
 	}
 
-	xdl_int XdevLWindowServerWayland::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size) {
+	xdl_int XdevLWindowServerWayland::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
 
-		*window = new XdevLWindowWayland(nullptr);
-
+		XdevLWindowWayland tmp = new XdevLWindowWayland(nullptr);
+		if(tmp->create(attributes) != ERR_OK) {
+			return ERR_ERROR;
+		}
+		*window = tmp;
 		return ERR_OK;
 	}
 

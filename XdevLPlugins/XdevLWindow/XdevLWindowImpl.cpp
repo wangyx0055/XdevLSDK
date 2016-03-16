@@ -135,6 +135,10 @@ namespace xdl {
 		return m_id;
 	}
 
+	XdevLWindow* XdevLWindowImpl::getParent() {
+		return m_rootWindow;
+	}
+
 	XdevLWindowSize::type XdevLWindowImpl::getWidth() {
 		return m_attribute.size.width;
 	}

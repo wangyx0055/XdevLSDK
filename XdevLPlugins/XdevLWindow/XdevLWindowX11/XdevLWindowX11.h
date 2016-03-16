@@ -207,12 +207,7 @@ namespace xdl {
 			virtual ~XdevLWindowServerX11();
 
 			/// Creates a new window.
-			virtual xdl_int createWindow(XdevLWindow** window,
-			                             const XdevLWindowTitle& title,
-			                             const XdevLWindowPosition& position,
-			                             const XdevLWindowSize& size,
-			                             const XdevLWindowTypes& type
-			                            );
+			xdl_int create(XdevLWindow** window, const XdevLWindowAttribute& attribute) override;
 	};
 
 

@@ -640,20 +640,16 @@ namespace xdl {
 
 	}
 
-	xdl_int XdevLWindowServerSDL::createWindow(XdevLWindow** window,
-	    const XdevLWindowTitle& title,
-	    const XdevLWindowPosition& position,
-	    const XdevLWindowSize& size,
-	    const XdevLWindowTypes& type) {
+	xdl_int XdevLWindowServerSDL::create(XdevLWindow** window, const XdevLWindowAttribute& attribute) {
 
 		XdevLWindowSDL* sdlWindow = new XdevLWindowSDL(nullptr, getDescriptor());
-		sdlWindow->setTitle(title);
-		sdlWindow->setPosition(position);
-		sdlWindow->setSize(size);
-		sdlWindow->setWindowDecoration(xdl_false);
-		sdlWindow->create();
-		*window = sdlWindow;
-		m_windowList[sdlWindow->getWindowID()] = sdlWindow;
+//		sdlWindow->setTitle(title);
+//		sdlWindow->setPosition(position);
+//		sdlWindow->setSize(size);
+//		sdlWindow->setWindowDecoration(xdl_false);
+//		sdlWindow->create();
+//		*window = sdlWindow;
+//		m_windowList[sdlWindow->getWindowID()] = sdlWindow;
 		return ERR_OK;
 	}
 
