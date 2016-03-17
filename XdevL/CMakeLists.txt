@@ -40,8 +40,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${XDEVL_HOME}/lib)
 #
 # Set variable names for the XdevL library
 
-set(SRC_DIR src)
-set(HEADERS_DIR include)
+set(SRC_DIR ${XdevL_SOURCE_DIR}/src)
+set(HEADERS_DIR ${XdevL_SOURCE_DIR}/include)
 
 #
 # Set the output directories for executables and static libraries
@@ -102,6 +102,10 @@ set(XDEVL_HEADER_FILES
 	${HEADERS_DIR}/XdevLProfiler.h
 )
 
+if(PLATFORM_UNIX)
+	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLDynLibUnix.h)
+endif()
+
 #
 # Set the source files for the bakka library.
 
@@ -111,7 +115,6 @@ set(XDEVL_SOURCE_FILES
 	${SRC_DIR}/tinyxmlerror.cpp
 	${SRC_DIR}/tinyxmlparser.cpp
 	${SRC_DIR}/XdevL.cpp
-	${SRC_DIR}/XdevLDynLib.cpp
 	${SRC_DIR}/XdevLMutex.cpp
 	${SRC_DIR}/XdevLLog.cpp
 	${SRC_DIR}/XdevLConditionalVariable.cpp
@@ -121,6 +124,9 @@ set(XDEVL_SOURCE_FILES
 	${SRC_DIR}/XdevLProfiler.cpp
 )
 
+if(PLATFORM_UNIX)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLDynLibUnix.cpp)
+endif()
 
 #
 # Create the XdevL library
