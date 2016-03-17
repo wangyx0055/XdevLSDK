@@ -23,57 +23,53 @@
 
 #include "XdevLTimer.h"
 
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+
 namespace xdl {
 
+	extern "C" xdl::xdl_uint64 getTimeGlobalMicroSeconds() {
 
-	XdevLTimer::XdevLTimer() :
-		m_StartingTime(0),
-		m_CurrTime(0),
-		m_OldTime(0) {
+#ifndef __LINUX__
+		timeval tp;
+		gettimeofday(&tp, NULL);
+		return ((xdl::xdl_uint64)tp.tv_sec*1000000 + (xdl::xdl_double)tp.tv_usec);
 
-		reset();
+#elif defined(__LINUX__)
+		struct timespec     clock_resolution;
+		int stat = clock_getres(CLOCK_MONOTONIC_RAW, &clock_resolution);
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+		return (ts.tv_sec*1000000 + ts.tv_nsec*1000);
+
+#endif
+
 	}
 
+	xdl::xdl_double getTimeGlobal() {
 
-	xdl::xdl_double XdevLTimer::getDT() {
-		xdl_double dT = (xdl_double)(getTimeGlobalMicroSeconds() - m_OldTime)*0.000001;
-		m_OldTime = getTimeGlobalMicroSeconds();
-		return dT;
+#ifndef __LINUX__
+		timeval tp;
+		gettimeofday(&tp, NULL);
+		return ((xdl::xdl_double)tp.tv_sec + (xdl::xdl_double)tp.tv_usec*0.000001);
+
+#elif defined(__LINUX__)
+		struct timespec     clock_resolution;
+		int stat = clock_getres(CLOCK_MONOTONIC_RAW, &clock_resolution);
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+		return (ts.tv_sec + ts.tv_nsec*0.000000001);
+
+#endif
+
 	}
 
-	xdl::xdl_uint64 XdevLTimer::getDT64() {
-		xdl_uint64 dT = (getTimeGlobalMicroSeconds() - m_OldTime);
-		m_OldTime = getTimeGlobalMicroSeconds();
-		return dT;
-	}
-
-	xdl_double XdevLTimer::getTime() {
-		return (xdl_double)(getTimeGlobalMicroSeconds() - m_StartingTime)*0.000001;
-	}
-
-	xdl_uint64 XdevLTimer::getTime64() {
-		return (getTimeGlobalMicroSeconds() - m_StartingTime);
-	}
-
-	void XdevLTimer::reset() {
-		m_CurrTime = m_OldTime = 0;
-		m_StartingTime = getTimeGlobalMicroSeconds();
-	}
-
-	void XdevLTimer::setT1() {
-		m_t1 = getTimeGlobalMicroSeconds();
-	}
-
-	void XdevLTimer::setT2() {
-		m_t2 = getTimeGlobalMicroSeconds();
-	}
-
-	xdl_double XdevLTimer::getT2T1() {
-		return (xdl_double)(m_t2 - m_t1)*0.000001;
-	}
-
-	xdl_uint64 XdevLTimer::getT2T164() {
-		return (m_t2 - m_t1);
+	void XdevLTimer::getTimeOfDay(XdevLTime* time) {
+		timeval val;
+		gettimeofday(&val,NULL);
+		time->sec = val.tv_sec;
+		time->usec = val.tv_usec;
 	}
 
 }

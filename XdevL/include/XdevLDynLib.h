@@ -29,6 +29,7 @@
 #ifdef XDEVL_PLATFORM_UNIX
 	#include <XdevL/Unix/XdevLDynLibUnix.h>
 #elif defined(XDEVL_PLATFORM_WINDOWS)
+	#include <XdevL/Windows/XdevLDynLibWindows.h>
 #endif
 
 #endif
