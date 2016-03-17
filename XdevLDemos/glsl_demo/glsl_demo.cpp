@@ -257,10 +257,12 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 
 		void handleGraphics(xdl::xdl_double dT) {
 
+			xdl::xdl_double dt = getCore()->getTimer().getDT() ;
 			if(m_left_mouse_button->getPressed()) {
-				rx += static_cast<float>(y_axis->getDeltaValue()) * 0.01;
-				ry += static_cast<float>(x_axis->getDeltaValue()) * 0.01;
+				rx += static_cast<float>(y_axis->getDeltaValue()) * dt* 50.0f;
+				ry += static_cast<float>(x_axis->getDeltaValue()) * dt * 50.0f;
 			}
+
 
 			//
 			// Let's render stuff into the framebuffer object with low resolution.
@@ -305,7 +307,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_frameBuffer->deactivate();
 
 //			m_frameBuffer->blit(m_rai->getDefaultFrameBuffer());
-			
+
 			//
 			// Render into the second half of the normal framebuffer.
 			//
@@ -345,7 +347,7 @@ class MyOpenGLApp : public xdl::XdevLApplication {
 			m_rai->setViewport(0, 0, getWindow()->getWidth(), getWindow()->getHeight());
 
 			std::wstringstream tmp;
-			tmp << L"OpenGL Demo using XdevLFont: FPS: " <<  (1.0/getCore()->getDT());
+			tmp << L"OpenGL Demo using XdevLFont: FPS: " << (1.0/getCore()->getDT());
 
 
 			textLayoutSystem->setColor(255, 255, 255, 255);
