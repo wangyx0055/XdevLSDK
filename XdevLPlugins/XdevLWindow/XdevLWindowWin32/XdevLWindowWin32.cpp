@@ -475,7 +475,7 @@ namespace xdl {
 		}
 
 		bool desiredDevModeFound = false;
-		if(m_fullScreen) {
+		if(isFullscreen()) {
 			// Cache the current display mode so we can switch back when done.
 			EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &m_oldDevMode);
 			int nMode = 0;
@@ -519,7 +519,7 @@ namespace xdl {
 			return ERR_ERROR;
 		}
 
-		if(m_fullScreen) {
+		if(isFullscreen()) {
 			LONG ret = 0;
 			if((ret = ChangeDisplaySettingsEx(displayInfoList[0].DeviceName, &m_matchingVideoMode, NULL, CDS_FULLSCREEN,
 			                                  NULL)) != DISP_CHANGE_SUCCESSFUL) {
@@ -568,7 +568,7 @@ namespace xdl {
 			return ERR_ERROR;
 
 		// Was the window in fullscreen mode?
-		if(m_fullScreen) {
+		if(isFullscreen()) {
 			// Yes, change into the old device mode.
 			ChangeDisplaySettingsEx(displayInfoList[0].DeviceName, &m_oldDevMode, NULL, 0, NULL);
 		}
