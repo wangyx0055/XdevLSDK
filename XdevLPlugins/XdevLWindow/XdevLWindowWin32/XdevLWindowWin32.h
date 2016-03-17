@@ -184,7 +184,9 @@ namespace xdl {
 		public:
 			XdevLWindowWindowsInit(XdevLCoreMediator* core);
 			virtual ~XdevLWindowWindowsInit();
-private:
+			XdevLWindowWindowsEventServer* getWindowsEventServer();
+			XdevLCursorWindows* getCursor();
+		private:
 			XdevLCoreMediator* m_core;
 			std::shared_ptr<XdevLWindowWindowsEventServer> windowEventServer;
 			std::shared_ptr<XdevLCursorWindows> cursor;

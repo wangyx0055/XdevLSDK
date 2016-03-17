@@ -70,7 +70,7 @@ XDEVL_PLUGIN_CREATE_MODULE  {
 }
 
 XDEVL_PLUGIN_DELETE_MODULE_DEFAULT
-XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(windowWindowPluginDescriptor);
+XDEVL_PLUGIN_GET_DESCRIPTOR_DEFAULT(windowWindowPluginDescriptor)
 
 XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLWindow, xdl::XdevLWindowDeviceWin32, windowModuleDesc)
 XDEVL_EXPORT_MODULE_CREATE_FUNCTION_DEFINITION(XdevLWindowEventServer, xdl::XdevLWindowWindowsEventServer, windowEventServerModuleDesc)
@@ -365,6 +365,13 @@ namespace xdl {
 		}
 	}
 
+	XdevLWindowWindowsEventServer* XdevLWindowWindowsInit::getWindowsEventServer() {
+		return windowEventServer.get();
+	}
+	
+	XdevLCursorWindows* XdevLWindowWindowsInit::getCursor() {
+		return cursor.get();
+	}
 
 //
 //
@@ -540,7 +547,7 @@ namespace xdl {
 		SetWindowLongPtr(m_wnd, GWLP_USERDATA, (LONG_PTR) this);
 		m_id = windowID++;
 
-		windowEventServer->registerWindowForEvents(this);
+		globalWin32->getWindowsEventServer()->registerWindowForEvents(this);
 
 		//
 		// ------------------------------------------------------------------------
@@ -812,9 +819,9 @@ namespace xdl {
 		}
 		intptr_t pInstance = (intptr_t)((GetWindowLongPtr(hWnd, GWLP_USERDATA)));
 		XdevLWindowWindowsEventServer* obj = (XdevLWindowWindowsEventServer*)(pInstance);
-		if(obj == 0)
+		if(nullptr == obj) {
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
-
+		}
 		return obj->callbackProc(hWnd, uMsg, wParam, lParam);
 	}
 
@@ -837,7 +844,7 @@ namespace xdl {
 
 		//	XdevLWindow* window = windowEventServer->getWindow((xdl_uint64)GetWindowLong(hWnd, GWL_ID));
 		XdevLWindow* window = (XdevLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-		if(windowEventServer->isWindowRegistered(window) == xdl_false) {
+		if(globalWin32->getWindowsEventServer()->isWindowRegistered(window) == xdl_false) {
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 
@@ -912,7 +919,7 @@ namespace xdl {
 
 					if(wParam != 0) {
 						HWND wnd = (HWND)wParam;
-						XdevLWindow* window = windowEventServer->getWindow((xdl_uint64)GetWindowLong(wnd, GWL_ID));
+						XdevLWindow* window = globalWin32->getWindowsEventServer()->getWindow((xdl_uint64)GetWindowLong(wnd, GWL_ID));
 						if(window != nullptr) {
 							ev.type = XDEVL_WINDOW_EVENT;
 							ev.window.event = XDEVL_WINDOW_INPUT_FOCUS_LOST;
