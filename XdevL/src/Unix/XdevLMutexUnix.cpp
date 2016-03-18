@@ -21,52 +21,48 @@
 	cengiz@terzibas.de
 */
 
-#ifndef XDEVL_MUTEX_H
-#define XDEVL_MUTEX_H
-
-#include <XdevLPlatform.h>
-
-#ifdef XDEVL_PLATFORM_UNIX
-#include <XdevL/Unix/XdevLMutexUnix.h>
-#elif defined(XDEVL_PLATFORM_WINDOWS)
-#include <XdevL/Windows/XdevLMutexWindows.h>
-#endif
+#include <XdevLMutex.h>
+#include <stdlib.h>
+#include <iostream>
+#include <cstring>
+#include <cerrno>
 
 namespace thread {
 
-	/**
-	 @class XdevLScopeLock
-	 @brief Locks mutex in a scope.
-	 @author Cengiz Terzibas
-	*/
-	class XdevLScopeLock {
-		public:
-			XdevLScopeLock(const Mutex& mutex) :
-				m_mutex(mutex) {
+	Mutex::Mutex() {
 
-				m_mutex.Lock();
-			}
+		if(pthread_mutex_init(&m_mutex, NULL) != 0) {
+			throw("Mutex::Could not create mutex");
+		}
+	}
 
-			~XdevLScopeLock() {
-				m_mutex.Unlock();
-			}
+	Mutex::~Mutex() {
 
-			void Lock() {
-				m_mutex.Lock();
-			}
+		pthread_mutex_destroy(&m_mutex);
+	}
 
-			void Unlock() {
-				m_mutex.Unlock();
-			}
+	int Mutex::Lock() {
 
-			operator Mutex& () {
-				return m_mutex;
-			}
+		if(pthread_mutex_lock(&m_mutex) != 0) {
+			std::cerr << "Mutex::Could not lock mutex: " << strerror(errno) << std::endl;
+			return 1;
+		}
 
-		private:
+		return 0;
+	}
 
-			Mutex m_mutex;
-	};
+	int Mutex::Unlock() {
+
+		if(pthread_mutex_unlock(&m_mutex) != 0) {
+			std::cerr << "Mutex::Could not unlock mutex: " << strerror(errno) << std::endl;
+			return 1;
+		}
+
+		return 0;
+	}
+
+	pthread_mutex_t& Mutex::getNativeMutex() {
+		return m_mutex;
+	}
 
 }
-#endif

@@ -64,15 +64,28 @@ namespace xdl {
 	class XdevLRingBuffer {
 		public:
 			XdevLRingBuffer() : size(_size) {
+				create(_size);
+			}
+
+			~XdevLRingBuffer() {
+				destroy();
+			};
+
+			xdl_int create(xdl_int size) {
 				b 		= new _T[_size];
 				rp 		= 0;
 				wp 		= 0;
 				fsize = 0;
+				return ERR_OK;
 			}
-
-			~XdevLRingBuffer() {
+			
+			xdl_int destroy() {
 				delete [] b;
-			};
+				rp 		= 0;
+				wp 		= 0;
+				fsize = 0;
+				return ERR_OK;
+			}
 
 			/// Put one element into the ring buffer.
 			/**

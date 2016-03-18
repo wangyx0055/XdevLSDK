@@ -105,9 +105,11 @@ set(XDEVL_HEADER_FILES
 if(PLATFORM_UNIX)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLDynLibUnix.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLThreadUnix.h)
+	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLMutexUnix.h)
 elseif(PLATFORM_WINDOWS)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLDynLibWindows.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLThreadWindows.h)
+	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLMutexWindows.h)
 endif()
 
 #
@@ -119,7 +121,6 @@ set(XDEVL_SOURCE_FILES
 	${SRC_DIR}/tinyxmlerror.cpp
 	${SRC_DIR}/tinyxmlparser.cpp
 	${SRC_DIR}/XdevL.cpp
-	${SRC_DIR}/XdevLMutex.cpp
 	${SRC_DIR}/XdevLLog.cpp
 	${SRC_DIR}/XdevLConditionalVariable.cpp
 	${SRC_DIR}/XdevLThread.cpp
@@ -132,10 +133,12 @@ if(PLATFORM_UNIX)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLDynLibUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLTimerUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLThreadUnix.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLMutexUnix.cpp)
 elseif(PLATFORM_WINDOWS)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLDynLibWindows.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLTimerWindows.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLThreadWindows.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLMutexWindows.cpp)
 endif()
 
 #
