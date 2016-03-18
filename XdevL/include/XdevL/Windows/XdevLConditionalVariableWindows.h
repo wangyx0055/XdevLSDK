@@ -17,20 +17,11 @@
 	I would appreciate if you report all bugs to: cengiz@terzibas.de
 */
 
-#ifndef XDEVL_CONDITIONAL_VARIABLE_H
-#define XDEVL_CONDITIONAL_VARIABLE_H
+#ifndef XDEVL_CONDITIONAL_VARIABLE_WINDOWS_H
+#define XDEVL_CONDITIONAL_VARIABLE_WINDOWS_H
 
 #include <XdevLTypes.h>
 #include <XdevLMutex.h>
-
-#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
-typedef pthread_cond_t THREAD_COND;
-#elif XDEVL_PLATFORM_WINDOWS 
-typedef CONDITION_VARIABLE THREAD_COND;
-#else
-#error "No implementation for this platform."
-#endif
-
 
 namespace thread {
 
@@ -57,10 +48,9 @@ namespace thread {
 
 		private:
 
-			THREAD_COND m_condition;
+			CONDITION_VARIABLE m_condition;
 
 	};
-
 
 }
 
