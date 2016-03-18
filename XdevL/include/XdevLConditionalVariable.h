@@ -20,48 +20,12 @@
 #ifndef XDEVL_CONDITIONAL_VARIABLE_H
 #define XDEVL_CONDITIONAL_VARIABLE_H
 
-#include <XdevLTypes.h>
-#include <XdevLMutex.h>
+#include <XdevLPlatform.h>
 
-#if defined (XDEVL_PLATFORM_UNIX)  || (defined XDEVL_PLATFORM_MINGW)
-typedef pthread_cond_t THREAD_COND;
-#elif XDEVL_PLATFORM_WINDOWS 
-typedef CONDITION_VARIABLE THREAD_COND;
-#else
-#error "No implementation for this platform."
+#ifdef XDEVL_PLATFORM_UNIX
+	#include <XdevL/Unix/XdevLConditionalVariableUnix.h>
+#elif defined(XDEVL_PLATFORM_WINDOWS)
+	#include <XdevL/Windows/XdevLConditionalVariableWindow.h>
 #endif
-
-
-namespace thread {
-
-	/**
-	 @class ConditionalVariable
-	 @brief Conditional variable.
-	*/
-	class ConditionalVariable {
-		public:
-			/// Initialize the conditional variable.
-			ConditionalVariable();
-
-			/// Destroy the conditional variable.
-			~ConditionalVariable();
-
-			/// Send signal.
-			int signal();
-
-			/// Send signal to all.
-			int brodcast();
-
-			/// Wait for signal.
-			int wait(Mutex& mutex);
-
-		private:
-
-			THREAD_COND m_condition;
-
-	};
-
-
-}
 
 #endif
