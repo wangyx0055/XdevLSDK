@@ -109,7 +109,7 @@ if(PLATFORM_UNIX)
 elseif(PLATFORM_WINDOWS)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLDynLibWindows.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLThreadWindows.h)
-	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLMutexWindows.h)
+	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLMutexWindows.h)
 endif()
 
 #
@@ -135,10 +135,10 @@ if(PLATFORM_UNIX)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLThreadUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLMutexUnix.cpp)
 elseif(PLATFORM_WINDOWS)
-	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLDynLibWindows.cpp)
-	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLTimerWindows.cpp)
-	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLThreadWindows.cpp)
-	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLMutexWindows.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Windows/XdevLDynLibWindows.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Windows/XdevLTimerWindows.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Windows/XdevLThreadWindows.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Windows/XdevLMutexWindows.cpp)
 endif()
 
 #
