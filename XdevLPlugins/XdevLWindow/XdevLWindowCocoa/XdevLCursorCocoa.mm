@@ -24,6 +24,21 @@
 #include "XdevLWindowCocoa.h"
 #include "XdevLCursorCocoa.h"
 
+static const xdl::XdevLString cursorDescription {
+	"Support for handling the cursor using Cocoa."
+};
+
+xdl::XdevLModuleDescriptor cursorCocoaDesc {
+	xdl::window_vendor,
+	xdl::window_author,
+	xdl::window_moduleNames[xdl::XDEVL_CURSOR_MODULE_NAME],
+	xdl::window_copyright,
+	xdl::windowServerDescription,
+	XDEVLCOCOA_CURSOR_MODULE_MAJOR_VERSION,
+	XDEVLCOCOA_CURSOR_MODULE_MINOR_VERSION,
+	XDEVLCOCOA_CURSOR_MODULE_PATCH_VERSION
+};
+
 namespace xdl {
 
 	XdevLCursorCocoa::XdevLCursorCocoa(XdevLModuleCreateParameter* parameter, const XdevLModuleDescriptor& desriptor) :

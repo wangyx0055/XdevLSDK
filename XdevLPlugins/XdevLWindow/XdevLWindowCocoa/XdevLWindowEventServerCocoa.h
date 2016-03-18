@@ -49,4 +49,21 @@ namespace xdl {
 	};
 }
 
+//
+// Cocoa View interface.
+//
+@interface XdevLContentView : NSView {
+	xdl::XdevLWindowCocoa* m_window;
+	xdl::XdevLWindowEventServerCocoa* m_windowEventServer;
+	NSTrackingArea* trackingArea;
+	xdl::xdl_int m_modifierKeys;
+
+}
+
+- (id)init:
+(xdl::XdevLWindowEventServerCocoa*)windowEventServer :
+(xdl::XdevLWindowCocoa*)window;
+
+@end
+
 #endif

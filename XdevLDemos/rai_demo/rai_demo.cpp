@@ -428,9 +428,10 @@ int main(int argc, char* argv[]) {
 			window->setFullscreen(fullscreenflag);
 		}
 
+		xdl::xdl_double dt = core->getTimer().getDT() ;
 		if(left_mouse_button->getPressed()) {
-			rx += static_cast<float>(y_axis->getDeltaValue()) * 0.01;
-			ry += static_cast<float>(x_axis->getDeltaValue()) * 0.01;
+			rx += static_cast<float>(y_axis->getDeltaValue()) * dt* 50.0f;
+			ry += static_cast<float>(x_axis->getDeltaValue()) * dt * 50.0f;
 		}
 
 
