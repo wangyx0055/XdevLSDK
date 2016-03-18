@@ -36,16 +36,16 @@ namespace xdl {
 	struct XdevLSemaphoreModeOpen {
 	};
 
-	const XdevLSemaphoreModeCreate XdevLSemaphoreCreate;
-	const XdevLSemaphoreModeOpen 	XdevLSemaphoreOpen;
+	static XdevLSemaphoreModeCreate XdevLSemaphoreCreate;
+	static XdevLSemaphoreModeOpen 	XdevLSemaphoreOpen;
 
 	/**
 	 * @enum CreationMode
 	 * @brief Creating modes.
 	 */
 	enum CreationMode {
-	  OPEN, 		/// Only start in open mode. Opener is not the owner.
-	  CREATE		/// Create the semaphore. Creator will be the owner.
+	  OPEN, 		/// Only start in open mode. Instance using this will not be the owner.
+	  CREATE		/// Create the semaphore. Instance using this Will be the owner.
 	};
 
 	/**
