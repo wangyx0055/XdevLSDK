@@ -1,21 +1,21 @@
 /*
 	Copyright (c) 2005 - 2016 Cengiz Terzibas
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy of 
-	this software and associated documentation files (the "Software"), to deal in the 
-	Software without restriction, including without limitation the rights to use, copy, 
-	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
-	and to permit persons to whom the Software is furnished to do so, subject to the 
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
 	following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies 
+	The above copyright notice and this permission notice shall be included in all copies
 	or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
-	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+	FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
 	cengiz@terzibas.de
@@ -63,24 +63,29 @@ namespace xdl {
 	template<typename _T, xdl_int _size>
 	class XdevLRingBuffer {
 		public:
-			XdevLRingBuffer() : size(_size) {
-				create(_size);
+			XdevLRingBuffer() :
+				size(_size),
+				rp(0),
+				wp(0),
+				b(nullptr) {
+				resize(_size);
 			}
 
 			~XdevLRingBuffer() {
 				destroy();
 			};
 
-			xdl_int create(xdl_int size) {
+			/// Resize the ringbufer.
+			/**
+				Resizing will detroy all elements in the ringbuffer. So before you resize it
+				make sure you used all elements within.
+
+				@param size The new size of the ringbuffer.
+			*/
+			xdl_int resize(xdl_int size) {
+				destroy();
+
 				b 		= new _T[_size];
-				rp 		= 0;
-				wp 		= 0;
-				fsize = 0;
-				return ERR_OK;
-			}
-			
-			xdl_int destroy() {
-				delete [] b;
 				rp 		= 0;
 				wp 		= 0;
 				fsize = 0;
@@ -127,7 +132,19 @@ namespace xdl {
 			/// Returns the size of the buffer.
 			size_t get_size() {
 				return _size;
-			} 
+			}
+
+		private:
+
+			/// Destroy the ringbuffer.
+			void destroy() {
+				if(nullptr != b) {
+					delete [] b;
+					rp 		= 0;
+					wp 		= 0;
+					fsize = 0;
+				}
+			}
 
 		private:
 
