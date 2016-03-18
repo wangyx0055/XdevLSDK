@@ -106,6 +106,7 @@ if(PLATFORM_UNIX)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLDynLibUnix.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLThreadUnix.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLMutexUnix.h)
+	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLSemaphoreUnix.h)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Unix/XdevLConditionalVariableUnix.h)
 elseif(PLATFORM_WINDOWS)
 	set(XDEVL_HEADER_FILES ${XDEVL_HEADER_FILES} ${HEADERS_DIR}/XdevL/Windows/XdevLDynLibWindows.h)
@@ -134,6 +135,7 @@ if(PLATFORM_UNIX)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLTimerUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLThreadUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLMutexUnix.cpp)
+	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLSemaphoreUnix.cpp)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Unix/XdevLConditionalVariableUnix.cpp)
 elseif(PLATFORM_WINDOWS)
 	set(XDEVL_SOURCE_FILES ${XDEVL_SOURCE_FILES} ${SRC_DIR}/Windows/XdevLDynLibWindows.cpp)
@@ -158,7 +160,7 @@ include_directories(
 	${HEADERS_DIR} 
 	${Boost_INCLUDE_DIRS} 
 	${XDEVL_PLUGINS}
-	)
+)
 
 
 #
